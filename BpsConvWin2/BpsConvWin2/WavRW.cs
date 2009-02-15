@@ -18,6 +18,7 @@
 */
 using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace BpsConvWin2
 {
@@ -146,7 +147,7 @@ namespace BpsConvWin2
         public uint   subChunk2Size;
         public byte[] data;
 
-        public bool Read(BinaryReader br)
+        public bool ReadHeader(BinaryReader br)
         {
             subChunk2Id = br.ReadBytes(4);
             if (subChunk2Id[0] != 'd' || subChunk2Id[1] != 'a' || subChunk2Id[2] != 't' || subChunk2Id[3] != 'a') {
@@ -162,10 +163,19 @@ namespace BpsConvWin2
                 return false;
             }
 
-            data = br.ReadBytes((int)subChunk2Size);
             return true;
         }
 
+        public void WriteAll(BinaryWriter bw)
+        {
+            bw.Write(subChunk2Id);
+            bw.Write(subChunk2Size);
+            bw.Write(data);
+        }
+
+
+
+        /*
         public bool ReduceBitsPerSample(int newBitsPerSample)
         {
             ushort mask = (ushort)(0xffff & (0xffff << (16 - newBitsPerSample)));
@@ -180,17 +190,58 @@ namespace BpsConvWin2
 
             return true;
         }
+        */
 
-        public void Write(BinaryWriter bw)
-        {
-            bw.Write(subChunk2Id);
-            bw.Write(subChunk2Size);
-            bw.Write(data);
-        }
     }
 
-    class WavRW
+    struct RiffHeader
     {
+        public RiffChunkDescriptor chunkDescriptor;
+        public RiffFmtSubChunk     fmtSubChunk;
+        public RiffDataSubChunk    dataSubChunk;
+
+        public bool ReadHeader(BinaryReader br)
+        {
+            if (!chunkDescriptor.Read(br)) {
+                return false;
+            }
+            if (!fmtSubChunk.Read(br)) {
+                return false;
+            }
+            if (!dataSubChunk.ReadHeader(br)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        public SampledData ReadAll(BinaryReader br)
+        {
+            if (!ReadHeader(br)) {
+                return null;
+            }
+            HashSet<short> variation = new HashSet<short>();
+
+            SampledData sd = new SampledData(fmtSubChunk.sampleRate, fmtSubChunk.numChannels);
+            byte[] data = br.ReadBytes((int)dataSubChunk.subChunk2Size);
+            switch (fmtSubChunk.bitsPerSample) {
+            case 16:
+                for (int i=0; i < data.Length / 2 / fmtSubChunk.numChannels; ++i) {
+                    for (int ch=0; ch < fmtSubChunk.numChannels; ++ch) {
+                        short v = (short)(data[i * 2] + ((ushort)(data[i * 2 + 1]) << 8));
+                        variation.Add(v);
+
+                        sd.Channel(ch).SampleAdd((float)v * (1.0f / 32768.0f));
+                    }
+                }
+                sd.ValueVariation = variation.Count;
+                break;
+            default:
+                Console.WriteLine("E: unknown bitsPerSample {0}", fmtSubChunk.bitsPerSample);
+                return null;
+            }
+            return sd;
+        }
 
     }
 }
