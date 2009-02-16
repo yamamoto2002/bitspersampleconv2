@@ -145,7 +145,6 @@ namespace BpsConvWin2
     {
         public byte[] subChunk2Id;
         public uint   subChunk2Size;
-        public byte[] data;
 
         public bool ReadHeader(BinaryReader br)
         {
@@ -166,35 +165,14 @@ namespace BpsConvWin2
             return true;
         }
 
-        public void WriteAll(BinaryWriter bw)
+        public void WriteHeader(BinaryWriter bw)
         {
             bw.Write(subChunk2Id);
             bw.Write(subChunk2Size);
-            bw.Write(data);
         }
-
-
-
-        /*
-        public bool ReduceBitsPerSample(int newBitsPerSample)
-        {
-            ushort mask = (ushort)(0xffff & (0xffff << (16 - newBitsPerSample)));
-            Console.WriteLine("D: mask={0:X}", mask);
-
-            for (int i=0; i < data.Length / 2; ++i) {
-                ushort sample = (ushort)(data[i * 2] + (data[i * 2 + 1] << 8));
-                sample &= mask;
-                data[i * 2] = (byte)(0xff & sample);
-                data[i * 2 + 1] = (byte)(0xff & (sample >> 8));
-            }
-
-            return true;
-        }
-        */
-
     }
 
-    struct RiffHeader
+    class WavRW
     {
         public RiffChunkDescriptor chunkDescriptor;
         public RiffFmtSubChunk     fmtSubChunk;
@@ -231,7 +209,7 @@ namespace BpsConvWin2
                         short v = (short)(data[i * 2] + ((ushort)(data[i * 2 + 1]) << 8));
                         variation.Add(v);
 
-                        sd.Channel(ch).SampleAdd((float)v * (1.0f / 32768.0f));
+                        sd.Channel(ch).SampleAdd((double)v * (1.0f / 32768.0f));
                     }
                 }
                 sd.ValueVariation = variation.Count;

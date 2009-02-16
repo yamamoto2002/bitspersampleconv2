@@ -6,9 +6,9 @@ namespace BpsConvWin2
     class SampledData1channel
     {
         private uint    sampleRate = 0;
-        private float   sampleMax = float.MinValue;
-        private float   sampleMin = float.MaxValue;
-        private List<float> samples = new List<float>();
+        private double   sampleMax = double.MinValue;
+        private double   sampleMin = double.MaxValue;
+        private List<double> samples = new List<double>();
 
         public SampledData1channel(uint aSampleRate)
         {
@@ -21,17 +21,17 @@ namespace BpsConvWin2
             set { sampleRate = value; }
         }
 
-        public float SampleMax
+        public double SampleMax
         {
             get { return sampleMax; }
         }
 
-        public float SampleMin
+        public double SampleMin
         {
             get { return sampleMin; }
         }
 
-        public void SampleAdd(float sample)
+        public void SampleAdd(double sample)
         {
             samples.Add(sample);
             if (sampleMax < sample) {
@@ -42,7 +42,7 @@ namespace BpsConvWin2
             }
         }
 
-        public void Scale(float magnify)
+        public void Scale(double magnify)
         {
             for (int i=0; i<samples.Count; ++i) {
                 samples[i] = magnify * samples[i];

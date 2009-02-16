@@ -44,12 +44,12 @@ namespace BpsConvWin2
              * create and fill SampledDataAllChannels
              * write to file
              */
-            RiffHeader riffHeader = new RiffHeader();
+            WavRW wavRW = new WavRW();
             SampledData sampledData = null;
 
             try {
                 using (BinaryReader br = new BinaryReader(new FileStream(readFileName, FileMode.Open))) {
-                    sampledData = riffHeader.ReadAll(br);
+                    sampledData = wavRW.ReadAll(br);
 
                     if (null == sampledData) {
                         Console.WriteLine("RIFF read error");
