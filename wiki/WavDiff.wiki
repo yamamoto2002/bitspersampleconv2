@@ -29,6 +29,8 @@
 スタートメニューかデスクトップのWavDiffを実行し、
 画面の指示に従います。
 
+http://bitspersampleconv2.googlecode.com/files/WavDiff1.jpg
+
 = アンインストール方法 =
 
 [コントロールパネル][プログラムの追加と削除]でWavDiffを選んで削除します。
