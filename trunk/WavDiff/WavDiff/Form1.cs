@@ -1,0 +1,345 @@
+﻿/*
+    WavDiff
+    Copyright (C) 2009 Yamamoto DIY Software Lab.
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+using System;
+using System.ComponentModel;
+using System.Windows.Forms;
+using System.IO;
+using System.Globalization;
+using System.Collections.Generic;
+
+namespace WavDiff
+{
+    public partial class Form1 : Form
+    {
+        private System.Resources.ResourceManager rm;
+        
+        private void GuiStatusUpdate()
+        {
+            if (string.Empty != textBoxRead1.Text &&
+                string.Empty != textBoxRead2.Text &&
+                string.Empty != textBoxWrite.Text) {
+                buttonStart.Enabled = true;
+            } else {
+                buttonStart.Enabled = false;
+            }
+            labelMagnitude.Text = string.Format(" / 2) = {0}x", (double)numericUpDown1.Value / 2.0);
+        }
+
+        public Form1()
+        {
+            InitializeComponent();
+
+            rm = WavDiff.Properties.Resources.ResourceManager;
+            textBoxConsole.Text = rm.GetString("Introduction") + "\r\n";
+            GuiStatusUpdate();
+
+            Console.WriteLine(rm.GetString("ConsoleIntroduction"));
+        }
+
+        private string OpenDialogAndAskPath(bool bReadFile)
+        {
+            string ret = string.Empty;
+
+            using (OpenFileDialog ofd = new OpenFileDialog()) {
+                ofd.ReadOnlyChecked = bReadFile;
+                ofd.Multiselect = false;
+                ofd.Filter = rm.GetString("WavFileFilter");
+                ofd.CheckPathExists = bReadFile;
+                ofd.CheckFileExists = bReadFile;
+                ofd.AutoUpgradeEnabled = true;
+                DialogResult dr = ofd.ShowDialog();
+                if (DialogResult.OK == dr) {
+                    ret = ofd.FileName;
+                }
+            }
+
+            return ret;
+        }
+
+        private void buttonRead1_Click(object sender, EventArgs e)
+        {
+            string path = OpenDialogAndAskPath(true);
+            if (string.Empty != path) {
+                textBoxRead1.Text = path;
+                GuiStatusUpdate();
+            }
+        }
+
+        private void buttonRead2_Click(object sender, EventArgs e)
+        {
+            string path = OpenDialogAndAskPath(true);
+            if (string.Empty != path) {
+                textBoxRead2.Text = path;
+                GuiStatusUpdate();
+            }
+        }
+
+        private void buttonWrite_Click(object sender, EventArgs e)
+        {
+            string path = OpenDialogAndAskPath(false);
+            if (string.Empty != path) {
+                textBoxWrite.Text = path;
+                GuiStatusUpdate();
+            }
+        }
+
+        const double DELAY_SECONDS_MAX = 2;
+
+        private WavData ReadWavFile(string path)
+        {
+            WavData wavData = new WavData();
+
+            Console.WriteLine(rm.GetString("ReadFileStarted"), path);
+
+            using (BinaryReader br1 = new BinaryReader(File.Open(path, FileMode.Open))) {
+                if (!wavData.Read(br1)) {
+                    textBoxConsole.Text += string.Format(rm.GetString("ReadFileFailFormat"), path) + "\r\n";
+                    return null;
+                }
+                if (16 != wavData.BitsPerSample) {
+                    textBoxConsole.Text += string.Format(rm.GetString("BitsPerSampleFailFormat"), path, wavData.BitsPerSample) + "\r\n";
+                    return null;
+                }
+
+                if (wavData.NumSamples < wavData.SampleRate * DELAY_SECONDS_MAX * 2) {
+                    textBoxConsole.Text += string.Format(rm.GetString("WavFileTooShort"), path, DELAY_SECONDS_MAX * 2) + "\r\n";
+                    return null;
+                }
+            }
+
+            return wavData;
+        }
+
+        /** @param delay_return [out] (0 < delay_return) w1 is delayed by delay samples
+         *                     (delay_return < 0) w2 is delayed by delay samples 
+         */
+        private bool SampleDelay(WavData w1, WavData w2, out int delay_return)
+        {
+            delay_return = 0;
+
+            SortedDictionary<long, int> delayValueAndPos =
+                new SortedDictionary<long, int>();
+
+            int samplesPerSecond = w1.SampleRate;
+            /* assume w1 is delayed (0 < delay) */
+            for (int delay=0; delay < samplesPerSecond * DELAY_SECONDS_MAX; ++delay) {
+                long acc = 0;
+                for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
+                    acc += Math.Abs(w1.Sample16Get(0, pos) - w2.Sample16Get(0, pos + delay));
+                }
+                // Console.Write("[{0} {1}]", delay, acc);
+                if (!delayValueAndPos.ContainsKey(acc)) {
+                    delayValueAndPos[acc] = delay;
+                }
+                backgroundWorker1.ReportProgress(delay * 50 / (int)(samplesPerSecond * DELAY_SECONDS_MAX));
+            }
+
+            /* assume w2 is delayed (delay < 0) */
+            for (int delay=1; delay < samplesPerSecond * DELAY_SECONDS_MAX; ++delay) {
+                long acc = 0;
+                for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
+                    acc += Math.Abs(w1.Sample16Get(0, pos + (int)(samplesPerSecond * DELAY_SECONDS_MAX)) 
+                                  - w2.Sample16Get(0, pos + (int)(samplesPerSecond * DELAY_SECONDS_MAX) - delay));
+                }
+                // Console.Write("[{0} {1}]", -delay, acc);
+                if (!delayValueAndPos.ContainsKey(acc)) {
+                    delayValueAndPos[acc] = -delay;
+                }
+                backgroundWorker1.ReportProgress(50 + delay * 50 / (int)(samplesPerSecond * DELAY_SECONDS_MAX));
+            }
+
+            SortedDictionary<long, int>.Enumerator e = delayValueAndPos.GetEnumerator();
+            e.MoveNext();
+
+            Console.WriteLine();
+            Console.WriteLine("delay={0} has the smallest diff {1}", e.Current.Value, e.Current.Key);
+            delay_return = e.Current.Value;
+            return true;
+        }
+
+        WavData wavRead1;
+        WavData wavRead2;
+
+        private void buttonStart_Click(object sender, EventArgs e)
+        {
+            textBoxConsole.Text += string.Format(rm.GetString("ProcessStarted"),
+                textBoxRead1.Text, textBoxRead2.Text, (double)numericUpDown1.Value/2.0, textBoxWrite.Text) + "\r\n";
+
+            wavRead1 = ReadWavFile(textBoxRead1.Text);
+            if (null == wavRead1) {
+                textBoxConsole.Text += string.Format(rm.GetString("ReadWavFileFailed"), textBoxRead1.Text) + "\r\n";
+                return;
+            }
+
+            wavRead2 = ReadWavFile(textBoxRead2.Text);
+            if (null == wavRead2) {
+                textBoxConsole.Text += string.Format(rm.GetString("ReadWavFileFailed"), textBoxRead2.Text) + "\r\n";
+                return;
+            }
+
+            if (wavRead1.SampleRate != wavRead2.SampleRate) {
+                textBoxConsole.Text += string.Format(rm.GetString("SampleRateIsDifferent")) + "\r\n";
+                return;
+            }
+            if (wavRead1.NumChannels != wavRead2.NumChannels) {
+                textBoxConsole.Text += string.Format(rm.GetString("NumChannelsIsDifferent")) + "\r\n";
+                return;
+            }
+
+            backgroundWorker1.RunWorkerAsync();
+            buttonStart.Enabled = false;
+        }
+
+        string resultString = string.Empty;
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            int sampleDelay;
+            if (!SampleDelay(wavRead1, wavRead2, out sampleDelay)) {
+                e.Result = false;
+                resultString = rm.GetString("TwoWavFilesTooDifferent");
+                return;
+            }
+
+            int numSamples = wavRead1.NumSamples - 2 * Math.Abs(sampleDelay);
+            if (wavRead2.NumSamples < wavRead1.NumSamples) {
+                numSamples = wavRead2.NumSamples - 2 * Math.Abs(sampleDelay);
+            }
+
+            List<PcmSamples1Channel> samples = new List<PcmSamples1Channel>();
+            for (int i=0; i<wavRead1.NumChannels; ++i) {
+                PcmSamples1Channel ps = new PcmSamples1Channel(numSamples, wavRead1.BitsPerSample);
+                samples.Add(ps);
+            }
+
+            long acc = 0;
+            int maxDiff = 0;
+
+            float magnitude = (int)numericUpDown1.Value / 2.0f;
+            if (0 <= sampleDelay) {
+                for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
+                    PcmSamples1Channel ps = samples[ch];
+                    for (int sample=0; sample < numSamples; ++sample) {
+                        int diff = wavRead1.Sample16Get(ch, sample)
+                                 - wavRead2.Sample16Get(ch, sample + sampleDelay);
+
+                        int absDiff = Math.Abs(diff);
+                        acc += absDiff;
+                        if (maxDiff < absDiff) {
+                            maxDiff = absDiff;
+                        }
+
+                        ps.Set16(sample, (short)(diff * magnitude));
+                    }
+                }
+            } else {
+                // sampleDelay < 0
+                for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
+                    PcmSamples1Channel ps = samples[ch];
+                    for (int sample=0; sample < numSamples; ++sample) {
+                        int diff = wavRead1.Sample16Get(ch, sample - sampleDelay)
+                                 - wavRead2.Sample16Get(ch, sample);
+
+                        int absDiff = Math.Abs(diff);
+                        acc += absDiff;
+                        if (maxDiff < absDiff) {
+                            maxDiff = absDiff;
+                        }
+
+                        ps.Set16(sample, (short)(diff * magnitude));
+                    }
+                }
+            }
+
+            if (0 == acc) {
+                e.Result = false;
+                resultString = rm.GetString("TwoWavFilesAreExactlyTheSame");
+                return;
+            }
+
+            WavData wav = new WavData();
+            wav.Create(wavRead1.SampleRate, wavRead1.BitsPerSample, samples);
+
+            if (0 < maxDiff) {
+                int maxMagnitude = 32767 / maxDiff;
+                resultString = string.Format(rm.GetString("DiffStatistics"),
+                    (double)acc / wav.NumSamples, maxDiff, maxMagnitude);
+                Console.WriteLine(resultString);
+
+                if (32767 < maxDiff * magnitude) {
+                    Console.WriteLine(rm.GetString("OutputFileLevelOver"), maxMagnitude); 
+                }
+            }
+
+            try {
+                using (BinaryWriter bw = new BinaryWriter(File.Open(textBoxWrite.Text, FileMode.CreateNew))) {
+                    wav.Write(bw);
+                }
+            } catch (Exception ex) {
+                resultString = ex.ToString();
+                e.Result = false;
+            }
+            e.Result = true;
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (false == (bool)e.Result) {
+                textBoxConsole.Text += resultString + "\r\n";
+                textBoxConsole.Text += string.Format(rm.GetString("WriteFailed"), textBoxWrite.Text) + "\r\n";
+            } else {
+                textBoxConsole.Text += resultString + "\r\n";
+                textBoxConsole.Text += string.Format(rm.GetString("WriteSucceeded"), textBoxWrite.Text) + "\r\n";
+            }
+
+            progressBar1.Value = 0;
+            buttonStart.Enabled = true;
+        }
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void numericUpDown1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void numericUpDown1_KeyUp(object sender, KeyEventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void numericUpDown1_KeyDown(object sender, KeyEventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void groupBox2_Enter(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
