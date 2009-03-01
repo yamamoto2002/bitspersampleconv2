@@ -20,7 +20,7 @@
 
 = インストール方法 =
 
-上のほうのDownloads:のところからWavDiffSetup????????.msi
+上のほうのDownloads:のところからWavDiffSetupYYYYMMDD.msi(YYYYMMDDは日付)
 をダウンロードして実行するとセットアップが始まります。
 (.NET Framework 3.5SP1を追加でインストールする必要があるかもしれません。この場合は画面の指示に従ってダウンロードしてきてインストールしてください。)
 
