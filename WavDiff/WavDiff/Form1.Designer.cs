@@ -45,31 +45,26 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.buttonWrite = new System.Windows.Forms.Button();
             this.textBoxWrite = new System.Windows.Forms.TextBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.checkBoxAutoAdjustVolumeDifference = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonStart
             // 
-            this.buttonStart.AccessibleDescription = null;
-            this.buttonStart.AccessibleName = null;
             resources.ApplyResources(this.buttonStart, "buttonStart");
-            this.buttonStart.BackgroundImage = null;
-            this.buttonStart.Font = null;
             this.buttonStart.Name = "buttonStart";
             this.buttonStart.UseVisualStyleBackColor = true;
             this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
             // 
             // textBoxConsole
             // 
-            this.textBoxConsole.AccessibleDescription = null;
-            this.textBoxConsole.AccessibleName = null;
             resources.ApplyResources(this.textBoxConsole, "textBoxConsole");
-            this.textBoxConsole.BackgroundImage = null;
-            this.textBoxConsole.Font = null;
             this.textBoxConsole.Name = "textBoxConsole";
             this.textBoxConsole.ReadOnly = true;
             // 
@@ -82,106 +77,68 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.AccessibleDescription = null;
-            this.progressBar1.AccessibleName = null;
             resources.ApplyResources(this.progressBar1, "progressBar1");
-            this.progressBar1.BackgroundImage = null;
-            this.progressBar1.Font = null;
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             // 
             // groupBox1
             // 
-            this.groupBox1.AccessibleDescription = null;
-            this.groupBox1.AccessibleName = null;
-            resources.ApplyResources(this.groupBox1, "groupBox1");
-            this.groupBox1.BackgroundImage = null;
             this.groupBox1.Controls.Add(this.buttonRead1);
             this.groupBox1.Controls.Add(this.textBoxRead1);
-            this.groupBox1.Font = null;
+            resources.ApplyResources(this.groupBox1, "groupBox1");
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.TabStop = false;
             // 
             // buttonRead1
             // 
-            this.buttonRead1.AccessibleDescription = null;
-            this.buttonRead1.AccessibleName = null;
             resources.ApplyResources(this.buttonRead1, "buttonRead1");
-            this.buttonRead1.BackgroundImage = null;
-            this.buttonRead1.Font = null;
             this.buttonRead1.Name = "buttonRead1";
             this.buttonRead1.UseVisualStyleBackColor = true;
             this.buttonRead1.Click += new System.EventHandler(this.buttonRead1_Click);
             // 
             // textBoxRead1
             // 
-            this.textBoxRead1.AccessibleDescription = null;
-            this.textBoxRead1.AccessibleName = null;
             resources.ApplyResources(this.textBoxRead1, "textBoxRead1");
-            this.textBoxRead1.BackgroundImage = null;
-            this.textBoxRead1.Font = null;
             this.textBoxRead1.Name = "textBoxRead1";
             // 
             // groupBox2
             // 
-            this.groupBox2.AccessibleDescription = null;
-            this.groupBox2.AccessibleName = null;
-            resources.ApplyResources(this.groupBox2, "groupBox2");
-            this.groupBox2.BackgroundImage = null;
             this.groupBox2.Controls.Add(this.buttonRead2);
             this.groupBox2.Controls.Add(this.textBoxRead2);
-            this.groupBox2.Font = null;
+            resources.ApplyResources(this.groupBox2, "groupBox2");
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.TabStop = false;
             this.groupBox2.Enter += new System.EventHandler(this.groupBox2_Enter);
             // 
             // buttonRead2
             // 
-            this.buttonRead2.AccessibleDescription = null;
-            this.buttonRead2.AccessibleName = null;
             resources.ApplyResources(this.buttonRead2, "buttonRead2");
-            this.buttonRead2.BackgroundImage = null;
-            this.buttonRead2.Font = null;
             this.buttonRead2.Name = "buttonRead2";
             this.buttonRead2.UseVisualStyleBackColor = true;
             this.buttonRead2.Click += new System.EventHandler(this.buttonRead2_Click);
             // 
             // textBoxRead2
             // 
-            this.textBoxRead2.AccessibleDescription = null;
-            this.textBoxRead2.AccessibleName = null;
             resources.ApplyResources(this.textBoxRead2, "textBoxRead2");
-            this.textBoxRead2.BackgroundImage = null;
-            this.textBoxRead2.Font = null;
             this.textBoxRead2.Name = "textBoxRead2";
             // 
             // groupBox3
             // 
-            this.groupBox3.AccessibleDescription = null;
-            this.groupBox3.AccessibleName = null;
-            resources.ApplyResources(this.groupBox3, "groupBox3");
-            this.groupBox3.BackgroundImage = null;
             this.groupBox3.Controls.Add(this.labelMagnitude);
             this.groupBox3.Controls.Add(this.numericUpDown1);
             this.groupBox3.Controls.Add(this.label3);
-            this.groupBox3.Font = null;
+            resources.ApplyResources(this.groupBox3, "groupBox3");
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.TabStop = false;
             // 
             // labelMagnitude
             // 
-            this.labelMagnitude.AccessibleDescription = null;
-            this.labelMagnitude.AccessibleName = null;
             resources.ApplyResources(this.labelMagnitude, "labelMagnitude");
-            this.labelMagnitude.Font = null;
             this.labelMagnitude.Name = "labelMagnitude";
             // 
             // numericUpDown1
             // 
-            this.numericUpDown1.AccessibleDescription = null;
-            this.numericUpDown1.AccessibleName = null;
             resources.ApplyResources(this.numericUpDown1, "numericUpDown1");
-            this.numericUpDown1.Font = null;
             this.numericUpDown1.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -205,51 +162,47 @@
             // 
             // label3
             // 
-            this.label3.AccessibleDescription = null;
-            this.label3.AccessibleName = null;
             resources.ApplyResources(this.label3, "label3");
-            this.label3.Font = null;
             this.label3.Name = "label3";
             // 
             // groupBox4
             // 
-            this.groupBox4.AccessibleDescription = null;
-            this.groupBox4.AccessibleName = null;
-            resources.ApplyResources(this.groupBox4, "groupBox4");
-            this.groupBox4.BackgroundImage = null;
             this.groupBox4.Controls.Add(this.buttonWrite);
             this.groupBox4.Controls.Add(this.textBoxWrite);
-            this.groupBox4.Font = null;
+            resources.ApplyResources(this.groupBox4, "groupBox4");
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.TabStop = false;
             // 
             // buttonWrite
             // 
-            this.buttonWrite.AccessibleDescription = null;
-            this.buttonWrite.AccessibleName = null;
             resources.ApplyResources(this.buttonWrite, "buttonWrite");
-            this.buttonWrite.BackgroundImage = null;
-            this.buttonWrite.Font = null;
             this.buttonWrite.Name = "buttonWrite";
             this.buttonWrite.UseVisualStyleBackColor = true;
             this.buttonWrite.Click += new System.EventHandler(this.buttonWrite_Click);
             // 
             // textBoxWrite
             // 
-            this.textBoxWrite.AccessibleDescription = null;
-            this.textBoxWrite.AccessibleName = null;
             resources.ApplyResources(this.textBoxWrite, "textBoxWrite");
-            this.textBoxWrite.BackgroundImage = null;
-            this.textBoxWrite.Font = null;
             this.textBoxWrite.Name = "textBoxWrite";
+            // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.checkBoxAutoAdjustVolumeDifference);
+            resources.ApplyResources(this.groupBox5, "groupBox5");
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.TabStop = false;
+            // 
+            // checkBoxAutoAdjustVolumeDifference
+            // 
+            resources.ApplyResources(this.checkBoxAutoAdjustVolumeDifference, "checkBoxAutoAdjustVolumeDifference");
+            this.checkBoxAutoAdjustVolumeDifference.Name = "checkBoxAutoAdjustVolumeDifference";
+            this.checkBoxAutoAdjustVolumeDifference.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
-            this.AccessibleDescription = null;
-            this.AccessibleName = null;
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackgroundImage = null;
+            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -257,8 +210,6 @@
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.textBoxConsole);
             this.Controls.Add(this.buttonStart);
-            this.Font = null;
-            this.Icon = null;
             this.Name = "Form1";
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
@@ -269,6 +220,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -293,6 +246,8 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button buttonWrite;
         private System.Windows.Forms.TextBox textBoxWrite;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.CheckBox checkBoxAutoAdjustVolumeDifference;
     }
 }
 

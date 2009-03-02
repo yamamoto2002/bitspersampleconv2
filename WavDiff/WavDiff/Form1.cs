@@ -99,7 +99,7 @@ namespace WavDiff
             }
         }
 
-        const double DELAY_SECONDS_MAX = 2;
+        const double DELAY_SECONDS_MAX = 2.0;
 
         private WavData ReadWavFile(string path)
         {
@@ -126,50 +126,78 @@ namespace WavDiff
             return wavData;
         }
 
+        struct VolumeInfo
+        {
+            public int delay;
+            public long accumulatedDiff;
+            public long w1Volume;
+            public long w2Volume;
+        }
+
         /** @param delay_return [out] (0 < delay_return) w1 is delayed by delay samples
-         *                     (delay_return < 0) w2 is delayed by delay samples 
+         *                     (delay_return < 0) w2 is delayed by delay samples
+         *  @param w1w2VolumeRatio_return [out] >1: w1 volume is larger than w2, <1: w1 volume is smaller than w2
          */
-        private bool SampleDelay(WavData w1, WavData w2, out int delay_return)
+        private bool SampleDelay(WavData w1, WavData w2, out int delay_return, out double w1w2VolumeRatio_return)
         {
             delay_return = 0;
 
-            SortedDictionary<long, int> delayValueAndPos =
-                new SortedDictionary<long, int>();
+            SortedDictionary<long, VolumeInfo> delayValueAndPos =
+                new SortedDictionary<long, VolumeInfo>();
 
             int samplesPerSecond = w1.SampleRate;
             /* assume w1 is delayed (0 < delay) */
             for (int delay=0; delay < samplesPerSecond * DELAY_SECONDS_MAX; ++delay) {
-                long acc = 0;
+                VolumeInfo vi = new VolumeInfo();
+                vi.delay = delay;
+
                 for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
-                    acc += Math.Abs(w1.Sample16Get(0, pos) - w2.Sample16Get(0, pos + delay));
+                    int w1Value = Math.Abs(w1.Sample16Get(0, pos));
+                    int w2Value = Math.Abs(w2.Sample16Get(0, pos + delay));
+                    vi.w1Volume += w1Value;
+                    vi.w2Volume += w2Value;
+                    vi.accumulatedDiff += Math.Abs(w1Value - w2Value);
                 }
                 // Console.Write("[{0} {1}]", delay, acc);
-                if (!delayValueAndPos.ContainsKey(acc)) {
-                    delayValueAndPos[acc] = delay;
+                if (!delayValueAndPos.ContainsKey(vi.accumulatedDiff)) {
+                    delayValueAndPos[vi.accumulatedDiff] = vi;
                 }
                 backgroundWorker1.ReportProgress(delay * 50 / (int)(samplesPerSecond * DELAY_SECONDS_MAX));
             }
 
             /* assume w2 is delayed (delay < 0) */
             for (int delay=1; delay < samplesPerSecond * DELAY_SECONDS_MAX; ++delay) {
-                long acc = 0;
+                VolumeInfo vi = new VolumeInfo();
+                vi.delay = -delay;
+
                 for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
-                    acc += Math.Abs(w1.Sample16Get(0, pos + (int)(samplesPerSecond * DELAY_SECONDS_MAX)) 
-                                  - w2.Sample16Get(0, pos + (int)(samplesPerSecond * DELAY_SECONDS_MAX) - delay));
+                    int w1Value = Math.Abs(w1.Sample16Get(0, pos + delay));
+                    int w2Value = Math.Abs(w2.Sample16Get(0, pos));
+                    vi.w1Volume += w1Value;
+                    vi.w2Volume += w2Value;
+                    vi.accumulatedDiff += Math.Abs(w1Value - w2Value);
                 }
                 // Console.Write("[{0} {1}]", -delay, acc);
-                if (!delayValueAndPos.ContainsKey(acc)) {
-                    delayValueAndPos[acc] = -delay;
+                if (!delayValueAndPos.ContainsKey(vi.accumulatedDiff)) {
+                    delayValueAndPos[vi.accumulatedDiff] = vi;
                 }
                 backgroundWorker1.ReportProgress(50 + delay * 50 / (int)(samplesPerSecond * DELAY_SECONDS_MAX));
             }
 
-            SortedDictionary<long, int>.Enumerator e = delayValueAndPos.GetEnumerator();
+            SortedDictionary<long, VolumeInfo>.Enumerator e = delayValueAndPos.GetEnumerator();
             e.MoveNext();
 
+            w1w2VolumeRatio_return = (double)e.Current.Value.w1Volume / e.Current.Value.w2Volume;
+            delay_return = e.Current.Value.delay;
+
             Console.WriteLine();
-            Console.WriteLine("delay={0} has the smallest diff {1}", e.Current.Value, e.Current.Key);
-            delay_return = e.Current.Value;
+            Console.WriteLine("delay={0} has the smallest diff {1}. volume ratio={2}",
+                delay_return,
+                (double)e.Current.Key / (samplesPerSecond * DELAY_SECONDS_MAX),
+                w1w2VolumeRatio_return);
+            if (w1w2VolumeRatio_return < 0.5 || 2.0 < w1w2VolumeRatio_return) {
+                return false;
+            }
             return true;
         }
 
@@ -211,10 +239,15 @@ namespace WavDiff
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             int sampleDelay;
-            if (!SampleDelay(wavRead1, wavRead2, out sampleDelay)) {
+            double w1w2VolumeRatio;
+            if (!SampleDelay(wavRead1, wavRead2, out sampleDelay, out w1w2VolumeRatio)) {
                 e.Result = false;
                 resultString = rm.GetString("TwoWavFilesTooDifferent");
                 return;
+            }
+
+            if (!checkBoxAutoAdjustVolumeDifference.Checked) {
+                w1w2VolumeRatio = 1.0;
             }
 
             int numSamples = wavRead1.NumSamples - 2 * Math.Abs(sampleDelay);
@@ -236,8 +269,8 @@ namespace WavDiff
                 for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
                     PcmSamples1Channel ps = samples[ch];
                     for (int sample=0; sample < numSamples; ++sample) {
-                        int diff = wavRead1.Sample16Get(ch, sample)
-                                 - wavRead2.Sample16Get(ch, sample + sampleDelay);
+                        int diff = (int)(wavRead1.Sample16Get(ch, sample)
+                                       - wavRead2.Sample16Get(ch, sample + sampleDelay) * w1w2VolumeRatio);
 
                         int absDiff = Math.Abs(diff);
                         acc += absDiff;
@@ -253,8 +286,8 @@ namespace WavDiff
                 for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
                     PcmSamples1Channel ps = samples[ch];
                     for (int sample=0; sample < numSamples; ++sample) {
-                        int diff = wavRead1.Sample16Get(ch, sample - sampleDelay)
-                                 - wavRead2.Sample16Get(ch, sample);
+                        int diff = (int)(wavRead1.Sample16Get(ch, sample - sampleDelay)
+                                       - wavRead2.Sample16Get(ch, sample) * w1w2VolumeRatio);
 
                         int absDiff = Math.Abs(diff);
                         acc += absDiff;
