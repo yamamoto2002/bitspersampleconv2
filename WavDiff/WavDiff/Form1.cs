@@ -99,7 +99,7 @@ namespace WavDiff
             }
         }
 
-        const double DELAY_SECONDS_MAX = 2.0;
+        const double DELAY_SECONDS_MAX = 0.1;
 
         private WavData ReadWavFile(string path)
         {

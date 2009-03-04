@@ -141,4 +141,14 @@
   <data name="groupBox4.Text" xml:space="preserve">
     <value>出力WAVファイル</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="checkBoxAutoAdjustVolumeDifference.Size" type="System.Drawing.Size, System.Drawing">
+    <value>152, 16</value>
+  </data>
+  <data name="checkBoxAutoAdjustVolumeDifference.Text" xml:space="preserve">
+    <value>音量差を自動補正する(&amp;A)</value>
+  </data>
+  <data name="groupBox5.Text" xml:space="preserve">
+    <value>設定</value>
+  </data>
 </root>
