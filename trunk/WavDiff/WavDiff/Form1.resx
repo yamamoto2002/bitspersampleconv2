@@ -117,140 +117,182 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="&gt;&gt;buttonRead1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;buttonRead2.Name" xml:space="preserve">
+    <value>buttonRead2</value>
+  </data>
+  <data name="&gt;&gt;buttonWrite.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead1.Parent" xml:space="preserve">
+    <value>groupBox1</value>
+  </data>
+  <data name="buttonWrite.Text" xml:space="preserve">
+    <value>Browse...(&amp;3)</value>
+  </data>
+  <data name="&gt;&gt;buttonRead2.Parent" xml:space="preserve">
+    <value>groupBox2</value>
+  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="buttonStart.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 232</value>
+  <data name="buttonWrite.Size" type="System.Drawing.Size, System.Drawing">
+    <value>122, 23</value>
   </data>
-  <data name="buttonStart.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 23</value>
-  </data>
-  <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="buttonStart.TabIndex" type="System.Int32, mscorlib">
-    <value>11</value>
-  </data>
-  <data name="buttonStart.Text" xml:space="preserve">
-    <value>Start(&amp;S)</value>
-  </data>
-  <data name="&gt;&gt;buttonStart.Name" xml:space="preserve">
-    <value>buttonStart</value>
-  </data>
-  <data name="&gt;&gt;buttonStart.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;buttonStart.Parent" xml:space="preserve">
+  <data name="&gt;&gt;groupBox4.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;buttonStart.ZOrder" xml:space="preserve">
-    <value>7</value>
+  <data name="numericUpDown1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>21, 13</value>
   </data>
-  <data name="textBoxConsole.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 261</value>
+  <data name="&gt;&gt;groupBox5.Name" xml:space="preserve">
+    <value>groupBox5</value>
   </data>
-  <data name="textBoxConsole.Multiline" type="System.Boolean, mscorlib">
-    <value>True</value>
+  <data name="&gt;&gt;progressBar1.ZOrder" xml:space="preserve">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;progressBar1.Name" xml:space="preserve">
+    <value>progressBar1</value>
+  </data>
+  <data name="textBoxRead1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>281, 19</value>
+  </data>
+  <data name="buttonRead2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>293, 14</value>
+  </data>
+  <data name="groupBox2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 49</value>
+  </data>
+  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
+    <value>6, 12</value>
+  </data>
+  <data name="textBoxWrite.Text" xml:space="preserve">
+    <value>C:\diff.wav</value>
+  </data>
+  <data name="&gt;&gt;groupBox4.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;progressBar1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ProgressBar, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;labelMagnitude.Parent" xml:space="preserve">
+    <value>groupBox3</value>
+  </data>
+  <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="groupBox4.TabIndex" type="System.Int32, mscorlib">
+    <value>19</value>
+  </data>
+  <data name="textBoxConsole.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 156</value>
+  </data>
+  <data name="&gt;&gt;progressBar1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="groupBox4.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 176</value>
+  </data>
+  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="labelMagnitude.Location" type="System.Drawing.Point, System.Drawing">
+    <value>87, 15</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="textBoxConsole.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
     <value>Vertical</value>
   </data>
-  <data name="textBoxConsole.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 156</value>
+  <data name="groupBox4.Text" xml:space="preserve">
+    <value>Output WAV File</value>
   </data>
-  <data name="textBoxConsole.TabIndex" type="System.Int32, mscorlib">
-    <value>12</value>
+  <data name="checkBoxAutoAdjustVolumeDifference.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="textBoxWrite.Location" type="System.Drawing.Point, System.Drawing">
+    <value>8, 18</value>
+  </data>
+  <data name="buttonStart.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 23</value>
+  </data>
+  <data name="numericUpDown1.TabIndex" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="groupBox3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>191, 46</value>
   </data>
   <data name="&gt;&gt;textBoxConsole.Name" xml:space="preserve">
     <value>textBoxConsole</value>
   </data>
-  <data name="&gt;&gt;textBoxConsole.Type" xml:space="preserve">
+  <data name="groupBox2.Text" xml:space="preserve">
+    <value>Input WAV file 2</value>
+  </data>
+  <data name="&gt;&gt;numericUpDown1.Name" xml:space="preserve">
+    <value>numericUpDown1</value>
+  </data>
+  <data name="&gt;&gt;buttonWrite.Name" xml:space="preserve">
+    <value>buttonWrite</value>
+  </data>
+  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
+    <value>448, 461</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead2.Type" xml:space="preserve">
     <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;textBoxConsole.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;textBoxConsole.ZOrder" xml:space="preserve">
-    <value>6</value>
-  </data>
-  <metadata name="backgroundWorker1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
-  <data name="progressBar1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 423</value>
-  </data>
-  <data name="progressBar1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 23</value>
-  </data>
-  <data name="progressBar1.TabIndex" type="System.Int32, mscorlib">
-    <value>13</value>
-  </data>
-  <data name="&gt;&gt;progressBar1.Name" xml:space="preserve">
-    <value>progressBar1</value>
-  </data>
-  <data name="&gt;&gt;progressBar1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ProgressBar, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;progressBar1.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;progressBar1.ZOrder" xml:space="preserve">
-    <value>5</value>
-  </data>
-  <data name="buttonRead1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>293, 18</value>
-  </data>
-  <data name="buttonRead1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>122, 23</value>
-  </data>
-  <data name="buttonRead1.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
-  </data>
-  <data name="buttonRead1.Text" xml:space="preserve">
-    <value>Browse...(&amp;1)</value>
-  </data>
-  <data name="&gt;&gt;buttonRead1.Name" xml:space="preserve">
-    <value>buttonRead1</value>
-  </data>
-  <data name="&gt;&gt;buttonRead1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;buttonRead1.Parent" xml:space="preserve">
-    <value>groupBox1</value>
-  </data>
-  <data name="&gt;&gt;buttonRead1.ZOrder" xml:space="preserve">
-    <value>0</value>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>9, 12</value>
   </data>
   <data name="textBoxRead1.Location" type="System.Drawing.Point, System.Drawing">
     <value>6, 18</value>
   </data>
-  <data name="textBoxRead1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>281, 19</value>
+  <data name="buttonRead1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>293, 18</value>
+  </data>
+  <data name="labelMagnitude.Size" type="System.Drawing.Size, System.Drawing">
+    <value>51, 12</value>
+  </data>
+  <data name="&gt;&gt;label3.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Name" xml:space="preserve">
+    <value>checkBoxAutoAdjustVolumeDifference</value>
+  </data>
+  <data name="groupBox5.TabIndex" type="System.Int32, mscorlib">
+    <value>20</value>
+  </data>
+  <data name="&gt;&gt;labelMagnitude.Name" xml:space="preserve">
+    <value>labelMagnitude</value>
+  </data>
+  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Parent" xml:space="preserve">
+    <value>groupBox5</value>
   </data>
   <data name="textBoxRead1.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <data name="&gt;&gt;textBoxRead1.Name" xml:space="preserve">
-    <value>textBoxRead1</value>
+  <data name="&gt;&gt;buttonRead2.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
-  <data name="&gt;&gt;textBoxRead1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="$this.Text" xml:space="preserve">
+    <value>WavDiff</value>
   </data>
-  <data name="&gt;&gt;textBoxRead1.Parent" xml:space="preserve">
-    <value>groupBox1</value>
+  <data name="&gt;&gt;groupBox4.Name" xml:space="preserve">
+    <value>groupBox4</value>
   </data>
-  <data name="&gt;&gt;textBoxRead1.ZOrder" xml:space="preserve">
-    <value>1</value>
+  <data name="&gt;&gt;backgroundWorker1.Name" xml:space="preserve">
+    <value>backgroundWorker1</value>
   </data>
-  <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 12</value>
+  <data name="&gt;&gt;groupBox2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 51</value>
+  <data name="&gt;&gt;textBoxRead2.Name" xml:space="preserve">
+    <value>textBoxRead2</value>
   </data>
-  <data name="groupBox1.TabIndex" type="System.Int32, mscorlib">
-    <value>16</value>
+  <data name="buttonRead1.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
   </data>
-  <data name="groupBox1.Text" xml:space="preserve">
-    <value>Input WAV file 1</value>
+  <data name="groupBox4.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 50</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead2.Parent" xml:space="preserve">
+    <value>groupBox2</value>
   </data>
   <data name="&gt;&gt;groupBox1.Name" xml:space="preserve">
     <value>groupBox1</value>
@@ -258,328 +300,289 @@
   <data name="&gt;&gt;groupBox1.Type" xml:space="preserve">
     <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;groupBox1.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;groupBox1.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="buttonRead2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>293, 14</value>
-  </data>
-  <data name="buttonRead2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>122, 23</value>
-  </data>
-  <data name="buttonRead2.TabIndex" type="System.Int32, mscorlib">
-    <value>5</value>
-  </data>
-  <data name="buttonRead2.Text" xml:space="preserve">
-    <value>Browse...(&amp;2)</value>
-  </data>
-  <data name="&gt;&gt;buttonRead2.Name" xml:space="preserve">
-    <value>buttonRead2</value>
-  </data>
-  <data name="&gt;&gt;buttonRead2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;buttonRead2.Parent" xml:space="preserve">
-    <value>groupBox2</value>
-  </data>
-  <data name="&gt;&gt;buttonRead2.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="textBoxRead2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
-  </data>
-  <data name="textBoxRead2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>281, 19</value>
-  </data>
-  <data name="textBoxRead2.TabIndex" type="System.Int32, mscorlib">
-    <value>4</value>
-  </data>
-  <data name="&gt;&gt;textBoxRead2.Name" xml:space="preserve">
-    <value>textBoxRead2</value>
-  </data>
-  <data name="&gt;&gt;textBoxRead2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;textBoxRead2.Parent" xml:space="preserve">
-    <value>groupBox2</value>
-  </data>
-  <data name="&gt;&gt;textBoxRead2.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="groupBox2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 69</value>
-  </data>
-  <data name="groupBox2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 49</value>
-  </data>
-  <data name="groupBox2.TabIndex" type="System.Int32, mscorlib">
-    <value>17</value>
-  </data>
-  <data name="groupBox2.Text" xml:space="preserve">
-    <value>Input WAV file 2</value>
-  </data>
-  <data name="&gt;&gt;groupBox2.Name" xml:space="preserve">
-    <value>groupBox2</value>
-  </data>
-  <data name="&gt;&gt;groupBox2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;groupBox2.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;groupBox2.ZOrder" xml:space="preserve">
-    <value>3</value>
-  </data>
-  <data name="labelMagnitude.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="labelMagnitude.Location" type="System.Drawing.Point, System.Drawing">
-    <value>87, 15</value>
-  </data>
-  <data name="labelMagnitude.Size" type="System.Drawing.Size, System.Drawing">
-    <value>51, 12</value>
-  </data>
-  <data name="labelMagnitude.TabIndex" type="System.Int32, mscorlib">
-    <value>17</value>
-  </data>
-  <data name="labelMagnitude.Text" xml:space="preserve">
-    <value>/ 2) = 1x</value>
-  </data>
-  <data name="&gt;&gt;labelMagnitude.Name" xml:space="preserve">
-    <value>labelMagnitude</value>
-  </data>
-  <data name="&gt;&gt;labelMagnitude.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;labelMagnitude.Parent" xml:space="preserve">
-    <value>groupBox3</value>
-  </data>
-  <data name="&gt;&gt;labelMagnitude.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="numericUpDown1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>21, 13</value>
-  </data>
-  <data name="numericUpDown1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>60, 19</value>
-  </data>
-  <data name="numericUpDown1.TabIndex" type="System.Int32, mscorlib">
-    <value>16</value>
-  </data>
-  <data name="&gt;&gt;numericUpDown1.Name" xml:space="preserve">
-    <value>numericUpDown1</value>
-  </data>
-  <data name="&gt;&gt;numericUpDown1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;numericUpDown1.Parent" xml:space="preserve">
     <value>groupBox3</value>
-  </data>
-  <data name="&gt;&gt;numericUpDown1.ZOrder" xml:space="preserve">
-    <value>1</value>
   </data>
   <data name="label3.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="label3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 15</value>
+  <data name="&gt;&gt;buttonRead1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>9, 12</value>
+  <data name="&gt;&gt;textBoxRead1.Name" xml:space="preserve">
+    <value>textBoxRead1</value>
   </data>
-  <data name="label3.TabIndex" type="System.Int32, mscorlib">
-    <value>15</value>
+  <data name="progressBar1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 423</value>
   </data>
   <data name="label3.Text" xml:space="preserve">
     <value>(</value>
   </data>
-  <data name="label3.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleRight</value>
+  <data name="groupBox3.Text" xml:space="preserve">
+    <value>Magnitude</value>
   </data>
-  <data name="&gt;&gt;label3.Name" xml:space="preserve">
-    <value>label3</value>
-  </data>
-  <data name="&gt;&gt;label3.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 12</value>
   </data>
   <data name="&gt;&gt;label3.Parent" xml:space="preserve">
     <value>groupBox3</value>
   </data>
-  <data name="&gt;&gt;label3.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="groupBox3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 124</value>
-  </data>
-  <data name="groupBox3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>191, 46</value>
-  </data>
-  <data name="groupBox3.TabIndex" type="System.Int32, mscorlib">
-    <value>18</value>
-  </data>
-  <data name="groupBox3.Text" xml:space="preserve">
-    <value>Magnitude</value>
-  </data>
-  <data name="&gt;&gt;groupBox3.Name" xml:space="preserve">
-    <value>groupBox3</value>
-  </data>
-  <data name="&gt;&gt;groupBox3.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;groupBox3.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;groupBox3.ZOrder" xml:space="preserve">
-    <value>2</value>
-  </data>
-  <data name="buttonWrite.Location" type="System.Drawing.Point, System.Drawing">
-    <value>293, 14</value>
-  </data>
-  <data name="buttonWrite.Size" type="System.Drawing.Size, System.Drawing">
-    <value>122, 23</value>
+  <data name="&gt;&gt;groupBox2.Name" xml:space="preserve">
+    <value>groupBox2</value>
   </data>
   <data name="buttonWrite.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
   </data>
-  <data name="buttonWrite.Text" xml:space="preserve">
-    <value>Browse...(&amp;3)</value>
-  </data>
-  <data name="&gt;&gt;buttonWrite.Name" xml:space="preserve">
-    <value>buttonWrite</value>
-  </data>
-  <data name="&gt;&gt;buttonWrite.Type" xml:space="preserve">
-    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;buttonWrite.Parent" xml:space="preserve">
-    <value>groupBox4</value>
-  </data>
-  <data name="&gt;&gt;buttonWrite.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="textBoxWrite.Location" type="System.Drawing.Point, System.Drawing">
-    <value>8, 18</value>
-  </data>
-  <data name="textBoxWrite.Size" type="System.Drawing.Size, System.Drawing">
-    <value>279, 19</value>
-  </data>
-  <data name="textBoxWrite.TabIndex" type="System.Int32, mscorlib">
-    <value>10</value>
-  </data>
-  <data name="textBoxWrite.Text" xml:space="preserve">
-    <value>C:\diff.wav</value>
-  </data>
-  <data name="&gt;&gt;textBoxWrite.Name" xml:space="preserve">
-    <value>textBoxWrite</value>
-  </data>
-  <data name="&gt;&gt;textBoxWrite.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;textBoxWrite.Parent" xml:space="preserve">
-    <value>groupBox4</value>
-  </data>
-  <data name="&gt;&gt;textBoxWrite.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="groupBox4.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 176</value>
-  </data>
-  <data name="groupBox4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>426, 50</value>
-  </data>
-  <data name="groupBox4.TabIndex" type="System.Int32, mscorlib">
-    <value>19</value>
-  </data>
-  <data name="groupBox4.Text" xml:space="preserve">
-    <value>Output WAV File</value>
-  </data>
-  <data name="&gt;&gt;groupBox4.Name" xml:space="preserve">
-    <value>groupBox4</value>
-  </data>
-  <data name="&gt;&gt;groupBox4.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;groupBox4.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;groupBox4.ZOrder" xml:space="preserve">
-    <value>1</value>
-  </data>
-  <data name="checkBoxAutoAdjustVolumeDifference.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="checkBoxAutoAdjustVolumeDifference.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
-  </data>
-  <data name="checkBoxAutoAdjustVolumeDifference.Size" type="System.Drawing.Size, System.Drawing">
-    <value>178, 16</value>
-  </data>
-  <data name="checkBoxAutoAdjustVolumeDifference.TabIndex" type="System.Int32, mscorlib">
-    <value>0</value>
-  </data>
-  <data name="checkBoxAutoAdjustVolumeDifference.Text" xml:space="preserve">
-    <value>&amp;Auto adjust volume difference</value>
-  </data>
-  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Name" xml:space="preserve">
-    <value>checkBoxAutoAdjustVolumeDifference</value>
-  </data>
-  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Type" xml:space="preserve">
-    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.Parent" xml:space="preserve">
-    <value>groupBox5</value>
-  </data>
-  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="groupBox5.Location" type="System.Drawing.Point, System.Drawing">
-    <value>209, 126</value>
+  <data name="&gt;&gt;textBoxConsole.ZOrder" xml:space="preserve">
+    <value>6</value>
   </data>
   <data name="groupBox5.Size" type="System.Drawing.Size, System.Drawing">
     <value>229, 44</value>
   </data>
-  <data name="groupBox5.TabIndex" type="System.Int32, mscorlib">
-    <value>20</value>
+  <data name="&gt;&gt;buttonWrite.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="groupBox5.Text" xml:space="preserve">
-    <value>Optional settings</value>
-  </data>
-  <data name="&gt;&gt;groupBox5.Name" xml:space="preserve">
-    <value>groupBox5</value>
-  </data>
-  <data name="&gt;&gt;groupBox5.Type" xml:space="preserve">
-    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="textBoxWrite.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
   </data>
   <data name="&gt;&gt;groupBox5.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;groupBox5.ZOrder" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
-    <value>True</value>
-  </metadata>
-  <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 12</value>
-  </data>
-  <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>448, 461</value>
-  </data>
-  <data name="$this.Text" xml:space="preserve">
-    <value>WavDiff</value>
-  </data>
-  <data name="&gt;&gt;backgroundWorker1.Name" xml:space="preserve">
-    <value>backgroundWorker1</value>
-  </data>
-  <data name="&gt;&gt;backgroundWorker1.Type" xml:space="preserve">
-    <value>System.ComponentModel.BackgroundWorker, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="&gt;&gt;groupBox1.Parent" xml:space="preserve">
+    <value>$this</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>Form1</value>
   </data>
+  <data name="label3.TabIndex" type="System.Int32, mscorlib">
+    <value>15</value>
+  </data>
+  <data name="&gt;&gt;buttonStart.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label3.Name" xml:space="preserve">
+    <value>label3</value>
+  </data>
+  <data name="groupBox2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 69</value>
+  </data>
+  <data name="&gt;&gt;textBoxWrite.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead1.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;buttonStart.ZOrder" xml:space="preserve">
+    <value>7</value>
+  </data>
+  <data name="&gt;&gt;groupBox2.ZOrder" xml:space="preserve">
+    <value>3</value>
+  </data>
+  <data name="buttonStart.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 232</value>
+  </data>
+  <data name="&gt;&gt;buttonWrite.Parent" xml:space="preserve">
+    <value>groupBox4</value>
+  </data>
+  <data name="&gt;&gt;buttonStart.Name" xml:space="preserve">
+    <value>buttonStart</value>
+  </data>
+  <data name="numericUpDown1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>60, 19</value>
+  </data>
+  <data name="&gt;&gt;labelMagnitude.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;groupBox5.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="buttonWrite.Location" type="System.Drawing.Point, System.Drawing">
+    <value>293, 14</value>
+  </data>
+  <data name="labelMagnitude.Text" xml:space="preserve">
+    <value>/ 2) = 1x</value>
+  </data>
+  <data name="&gt;&gt;buttonRead1.Parent" xml:space="preserve">
+    <value>groupBox1</value>
+  </data>
+  <data name="checkBoxAutoAdjustVolumeDifference.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 16</value>
+  </data>
+  <data name="buttonStart.Text" xml:space="preserve">
+    <value>Start(&amp;S)</value>
+  </data>
+  <data name="&gt;&gt;textBoxWrite.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>System.Windows.Forms.Form, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="groupBox5.Text" xml:space="preserve">
+    <value>Optional settings</value>
+  </data>
+  <data name="&gt;&gt;buttonRead1.Name" xml:space="preserve">
+    <value>buttonRead1</value>
+  </data>
+  <data name="&gt;&gt;groupBox5.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="checkBoxAutoAdjustVolumeDifference.Text" xml:space="preserve">
+    <value>&amp;Auto adjust volume difference</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead2.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="groupBox1.TabIndex" type="System.Int32, mscorlib">
+    <value>16</value>
+  </data>
+  <data name="&gt;&gt;textBoxWrite.Parent" xml:space="preserve">
+    <value>groupBox4</value>
+  </data>
+  <data name="&gt;&gt;backgroundWorker1.Type" xml:space="preserve">
+    <value>System.ComponentModel.BackgroundWorker, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;groupBox4.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;groupBox3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;numericUpDown1.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;groupBox3.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <data name="&gt;&gt;textBoxRead1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="labelMagnitude.TabIndex" type="System.Int32, mscorlib">
+    <value>17</value>
+  </data>
+  <data name="groupBox1.Text" xml:space="preserve">
+    <value>Input WAV file 1</value>
+  </data>
+  <data name="buttonRead2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>122, 23</value>
+  </data>
+  <data name="textBoxWrite.Size" type="System.Drawing.Size, System.Drawing">
+    <value>279, 19</value>
+  </data>
+  <data name="&gt;&gt;groupBox2.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="label3.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
+  <data name="&gt;&gt;numericUpDown1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="textBoxRead2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>281, 19</value>
+  </data>
+  <data name="label3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 15</value>
+  </data>
+  <data name="buttonRead1.Text" xml:space="preserve">
+    <value>Browse...(&amp;1)</value>
+  </data>
+  <data name="groupBox3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 124</value>
+  </data>
+  <data name="progressBar1.TabIndex" type="System.Int32, mscorlib">
+    <value>13</value>
+  </data>
+  <data name="textBoxRead2.TabIndex" type="System.Int32, mscorlib">
+    <value>4</value>
+  </data>
+  <data name="buttonRead1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>122, 23</value>
+  </data>
+  <data name="&gt;&gt;buttonStart.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="groupBox5.Location" type="System.Drawing.Point, System.Drawing">
+    <value>209, 126</value>
+  </data>
+  <data name="progressBar1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 23</value>
+  </data>
+  <data name="&gt;&gt;textBoxWrite.Name" xml:space="preserve">
+    <value>textBoxWrite</value>
+  </data>
+  <data name="groupBox3.TabIndex" type="System.Int32, mscorlib">
+    <value>18</value>
+  </data>
+  <data name="labelMagnitude.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="&gt;&gt;textBoxConsole.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="buttonStart.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="buttonRead2.Text" xml:space="preserve">
+    <value>Browse...(&amp;2)</value>
+  </data>
+  <data name="&gt;&gt;groupBox1.ZOrder" xml:space="preserve">
+    <value>4</value>
+  </data>
+  <data name="checkBoxAutoAdjustVolumeDifference.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;checkBoxAutoAdjustVolumeDifference.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="buttonRead2.TabIndex" type="System.Int32, mscorlib">
+    <value>5</value>
+  </data>
+  <data name="&gt;&gt;textBoxConsole.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;buttonRead2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="textBoxRead2.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 18</value>
+  </data>
+  <data name="&gt;&gt;groupBox3.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;label3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;labelMagnitude.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="checkBoxAutoAdjustVolumeDifference.Location" type="System.Drawing.Point, System.Drawing">
+    <value>6, 18</value>
+  </data>
+  <data name="textBoxConsole.Location" type="System.Drawing.Point, System.Drawing">
+    <value>12, 261</value>
+  </data>
+  <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>426, 51</value>
+  </data>
+  <data name="&gt;&gt;groupBox3.Name" xml:space="preserve">
+    <value>groupBox3</value>
+  </data>
+  <data name="textBoxConsole.TabIndex" type="System.Int32, mscorlib">
+    <value>12</value>
+  </data>
+  <data name="textBoxConsole.Multiline" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="groupBox2.TabIndex" type="System.Int32, mscorlib">
+    <value>17</value>
+  </data>
+  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <metadata name="$this.Language" type="System.Globalization.CultureInfo, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>Japanese</value>
+  </metadata>
+  <metadata name="backgroundWorker1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
 </root>
