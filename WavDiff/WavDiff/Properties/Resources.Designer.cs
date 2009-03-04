@@ -151,6 +151,15 @@ namespace WavDiff.Properties {
         }
         
         /// <summary>
+        ///   delay={0} ({1}seconds) has the smallest diff {2}. volume ratio={3} に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string SampleDelaySummary {
+            get {
+                return ResourceManager.GetString("SampleDelaySummary", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sample rate is different. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string SampleRateIsDifferent {

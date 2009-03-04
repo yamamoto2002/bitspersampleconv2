@@ -147,6 +147,9 @@
   <data name="ReadWavFileFailed" xml:space="preserve">
     <value>WAVファイル読み込み失敗: {0}</value>
   </data>
+  <data name="SampleDelaySummary" xml:space="preserve">
+    <value>1番目のWAVファイルは2番目のWAVファイルよりも{0}サンプル({1}秒)遅れて曲が始まります。smallestDiff={2}。2つのファイルの音量の比={3}</value>
+  </data>
   <data name="SampleRateIsDifferent" xml:space="preserve">
     <value>2つのファイルはサンプリングレートが異なります。</value>
   </data>

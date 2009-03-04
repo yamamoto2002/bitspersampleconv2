@@ -99,7 +99,7 @@ namespace WavDiff
             }
         }
 
-        const double DELAY_SECONDS_MAX = 0.1;
+        const double DELAY_SECONDS_MAX = 2.0;
 
         private WavData ReadWavFile(string path)
         {
@@ -191,8 +191,8 @@ namespace WavDiff
             delay_return = e.Current.Value.delay;
 
             Console.WriteLine();
-            Console.WriteLine("delay={0} has the smallest diff {1}. volume ratio={2}",
-                delay_return,
+            Console.WriteLine(rm.GetString("SampleDelaySummary"),
+                delay_return, (double)delay_return / samplesPerSecond,
                 (double)e.Current.Key / (samplesPerSecond * DELAY_SECONDS_MAX),
                 w1w2VolumeRatio_return);
             if (w1w2VolumeRatio_return < 0.5 || 2.0 < w1w2VolumeRatio_return) {
