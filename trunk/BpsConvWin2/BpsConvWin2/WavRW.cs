@@ -19,6 +19,7 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace BpsConvWin2
 {
@@ -28,10 +29,31 @@ namespace BpsConvWin2
         public uint   chunkSize;
         public byte[] format;
 
+        public void Create(uint chunkSize)
+        {
+            chunkId = new byte[4];
+            chunkId[0] = (byte)'R';
+            chunkId[1] = (byte)'I';
+            chunkId[2] = (byte)'F';
+            chunkId[3] = (byte)'F';
+
+            Debug.Assert(36 <= chunkSize);
+            this.chunkSize = chunkSize;
+
+            format = new byte[4];
+            format[0] = (byte)'W';
+            format[1] = (byte)'A';
+            format[2] = (byte)'V';
+            format[3] = (byte)'E';
+        }
+
         public bool Read(BinaryReader br)
         {
             chunkId = br.ReadBytes(4);
-            if (chunkId[0] != 'R' || chunkId[1] != 'I' || chunkId[2] != 'F' || chunkId[3] != 'F') {
+            if (chunkId[0] != 'R' ||
+                chunkId[1] != 'I' ||
+                chunkId[2] != 'F' ||
+                chunkId[3] != 'F') {
                 Console.WriteLine("E: RiffChunkDescriptor.chunkId mismatch. \"{0}{1}{2}{3}\" should be \"RIFF\"",
                     (char)chunkId[0], (char)chunkId[1], (char)chunkId[2], (char)chunkId[3]);
                 return false;
@@ -44,7 +66,10 @@ namespace BpsConvWin2
             }
 
             format = br.ReadBytes(4);
-            if (format[0] != 'W' || format[1] != 'A' || format[2] != 'V' || format[3] != 'E') {
+            if (format[0] != 'W' ||
+                format[1] != 'A' ||
+                format[2] != 'V' ||
+                format[3] != 'E') {
                 Console.WriteLine("E: RiffChunkDescriptor.format mismatch. \"{0}{1}{2}{3}\" should be \"WAVE\"",
                     (char)format[0], (char)format[1], (char)format[2], (char)format[3]);
                 return false;
@@ -73,10 +98,31 @@ namespace BpsConvWin2
         public ushort blockAlign;
         public ushort bitsPerSample;
 
+        public void Create(int numChannels, int sampleRate, int bitsPerSample)
+        {
+            subChunk1Id = new byte[4];
+            subChunk1Id[0] = (byte)'f';
+            subChunk1Id[1] = (byte)'m';
+            subChunk1Id[2] = (byte)'t';
+            subChunk1Id[3] = (byte)' ';
+
+            subChunk1Size      = 16;
+            audioFormat        = 1;
+            this.numChannels   = (ushort)numChannels;
+            this.sampleRate    = (uint)sampleRate;
+
+            byteRate           = (uint)(sampleRate * numChannels * bitsPerSample / 8);
+            blockAlign         = (ushort)(numChannels * bitsPerSample / 8);
+            this.bitsPerSample = (ushort)bitsPerSample;
+        }
+
         public bool Read(BinaryReader br)
         {
             subChunk1Id = br.ReadBytes(4);
-            if (subChunk1Id[0] != 'f' || subChunk1Id[1] != 'm' || subChunk1Id[2] != 't' || subChunk1Id[3] != ' ') {
+            if (subChunk1Id[0] != 'f' ||
+                subChunk1Id[1] != 'm' ||
+                subChunk1Id[2] != 't' ||
+                subChunk1Id[3] != ' ') {
                 Console.WriteLine("E: FmtSubChunk.subChunk1Id mismatch. \"{0}{1}{2}{3}\" should be \"fmt \"",
                     (char)subChunk1Id[0], (char)subChunk1Id[1], (char)subChunk1Id[2], (char)subChunk1Id[3]);
                 return false;
@@ -146,10 +192,24 @@ namespace BpsConvWin2
         public byte[] subChunk2Id;
         public uint   subChunk2Size;
 
+        public void Create(uint subChunk2Size)
+        {
+            subChunk2Id = new byte[4];
+            subChunk2Id[0] = (byte)'d';
+            subChunk2Id[1] = (byte)'a';
+            subChunk2Id[2] = (byte)'t';
+            subChunk2Id[3] = (byte)'a';
+
+            this.subChunk2Size = subChunk2Size;
+        }
+
         public bool ReadHeader(BinaryReader br)
         {
             subChunk2Id = br.ReadBytes(4);
-            if (subChunk2Id[0] != 'd' || subChunk2Id[1] != 'a' || subChunk2Id[2] != 't' || subChunk2Id[3] != 'a') {
+            if (subChunk2Id[0] != 'd' ||
+                subChunk2Id[1] != 'a' ||
+                subChunk2Id[2] != 't' ||
+                subChunk2Id[3] != 'a') {
                 Console.WriteLine("E: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\"",
                     (char)subChunk2Id[0], (char)subChunk2Id[1], (char)subChunk2Id[2], (char)subChunk2Id[3]);
                 return false;
