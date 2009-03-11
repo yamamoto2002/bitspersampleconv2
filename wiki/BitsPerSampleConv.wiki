@@ -1,3 +1,5 @@
+#summary WAVファイルの量子化ビット数を減らすプログラムBPSConvWin
+
 BPSConvWinは16bit PCM WAVファイルを読み込み、
 音量を変えずに量子化ビット数を減らし、別ファイルに保存するWindows用アプリケーションです。
 
