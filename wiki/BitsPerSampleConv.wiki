@@ -3,6 +3,17 @@
 BPSConvWinは16bit PCM WAVファイルを読み込み、
 音量を変えずに量子化ビット数を減らし、別ファイルに保存するWindows用アプリケーションです。
 
+=Version 1.1.3 [ディザを加える]機能=
+
+量子化ビット数を減らしたあとにディザを加える機能をつけました。
+暗号通信に使える乱雑さが高い乱数をディザに使用しました。
+(オーオタが喜びそうなキャッチーな説明文ですが、
+実際にはCryptographyクラスの乱数生成器を使用しているだけです)
+
+http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
+
+ディザを加えるとビット数を減らしても音がだいぶ滑らかになります。
+
 =使い方=
 
 まず16bit PCM WAVファイルをCDからripするなどして用意します。
@@ -15,8 +26,6 @@ BPSConvWinは16bit PCM WAVファイルを読み込み、
 これをダブルクリックして実行してください。
 あとは画面の指示に従うと、読み出すWAVファイルと同じフォルダに
 量子化ビット数が1～15ビットに減らされた15個のWAVファイルが作られます。
-
-http://bitspersampleconv2.googlecode.com/files/bpsconvwin.jpg
 
 読み込むWAVファイル自体は読み出しに使用するだけで、書き換えません。
 
