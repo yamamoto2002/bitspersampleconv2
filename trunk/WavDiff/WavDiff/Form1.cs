@@ -28,7 +28,20 @@ namespace WavDiff
     public partial class Form1 : Form
     {
         private System.Resources.ResourceManager rm;
-        
+
+        private double DelaySecondsMax
+        {
+            get { return (double)numericToleranceSeconds.Value; }
+        }
+        private double AccumulateSecondsMax
+        {
+            get { return (double)numericAccumulateSeconds.Value / 10.0; }
+        }
+        private double Magnitude
+        {
+            get { return (double)numericMagnitude.Value / 2.0; }
+        }
+
         private void GuiStatusUpdate()
         {
             if (string.Empty != textBoxRead1.Text &&
@@ -38,7 +51,8 @@ namespace WavDiff
             } else {
                 buttonStart.Enabled = false;
             }
-            labelMagnitude.Text = string.Format(" / 2) = {0}x", (double)numericUpDown1.Value / 2.0);
+            labelMagnitude.Text = string.Format(" / 2) = {0}x", Magnitude);
+            labelAccumulateSeconds.Text = string.Format("/ 10) = {0} seconds", (double)numericAccumulateSeconds.Value / 10.0);
         }
 
         public Form1()
@@ -101,7 +115,6 @@ namespace WavDiff
 
         private WavData ReadWavFile(string path)
         {
-            double DELAY_SECONDS_MAX = (double)numericToleranceSeconds.Value;
             WavData wavData = new WavData();
 
             Console.WriteLine(rm.GetString("ReadFileStarted"), path);
@@ -116,8 +129,8 @@ namespace WavDiff
                     return null;
                 }
 
-                if (wavData.NumSamples < wavData.SampleRate * DELAY_SECONDS_MAX * 2) {
-                    textBoxConsole.Text += string.Format(rm.GetString("WavFileTooShort"), path, DELAY_SECONDS_MAX * 2) + "\r\n";
+                if (wavData.NumSamples < wavData.SampleRate * DelaySecondsMax + AccumulateSecondsMax) {
+                    textBoxConsole.Text += string.Format(rm.GetString("WavFileTooShort"), path, DelaySecondsMax + AccumulateSecondsMax) + "\r\n";
                     return null;
                 }
             }
@@ -139,7 +152,8 @@ namespace WavDiff
          */
         private bool SampleDelay(WavData w1, WavData w2, out int delay_return, out double w1w2VolumeRatio_return)
         {
-            double DELAY_SECONDS_MAX = (double)numericToleranceSeconds.Value;
+            float ACCUMULATE_SECONDS_MAX = (float)AccumulateSecondsMax;
+            float DELAY_SECONDS_MAX      = (float)DelaySecondsMax;
             delay_return = 0;
 
             SortedDictionary<long, VolumeInfo> delayValueAndPos =
@@ -151,7 +165,7 @@ namespace WavDiff
                 VolumeInfo vi = new VolumeInfo();
                 vi.delay = delay;
 
-                for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
+                for (int pos=0; pos < samplesPerSecond * ACCUMULATE_SECONDS_MAX; ++pos) {
                     int w1Value = Math.Abs(w1.Sample16Get(0, pos));
                     int w2Value = Math.Abs(w2.Sample16Get(0, pos + delay));
                     vi.w1Volume += w1Value;
@@ -170,7 +184,7 @@ namespace WavDiff
                 VolumeInfo vi = new VolumeInfo();
                 vi.delay = -delay;
 
-                for (int pos=0; pos < samplesPerSecond * DELAY_SECONDS_MAX; ++pos) {
+                for (int pos=0; pos < samplesPerSecond * ACCUMULATE_SECONDS_MAX; ++pos) {
                     int w1Value = Math.Abs(w1.Sample16Get(0, pos + delay));
                     int w2Value = Math.Abs(w2.Sample16Get(0, pos));
                     vi.w1Volume += w1Value;
@@ -207,7 +221,7 @@ namespace WavDiff
         private void buttonStart_Click(object sender, EventArgs e)
         {
             textBoxConsole.Text += string.Format(rm.GetString("ProcessStarted"),
-                textBoxRead1.Text, textBoxRead2.Text, (double)numericUpDown1.Value/2.0, textBoxWrite.Text) + "\r\n";
+                textBoxRead1.Text, textBoxRead2.Text, Magnitude, textBoxWrite.Text) + "\r\n";
 
             wavRead1 = ReadWavFile(textBoxRead1.Text);
             if (null == wavRead1) {
@@ -264,7 +278,7 @@ namespace WavDiff
             long acc = 0;
             int maxDiff = 0;
 
-            float magnitude = (int)numericUpDown1.Value / 2.0f;
+            float magnitude = (float)Magnitude;
             if (0 <= sampleDelay) {
                 for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
                     PcmSamples1Channel ps = samples[ch];
@@ -350,29 +364,44 @@ namespace WavDiff
             progressBar1.Value = e.ProgressPercentage;
         }
 
-        private void numericUpDown1_ValueChanged(object sender, EventArgs e)
+        private void numericAccumulateSeconds_ValueChanged(object sender, EventArgs e)
         {
             GuiStatusUpdate();
         }
 
-        private void numericUpDown1_KeyPress(object sender, KeyPressEventArgs e)
+        private void numericAccumulateSeconds_KeyDown(object sender, KeyEventArgs e)
         {
             GuiStatusUpdate();
         }
 
-        private void numericUpDown1_KeyUp(object sender, KeyEventArgs e)
+        private void numericAccumulateSeconds_KeyPress(object sender, KeyPressEventArgs e)
         {
             GuiStatusUpdate();
         }
 
-        private void numericUpDown1_KeyDown(object sender, KeyEventArgs e)
+        private void numericAccumulateSeconds_KeyUp(object sender, KeyEventArgs e)
         {
             GuiStatusUpdate();
         }
 
-        private void groupBox2_Enter(object sender, EventArgs e)
+        private void numericMagnitude_KeyDown(object sender, KeyEventArgs e)
         {
+            GuiStatusUpdate();
+        }
 
+        private void numericMagnitude_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void numericMagnitude_KeyUp(object sender, KeyEventArgs e)
+        {
+            GuiStatusUpdate();
+        }
+
+        private void numericMagnitude_ValueChanged(object sender, EventArgs e)
+        {
+            GuiStatusUpdate();
         }
     }
 }
