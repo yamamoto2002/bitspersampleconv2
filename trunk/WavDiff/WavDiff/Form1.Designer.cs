@@ -47,12 +47,18 @@
             this.textBoxWrite = new System.Windows.Forms.TextBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.checkBoxAutoAdjustVolumeDifference = new System.Windows.Forms.CheckBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.numericToleranceSeconds = new System.Windows.Forms.NumericUpDown();
+            this.label2 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericToleranceSeconds)).BeginInit();
             this.SuspendLayout();
             // 
             // buttonStart
@@ -267,6 +273,58 @@
             this.checkBoxAutoAdjustVolumeDifference.Name = "checkBoxAutoAdjustVolumeDifference";
             this.checkBoxAutoAdjustVolumeDifference.UseVisualStyleBackColor = true;
             // 
+            // groupBox6
+            // 
+            this.groupBox6.AccessibleDescription = null;
+            this.groupBox6.AccessibleName = null;
+            resources.ApplyResources(this.groupBox6, "groupBox6");
+            this.groupBox6.BackgroundImage = null;
+            this.groupBox6.Controls.Add(this.label1);
+            this.groupBox6.Controls.Add(this.numericToleranceSeconds);
+            this.groupBox6.Controls.Add(this.label2);
+            this.groupBox6.Font = null;
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.TabStop = false;
+            // 
+            // label1
+            // 
+            this.label1.AccessibleDescription = null;
+            this.label1.AccessibleName = null;
+            resources.ApplyResources(this.label1, "label1");
+            this.label1.Font = null;
+            this.label1.Name = "label1";
+            // 
+            // numericToleranceSeconds
+            // 
+            this.numericToleranceSeconds.AccessibleDescription = null;
+            this.numericToleranceSeconds.AccessibleName = null;
+            resources.ApplyResources(this.numericToleranceSeconds, "numericToleranceSeconds");
+            this.numericToleranceSeconds.Font = null;
+            this.numericToleranceSeconds.Maximum = new decimal(new int[] {
+            10000,
+            0,
+            0,
+            0});
+            this.numericToleranceSeconds.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericToleranceSeconds.Name = "numericToleranceSeconds";
+            this.numericToleranceSeconds.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            // 
+            // label2
+            // 
+            this.label2.AccessibleDescription = null;
+            this.label2.AccessibleName = null;
+            resources.ApplyResources(this.label2, "label2");
+            this.label2.Font = null;
+            this.label2.Name = "label2";
+            // 
             // Form1
             // 
             this.AccessibleDescription = null;
@@ -274,6 +332,7 @@
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = null;
+            this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -296,6 +355,9 @@
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            this.groupBox6.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericToleranceSeconds)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -322,6 +384,10 @@
         private System.Windows.Forms.TextBox textBoxWrite;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.CheckBox checkBoxAutoAdjustVolumeDifference;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.NumericUpDown numericToleranceSeconds;
+        private System.Windows.Forms.Label label2;
     }
 }
 

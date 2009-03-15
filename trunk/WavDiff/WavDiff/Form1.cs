@@ -99,10 +99,9 @@ namespace WavDiff
             }
         }
 
-        const double DELAY_SECONDS_MAX = 2.0;
-
         private WavData ReadWavFile(string path)
         {
+            double DELAY_SECONDS_MAX = (double)numericToleranceSeconds.Value;
             WavData wavData = new WavData();
 
             Console.WriteLine(rm.GetString("ReadFileStarted"), path);
@@ -140,6 +139,7 @@ namespace WavDiff
          */
         private bool SampleDelay(WavData w1, WavData w2, out int delay_return, out double w1w2VolumeRatio_return)
         {
+            double DELAY_SECONDS_MAX = (double)numericToleranceSeconds.Value;
             delay_return = 0;
 
             SortedDictionary<long, VolumeInfo> delayValueAndPos =
