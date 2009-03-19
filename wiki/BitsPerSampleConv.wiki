@@ -9,7 +9,9 @@ BPSConvWinは16bit PCM WAVファイルを読み込み、
 暗号通信に使えるほど乱雑さ(randomness)が高い乱数をディザに使用しました。
 (オーオタが喜びそうなキャッチーな説明文ですが、
 実際には.Net Frameworkに備わっているCryptographyクラスの
-乱数生成器の関数を呼び出しているだけです)
+乱数生成器の関数を呼び出しているだけです。このあたりで呼んでいます↓
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/BpsConvWin/BpsConvWin/BpsConv.cs#171
 
 http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
 
