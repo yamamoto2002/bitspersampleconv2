@@ -35,8 +35,11 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.buttonConvStart = new System.Windows.Forms.Button();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.checkBoxAddDither = new System.Windows.Forms.CheckBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // buttonReadFile
@@ -109,6 +112,27 @@
             this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
             this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.AccessibleDescription = null;
+            this.groupBox3.AccessibleName = null;
+            resources.ApplyResources(this.groupBox3, "groupBox3");
+            this.groupBox3.BackgroundImage = null;
+            this.groupBox3.Controls.Add(this.checkBoxAddDither);
+            this.groupBox3.Font = null;
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.TabStop = false;
+            // 
+            // checkBoxAddDither
+            // 
+            this.checkBoxAddDither.AccessibleDescription = null;
+            this.checkBoxAddDither.AccessibleName = null;
+            resources.ApplyResources(this.checkBoxAddDither, "checkBoxAddDither");
+            this.checkBoxAddDither.BackgroundImage = null;
+            this.checkBoxAddDither.Font = null;
+            this.checkBoxAddDither.Name = "checkBoxAddDither";
+            this.checkBoxAddDither.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AccessibleDescription = null;
@@ -116,6 +140,7 @@
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = null;
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.buttonConvStart);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
@@ -126,6 +151,8 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -139,6 +166,8 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button buttonConvStart;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.CheckBox checkBoxAddDither;
     }
 }
 
