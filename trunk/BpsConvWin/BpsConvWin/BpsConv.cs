@@ -18,6 +18,7 @@
 */
 using System;
 using System.IO;
+using System.Security.Cryptography;
 
 namespace BpsConvWin
 {
@@ -167,14 +168,22 @@ namespace BpsConvWin
             return true;
         }
 
-        public bool ReduceBitsPerSample(int newBitsPerSample)
+        public bool ReduceBitsPerSample(int newBitsPerSample, bool addDither)
         {
             ushort mask = (ushort)(0xffff & (0xffff << (16 - newBitsPerSample)));
+            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
+            byte[] randomNumber = new byte[2];
+
             Console.WriteLine("D: mask={0:X}", mask);
 
             for (int i=0; i < data.Length / 2; ++i) {
                 ushort sample = (ushort)(data[i * 2] + (data[i * 2 + 1] << 8));
                 sample &= mask;
+                if (addDither) {
+                    gen.GetBytes(randomNumber);
+                    ushort randDither = (ushort)((ushort)((randomNumber[0] << 8) + randomNumber[1]) & (ushort)(~mask));
+                    sample += randDither;
+                }
                 data[i * 2]     = (byte)(0xff & sample);
                 data[i * 2 + 1] = (byte)(0xff & (sample>>8));
             }
@@ -197,7 +206,7 @@ namespace BpsConvWin
         {
         }
 
-        public static bool Convert(BinaryReader br, BinaryWriter bw, int newQuantizationBitrate)
+        public static bool Convert(BinaryReader br, BinaryWriter bw, int newQuantizationBitrate, bool addDither)
         {
             RiffChunkDescriptor rcd = new RiffChunkDescriptor();
             if (!rcd.Read(br)) {
@@ -214,7 +223,7 @@ namespace BpsConvWin
                 return false;
             }
 
-            if (!dsc.ReduceBitsPerSample(newQuantizationBitrate)) {
+            if (!dsc.ReduceBitsPerSample(newQuantizationBitrate, addDither)) {
                 return false;
             }
 

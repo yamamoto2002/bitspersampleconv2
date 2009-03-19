@@ -123,7 +123,7 @@ namespace BpsConvWin
             try {
                 using (BinaryReader br = new BinaryReader(File.Open(a.readFileName, FileMode.Open))) {
                     using (BinaryWriter bw = new BinaryWriter(File.Open(a.writeFileName, FileMode.CreateNew))) {
-                        if (!BpsConv.Convert(br, bw, a.newBitsPerSample)) {
+                        if (!BpsConv.Convert(br, bw, a.newBitsPerSample, checkBoxAddDither.Checked)) {
                             e.Result = rm.GetString("ConvFailedByWrongFormat");
                             return;
                         }
