@@ -1,4 +1,4 @@
-#summary 全く同じ曲の2つのWAVファイルの演奏開始時間と終了時間を合わせるWavSynchro
+#summary 全く同じ曲の2つのWAVファイルの演奏開始時間と終了時間を合わせるプログラムWavSynchro
 
 = 説明 =
 
