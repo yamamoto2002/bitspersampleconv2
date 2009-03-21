@@ -42,4 +42,5 @@ gnuplot> quit
 = ソースコードの入手方法 =
 
 上のほうのSourceのところから入手します。
-Browseで閲覧することも出来ます。
+Browseで閲覧することも出来ます。このあたりです
+http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/Wav2Gnuplot/Wav2Gnuplot
