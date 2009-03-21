@@ -34,3 +34,7 @@ gnuplot> set output "output2.png"
 gnuplot> plot "11.wav.dat" with lines, "22.wav.dat" with lines, "33.wav.dat" with lines
 gnuplot> quit
 }}}
+
+= アンインストール方法 =
+
+コントロールパネルの[プログラムの追加と削除]から削除します。
