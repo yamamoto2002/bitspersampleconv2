@@ -206,7 +206,6 @@ namespace WavSynchro
             long acc = 0;
             int maxDiff = 0;
 
-            float magnitude = 1.0f;
             if (0 <= sampleDelay) {
                 for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
                     PcmSamples1Channel ps1 = samples1[ch];
@@ -232,7 +231,7 @@ namespace WavSynchro
                     PcmSamples1Channel ps2 = samples2[ch];
                     for (int sample=0; sample < numSamples; ++sample) {
                         int diff = (int)(wavRead1.Sample16Get(ch, sample - sampleDelay)
-                                       - wavRead2.Sample16Get(ch, sample) * w1w2VolumeRatio);
+                                       - wavRead2.Sample16Get(ch, sample));
 
                         int absDiff = Math.Abs(diff);
                         acc += absDiff;
@@ -241,7 +240,7 @@ namespace WavSynchro
                         }
 
                         ps1.Set16(sample, wavRead1.Sample16Get(ch, sample - sampleDelay));
-                        ps2.Set16(sample, wavRead1.Sample16Get(ch, sample));
+                        ps2.Set16(sample, wavRead2.Sample16Get(ch, sample));
                     }
                 }
             }
