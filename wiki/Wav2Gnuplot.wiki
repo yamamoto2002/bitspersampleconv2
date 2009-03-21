@@ -11,3 +11,25 @@ Gnuplotで複数のWAVファイルの出力を1個のグラフにプロットす
 
 上のほうのDownloadsタブを押して、Wav2GnuplotSetupYYYYMMDD.msiをダウンロードしてインストールします。
 あとは画面の指示に従って読み込むWAVファイルの名前を指定します。
+http://bitspersampleconv2.googlecode.com/files/Wav2Gnuplot.jpg
+
+2つのWAVを比較するときは、まずWavSynchroで演奏開始時間を合わせたWAVファイルを作り、
+これを1つ1つWav2Gnuplotに読み込ませ、Gnuplot用データを作成します。
+
+そしてGnuplotを起動し、以下のようにコマンドを入力します。
+(11.wav.dat、22.wav.datがWav2Gnuplotで出力したデータとする。)
+
+{{{
+gnuplot> set terminal png small color picsize 3040 2560
+gnuplot> set output "output2.png"
+gnuplot> plot "11.wav.dat" with lines, "22.wav.dat" with lines
+gnuplot> quit
+}}}
+
+3つのWAVファイルのサンプルデータをプロットするには、以下のようにします。
+{{{
+gnuplot> set terminal png small color picsize 3040 2560
+gnuplot> set output "output2.png"
+gnuplot> plot "11.wav.dat" with lines, "22.wav.dat" with lines, "33.wav.dat" with lines
+gnuplot> quit
+}}}
