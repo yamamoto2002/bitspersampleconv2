@@ -1,6 +1,7 @@
-#labels Featured
 #全く同じ曲の2つのWAVファイルの演奏開始時間と終了時間を合わせるWavSynchro
 
 = 説明 =
 
 WavSynchroは全く同じ曲の2つのWAVファイルの演奏開始時間と終了時間を合わせるツールです。
+
+http://bitspersampleconv2.googlecode.com/files/WavSynchro.jpg
