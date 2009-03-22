@@ -89,7 +89,7 @@ namespace Wav2Gnuplot
             textBoxConsole.Clear();
 
             textBoxConsole.Text += string.Format(rm.GetString("ProcessStarted"),
-                textBoxReadWavFile.Text, textBoxWriteFile) + "\r\n";
+                textBoxReadWavFile.Text, textBoxWriteFile.Text) + "\r\n";
             backgroundWorker1.RunWorkerAsync();
             buttonStart.Enabled = false;
         }
