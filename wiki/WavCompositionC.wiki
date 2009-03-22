@@ -35,3 +35,8 @@
 = アンインストール方法 =
 
 持ってきたexeファイルを削除します。
+
+= ソースコード =
+
+これです。
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WavCompositionC/WavCompositionC/Program.cs
