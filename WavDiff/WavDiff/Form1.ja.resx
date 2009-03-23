@@ -132,6 +132,13 @@
   <data name="groupBox2.Text" xml:space="preserve">
     <value>読み込むWAVファイル2</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="labelMagnitude.Size" type="System.Drawing.Size, System.Drawing">
+    <value>17, 12</value>
+  </data>
+  <data name="labelMagnitude.Text" xml:space="preserve">
+    <value>倍</value>
+  </data>
   <data name="groupBox3.Text" xml:space="preserve">
     <value>音量を上げる</value>
   </data>
@@ -141,7 +148,6 @@
   <data name="groupBox4.Text" xml:space="preserve">
     <value>出力WAVファイル</value>
   </data>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="checkBoxAutoAdjustVolumeDifference.Size" type="System.Drawing.Size, System.Drawing">
     <value>152, 16</value>
   </data>
@@ -160,8 +166,14 @@
   <data name="groupBox6.Text" xml:space="preserve">
     <value>開始時間ずれ最大許容秒数</value>
   </data>
-  <data name="label4.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="labelAccumulateSeconds.Location" type="System.Drawing.Point, System.Drawing">
     <value>87, 15</value>
+  </data>
+  <data name="labelAccumulateSeconds.Size" type="System.Drawing.Size, System.Drawing">
+    <value>17, 12</value>
+  </data>
+  <data name="labelAccumulateSeconds.Text" xml:space="preserve">
+    <value>秒</value>
   </data>
   <data name="numericAccumulateSeconds.Size" type="System.Drawing.Size, System.Drawing">
     <value>60, 19</value>
