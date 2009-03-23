@@ -35,11 +35,11 @@ namespace WavDiff
         }
         private double AccumulateSecondsMax
         {
-            get { return (double)numericAccumulateSeconds.Value / 10.0; }
+            get { return (double)numericAccumulateSeconds.Value; }
         }
         private double Magnitude
         {
-            get { return (double)numericMagnitude.Value / 2.0; }
+            get { return (double)numericMagnitude.Value; }
         }
 
         private void GuiStatusUpdate()
@@ -51,8 +51,6 @@ namespace WavDiff
             } else {
                 buttonStart.Enabled = false;
             }
-            labelMagnitude.Text = string.Format(" / 2) = {0}x", Magnitude);
-            labelAccumulateSeconds.Text = string.Format("/ 10) = {0} seconds", (double)numericAccumulateSeconds.Value / 10.0);
         }
 
         public Form1()

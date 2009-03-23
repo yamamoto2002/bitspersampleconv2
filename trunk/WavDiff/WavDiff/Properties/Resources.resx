@@ -159,6 +159,9 @@
   <data name="TwoWavFilesTooDifferent" xml:space="preserve">
     <value>two wave files are too different to continue processing</value>
   </data>
+  <data name="WavFileFilter" xml:space="preserve">
+    <value>WAV files (*.wav)|*.wav</value>
+  </data>
   <data name="WavFileTooShort" xml:space="preserve">
     <value>WAV file is too short must be longer than {1} seconds: {0}</value>
   </data>
