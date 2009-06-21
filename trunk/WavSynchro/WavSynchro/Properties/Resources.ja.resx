@@ -124,7 +124,7 @@
     <value>メインウィンドウがこのコンソールの裏に隠れているかもしれません。</value>
   </data>
   <data name="DiffStatistics" xml:space="preserve">
-    <value>平均サンプルあたりサンプル値の差={0}. 最大サンプル値の差={1}.</value>
+    <value>平均サンプルあたりサンプル値の差={0}. 最大サンプル値の差={1}. 最大サンプル値のサンプル位置{2} {3}秒目.</value>
   </data>
   <data name="Introduction" xml:space="preserve">
     <value>読み込むWAVファイルを指定してください。</value>
