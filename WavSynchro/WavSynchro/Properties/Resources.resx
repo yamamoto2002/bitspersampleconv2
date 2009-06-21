@@ -124,7 +124,7 @@
     <value>Main window may be occulted by this console window...</value>
   </data>
   <data name="DiffStatistics" xml:space="preserve">
-    <value>average diff per sample={0}. max diff={1}.</value>
+    <value>average diff per sample={0}. max diff={1}. maxDiffPos={2} {3}sec.</value>
   </data>
   <data name="Introduction" xml:space="preserve">
     <value>Please specify wave file pathes to input.</value>
