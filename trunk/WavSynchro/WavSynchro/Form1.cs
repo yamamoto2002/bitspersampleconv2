@@ -206,6 +206,7 @@ namespace WavSynchro
             long acc = 0;
             int maxDiff = 0;
             int maxDiffPos = 0;
+            double maxDiffRatio = 0;
 
             if (0 <= sampleDelay) {
                 for (int ch=0; ch < wavRead1.NumChannels; ++ch) {
@@ -219,6 +220,8 @@ namespace WavSynchro
                         acc += absDiff;
                         if (maxDiff < absDiff) {
                             maxDiff = absDiff;
+                            maxDiffRatio = (double)wavRead1.Sample16Get(ch, sample) /
+                                            wavRead2.Sample16Get(ch, sample + sampleDelay);
                             maxDiffPos = sample;
                         }
 
@@ -239,6 +242,8 @@ namespace WavSynchro
                         acc += absDiff;
                         if (maxDiff < absDiff) {
                             maxDiff = absDiff;
+                            maxDiffRatio = (double)wavRead1.Sample16Get(ch, sample) /
+                                            wavRead2.Sample16Get(ch, sample + sampleDelay);
                             maxDiffPos = sample;
                         }
 
@@ -257,7 +262,7 @@ namespace WavSynchro
             if (0 < maxDiff) {
                 int maxMagnitude = 32767 / maxDiff;
                 resultString = string.Format(rm.GetString("DiffStatistics"),
-                    (double)acc / numSamples, maxDiff, maxDiffPos, (double)maxDiffPos/wavRead1.SampleRate);
+                    (double)acc / numSamples, maxDiff, maxDiffPos, (double)maxDiffPos/wavRead1.SampleRate, 20.0 * System.Math.Log10(maxDiffRatio));
                 Console.WriteLine(resultString);
             }
 

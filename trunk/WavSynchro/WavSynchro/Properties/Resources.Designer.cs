@@ -79,7 +79,7 @@ namespace WavSynchro.Properties {
         }
         
         /// <summary>
-        ///   average diff per sample={0}. max diff={1}. maxDiffPos={2} {3}sec. に類似しているローカライズされた文字列を検索します。
+        ///   average diff per sample={0}. max diff={1} {4}dB. maxDiffPos={2} {3}sec. に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string DiffStatistics {
             get {
