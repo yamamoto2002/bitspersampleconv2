@@ -46,31 +46,30 @@
             // 
             // pictureBoxSource
             // 
-            this.pictureBoxSource.Location = new System.Drawing.Point(16, 14);
-            this.pictureBoxSource.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBoxSource.Location = new System.Drawing.Point(12, 12);
             this.pictureBoxSource.Name = "pictureBoxSource";
-            this.pictureBoxSource.Size = new System.Drawing.Size(683, 321);
+            this.pictureBoxSource.Size = new System.Drawing.Size(512, 278);
             this.pictureBoxSource.TabIndex = 0;
             this.pictureBoxSource.TabStop = false;
             this.pictureBoxSource.MouseLeave += new System.EventHandler(this.pictureBoxSource_MouseLeave);
             this.pictureBoxSource.MouseMove += new System.Windows.Forms.MouseEventHandler(this.pictureBoxSource_MouseMove);
+            this.pictureBoxSource.MouseDown += new System.Windows.Forms.MouseEventHandler(this.pictureBoxSource_MouseDown);
+            this.pictureBoxSource.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBoxSource_MouseUp);
             this.pictureBoxSource.MouseEnter += new System.EventHandler(this.pictureBoxSource_MouseEnter);
             // 
             // pictureBoxDWTed
             // 
-            this.pictureBoxDWTed.Location = new System.Drawing.Point(16, 349);
-            this.pictureBoxDWTed.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBoxDWTed.Location = new System.Drawing.Point(12, 302);
             this.pictureBoxDWTed.Name = "pictureBoxDWTed";
-            this.pictureBoxDWTed.Size = new System.Drawing.Size(683, 160);
+            this.pictureBoxDWTed.Size = new System.Drawing.Size(512, 139);
             this.pictureBoxDWTed.TabIndex = 1;
             this.pictureBoxDWTed.TabStop = false;
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(16, 516);
-            this.buttonSave.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonSave.Location = new System.Drawing.Point(12, 447);
             this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(100, 26);
+            this.buttonSave.Size = new System.Drawing.Size(75, 23);
             this.buttonSave.TabIndex = 2;
             this.buttonSave.Text = "&SAVE";
             this.buttonSave.UseVisualStyleBackColor = true;
@@ -78,10 +77,9 @@
             // 
             // buttonLoad
             // 
-            this.buttonLoad.Location = new System.Drawing.Point(124, 516);
-            this.buttonLoad.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.buttonLoad.Location = new System.Drawing.Point(93, 447);
             this.buttonLoad.Name = "buttonLoad";
-            this.buttonLoad.Size = new System.Drawing.Size(100, 26);
+            this.buttonLoad.Size = new System.Drawing.Size(75, 23);
             this.buttonLoad.TabIndex = 3;
             this.buttonLoad.Text = "&LOAD";
             this.buttonLoad.UseVisualStyleBackColor = true;
@@ -89,11 +87,10 @@
             // 
             // trackBar1
             // 
-            this.trackBar1.Location = new System.Drawing.Point(232, 515);
-            this.trackBar1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.trackBar1.Location = new System.Drawing.Point(174, 446);
             this.trackBar1.Maximum = 8;
             this.trackBar1.Name = "trackBar1";
-            this.trackBar1.Size = new System.Drawing.Size(329, 53);
+            this.trackBar1.Size = new System.Drawing.Size(247, 42);
             this.trackBar1.TabIndex = 5;
             this.trackBar1.Value = 2;
             this.trackBar1.Scroll += new System.EventHandler(this.trackBar1_Scroll);
@@ -101,10 +98,9 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(584, 527);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(438, 457);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(43, 15);
+            this.label1.Size = new System.Drawing.Size(35, 13);
             this.label1.TabIndex = 6;
             this.label1.Text = "label1";
             // 
@@ -116,10 +112,11 @@
             // 
             // trackBar2
             // 
-            this.trackBar2.Location = new System.Drawing.Point(16, 592);
+            this.trackBar2.Location = new System.Drawing.Point(12, 513);
+            this.trackBar2.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
             this.trackBar2.Maximum = 127;
             this.trackBar2.Name = "trackBar2";
-            this.trackBar2.Size = new System.Drawing.Size(256, 53);
+            this.trackBar2.Size = new System.Drawing.Size(192, 42);
             this.trackBar2.TabIndex = 7;
             this.trackBar2.TickFrequency = 16;
             this.trackBar2.Scroll += new System.EventHandler(this.trackBar2_Scroll);
@@ -127,17 +124,18 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(278, 603);
+            this.label2.Location = new System.Drawing.Point(208, 523);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(43, 15);
+            this.label2.Size = new System.Drawing.Size(35, 13);
             this.label2.TabIndex = 8;
             this.label2.Text = "label2";
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(719, 657);
+            this.ClientSize = new System.Drawing.Size(539, 569);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.trackBar2);
             this.Controls.Add(this.label1);
@@ -146,7 +144,6 @@
             this.Controls.Add(this.buttonSave);
             this.Controls.Add(this.pictureBoxDWTed);
             this.Controls.Add(this.pictureBoxSource);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.Text = "DWT";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxSource)).EndInit();
