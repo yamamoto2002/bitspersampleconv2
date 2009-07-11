@@ -33,13 +33,14 @@ namespace DWT1
         private const string SIGNAL_FILENAME = "sourceSignal.txt";
         private float[] sourceSignal = null;
         private int offset = 0;
+        private const int OFFSET_MAX_PLUS_1 = 128;
 
         private void PrepareSourceData()
         {
-            sourceSignal = new float[SRC_W];
+            sourceSignal = new float[SRC_W + OFFSET_MAX_PLUS_1];
             for (int x = 0; x < SRC_W; ++x)
             {
-                sourceSignal[x] = (float)Math.Sin(x * 0.04f);
+                sourceSignal[x] = (float)Math.Sin(x * 0.08f);
             }
         }
 
@@ -71,7 +72,7 @@ namespace DWT1
                         return false;
                     }
 
-                    sourceSignal = new float[SRC_W];
+                    sourceSignal = new float[SRC_W + OFFSET_MAX_PLUS_1];
                     int length = System.Int32.Parse(sr.ReadLine().Trim());
                     if (SRC_W < length)
                     {
@@ -99,18 +100,13 @@ namespace DWT1
 
         private Point prevXY;
 
-        private void pictureBoxSource_MouseEnter(object sender, EventArgs e)
-        {
-            prevXY = new Point(-1, -1);
-        }
-
         private void pictureBoxSource_MouseMove(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.None)
             {
                 return;
             }
-            if (e.X < 0 || SRC_W <= e.X ||
+            if (e.X < 0 || sourceSignal.Length <= e.X + offset ||
                 e.Y < 0 || SRC_H <= e.Y)
             {
                 return;
@@ -118,16 +114,16 @@ namespace DWT1
 
             if (prevXY.X < 0)
             {
-                prevXY = new Point(e.X, e.Y);
+                prevXY = new Point(e.X+offset, e.Y);
                 return;
             }
 
             Point from = new Point(prevXY.X, prevXY.Y);
-            Point to = new Point(e.X, e.Y);
+            Point to = new Point(e.X+offset, e.Y);
             float katamuki = 0;
-            if (e.X < prevXY.X)
+            if (e.X+offset < prevXY.X)
             {
-                from = new Point(e.X, e.Y);
+                from = new Point(e.X+offset, e.Y);
                 to = new Point(prevXY.X, prevXY.Y);
             }
 
@@ -142,13 +138,28 @@ namespace DWT1
                 float y = (float)from.Y + katamuki * i;
                 sourceSignal[x] = (SRC_HALF_H - y) / SRC_HALF_H;
             }
-            prevXY = new Point(e.X, e.Y);
+            prevXY = new Point(e.X+offset, e.Y);
             UpdateGui();
+        }
+
+        private void pictureBoxSource_MouseEnter(object sender, EventArgs e)
+        {
+            prevXY = new Point(-1, -1);
+        }
+
+        private void pictureBoxSource_MouseUp(object sender, MouseEventArgs e)
+        {
+            prevXY = new Point(-1, -1);
         }
 
         private void pictureBoxSource_MouseLeave(object sender, EventArgs e)
         {
             prevXY = new Point(-1, -1);
+        }
+
+        private void pictureBoxSource_MouseDown(object sender, MouseEventArgs e)
+        {
+            prevXY = new Point(e.X+offset, e.Y);
         }
 
         private void buttonSave_Click(object sender, EventArgs e)
@@ -168,12 +179,12 @@ namespace DWT1
             Graphics g = Graphics.FromImage(bmp);
             g.FillRectangle(new SolidBrush(Color.FromArgb(0xff, 0xff, 0xff, 0xff)), 0, 0, SRC_W, SRC_H);
 
-            PointF[] points = new PointF[(sourceSignal.Length - 1) * 2];
+            PointF[] points = new PointF[(SRC_W - 1) * 2];
 
-            for (int x = 0; x < sourceSignal.Length - 1; ++x)
+            for (int x = 0; x < SRC_W - 1; ++x)
             {
-                points[x * 2] = new PointF(x, -sourceSignal[x] * SRC_HALF_H + SRC_HALF_H);
-                points[x * 2 + 1] = new PointF(x + 1, -sourceSignal[x + 1] * SRC_HALF_H + SRC_HALF_H);
+                points[x * 2] = new PointF(x, -sourceSignal[x + offset] * SRC_HALF_H + SRC_HALF_H);
+                points[x * 2 + 1] = new PointF(x + 1, -sourceSignal[x + offset + 1] * SRC_HALF_H + SRC_HALF_H);
             }
             g.DrawLines(new Pen(Color.Black), points);
 
@@ -192,21 +203,21 @@ namespace DWT1
             Graphics g = Graphics.FromImage(bmp);
             g.FillRectangle(new SolidBrush(Color.FromArgb(0xff, 0, 0, 0)), 0, 0, SRC_W, DWT_H);
 
-            RectangleF[] rects = new RectangleF[sourceSignal.Length * 3];
-            float[] dwtData = new float[sourceSignal.Length*9];
-            sourceSignal.CopyTo(dwtData, 0);
+            RectangleF[] rects = new RectangleF[SRC_W * 3];
+            float[] dwtData = new float[SRC_W * 9];
+            Array.Copy(sourceSignal, offset, dwtData, 0, SRC_W);
 
             Color[] colors = new Color[sourceSignal.Length * 3];
 
             int readColumn = 0;
-            int writeColumn = sourceSignal.Length;
+            int writeColumn = SRC_W;
             float y = 0;
             float h = 16.0f;
             int posR = 0;
 
-            for (int j = sourceSignal.Length / 2; 2 <= j; j /= 2)
+            for (int j = SRC_W / 2; 2 <= j; j /= 2)
             {
-                float w = sourceSignal.Length / j;
+                float w = SRC_W / j;
 
                 for (int i = 0; i < j; ++i)
                 {
@@ -224,13 +235,13 @@ namespace DWT1
                     colors[posR++] = Color.FromArgb(b, 0, r);
                 }
 
-                for (int i = j * 2; i < sourceSignal.Length; ++i)
+                for (int i = j * 2; i < SRC_W; ++i)
                 {
-                    dwtData[writeColumn + i] = dwtData[writeColumn - sourceSignal.Length + i];
+                    dwtData[writeColumn + i] = dwtData[writeColumn - SRC_W + i];
                 }
 
-                readColumn += sourceSignal.Length;
-                writeColumn += sourceSignal.Length;
+                readColumn += SRC_W;
+                writeColumn += SRC_W;
                 y += h;
             }
 
@@ -269,5 +280,6 @@ namespace DWT1
             TrackbarOffsetUpdated();
             UpdateGui();
         }
+
     }
 }
