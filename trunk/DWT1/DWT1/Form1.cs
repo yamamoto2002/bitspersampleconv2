@@ -26,21 +26,25 @@ namespace DWT1
             UpdateGui();
         }
 
-        private const int SRC_W = 512;
+        private const int SRC_W = 1024;
+        private const int SRC_LOG2_W = 10;
         private const int SRC_H = 257;
         private const int DWT_H = 256;
         private const int SRC_HALF_H = 128;
         private const string SIGNAL_FILENAME = "sourceSignal.txt";
         private float[] sourceSignal = null;
+        private float[] dwtData = null;
+        private float[] processedSignal = null;
         private int offset = 0;
         private const int OFFSET_MAX_PLUS_1 = 128;
+        private int magnitude = 256;
 
         private void PrepareSourceData()
         {
             sourceSignal = new float[SRC_W + OFFSET_MAX_PLUS_1];
             for (int x = 0; x < SRC_W; ++x)
             {
-                sourceSignal[x] = (float)Math.Sin(x * 0.08f);
+                sourceSignal[x] = 0.5f * (float)Math.Sin(x * 0.08f);
             }
         }
 
@@ -94,8 +98,10 @@ namespace DWT1
 
         private void UpdateGui()
         {
-            UpdatePictureBoxSource();
             UpdateDwt();
+            Effect();
+            UpdateIdwt();
+            UpdatePictureBoxSource();
         }
 
         private Point prevXY;
@@ -188,14 +194,19 @@ namespace DWT1
             }
             g.DrawLines(new Pen(Color.Black), points);
 
+            for (int x = 0; x < SRC_W - 1; ++x)
+            {
+                points[x * 2] = new PointF(x, -dwtData[x ] * SRC_HALF_H + SRC_HALF_H);
+                points[x * 2 + 1] = new PointF(x + 1, -dwtData[x + 1] * SRC_HALF_H + SRC_HALF_H);
+            }
+            g.DrawLines(new Pen(Color.Red), points);
+
             if (null != pictureBoxSource.Image)
             {
                 pictureBoxSource.Image.Dispose();
             }
             pictureBoxSource.Image = bmp;
         }
-
-        private int magnitude = 256;
 
         private void UpdateDwt()
         {
@@ -204,27 +215,27 @@ namespace DWT1
             g.FillRectangle(new SolidBrush(Color.FromArgb(0xff, 0, 0, 0)), 0, 0, SRC_W, DWT_H);
 
             RectangleF[] rects = new RectangleF[SRC_W * 3];
-            float[] dwtData = new float[SRC_W * 9];
+            dwtData = new float[SRC_W * 11];
             Array.Copy(sourceSignal, offset, dwtData, 0, SRC_W);
 
             Color[] colors = new Color[sourceSignal.Length * 3];
 
-            int readColumn = 0;
-            int writeColumn = SRC_W;
+            int readPos = 0;
+            int writePos = SRC_W;
             float y = 0;
-            float h = 16.0f;
+            float h = 8.0f;
             int posR = 0;
 
-            for (int j = SRC_W / 2; 2 <= j; j /= 2)
+            for (int j = SRC_W / 2; 1 <= j; j /= 2)
             {
                 float w = SRC_W / j;
 
                 for (int i = 0; i < j; ++i)
                 {
-                    float a = (dwtData[readColumn + i * 2] + dwtData[readColumn + i * 2 + 1]) * 0.5f;
-                    float d = dwtData[readColumn + i * 2] - a;
-                    dwtData[writeColumn + i] = a;
-                    dwtData[writeColumn + j + i] = d;
+                    float a = (dwtData[readPos + i * 2] + dwtData[readPos + i * 2 + 1]) * 0.5f;
+                    float d = dwtData[readPos + i * 2] - a;
+                    dwtData[writePos + i] = a;
+                    dwtData[writePos + j + i] = d;
 
                     rects[posR] = new RectangleF(i * w, y, w, h);
 
@@ -237,11 +248,11 @@ namespace DWT1
 
                 for (int i = j * 2; i < SRC_W; ++i)
                 {
-                    dwtData[writeColumn + i] = dwtData[writeColumn - SRC_W + i];
+                    dwtData[writePos + i] = dwtData[writePos - SRC_W + i];
                 }
 
-                readColumn += SRC_W;
-                writeColumn += SRC_W;
+                readPos += SRC_W;
+                writePos += SRC_W;
                 y += h;
             }
 
@@ -255,6 +266,53 @@ namespace DWT1
                 pictureBoxDWTed.Image.Dispose();
             }
             pictureBoxDWTed.Image = bmp;
+        }
+
+        private void UpdateIdwt()
+        {
+            int readAPos = SRC_W*(SRC_LOG2_W);
+            int writePos = readAPos - SRC_W;
+            for (int j = 1; j < SRC_W; j *= 2)
+            {
+                int readDPos = readAPos + j;
+                for (int i = 0; i < j; ++i)
+                {
+                    float a = dwtData[readAPos +i];
+                    float d = dwtData[readDPos +i];
+                    dwtData[writePos +i*2  ] = a + d;
+                    dwtData[writePos +i*2+1] = a - d;
+                }
+                readAPos -= SRC_W;
+                writePos -= SRC_W;
+            }
+        }
+
+        private void Effect()
+        {
+            int readPos = SRC_W * (SRC_LOG2_W);
+            for (int j = 1; j < SRC_W; j *= 2)
+            {
+                int lastMagPos = -8;
+                int readDPos = readPos + j;
+                for (int i = 0; i < j - 4; ++i)
+                {
+                    float d0 = dwtData[readDPos + i];
+                    float d1 = dwtData[readDPos + i+1];
+                    float d2 = dwtData[readDPos + i+2];
+                    float d3 = dwtData[readDPos + i+3];
+                    float valueAbs = Math.Abs(d0 - d1 + d2 - d3);
+                    if (d0 * d1 < 0 && d2 * d3 < 0 && d0 * d2 > 0)
+                    {
+                        if (lastMagPos + 8 < i && 0.05f < valueAbs)
+                        {
+                            dwtData[readDPos + i] *= 2.0f;
+                            dwtData[readDPos + i + 1] *= 2.0f;
+                            lastMagPos = i;
+                        }
+                    }
+                }
+                readPos -= SRC_W;
+            }
         }
 
         private void TrackbarMagnitudeUpdated()
