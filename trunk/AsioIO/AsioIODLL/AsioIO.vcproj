@@ -175,10 +175,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AsioDriverLoad.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\asiodrivers.cpp"
 				>
 			</File>
@@ -188,6 +184,10 @@
 			</File>
 			<File
 				RelativePath=".\asiolist.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\AsioWrap.cpp"
 				>
 			</File>
 			<File
@@ -223,15 +223,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\AsioDriverLoad.h"
-				>
-			</File>
-			<File
 				RelativePath=".\asiodrivers.h"
 				>
 			</File>
 			<File
 				RelativePath=".\asiolist.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AsioWrap.h"
 				>
 			</File>
 			<File

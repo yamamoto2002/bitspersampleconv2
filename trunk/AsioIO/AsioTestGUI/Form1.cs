@@ -24,10 +24,15 @@ namespace AsioTestGUI
                 listBoxDrivers.SelectedIndex = 0;
                 buttonLoadDriver.Enabled = true;
             }
+
+            if (1 == AsioFromCS.DriverNumGet()) {
+                buttonLoadDriver_Click(null, null);
+            }
         }
 
         public void FinalizeAll()
         {
+            AsioFromCS.Unsetup();
             AsioFromCS.DriverUnload();
         }
 
@@ -39,7 +44,29 @@ namespace AsioTestGUI
                 return;
             }
 
+            int rv = AsioFromCS.Setup(96000);
+            if (0 != rv) {
+                MessageBox.Show(string.Format("AsioFromCS.Setup(96000) failed {0:X8}", rv));
+                return;
+            }
 
+            for (int i = 0; i < AsioFromCS.InputChannelsNumGet(); ++i) {
+                listBoxInput.Items.Add(AsioFromCS.InputChannelNameGet(i));
+            }
+            if (0 < listBoxInput.Items.Count) {
+                listBoxInput.SelectedIndex = 0;
+            }
+            for (int i = 0; i < AsioFromCS.OutputChannelsNumGet(); ++i) {
+                listBoxOutput.Items.Add(AsioFromCS.OutputChannelNameGet(i));
+            }
+            if (0 < listBoxOutput.Items.Count) {
+                listBoxOutput.SelectedIndex = 0;
+            }
+
+            if (0 < listBoxInput.Items.Count &&
+                0 < listBoxOutput.Items.Count) {
+                buttonStart.Enabled = true;
+            }
         }
     }
 }
