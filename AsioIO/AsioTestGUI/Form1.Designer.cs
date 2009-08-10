@@ -34,9 +34,9 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonLoadDriver = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.checkedListBoxInput = new System.Windows.Forms.CheckedListBox();
-            this.checkedListBoxOutput = new System.Windows.Forms.CheckedListBox();
             this.buttonStart = new System.Windows.Forms.Button();
+            this.listBoxOutput = new System.Windows.Forms.ListBox();
+            this.listBoxInput = new System.Windows.Forms.ListBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -74,31 +74,15 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.listBoxInput);
+            this.groupBox2.Controls.Add(this.listBoxOutput);
             this.groupBox2.Controls.Add(this.buttonStart);
-            this.groupBox2.Controls.Add(this.checkedListBoxOutput);
-            this.groupBox2.Controls.Add(this.checkedListBoxInput);
             this.groupBox2.Location = new System.Drawing.Point(12, 194);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(425, 435);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "2. Select IO channels to use";
-            // 
-            // checkedListBoxInput
-            // 
-            this.checkedListBoxInput.FormattingEnabled = true;
-            this.checkedListBoxInput.Location = new System.Drawing.Point(6, 21);
-            this.checkedListBoxInput.Name = "checkedListBoxInput";
-            this.checkedListBoxInput.Size = new System.Drawing.Size(413, 191);
-            this.checkedListBoxInput.TabIndex = 0;
-            // 
-            // checkedListBoxOutput
-            // 
-            this.checkedListBoxOutput.FormattingEnabled = true;
-            this.checkedListBoxOutput.Location = new System.Drawing.Point(6, 218);
-            this.checkedListBoxOutput.Name = "checkedListBoxOutput";
-            this.checkedListBoxOutput.Size = new System.Drawing.Size(413, 174);
-            this.checkedListBoxOutput.TabIndex = 1;
             // 
             // buttonStart
             // 
@@ -110,11 +94,29 @@
             this.buttonStart.Text = "Start";
             this.buttonStart.UseVisualStyleBackColor = true;
             // 
+            // listBoxOutput
+            // 
+            this.listBoxOutput.FormattingEnabled = true;
+            this.listBoxOutput.ItemHeight = 15;
+            this.listBoxOutput.Location = new System.Drawing.Point(6, 21);
+            this.listBoxOutput.Name = "listBoxOutput";
+            this.listBoxOutput.Size = new System.Drawing.Size(413, 184);
+            this.listBoxOutput.TabIndex = 3;
+            // 
+            // listBoxInput
+            // 
+            this.listBoxInput.FormattingEnabled = true;
+            this.listBoxInput.ItemHeight = 15;
+            this.listBoxInput.Location = new System.Drawing.Point(6, 208);
+            this.listBoxInput.Name = "listBoxInput";
+            this.listBoxInput.Size = new System.Drawing.Size(413, 184);
+            this.listBoxInput.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(614, 651);
+            this.ClientSize = new System.Drawing.Size(938, 651);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
@@ -132,8 +134,8 @@
         private System.Windows.Forms.Button buttonLoadDriver;
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Button buttonStart;
-        private System.Windows.Forms.CheckedListBox checkedListBoxOutput;
-        private System.Windows.Forms.CheckedListBox checkedListBoxInput;
+        private System.Windows.Forms.ListBox listBoxInput;
+        private System.Windows.Forms.ListBox listBoxOutput;
     }
 }
 
