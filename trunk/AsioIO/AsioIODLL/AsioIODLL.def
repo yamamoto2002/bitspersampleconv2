@@ -1,0 +1,26 @@
+LIBRARY AsioIODLL
+
+EXPORTS
+	AsioDriverLoad_getDriverNum
+	AsioDriverLoad_getDriverName
+	AsioDriverLoad_loadDriver
+	AsioDriverLoad_unloadDriver
+	AsioTimeStampToDouble
+	AsioSamplesToDouble
+	ASIOOutputReady
+	ASIOExit
+	ASIODisposeBuffers
+	ASIOStop
+	ASIOStart
+	ASIOGetLatencies
+	ASIOGetChannelInfo
+	ASIOCreateBuffers
+	ASIOSetSampleRate
+	ASIOCanSampleRate
+	ASIOGetBufferSize
+	ASIOGetChannels
+	ASIOInit
+	ASIOGetSamplePosition
+	
+	
+	
