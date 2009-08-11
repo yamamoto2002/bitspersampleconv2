@@ -9,14 +9,17 @@
 #include <assert.h>
 #include <stdio.h>
 
+HANDLE hEvent;
+
 struct WavData {
     int *data;
-    int length;
+    int samples;
     int pos;
     int channel;
 };
 
 static WavData outputWavData;
+static WavData inputWavData;
 
 #if NATIVE_INT64
     #define ASIO64toDouble(a)  (a)
@@ -139,7 +142,6 @@ struct AsioPropertyInfo {
     double samples;
     double tcSamples;
     long  sysRefTime;
-    bool stopped;
 };
 
 static AsioPropertyInfo *
@@ -148,8 +150,6 @@ asioPropertyInstance(void)
     static AsioPropertyInfo ap;
     return &ap;
 }
-
-
 
 ASIOTime *
 bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
@@ -180,20 +180,22 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 
     ap->sysRefTime = GetTickCount();
 
-
     long buffSize = ap->preferredSize;
 
     for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
+        if (ap->bufferInfos[i].isInput == true &&
+            ap->channelInfos[i].channel == inputWavData.channel) {
+            assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
+            
+            memcpy(&inputWavData.data[inputWavData.pos], ap->bufferInfos[i].buffers[index], buffSize * 4);
+            inputWavData.pos += buffSize;
+        }
         if (ap->bufferInfos[i].isInput == false &&
             ap->channelInfos[i].channel == outputWavData.channel) {
-            switch (ap->channelInfos[i].type) {
-            case ASIOSTInt32LSB:
-                memcpy(ap->bufferInfos[i].buffers[index], &outputWavData.data[outputWavData.pos], buffSize * 4);
-                outputWavData.pos += buffSize;
-                break;
-            default:
-                assert(0);
-            }
+            assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
+
+            memcpy(ap->bufferInfos[i].buffers[index], &outputWavData.data[outputWavData.pos], buffSize * 4);
+            outputWavData.pos += buffSize;
         }
     }
 
@@ -201,8 +203,9 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
         ASIOOutputReady();
     }
 
-    if (outputWavData.length <= outputWavData.pos) {
-        ap->stopped = true;
+    if (outputWavData.samples <= outputWavData.pos ||
+        inputWavData.samples <= inputWavData.pos) {
+        SetEvent(hEvent);
     } else {
         processedSamples += buffSize;
     }
@@ -250,7 +253,7 @@ long asioMessages(long selector, long value, void* message, double* opt)
             ret = 1L;
         break;
     case kAsioResetRequest:
-        ap->stopped = true;
+        SetEvent(hEvent);
         ret = 1L;
         break;
     case kAsioResyncRequest:
@@ -449,13 +452,35 @@ AsioWrap_unsetup(void)
 }
 
 void
-AsioWrap_setOutputData(int outputChannel, int *data, int length)
+AsioWrap_setOutput(int outputChannel, int *data, int samples)
 {
-    outputWavData.data = new int[length];
-    memcpy(outputWavData.data, data, length * 4);
-    outputWavData.length = length;
+    delete[] outputWavData.data;
+    outputWavData.data = NULL;
+
+    outputWavData.data = new int[samples];
+    memcpy(outputWavData.data, data, samples * 4);
+    outputWavData.samples = samples;
     outputWavData.pos = 0;
     outputWavData.channel = outputChannel;
+}
+
+void
+AsioWrap_setInput(int inputChannel, int samples)
+{
+    delete[] inputWavData.data;
+    inputWavData.data = NULL;
+
+    inputWavData.data = new int[samples];
+    inputWavData.samples = samples;
+    inputWavData.pos = 0;
+    inputWavData.channel = inputChannel;
+}
+
+void
+AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples)
+{
+    assert(inputWavData.data);
+    memcpy_s(recordedData_return, samples * 4, inputWavData.data, inputWavData.pos *4);
 }
 
 void
@@ -463,13 +488,16 @@ AsioWrap_run(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
 
+    assert(!hEvent);
+    hEvent = CreateEvent(NULL,FALSE,FALSE,"Test");
+
     if (ASIOStart() == ASE_OK) {
         printf("ASIOStart() success.\n\n");
-        while (!ap->stopped) {
-            Sleep(10);
-        }
+        WaitForSingleObject(hEvent,INFINITE);
         ASIOStop();
         printf("ASIOStop()\n");
-        ap->stopped = false;
     }
+
+    CloseHandle(hEvent);
+    hEvent = NULL;
 }

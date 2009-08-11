@@ -42,10 +42,16 @@ namespace AsioTestGUI
         private extern static bool AsioWrap_getOutputChannelName(int n, System.Text.StringBuilder name_return, int size);
 
         [DllImport("AsioIODLL.dll")]
-        private extern static void AsioWrap_setOutputData(int channel, int[] data, int length);
+        private extern static void AsioWrap_setOutput(int channel, int[] data, int samples);
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static void AsioWrap_setInput(int inputChannel, int samples);
 
         [DllImport("AsioIODLL.dll")]
         private extern static void AsioWrap_run();
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static void AsioWrap_getRecordedData(int inputChannel, int [] recordedData_return, int samples);
 
         /////////////////////////////////////////////////////////////////////////
 
@@ -105,8 +111,20 @@ namespace AsioTestGUI
             return buf.ToString();
         }
 
-        public void OutputDataSet(int channel, int [] outputData) {
-            AsioWrap_setOutputData(channel, outputData, outputData.Length);
+        public void OutputSet(int channel, int [] outputData) {
+            AsioWrap_setOutput(channel, outputData, outputData.Length);
+        }
+
+        public void InputSet(int channel, int samples) {
+            AsioWrap_setInput(channel, samples);
+        }
+
+        public int[] RecordedDataGet(int inputChannel, int samples)
+        {
+            int [] recordedData = new int[samples];
+
+            AsioWrap_getRecordedData(inputChannel, recordedData, samples);
+            return recordedData;
         }
 
         public void Run() {

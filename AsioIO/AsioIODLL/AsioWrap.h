@@ -30,9 +30,15 @@ bool
 AsioWrap_getOutputChannelName(int n, char *name_return, int size);
 
 void
-AsioWrap_setOutputData(int outputChannel, int *data, int length);
+AsioWrap_setOutput(int outputChannel, int *data, int samples);
+
+void
+AsioWrap_setInput(int inputChannel, int samples);
 
 void
 AsioWrap_run(void);
+
+void
+AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples);
 
 #endif /* H_AsioWrap */
