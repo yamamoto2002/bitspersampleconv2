@@ -75,13 +75,14 @@ namespace AsioTestGUI
 
         BackgroundWorker bw;
         int inputChannelNum;
+        int seconds;
 
         private void DoWork(object o, DoWorkEventArgs args) {
             System.Console.WriteLine("DoWork started\n");
             afc.Run();
 
-            int [] recordedData = afc.RecordedDataGet(inputChannelNum, 20 * 96000);
-            PcmSamples1Channel ch0 = new PcmSamples1Channel(20 * 96000, 16);
+            int [] recordedData = afc.RecordedDataGet(inputChannelNum, seconds * 96000);
+            PcmSamples1Channel ch0 = new PcmSamples1Channel(seconds * 96000, 16);
             int max = 0;
             int min = 0;
             for (int i = 0; i < recordedData.Length; ++i) {
@@ -126,6 +127,7 @@ namespace AsioTestGUI
             buttonStart.Enabled = true;
         }
 
+        // 1 oct
         // 22.5
         // 55
         // 110
@@ -136,17 +138,25 @@ namespace AsioTestGUI
         // 3520
         // 7040
         // 14080
+
+        // 1/3 oct
+
         public bool Start() {
             inputChannelNum = listBoxInput.SelectedIndex;
 
-            int [] outputData = new int[20 * 96000];
+            seconds = 0;
+            for (double f = 22.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
+                ++seconds;
+            }
+
+            int [] outputData = new int[seconds * 96000];
             int pos = 0;
-            for (double f = 22.5; f < 20000.0; f *= Math.Sqrt(2)) {
+            for (double f = 22.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
                 for (int i = 0; i < 96000; ++i) {
                     outputData[pos + i] = 0;
                 }
 
-                for (int i = 0; i < 96000 * 10 / f; ++i) {
+                for (int i = 0; i < 96000 * 5 / f; ++i) {
                     outputData[pos + i] = (int)(System.Int32.MaxValue * Math.Sin(2.0 * Math.PI * (i *f / 96000)));
                 }
                 pos += 96000;
