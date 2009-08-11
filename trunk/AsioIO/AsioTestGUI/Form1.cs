@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace AsioTestGUI
 {
@@ -73,10 +74,27 @@ namespace AsioTestGUI
         }
 
         BackgroundWorker bw;
+        int inputChannelNum;
 
         private void DoWork(object o, DoWorkEventArgs args) {
             System.Console.WriteLine("DoWork started\n");
             afc.Run();
+
+            int [] recordedData = afc.RecordedDataGet(inputChannelNum, 20 * 96000);
+            PcmSamples1Channel ch0 = new PcmSamples1Channel(20 * 96000, 16);
+            for (int i=0; i < recordedData.Length; ++i) {
+                ch0.Set16(i, (short)(recordedData[i]));
+            }
+
+            List<PcmSamples1Channel> chList = new List<PcmSamples1Channel>();
+            chList.Add(ch0);
+
+            WavData wd = new WavData();
+            wd.Create(96000, 16, chList);
+            using (BinaryWriter bw = new BinaryWriter(File.Open("REC.WAV", FileMode.Create))) {
+                wd.Write(bw);
+            }
+
             args.Result = 0;
             System.Console.WriteLine("DoWork end\n");
         }
@@ -101,6 +119,8 @@ namespace AsioTestGUI
         // 7040
         // 14080
         public bool Start() {
+            inputChannelNum = listBoxInput.SelectedIndex;
+
             int [] outputData = new int[20 * 96000];
             int pos = 0;
             for (double f = 22.5; f < 20000.0; f *= Math.Sqrt(2)) {
@@ -113,7 +133,8 @@ namespace AsioTestGUI
                 }
                 pos += 96000;
             }
-            afc.OutputDataSet(listBoxOutput.SelectedIndex, outputData);
+            afc.OutputSet(listBoxOutput.SelectedIndex, outputData);
+            afc.InputSet(listBoxInput.SelectedIndex, outputData.Length);
 
             bw = new BackgroundWorker();
             bw.WorkerReportsProgress = true;
