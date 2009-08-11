@@ -82,8 +82,26 @@ namespace AsioTestGUI
 
             int [] recordedData = afc.RecordedDataGet(inputChannelNum, 20 * 96000);
             PcmSamples1Channel ch0 = new PcmSamples1Channel(20 * 96000, 16);
-            for (int i=0; i < recordedData.Length; ++i) {
-                ch0.Set16(i, (short)(recordedData[i]));
+            int max = 0;
+            int min = 0;
+            for (int i = 0; i < recordedData.Length; ++i) {
+                if (max < recordedData[i]) {
+                    max = recordedData[i];
+                }
+                if (recordedData[i] < min) {
+                    min = recordedData[i];
+                }
+            }
+            System.Console.WriteLine("max={0} min={1}", max, min);
+
+            if (max < -min) {
+                max = -min;
+            }
+            double mag = 32767.0 / max;
+            System.Console.WriteLine("mag={0}", mag);
+
+            for (int i = 0; i < recordedData.Length; ++i) {
+                ch0.Set16(i, (short)(recordedData[i] * mag));
             }
 
             List<PcmSamples1Channel> chList = new List<PcmSamples1Channel>();
