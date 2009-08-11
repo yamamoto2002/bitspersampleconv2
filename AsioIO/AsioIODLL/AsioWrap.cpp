@@ -448,6 +448,12 @@ AsioWrap_unsetup(void)
     printf("ASIODisposeBuffers()\n");
     ASIOExit();
     printf("ASIOExit()\n");
+
+    delete[] inputWavData.data;
+    inputWavData.data = NULL;
+
+    delete[] outputWavData.data;
+    outputWavData.data = NULL;
 }
 
 void
@@ -482,21 +488,53 @@ AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int sample
     memcpy_s(recordedData_return, samples * 4, inputWavData.data, inputWavData.pos *4);
 }
 
-void
-AsioWrap_run(void)
+int
+AsioWrap_start(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
 
     assert(!hEvent);
     hEvent = CreateEvent(NULL,FALSE,FALSE,"Test");
+    printf("CreateEvent()\n");
 
-    if (ASIOStart() == ASE_OK) {
+    ASIOError rv = ASIOStart();
+    if (rv == ASE_OK) {
         printf("ASIOStart() success.\n\n");
-        WaitForSingleObject(hEvent,INFINITE);
-        ASIOStop();
-        printf("ASIOStop()\n");
+    } else {
+        printf("ASIOStart() failed %d\n", rv);
     }
+    return rv;
+}
+
+bool
+AsioWrap_run(void)
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
+    assert(hEvent);
+
+    printf("WaitForSingleObject() start\n");
+    DWORD rv = WaitForSingleObject(hEvent, 1000);
+    printf("WaitForSingleObject() %x\n", rv);
+    if (rv == WAIT_TIMEOUT) {
+        return false;
+    }
+
+    ASIOStop();
+    printf("ASIOStop()\n");
 
     CloseHandle(hEvent);
     hEvent = NULL;
+    printf("CloseHandle()\n");
+    return true;
+}
+
+void
+AsioWrap_stop(void)
+{
+    printf("AsioWrap_stop\n");
+    if (hEvent) {
+        printf("AsioWrap_stop calling SetEvent()\n");
+        SetEvent(hEvent);
+    }
 }
