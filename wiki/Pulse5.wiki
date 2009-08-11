@@ -37,5 +37,32 @@ Pulse5を起動し、画面のグループボックス1～4まで設定を行っ
 
 http://bitspersampleconv2.googlecode.com/files/Pulse5.png
 
+=ソースコードからexeを作る方法=
+
+Visual C++ 2008 express editionと
+Visual C# 2008 express edition が必要です。
+マイクロソフトのサイトからダウンロードします(無料)
+
+http://www.steinberg.net/en/company/3rd_party_developer.html
+からASIO SDKをダウンロードします(無料)
+
+TortoiseSVNなどを使って
+https://bitspersampleconv2.googlecode.com/svn/trunk/
+からPulse5のソースコードをダウンロード(チェックアウト)します
+
+チェックアウトしてきたツリーにASIO SDKをunzipしたものをコピーして
+同じ親ディレクトリのなかにASIOSDK2とAsioIOがある状態にして
+AsioIO\AsioIODLL\copyasiofiles.batを実行するとASIOSDKの中から
+asio.cppなど9つのファイルをAsioIO\AsioIODLL\にコピーします
+
+Visual C++を起動してAsioIO\AsioIO.slnを読み込みます。
+AsioIODLLプロジェクトをビルドします。
+
+できたAsioIODLL.dllとAsioIODLL.libをAsioTestGUI\bin\Debugにコピーします
+
+VisualC#を起動してPulse5プロジェクトをデバッグビルドします
+
+実行します
+
 ASIOにアクセスするDLLはC++で作成。
-ユーザーインターフェースはC#で作成。
+ユーザーインターフェースはC#で作成したためこのような面倒なことになっています
