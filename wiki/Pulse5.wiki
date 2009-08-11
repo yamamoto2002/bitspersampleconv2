@@ -13,7 +13,7 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 
 =動作確認デバイス=
 
- * Creative X-Fi titanium PCI-e
+ * Creative X-Fi titanium PCI-e　オーディオクリエイションモード
  * M-AUDIO ProFire 2626
 
 =ダウンロード=
