@@ -36,3 +36,6 @@ Pulse5を起動し、画面のグループボックス1～4まで設定を行っ
 2のPulse Countは何波長分のパルスを出力するか設定します。デフォルトは5波長出力です。
 
 http://bitspersampleconv2.googlecode.com/files/Pulse5.png
+
+ASIOにアクセスするDLLはC++で作成。
+ユーザーインターフェースはC#で作成。
