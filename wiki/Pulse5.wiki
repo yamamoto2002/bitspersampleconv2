@@ -18,7 +18,7 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/Pluse5Setup.msi
+http://bitspersampleconv2.googlecode.com/files/Pulse5103Setup.msi
 
 
 =使用方法=
