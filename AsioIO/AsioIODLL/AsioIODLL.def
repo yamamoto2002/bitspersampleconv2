@@ -27,6 +27,6 @@ EXPORTS
 	AsioWrap_getOutputChannelsNum
 	AsioWrap_getInputChannelName
 	AsioWrap_getOutputChannelName
-	
-	
+	AsioWrap_setOutputData
+	AsioWrap_run
 	
