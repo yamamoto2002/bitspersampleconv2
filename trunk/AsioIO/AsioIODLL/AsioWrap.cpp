@@ -186,7 +186,6 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
         if (ap->bufferInfos[i].isInput == true &&
             ap->channelInfos[i].channel == inputWavData.channel) {
             assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
-            
             memcpy(&inputWavData.data[inputWavData.pos], ap->bufferInfos[i].buffers[index], buffSize * 4);
             inputWavData.pos += buffSize;
         }
