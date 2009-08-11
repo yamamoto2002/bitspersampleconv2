@@ -106,6 +106,6 @@ C#まで伝わりません。
 14514
 18286
 
-
+これは440Hzのラの音を聴くために2で割っていって設計したのですが55÷2＝22.5というような計算間違いをしたため440Hzの音が鳴らない数列になってしまいました。
 
 ASIO is a trademark and software of Steinberg Media Technologies GmbH
