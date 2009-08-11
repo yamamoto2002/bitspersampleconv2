@@ -1,4 +1,5 @@
-// ASIO is a trademark and software of Steinberg Media Technologies GmbH
+// AsioWrap.cpp Yamamoto Software Lab.
+// ASIO is a trademark and software of Steinberg Media Technologies GmbH.
 
 #include "targetver.h"
 #define WIN32_LEAN_AND_MEAN
@@ -11,7 +12,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-HANDLE hEvent;
+static HANDLE hEvent;
 
 struct WavData {
     int *data;
@@ -22,25 +23,6 @@ struct WavData {
 
 static WavData outputWavData;
 static WavData inputWavData;
-
-#if NATIVE_INT64
-    #define ASIO64toDouble(a)  (a)
-#else
-    const double twoRaisedTo32 = 4294967296.;
-    #define ASIO64toDouble(a)  ((a).lo + (a).hi * twoRaisedTo32)
-#endif
-
-double
-AsioTimeStampToDouble(ASIOTimeStamp &a)
-{
-    return ASIO64toDouble(a);
-}
-
-double
-AsioSamplesToDouble(ASIOSamples &a)
-{
-    return ASIO64toDouble(a);
-}
 
 extern AsioDrivers* asioDrivers;
 
@@ -99,31 +81,48 @@ unloadAsioDriver(void)
     asioDrivers = NULL;
 }
 
-int AsioWrap_getDriverNum(void)
+#if NATIVE_INT64
+    #define ASIO64toDouble(a)  (a)
+#else
+    const double twoRaisedTo32 = 4294967296.;
+    #define ASIO64toDouble(a) ((a).lo + (a).hi * twoRaisedTo32)
+#endif
+
+double
+AsioTimeStampToDouble(ASIOTimeStamp &a)
+{
+    return ASIO64toDouble(a);
+}
+
+double
+AsioSamplesToDouble(ASIOSamples &a)
+{
+    return ASIO64toDouble(a);
+}
+
+int
+AsioWrap_getDriverNum(void)
 {
     return getAsioDriverNum();
 }
 
-bool AsioWrap_getDriverName(int n, char *name_return, int size)
+bool
+AsioWrap_getDriverName(int n, char *name_return, int size)
 {
     return getAsioDriverName(n, name_return, size);
 }
 
-bool AsioWrap_loadDriver(int n)
+bool
+AsioWrap_loadDriver(int n)
 {
     return loadAsioDriver(n);
 }
 
-void AsioWrap_unloadDriver(void)
+void
+AsioWrap_unloadDriver(void)
 {
     unloadAsioDriver();
 }
-
-#include "asiosys.h"
-#include "asio.h"
-#include "AsioWrap.h"
-
-#define TEST_RUN_TIME (3)
 
 struct AsioPropertyInfo {
     ASIODriverInfo adi;
@@ -153,6 +152,9 @@ asioPropertyInstance(void)
     return &ap;
 }
 
+//----------------------------------------------------------------------------------
+// ASIO callbacks
+
 ASIOTime *
 bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 {
@@ -163,19 +165,22 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
     ap->tInfo = *timeInfo;
 
     if (timeInfo->timeInfo.flags & kSystemTimeValid) {
-        ap->nanoSeconds = AsioTimeStampToDouble(timeInfo->timeInfo.systemTime);
+        ap->nanoSeconds =
+            AsioTimeStampToDouble(timeInfo->timeInfo.systemTime);
     } else {
         ap->nanoSeconds = 0;
     }
 
     if (timeInfo->timeInfo.flags & kSamplePositionValid) {
-        ap->samples = AsioSamplesToDouble(timeInfo->timeInfo.samplePosition);
+        ap->samples =
+            AsioSamplesToDouble(timeInfo->timeInfo.samplePosition);
     } else {
         ap->samples = 0;
     }
 
     if (timeInfo->timeCode.flags & kTcValid) {
-        ap->tcSamples = AsioSamplesToDouble(timeInfo->timeCode.timeCodeSamples);
+        ap->tcSamples =
+            AsioSamplesToDouble(timeInfo->timeCode.timeCodeSamples);
     } else {
         ap->tcSamples = 0;
     }
@@ -188,14 +193,16 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
         if (ap->bufferInfos[i].isInput == true &&
             ap->channelInfos[i].channel == inputWavData.channel) {
             assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
-            memcpy(&inputWavData.data[inputWavData.pos], ap->bufferInfos[i].buffers[index], buffSize * 4);
+            memcpy(&inputWavData.data[inputWavData.pos],
+                ap->bufferInfos[i].buffers[index], buffSize * 4);
             inputWavData.pos += buffSize;
         }
         if (ap->bufferInfos[i].isInput == false &&
             ap->channelInfos[i].channel == outputWavData.channel) {
             assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
 
-            memcpy(ap->bufferInfos[i].buffers[index], &outputWavData.data[outputWavData.pos], buffSize * 4);
+            memcpy(ap->bufferInfos[i].buffers[index],
+                &outputWavData.data[outputWavData.pos], buffSize * 4);
             outputWavData.pos += buffSize;
         }
     }
@@ -214,30 +221,28 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
     return 0L;
 }
 
-//----------------------------------------------------------------------------------
 static void
 bufferSwitch(long index, ASIOBool processNow)
 {
     ASIOTime  timeInfo;
     memset (&timeInfo, 0, sizeof (timeInfo));
 
-    if(ASIOGetSamplePosition(&timeInfo.timeInfo.samplePosition, &timeInfo.timeInfo.systemTime) == ASE_OK) {
+    if(ASIOGetSamplePosition(&timeInfo.timeInfo.samplePosition,
+        &timeInfo.timeInfo.systemTime) == ASE_OK) {
         timeInfo.timeInfo.flags = kSystemTimeValid | kSamplePositionValid;
     }
 
     bufferSwitchTimeInfo (&timeInfo, index, processNow);
 }
 
-
-//----------------------------------------------------------------------------------
 static void
 sampleRateChanged(ASIOSampleRate sRate)
 {
     printf("sampleRateChanged(%f)\n", sRate);
 }
 
-//----------------------------------------------------------------------------------
-long asioMessages(long selector, long value, void* message, double* opt)
+static long
+asioMessages(long selector, long value, void* message, double* opt)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
     
@@ -277,6 +282,8 @@ long asioMessages(long selector, long value, void* message, double* opt)
 }
 
 //----------------------------------------------------------------------------------
+// AsioWrap APIs
+
 int
 AsioWrap_setup(int sampleRate)
 {
@@ -288,7 +295,7 @@ AsioWrap_setup(int sampleRate)
     memset(&ap->adi, 0, sizeof ap->adi);
     rv = ASIOInit(&ap->adi);
     if (ASE_OK != rv) {
-        printf ("ASIOGetChannels err %d\n", rv);
+        printf ("ASIOGetChannels() err %d\n", rv);
         return rv;
     }
     printf ("ASIOInit()\n"
@@ -301,10 +308,10 @@ AsioWrap_setup(int sampleRate)
 
     rv = ASIOGetChannels(&ap->inputChannels, &ap->outputChannels);
     if (ASE_OK != rv) {
-        printf ("ASIOGetChannels err %d\n", rv);
+        printf ("ASIOGetChannels() err %d\n", rv);
         return rv;
     }
-    printf ("ASIOGetChannels (inputs: %d, outputs: %d);\n",
+    printf ("ASIOGetChannels() inputs=%d outputs=%d\n",
         ap->inputChannels, ap->outputChannels);
 
     int totalChannels = ap->inputChannels + ap->outputChannels;
@@ -312,34 +319,38 @@ AsioWrap_setup(int sampleRate)
     ap->bufferInfos  = new ASIOBufferInfo[totalChannels];
     ap->channelInfos = new ASIOChannelInfo[totalChannels];
 
-    rv = ASIOGetBufferSize(&ap->minSize, &ap->maxSize, &ap->preferredSize, &ap->granularity);
+    rv = ASIOGetBufferSize(&ap->minSize, &ap->maxSize,
+        &ap->preferredSize, &ap->granularity);
     if (ASE_OK != rv) {
         printf ("ASIOGetBufferSize err %d\n", rv);
         return rv;
     }
-    printf ("ASIOGetBufferSize (min: %d, max: %d, preferred: %d, granularity: %d);\n",
+    printf ("ASIOGetBufferSize() min=%d max=%d preferred=%d granularity=%d\n",
              ap->minSize, ap->maxSize,
              ap->preferredSize, ap->granularity);
 
     rv = ASIOCanSampleRate(ap->sampleRate);
     if (ASE_OK != rv) {
-        printf ("ASIOCanSampleRate (sampleRate: %f) failed %d\n", ap->sampleRate, rv);
+        printf ("ASIOCanSampleRate(sampleRate=%f) failed %d\n",
+            ap->sampleRate, rv);
         return rv;
     }
 
     rv = ASIOSetSampleRate(ap->sampleRate);
     if (ASE_OK != rv) {
-        printf ("ASIOSetSampleRate (sampleRate: %f) failed %d\n", ap->sampleRate, rv);
+        printf ("ASIOSetSampleRate(sampleRate=%f) failed %d\n",
+            ap->sampleRate, rv);
         return rv;
     }
-    printf ("ASIOSetSampleRate (sampleRate: %f)\n", ap->sampleRate);
+    printf ("ASIOSetSampleRate(sampleRate=%f)\n", ap->sampleRate);
 
     ap->postOutput = true;
     rv = ASIOOutputReady();
     if (ASE_OK != rv) {
         ap->postOutput = false;
     }
-    printf ("ASIOOutputReady(); - %s\n", ap->postOutput ? "Supported" : "Not supported");
+    printf ("ASIOOutputReady() %s\n",
+        ap->postOutput ? "Supported" : "Not supported");
 
     ASIOBufferInfo *info = ap->bufferInfos;
 
@@ -395,7 +406,7 @@ AsioWrap_setup(int sampleRate)
         printf ("ASIOGetLatencies() failed %d\n", rv);
         return rv;
     }
-    printf ("ASIOGetLatencies (input: %d, output: %d);\n",
+    printf ("ASIOGetLatencies() input=%d output=%d\n",
         ap->inputLatency, ap->outputLatency);
 
     return ASE_OK;
@@ -439,7 +450,8 @@ AsioWrap_getOutputChannelName(int n, char *name_return, int size)
     }
 
     memcpy_s(name_return, size,
-        ap->channelInfos[n + ap->inputChannels].name, sizeof ap->channelInfos[0].name);
+        ap->channelInfos[n + ap->inputChannels].name,
+        sizeof ap->channelInfos[0].name);
     return true;
 }
 
@@ -487,7 +499,7 @@ void
 AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples)
 {
     assert(inputWavData.data);
-    memcpy_s(recordedData_return, samples * 4, inputWavData.data, inputWavData.pos *4);
+    memcpy_s(recordedData_return, samples *4, inputWavData.data, inputWavData.pos *4);
 }
 
 int
@@ -496,7 +508,7 @@ AsioWrap_start(void)
     AsioPropertyInfo *ap = asioPropertyInstance();
 
     assert(!hEvent);
-    hEvent = CreateEvent(NULL,FALSE,FALSE,"Test");
+    hEvent = CreateEvent(NULL, FALSE, FALSE, "AsioWrap");
     printf("CreateEvent()\n");
 
     ASIOError rv = ASIOStart();
@@ -534,7 +546,7 @@ AsioWrap_run(void)
 void
 AsioWrap_stop(void)
 {
-    printf("AsioWrap_stop\n");
+    printf("AsioWrap_stop()\n");
     if (hEvent) {
         printf("AsioWrap_stop calling SetEvent()\n");
         SetEvent(hEvent);

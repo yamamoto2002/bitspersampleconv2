@@ -15,14 +15,14 @@ EXPORTS
 	ASIOGetChannels
 	ASIOInit
 	ASIOGetSamplePosition
+	AsioTimeStampToDouble
+	AsioSamplesToDouble
 	AsioWrap_getDriverNum
 	AsioWrap_getDriverName
 	AsioWrap_loadDriver
 	AsioWrap_unloadDriver
 	AsioWrap_setup
 	AsioWrap_unsetup
-	AsioTimeStampToDouble
-	AsioSamplesToDouble
 	AsioWrap_getInputChannelsNum
 	AsioWrap_getOutputChannelsNum
 	AsioWrap_getInputChannelName
