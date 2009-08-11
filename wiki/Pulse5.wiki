@@ -5,21 +5,23 @@ ASIOデバイスから録音するプログラムです。
 
 スピーカーの応答具合を観察するために作成しました。
 ASIOデバイスは96kHz 24bit録音再生対応である必要があります。
+
 ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作しないと思います。
+
 大雑把なプログラムなのでASIO2対応で96kHz 24bit録音再生対応であっても
 動作しないハードウェアも少なからずあると思われます。
 
-動作確認デバイス
+==動作確認デバイス==
 
  * Creative X-Fi titanium PCI-e
  * M-AUDIO ProFire 2626
 
-ダウンロード
+==ダウンロード==
 
 http://bitspersampleconv2.googlecode.com/files/Pluse5Setup.msi
 
 
-使用方法
+==使用方法==
 
 ASIOデバイス自体の性能を測るときは入力端子と出力端子をケーブルでつなげます。
 
