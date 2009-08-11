@@ -76,11 +76,16 @@ namespace AsioTestGUI
         BackgroundWorker bw;
         int inputChannelNum;
         int seconds;
+        string writeFilePath;
 
         private void DoWork(object o, DoWorkEventArgs args) {
             System.Console.WriteLine("DoWork started\n");
-            afc.Run();
 
+            int count = 0;
+            while (!afc.Run()) {
+                ++count;
+                bw.ReportProgress(100 * count / seconds);
+            }
             int [] recordedData = afc.RecordedDataGet(inputChannelNum, seconds * 96000);
             PcmSamples1Channel ch0 = new PcmSamples1Channel(seconds * 96000, 16);
             int max = 0;
@@ -110,7 +115,7 @@ namespace AsioTestGUI
 
             WavData wd = new WavData();
             wd.Create(96000, 16, chList);
-            using (BinaryWriter bw = new BinaryWriter(File.Open("REC.WAV", FileMode.Create))) {
+            using (BinaryWriter bw = new BinaryWriter(File.Open(writeFilePath, FileMode.Create))) {
                 wd.Write(bw);
             }
 
@@ -125,6 +130,7 @@ namespace AsioTestGUI
         private void RunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             progressBar1.Visible = false;
             buttonStart.Enabled = true;
+            buttonStop.Enabled = false;
         }
 
         // 1 oct
@@ -163,6 +169,10 @@ namespace AsioTestGUI
             }
             afc.OutputSet(listBoxOutput.SelectedIndex, outputData);
             afc.InputSet(listBoxInput.SelectedIndex, outputData.Length);
+            afc.Start();
+
+            progressBar1.Value = 0;
+            progressBar1.Visible = true;
 
             bw = new BackgroundWorker();
             bw.WorkerReportsProgress = true;
@@ -170,12 +180,31 @@ namespace AsioTestGUI
             bw.ProgressChanged    += new ProgressChangedEventHandler(ProgressChanged);
             bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompleted);
             bw.RunWorkerAsync();
+            buttonStop.Enabled = true;
             return true;
         }
 
         private void buttonStart_Click(object sender, EventArgs e) {
+            writeFilePath = textBoxFilePath.Text;
             buttonStart.Enabled = false;
             Start();
+        }
+
+        private void buttonBrowse_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.FileName = textBoxFilePath.Text;
+            ofd.CheckPathExists = true;
+            ofd.CheckFileExists = false;
+            if (DialogResult.OK == ofd.ShowDialog()) {
+                textBoxFilePath.Text = ofd.FileName;
+            }
+        }
+
+        private void buttonStop_Click(object sender, EventArgs e)
+        {
+            buttonStop.Enabled = false;
+            afc.Stop();
         }
     }
 }

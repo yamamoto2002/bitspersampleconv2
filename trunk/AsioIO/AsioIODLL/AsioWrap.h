@@ -35,8 +35,14 @@ AsioWrap_setOutput(int outputChannel, int *data, int samples);
 void
 AsioWrap_setInput(int inputChannel, int samples);
 
-void
+int
+AsioWrap_start(void);
+
+bool
 AsioWrap_run(void);
+
+void
+AsioWrap_stop(void);
 
 void
 AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples);

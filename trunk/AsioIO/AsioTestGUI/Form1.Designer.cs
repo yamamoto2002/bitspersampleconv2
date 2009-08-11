@@ -38,8 +38,13 @@
             this.listBoxOutput = new System.Windows.Forms.ListBox();
             this.buttonStart = new System.Windows.Forms.Button();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.textBoxFilePath = new System.Windows.Forms.TextBox();
+            this.buttonBrowse = new System.Windows.Forms.Button();
+            this.buttonStop = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // listBoxDrivers
@@ -77,10 +82,9 @@
             // 
             this.groupBox2.Controls.Add(this.listBoxInput);
             this.groupBox2.Controls.Add(this.listBoxOutput);
-            this.groupBox2.Controls.Add(this.buttonStart);
             this.groupBox2.Location = new System.Drawing.Point(12, 194);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(425, 435);
+            this.groupBox2.Size = new System.Drawing.Size(425, 400);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "2. Select IO channels to use";
@@ -106,7 +110,7 @@
             // buttonStart
             // 
             this.buttonStart.Enabled = false;
-            this.buttonStart.Location = new System.Drawing.Point(6, 398);
+            this.buttonStart.Location = new System.Drawing.Point(12, 662);
             this.buttonStart.Name = "buttonStart";
             this.buttonStart.Size = new System.Drawing.Size(184, 30);
             this.buttonStart.TabIndex = 2;
@@ -116,24 +120,69 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 635);
+            this.progressBar1.Location = new System.Drawing.Point(12, 698);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(425, 23);
             this.progressBar1.TabIndex = 3;
             this.progressBar1.Visible = false;
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.buttonBrowse);
+            this.groupBox3.Controls.Add(this.textBoxFilePath);
+            this.groupBox3.Location = new System.Drawing.Point(12, 600);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(425, 56);
+            this.groupBox3.TabIndex = 4;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "3. Specify output file";
+            // 
+            // textBoxFilePath
+            // 
+            this.textBoxFilePath.Location = new System.Drawing.Point(6, 21);
+            this.textBoxFilePath.Name = "textBoxFilePath";
+            this.textBoxFilePath.Size = new System.Drawing.Size(293, 22);
+            this.textBoxFilePath.TabIndex = 0;
+            this.textBoxFilePath.Text = "REC.WAV";
+            // 
+            // buttonBrowse
+            // 
+            this.buttonBrowse.Location = new System.Drawing.Point(305, 21);
+            this.buttonBrowse.Name = "buttonBrowse";
+            this.buttonBrowse.Size = new System.Drawing.Size(114, 23);
+            this.buttonBrowse.TabIndex = 1;
+            this.buttonBrowse.Text = "Browse...";
+            this.buttonBrowse.UseVisualStyleBackColor = true;
+            this.buttonBrowse.Click += new System.EventHandler(this.buttonBrowse_Click);
+            // 
+            // buttonStop
+            // 
+            this.buttonStop.Enabled = false;
+            this.buttonStop.Location = new System.Drawing.Point(202, 662);
+            this.buttonStop.Name = "buttonStop";
+            this.buttonStop.Size = new System.Drawing.Size(175, 30);
+            this.buttonStop.TabIndex = 5;
+            this.buttonStop.Text = "Abort";
+            this.buttonStop.UseVisualStyleBackColor = true;
+            this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(449, 667);
+            this.ClientSize = new System.Drawing.Size(449, 728);
+            this.Controls.Add(this.buttonStop);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBox2);
+            this.Controls.Add(this.buttonStart);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -148,6 +197,10 @@
         private System.Windows.Forms.ListBox listBoxInput;
         private System.Windows.Forms.ListBox listBoxOutput;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.Button buttonBrowse;
+        private System.Windows.Forms.TextBox textBoxFilePath;
+        private System.Windows.Forms.Button buttonStop;
     }
 }
 

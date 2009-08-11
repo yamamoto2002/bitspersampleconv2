@@ -48,7 +48,13 @@ namespace AsioTestGUI
         private extern static void AsioWrap_setInput(int inputChannel, int samples);
 
         [DllImport("AsioIODLL.dll")]
-        private extern static void AsioWrap_run();
+        private extern static int AsioWrap_start();
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static bool AsioWrap_run();
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static void AsioWrap_stop();
 
         [DllImport("AsioIODLL.dll")]
         private extern static void AsioWrap_getRecordedData(int inputChannel, int [] recordedData_return, int samples);
@@ -127,8 +133,18 @@ namespace AsioTestGUI
             return recordedData;
         }
 
-        public void Run() {
-            AsioWrap_run();
+        public int Start()
+        {
+            return AsioWrap_start();
+        }
+
+        public bool Run()
+        {
+            return AsioWrap_run();
+        }
+
+        public void Stop() {
+            AsioWrap_stop();
         }
     }
 }
