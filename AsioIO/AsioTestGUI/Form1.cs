@@ -162,7 +162,7 @@ namespace AsioTestGUI
                     outputData[pos + i] = 0;
                 }
 
-                for (int i = 0; i < 96000 * 5 / f; ++i) {
+                for (int i = 0; i < 96000 * (int)numericUpDownPulseCount.Value / f; ++i) {
                     outputData[pos + i] = (int)(System.Int32.MaxValue * Math.Sin(2.0 * Math.PI * (i *f / 96000)));
                 }
                 pos += 96000;
