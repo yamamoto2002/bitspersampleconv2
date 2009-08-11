@@ -9,6 +9,15 @@
 #include <assert.h>
 #include <stdio.h>
 
+struct WavData {
+    int *data;
+    int length;
+    int pos;
+    int channel;
+};
+
+static WavData outputWavData;
+
 #if NATIVE_INT64
     #define ASIO64toDouble(a)  (a)
 #else
@@ -175,57 +184,15 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
     long buffSize = ap->preferredSize;
 
     for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
-        if (ap->bufferInfos[i].isInput == false) {
+        if (ap->bufferInfos[i].isInput == false &&
+            ap->channelInfos[i].channel == outputWavData.channel) {
             switch (ap->channelInfos[i].type) {
-            case ASIOSTInt16LSB:
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 2);
-                break;
-            case ASIOSTInt24LSB:                // used for 20 bits as well
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 3);
-                break;
             case ASIOSTInt32LSB:
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
+                memcpy(ap->bufferInfos[i].buffers[index], &outputWavData.data[outputWavData.pos], buffSize * 4);
+                outputWavData.pos += buffSize;
                 break;
-            case ASIOSTFloat32LSB:      // IEEE 754 32 bit float, as found on Intel x86 architecture
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
-                break;
-            case ASIOSTFloat64LSB:      // IEEE 754 64 bit double float, as found on Intel x86 architecture
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 8);
-                break;
-
-                // these are used for 32 bit data buffer, with different alignment of the data inside
-                // 32 bit PCI bus systems can more easily used with these
-            case ASIOSTInt32LSB16:      // 32 bit data with 18 bit alignment
-            case ASIOSTInt32LSB18:      // 32 bit data with 18 bit alignment
-            case ASIOSTInt32LSB20:      // 32 bit data with 20 bit alignment
-            case ASIOSTInt32LSB24:      // 32 bit data with 24 bit alignment
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
-                break;
-
-            case ASIOSTInt16MSB:
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 2);
-                break;
-            case ASIOSTInt24MSB:        // used for 20 bits as well
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 3);
-                break;
-            case ASIOSTInt32MSB:
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
-                break;
-            case ASIOSTFloat32MSB:      // IEEE 754 32 bit float, as found on Intel x86 architecture
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
-                break;
-            case ASIOSTFloat64MSB:      // IEEE 754 64 bit double float, as found on Intel x86 architecture
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 8);
-                break;
-
-                // these are used for 32 bit data buffer, with different alignment of the data inside
-                // 32 bit PCI bus systems can more easily used with these
-            case ASIOSTInt32MSB16:      // 32 bit data with 18 bit alignment
-            case ASIOSTInt32MSB18:      // 32 bit data with 18 bit alignment
-            case ASIOSTInt32MSB20:      // 32 bit data with 20 bit alignment
-            case ASIOSTInt32MSB24:      // 32 bit data with 24 bit alignment
-                memset (ap->bufferInfos[i].buffers[index], 0, buffSize * 4);
-                break;
+            default:
+                assert(0);
             }
         }
     }
@@ -234,7 +201,7 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
         ASIOOutputReady();
     }
 
-    if (processedSamples >= ap->sampleRate * TEST_RUN_TIME) {
+    if (outputWavData.length <= outputWavData.pos) {
         ap->stopped = true;
     } else {
         processedSamples += buffSize;
@@ -481,3 +448,28 @@ AsioWrap_unsetup(void)
     printf("ASIOExit()\n");
 }
 
+void
+AsioWrap_setOutputData(int outputChannel, int *data, int length)
+{
+    outputWavData.data = new int[length];
+    memcpy(outputWavData.data, data, length * 4);
+    outputWavData.length = length;
+    outputWavData.pos = 0;
+    outputWavData.channel = outputChannel;
+}
+
+void
+AsioWrap_run(void)
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
+    if (ASIOStart() == ASE_OK) {
+        printf("ASIOStart() success.\n\n");
+        while (!ap->stopped) {
+            Sleep(10);
+        }
+        ASIOStop();
+        printf("ASIOStop()\n");
+        ap->stopped = false;
+    }
+}

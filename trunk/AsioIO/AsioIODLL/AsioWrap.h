@@ -29,4 +29,10 @@ AsioWrap_getInputChannelName(int n, char *name_return, int size);
 bool
 AsioWrap_getOutputChannelName(int n, char *name_return, int size);
 
+void
+AsioWrap_setOutputData(int outputChannel, int *data, int length);
+
+void
+AsioWrap_run(void);
+
 #endif /* H_AsioWrap */

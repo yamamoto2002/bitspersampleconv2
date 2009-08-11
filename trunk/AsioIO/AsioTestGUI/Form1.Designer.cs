@@ -34,9 +34,10 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.buttonLoadDriver = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.buttonStart = new System.Windows.Forms.Button();
-            this.listBoxOutput = new System.Windows.Forms.ListBox();
             this.listBoxInput = new System.Windows.Forms.ListBox();
+            this.listBoxOutput = new System.Windows.Forms.ListBox();
+            this.buttonStart = new System.Windows.Forms.Button();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -84,15 +85,14 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "2. Select IO channels to use";
             // 
-            // buttonStart
+            // listBoxInput
             // 
-            this.buttonStart.Enabled = false;
-            this.buttonStart.Location = new System.Drawing.Point(6, 398);
-            this.buttonStart.Name = "buttonStart";
-            this.buttonStart.Size = new System.Drawing.Size(184, 30);
-            this.buttonStart.TabIndex = 2;
-            this.buttonStart.Text = "Start";
-            this.buttonStart.UseVisualStyleBackColor = true;
+            this.listBoxInput.FormattingEnabled = true;
+            this.listBoxInput.ItemHeight = 15;
+            this.listBoxInput.Location = new System.Drawing.Point(6, 208);
+            this.listBoxInput.Name = "listBoxInput";
+            this.listBoxInput.Size = new System.Drawing.Size(413, 184);
+            this.listBoxInput.TabIndex = 4;
             // 
             // listBoxOutput
             // 
@@ -103,20 +103,31 @@
             this.listBoxOutput.Size = new System.Drawing.Size(413, 184);
             this.listBoxOutput.TabIndex = 3;
             // 
-            // listBoxInput
+            // buttonStart
             // 
-            this.listBoxInput.FormattingEnabled = true;
-            this.listBoxInput.ItemHeight = 15;
-            this.listBoxInput.Location = new System.Drawing.Point(6, 208);
-            this.listBoxInput.Name = "listBoxInput";
-            this.listBoxInput.Size = new System.Drawing.Size(413, 184);
-            this.listBoxInput.TabIndex = 4;
+            this.buttonStart.Enabled = false;
+            this.buttonStart.Location = new System.Drawing.Point(6, 398);
+            this.buttonStart.Name = "buttonStart";
+            this.buttonStart.Size = new System.Drawing.Size(184, 30);
+            this.buttonStart.TabIndex = 2;
+            this.buttonStart.Text = "Start";
+            this.buttonStart.UseVisualStyleBackColor = true;
+            this.buttonStart.Click += new System.EventHandler(this.buttonStart_Click);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(12, 635);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(425, 23);
+            this.progressBar1.TabIndex = 3;
+            this.progressBar1.Visible = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(938, 651);
+            this.ClientSize = new System.Drawing.Size(449, 667);
+            this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Name = "Form1";
@@ -136,6 +147,7 @@
         private System.Windows.Forms.Button buttonStart;
         private System.Windows.Forms.ListBox listBoxInput;
         private System.Windows.Forms.ListBox listBoxOutput;
+        private System.Windows.Forms.ProgressBar progressBar1;
     }
 }
 
