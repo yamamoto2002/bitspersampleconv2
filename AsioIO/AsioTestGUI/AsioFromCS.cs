@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -10,12 +8,10 @@ namespace AsioTestGUI
     class AsioFromCS
     {
         [DllImport("AsioIODLL.dll")]
-        private extern static int
-            AsioWrap_getDriverNum();
+        private extern static int AsioWrap_getDriverNum();
 
         [DllImport("AsioIODLL.dll")]
-        private extern static bool
-            AsioWrap_getDriverName(int n, System.Text.StringBuilder name, int size);
+        private extern static bool AsioWrap_getDriverName(int n, System.Text.StringBuilder name, int size);
 
         [DllImport("AsioIODLL.dll")]
         private extern static bool AsioWrap_loadDriver(int n);
@@ -81,21 +77,20 @@ namespace AsioTestGUI
 
         public bool DriverLoad(int n) {
             driverLoaded = AsioWrap_loadDriver(n);
-            System.Console.WriteLine("AsioWrap_loadDriver({0}) rv={1}", n, driverLoaded);
+            Console.WriteLine("AsioWrap_loadDriver({0}) rv={1}", n, driverLoaded);
             return driverLoaded;
         }
 
         public void DriverUnload() {
             if (driverLoaded) {
                 AsioWrap_unloadDriver();
-                System.Console.WriteLine("AsioWrap_unloadDriver()");
+                Console.WriteLine("AsioWrap_unloadDriver()");
                 driverLoaded = false;
             }
         }
 
         public int Setup(int sampleRate) {
             System.Diagnostics.Debug.Assert(driverLoaded);
-
             return AsioWrap_setup(sampleRate);
         }
 
@@ -125,21 +120,17 @@ namespace AsioTestGUI
             AsioWrap_setInput(channel, samples);
         }
 
-        public int[] RecordedDataGet(int inputChannel, int samples)
-        {
+        public int[] RecordedDataGet(int inputChannel, int samples) {
             int [] recordedData = new int[samples];
-
             AsioWrap_getRecordedData(inputChannel, recordedData, samples);
             return recordedData;
         }
 
-        public int Start()
-        {
+        public int Start() {
             return AsioWrap_start();
         }
 
-        public bool Run()
-        {
+        public bool Run() {
             return AsioWrap_run();
         }
 

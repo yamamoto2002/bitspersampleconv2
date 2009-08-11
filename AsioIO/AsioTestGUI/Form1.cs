@@ -20,7 +20,7 @@ namespace AsioTestGUI
 
             afc = new AsioFromCS();
 
-            System.Console.WriteLine("driverNum=" +afc.DriverNumGet());
+            Console.WriteLine("driverNum=" +afc.DriverNumGet());
             for (int i = 0; i < afc.DriverNumGet(); ++i) {
                 listBoxDrivers.Items.Add(afc.DriverNameGet(i));
             }
@@ -79,7 +79,7 @@ namespace AsioTestGUI
         string writeFilePath;
 
         private void DoWork(object o, DoWorkEventArgs args) {
-            System.Console.WriteLine("DoWork started\n");
+            Console.WriteLine("DoWork started\n");
 
             int count = 0;
             while (!afc.Run()) {
@@ -98,13 +98,13 @@ namespace AsioTestGUI
                     min = recordedData[i];
                 }
             }
-            System.Console.WriteLine("max={0} min={1}", max, min);
+            Console.WriteLine("max={0} min={1}", max, min);
 
             if (max < -min) {
                 max = -min;
             }
             double mag = 32767.0 / max;
-            System.Console.WriteLine("mag={0}", mag);
+            Console.WriteLine("mag={0}", mag);
 
             for (int i = 0; i < recordedData.Length; ++i) {
                 ch0.Set16(i, (short)(recordedData[i] * mag));
@@ -120,7 +120,7 @@ namespace AsioTestGUI
             }
 
             args.Result = 0;
-            System.Console.WriteLine("DoWork end\n");
+            Console.WriteLine("DoWork end\n");
         }
 
         private void ProgressChanged(object o, ProgressChangedEventArgs args) {
@@ -133,7 +133,7 @@ namespace AsioTestGUI
             buttonStop.Enabled = false;
         }
 
-        // 1 oct
+        // 1 oct 22.5Hz to approx. 20000Hz ... 10 variations
         // 22.5
         // 55
         // 110
@@ -144,8 +144,6 @@ namespace AsioTestGUI
         // 3520
         // 7040
         // 14080
-
-        // 1/3 oct
 
         public bool Start() {
             inputChannelNum = listBoxInput.SelectedIndex;
