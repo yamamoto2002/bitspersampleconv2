@@ -44,6 +44,7 @@
             this.buttonStop = new System.Windows.Forms.Button();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.numericUpDownPulseCount = new System.Windows.Forms.NumericUpDown();
+            this.buttonAbout = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -116,7 +117,7 @@
             this.buttonStart.Enabled = false;
             this.buttonStart.Location = new System.Drawing.Point(12, 662);
             this.buttonStart.Name = "buttonStart";
-            this.buttonStart.Size = new System.Drawing.Size(184, 30);
+            this.buttonStart.Size = new System.Drawing.Size(105, 30);
             this.buttonStart.TabIndex = 2;
             this.buttonStart.Text = "Start";
             this.buttonStart.UseVisualStyleBackColor = true;
@@ -162,9 +163,9 @@
             // buttonStop
             // 
             this.buttonStop.Enabled = false;
-            this.buttonStop.Location = new System.Drawing.Point(202, 662);
+            this.buttonStop.Location = new System.Drawing.Point(123, 662);
             this.buttonStop.Name = "buttonStop";
-            this.buttonStop.Size = new System.Drawing.Size(175, 30);
+            this.buttonStop.Size = new System.Drawing.Size(109, 30);
             this.buttonStop.TabIndex = 5;
             this.buttonStop.Text = "Abort";
             this.buttonStop.UseVisualStyleBackColor = true;
@@ -202,11 +203,22 @@
             0,
             0});
             // 
+            // buttonAbout
+            // 
+            this.buttonAbout.Location = new System.Drawing.Point(238, 662);
+            this.buttonAbout.Name = "buttonAbout";
+            this.buttonAbout.Size = new System.Drawing.Size(199, 30);
+            this.buttonAbout.TabIndex = 7;
+            this.buttonAbout.Text = "About this program ...";
+            this.buttonAbout.UseVisualStyleBackColor = true;
+            this.buttonAbout.Click += new System.EventHandler(this.buttonAbout_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(449, 728);
+            this.Controls.Add(this.buttonAbout);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.groupBox3);
@@ -242,6 +254,7 @@
         private System.Windows.Forms.Button buttonStop;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.NumericUpDown numericUpDownPulseCount;
+        private System.Windows.Forms.Button buttonAbout;
     }
 }
 

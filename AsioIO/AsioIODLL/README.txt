@@ -14,3 +14,5 @@ ASIOSDK2/pc/asiolist.cpp
 ASIOSDK2/pc/asiolist.h
 
 compile
+
+ASIO is a trademark and software of Steinberg Media Technologies GmbH

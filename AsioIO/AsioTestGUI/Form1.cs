@@ -206,5 +206,10 @@ namespace AsioTestGUI
             buttonStop.Enabled = false;
             afc.Stop();
         }
+
+        private void buttonAbout_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Pulse5 by Yamamoto Software Lab.\nASIO Technology by Steinberg Media Technology GmbH.");
+        }
     }
 }
