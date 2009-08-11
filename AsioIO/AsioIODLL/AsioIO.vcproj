@@ -99,6 +99,8 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				CommandLine="copy $(SolutionDir)\Release\AsioIODLL.dll $(SolutionDir)\AsioTestGui\bin\Release&#x0D;&#x0A;"
+				Outputs="AsioIODLL.dll"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
