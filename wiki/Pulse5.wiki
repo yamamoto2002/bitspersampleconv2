@@ -14,6 +14,11 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
  * Creative X-Fi titanium PCI-e
  * M-AUDIO ProFire 2626
 
+ダウンロード
+
+http://bitspersampleconv2.googlecode.com/files/Pluse5Setup.msi
+
+
 使用方法
 
 ASIOデバイス自体の性能を測るときは入力端子と出力端子をケーブルでつなげます。
