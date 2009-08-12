@@ -10,6 +10,10 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 
 大雑把なプログラムなのでASIO2対応で96kHz 24bit録音再生対応であっても
 動作しないハードウェアも少なからずあると思われます。
+というのは、ASIOバッファのフォーマットがASIOSTInt32LSBであることを想定して
+コードが書かれているためです。他のバッファフォーマットにも対応するためには
+AsioWrap.cppの195行目あたりを修正する必要があります
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/AsioIO/AsioIODLL/AsioWrap.cpp#195
 
 =動作確認デバイス=
 
