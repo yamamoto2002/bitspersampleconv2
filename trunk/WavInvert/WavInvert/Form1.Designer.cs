@@ -94,6 +94,8 @@
             // checkBoxInvert
             // 
             resources.ApplyResources(this.checkBoxInvert, "checkBoxInvert");
+            this.checkBoxInvert.Checked = true;
+            this.checkBoxInvert.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBoxInvert.Name = "checkBoxInvert";
             this.checkBoxInvert.UseVisualStyleBackColor = true;
             // 

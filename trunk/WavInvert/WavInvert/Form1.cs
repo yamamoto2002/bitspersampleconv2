@@ -74,7 +74,7 @@ namespace WavInvert
         private void buttonStart_Click(object sender, EventArgs e)
         {
             buttonStart.Enabled = false;
-            textBoxConsole.Text += rm.GetString("Started") + "\n";
+            textBoxConsole.Text += rm.GetString("Started") + "\r\n";
             backgroundWorker1.RunWorkerAsync();
         }
 
