@@ -4,7 +4,8 @@ WavInvertはWavファイルの位相を反転します。
 
 =使用方法=
 
-WavInvertSetup103.msiをダウンロードして実行して下さい。
+WavInvertSetup103.msiをダウンロードしてインストールして下さい。
+インストール後[スタート][プログラム][WavInvert]で実行します。
 
 http://bitspersampleconv2.googlecode.com/files/WavInvertSetup103.msi
 
