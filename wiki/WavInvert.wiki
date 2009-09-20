@@ -1,0 +1,11 @@
+#labels Featured
+#Wavファイルの位相を反転するプログラムWavInvert
+
+WavInvertはWavファイルの位相を反転します。
+
+DownloadsのところからWavInvertSetup102.msiをダウンロードしてきてインストールして下さい。
+
+Wavファイルの位相反転はこのあたりで行っています
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WavInvert/WavInvert/Form1.cs#146
+
