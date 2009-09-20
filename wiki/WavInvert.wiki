@@ -2,7 +2,13 @@
 
 WavInvertはWavファイルの位相を反転します。
 
-DownloadsのところからWavInvertSetup???.msiをダウンロードしてきてインストールして下さい。
+=使用方法=
+
+WavInvertSetup103.msiをダウンロードして実行して下さい。
+
+http://bitspersampleconv2.googlecode.com/files/WavInvertSetup103.msi
+
+=ソースコードの説明=
 
 Wavファイルの位相反転はこのあたりで行っています
 
