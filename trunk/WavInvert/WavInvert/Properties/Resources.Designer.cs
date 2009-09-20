@@ -88,6 +88,15 @@ namespace WavInvert.Properties {
         }
         
         /// <summary>
+        ///   Started に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string Started {
+            get {
+                return ResourceManager.GetString("Started", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   WAV files (*.wav)|*.wav に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string WavFileFilter {
