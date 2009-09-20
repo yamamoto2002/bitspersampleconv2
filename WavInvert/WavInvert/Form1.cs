@@ -19,7 +19,7 @@ namespace WavInvert
         {
             InitializeComponent();
 
-            rm = Form1.Properties.Resources.ResourceManager;
+            rm = WavInvert.Properties.Resources.ResourceManager;
             GuiStatusUpdate();
         }
 

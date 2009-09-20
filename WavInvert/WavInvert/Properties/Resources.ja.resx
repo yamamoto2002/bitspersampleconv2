@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ReadWavFileFailed" xml:space="preserve">
-    <value>Read wav file failed: {0}</value>
+    <value>WAVファイルの読み込みに失敗: {0}</value>
   </data>
   <data name="ReadWavFileStarted" xml:space="preserve">
-    <value>Read wav file started: {0}</value>
+    <value>WAVファイルの読み込み開始: {0}</value>
   </data>
   <data name="ReadWavFileSucceeded" xml:space="preserve">
-    <value>Read wav file succeeded: {0}</value>
+    <value>WAVファイルの読み込み成功: {0}</value>
   </data>
   <data name="Started" xml:space="preserve">
-    <value>Started</value>
+    <value>開始</value>
   </data>
   <data name="WavFileFilter" xml:space="preserve">
-    <value>WAV files (*.wav)|*.wav</value>
+    <value>WAVファイル (*.wav)|*.wav</value>
   </data>
   <data name="WriteWavFileFailed" xml:space="preserve">
-    <value>Write wav file failed: {0}</value>
+    <value>WAVファイルの書き込み失敗: {0}</value>
   </data>
   <data name="WriteWavFileStarted" xml:space="preserve">
-    <value>Write wav file started: {0}</value>
+    <value>WAVファイルの書き込み開始: {0}</value>
   </data>
   <data name="WriteWavFileSucceeded" xml:space="preserve">
-    <value>Write wav file succeeded: {0}</value>
+    <value>WAVファイルの書き込み成功: {0}</value>
   </data>
 </root>
