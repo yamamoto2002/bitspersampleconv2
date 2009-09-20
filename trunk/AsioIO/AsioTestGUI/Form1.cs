@@ -134,22 +134,12 @@ namespace AsioTestGUI
         }
 
         // 1 oct 22.5Hz to approx. 20000Hz ... 10 variations
-        // 22.5
-        // 55
-        // 110
-        // 220
-        // 440
-        // 880
-        // 1760
-        // 3520
-        // 7040
-        // 14080
 
         public bool Start() {
             inputChannelNum = listBoxInput.SelectedIndex;
 
             seconds = 0;
-            for (double f = 22.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
+            for (double f = 27.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
                 ++seconds;
             }
 
