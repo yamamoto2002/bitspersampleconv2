@@ -120,8 +120,53 @@ namespace Compose
             return p;
         }
 
+        List<Chord> I = new List<Chord>();
+        List<Chord> V7 = new List<Chord>();
 
+        public Composer() {
+            I.Add(new Chord(CT.I, P(MN.E, 4), P(MN.C, 4), P(MN.G, 3), P(MN.C, 3)));
+            I.Add(new Chord(CT.I, P(MN.G, 4), P(MN.E, 4), P(MN.C, 4), P(MN.C, 3)));
+            I.Add(new Chord(CT.I, P(MN.C, 5), P(MN.G, 4), P(MN.E, 4), P(MN.C, 3)));
+            I.Add(new Chord(CT.I, P(MN.C, 5), P(MN.E, 4), P(MN.G, 3), P(MN.C, 3)));
+            I.Add(new Chord(CT.I, P(MN.E, 5), P(MN.G, 4), P(MN.C, 4), P(MN.C, 3)));
+            I.Add(new Chord(CT.I, P(MN.G, 5), P(MN.C, 5), P(MN.E, 4), P(MN.C, 3)));
 
+            V7.Add(new Chord(CT.V7, P(MN.F, 4), P(MN.D, 4), P(MN.B, 3), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.F, 4), P(MN.D, 4), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.D, 5), P(MN.B, 4), P(MN.F, 4), P(MN.G, 2)));
+
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.D, 4), P(MN.F, 3), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.D, 5), P(MN.F, 4), P(MN.B, 3), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.F, 5), P(MN.B, 4), P(MN.D, 4), P(MN.G, 2)));
+
+            V7.Add(new Chord(CT.V7, P(MN.F, 4), P(MN.B, 3), P(MN.G, 3), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 4), P(MN.F, 4), P(MN.B, 3), P(MN.G, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.G, 4), P(MN.F, 4), P(MN.G, 2)));
+
+            V7.Add(new Chord(CT.V7, P(MN.F, 4), P(MN.D, 4), P(MN.G, 3), P(MN.B, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 4), P(MN.F, 4), P(MN.D, 4), P(MN.B, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.D, 5), P(MN.G, 4), P(MN.F, 4), P(MN.B, 2)));
+
+            V7.Add(new Chord(CT.V7, P(MN.D, 5), P(MN.F, 4), P(MN.G, 3), P(MN.B, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.F, 5), P(MN.G, 4), P(MN.D, 4), P(MN.B, 2)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 5), P(MN.D, 5), P(MN.F, 4), P(MN.B, 2)));
+
+            V7.Add(new Chord(CT.V7, P(MN.F, 4), P(MN.B, 3), P(MN.G, 3), P(MN.D, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 4), P(MN.F, 4), P(MN.B, 3), P(MN.D, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.G, 4), P(MN.F, 4), P(MN.D, 3)));
+
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.F, 4), P(MN.G, 3), P(MN.D, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.F, 5), P(MN.G, 4), P(MN.B, 3), P(MN.D, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 5), P(MN.B, 4), P(MN.F, 4), P(MN.D, 3)));
+
+            V7.Add(new Chord(CT.V7, P(MN.D, 4), P(MN.B, 3), P(MN.G, 3), P(MN.F, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 4), P(MN.D, 4), P(MN.B, 3), P(MN.F, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.G, 4), P(MN.D, 4), P(MN.F, 3)));
+
+            V7.Add(new Chord(CT.V7, P(MN.B, 4), P(MN.D, 4), P(MN.G, 3), P(MN.F, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.D, 5), P(MN.G, 4), P(MN.B, 3), P(MN.F, 3)));
+            V7.Add(new Chord(CT.V7, P(MN.G, 5), P(MN.B, 4), P(MN.D, 4), P(MN.F, 3)));
+        }
 
         public Music CreateMusic()
         {
