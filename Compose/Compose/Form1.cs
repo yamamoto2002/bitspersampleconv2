@@ -10,6 +10,32 @@ using System.IO;
 
 namespace Compose
 {
+    /// <summary>
+    /// phone name  do re mi
+    /// </summary>
+    enum PN
+    {
+        Silence = -1,
+        C,
+        CIS,
+        D,
+        DIS,
+        E,
+        F,
+        FIS,
+        G,
+        GIS,
+        A,
+        AIS,
+        B
+    };
+
+    struct Pitch
+    {
+        public PN  phoneName;
+        public int octave;
+    }
+
     class MidiWriter
     {
         public MidiWriter(BinaryWriter a)
@@ -61,8 +87,8 @@ namespace Compose
                 v1 = v1 / 128;
                 int v0 = v - v2 * 128*128- v1 *128;
 
-                v2 += 129;
-                v1 += 129;
+                v2 += 128;
+                v1 += 128;
 
                 bw.Write((byte)v2);
                 bw.Write((byte)v1);
@@ -73,7 +99,7 @@ namespace Compose
                 int v1 = v / 128;
                 int v0 = v - v1 *128;
 
-                v1 += 129;
+                v1 += 128;
 
                 bw.Write((byte)v1);
                 bw.Write((byte)v0);
@@ -83,40 +109,21 @@ namespace Compose
         }
     }
 
-    enum NoteType
-    {
-        Silence = -1,
-        C,
-        CIS,
-        D,
-        DIS,
-        E,
-        F,
-        FIS,
-        G,
-        GIS,
-        A,
-        AIS,
-        B
-    };
-
     class Note {
         int      offset;
         int      length;
-        NoteType pitch;
-        int      octave;
+        Pitch    pitch;
         int      volume;
 
-        public Note(int offset, int length, NoteType pitch, int octave, int volume) {
+        public Note(int offset, int length, Pitch pitch, int volume) {
             this.offset = offset;
             this.length = length;
             this.pitch  = pitch;
-            this.octave = octave;
             this.volume = volume;
         }
 
         public int CountMidiBytes(ref int timeCursorRW) {
-            if (pitch == NoteType.Silence)
+            if (pitch.phoneName == PN.Silence)
             {
                 return 0;
             }
@@ -132,14 +139,14 @@ namespace Compose
 
         // returns new time cursor
         public int Write(int timeCursor, MidiWriter mw) {
-            if (pitch == NoteType.Silence)
+            if (pitch.phoneName == PN.Silence)
             {
                 return timeCursor;
             }
 
             // pitch
-            int p = (int)pitch + 0x3c;
-            switch (octave) {
+            int p = (int)pitch.phoneName + 0x3c;
+            switch (pitch.octave) {
                 case 1: p -= 12 * 3; break;
                 case 2: p -= 12 * 2; break;
                 case 3: p -= 12; break;
@@ -172,19 +179,8 @@ namespace Compose
         }
     }
 
-    enum PartType
-    {
-        Soprano,
-        Alto,
-        Tenor,
-        Bass
-    };
-
-    class Part {
-        PartType part;
-
-        public Part(PartType t) {
-            part = t;
+    class MidiTrackInfo {
+        public MidiTrackInfo() {
             noteList = new System.Collections.Generic.List<Note>();
         }
 
@@ -262,6 +258,60 @@ namespace Compose
         }
     }
 
+    class MidiFileInfo
+    {
+        MidiTrackInfo[] tracks;
+
+        public MidiFileInfo(int nTrack)
+        {
+            tracks = new MidiTrackInfo[nTrack];
+            for (int i = 0; i < nTrack; ++i)
+            {
+                tracks[i] = new MidiTrackInfo();
+            }
+        }
+
+        public MidiTrackInfo GetTrack(int n)
+        {
+            return tracks[n];
+        }
+
+        public void WriteMidi(BinaryWriter bw)
+        {
+            MidiHeaderInfo mhi = new MidiHeaderInfo(128, (short)tracks.Length);
+            TrackHeaderInfo thi = new TrackHeaderInfo();
+
+            mhi.WriteMidiHeader(bw);
+
+            for (int i = 0; i < tracks.Length; ++i)
+            {
+                MidiTrackInfo p = GetTrack(i);
+                thi.WriteTrackHeader(p.CountMidiBytes(), bw);
+                p.WriteMidiPart(bw);
+                thi.WriteTrackFooter(bw);
+            }
+        }
+    }
+
+    class Chord {
+        Pitch [] pitches;
+
+        public Chord() {
+            pitches = new Pitch[4];
+            for (int i = 0; i < 4; ++i)
+            {
+                pitches[i] = new Pitch();
+            }
+        }
+
+        public void Set(Pitch soprano, Pitch alto, Pitch tenor, Pitch bass) {
+            pitches[0] = soprano;
+            pitches[1] = alto;
+            pitches[2] = tenor;
+            pitches[3] = bass;            
+        }
+    }
+
     public partial class Form1 : Form
     {
 
@@ -269,31 +319,41 @@ namespace Compose
         {
             InitializeComponent();
 
-            Part p = CreateMusic();
+            MidiFileInfo c = CreateMusic();
 
             using (BinaryWriter bw
                 = new BinaryWriter(File.Open("C:\\output.mid", FileMode.Create))) {
-                OutputMidi(p, bw);
+                OutputMidi(c, bw);
             }
         }
 
-        private Part CreateMusic()
-        {
-            Part p = new Part(PartType.Soprano);
-            p.AddNote(new Note(0, 120, NoteType.C, 4, 0x60));
-            p.AddNote(new Note(128, 120, NoteType.E, 4, 0x60));
-            p.AddNote(new Note(256, 120, NoteType.G, 4, 0x60));
+        Pitch P(PN n, int octave) {
+            Pitch p = new Pitch();
+            p.phoneName = n;
+            p.octave = octave;
             return p;
         }
 
-        private void OutputMidi(Part p,BinaryWriter bw) {
-            MidiHeaderInfo mhi = new MidiHeaderInfo(128, 1);
-            mhi.WriteMidiHeader(bw);
+        private MidiFileInfo CreateMusic()
+        {
+            Chord chord = new Chord();
+            chord.Set(P(PN.E, 4), P(PN.C, 4),P(PN.G, 3), P(PN.C, 3));
 
-            TrackHeaderInfo thi = new TrackHeaderInfo();
-            thi.WriteTrackHeader(p.CountMidiBytes(), bw);
-            p.WriteMidiPart(bw);
-            thi.WriteTrackFooter(bw);
+            MidiFileInfo c = new MidiFileInfo(4);
+            MidiTrackInfo s = c.GetTrack(0);
+            MidiTrackInfo a = c.GetTrack(1);
+            MidiTrackInfo t = c.GetTrack(2);
+            MidiTrackInfo b = c.GetTrack(3);
+
+            s.AddNote(new Note(0, 128, P(PN.C, 4), 0x60));
+            a.AddNote(new Note(0, 120, P(PN.E, 4), 0x60));
+            t.AddNote(new Note(0, 120, P(PN.G, 4), 0x60));
+            b.AddNote(new Note(0, 120, P(PN.B, 4), 0x60));
+            return c;
+        }
+
+        private void OutputMidi(MidiFileInfo c, BinaryWriter bw) {
+            c.WriteMidi(bw);
         }
     }
 }
