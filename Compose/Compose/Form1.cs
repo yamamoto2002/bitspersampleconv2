@@ -188,7 +188,7 @@ namespace Compose
             noteList.Add(note);
         }
 
-        public void WriteMidiPart(BinaryWriter a) {
+        public void Write(BinaryWriter a) {
             MidiWriter mw = new MidiWriter(a);
 
             int timeCursor = 0;
@@ -236,7 +236,7 @@ namespace Compose
         }
     }
 
-    class TrackHeaderInfo
+    class MidiTrackHeaderInfo
     {
         public void WriteTrackHeader(int partDataBytes, BinaryWriter a)
         {
@@ -276,10 +276,10 @@ namespace Compose
             return tracks[n];
         }
 
-        public void WriteMidi(BinaryWriter bw)
+        public void Write(BinaryWriter bw)
         {
             MidiHeaderInfo mhi = new MidiHeaderInfo(128, (short)tracks.Length);
-            TrackHeaderInfo thi = new TrackHeaderInfo();
+            MidiTrackHeaderInfo thi = new MidiTrackHeaderInfo();
 
             mhi.WriteMidiHeader(bw);
 
@@ -287,7 +287,7 @@ namespace Compose
             {
                 MidiTrackInfo p = GetTrack(i);
                 thi.WriteTrackHeader(p.CountMidiBytes(), bw);
-                p.WriteMidiPart(bw);
+                p.Write(bw);
                 thi.WriteTrackFooter(bw);
             }
         }
@@ -303,6 +303,18 @@ namespace Compose
                 pitches[i] = new Pitch();
             }
         }
+        public Chord(Pitch soprano, Pitch alto, Pitch tenor, Pitch bass)
+        {
+            pitches = new Pitch[4];
+            for (int i = 0; i < 4; ++i)
+            {
+                pitches[i] = new Pitch();
+            }
+            pitches[0] = soprano;
+            pitches[1] = alto;
+            pitches[2] = tenor;
+            pitches[3] = bass;
+        }
 
         public void Set(Pitch soprano, Pitch alto, Pitch tenor, Pitch bass) {
             pitches[0] = soprano;
@@ -310,21 +322,26 @@ namespace Compose
             pitches[2] = tenor;
             pitches[3] = bass;            
         }
+
+        public Pitch GetPitch(int part) {
+            return pitches[part];
+        }
     }
 
     public partial class Form1 : Form
     {
-
         public Form1()
         {
             InitializeComponent();
 
-            MidiFileInfo c = CreateMusic();
+            CreateMusic();
 
             using (BinaryWriter bw
                 = new BinaryWriter(File.Open("C:\\output.mid", FileMode.Create))) {
-                OutputMidi(c, bw);
+                OutputMidi(bw);
             }
+
+            Application.Exit();
         }
 
         Pitch P(MN n, int octave) {
@@ -334,26 +351,38 @@ namespace Compose
             return p;
         }
 
-        private MidiFileInfo CreateMusic()
+        List<Chord> chordList;
+
+        private MidiFileInfo ChordListToMidiFile(int interval, int volume)
         {
-            Chord chord = new Chord();
-            chord.Set(P(MN.E, 4), P(MN.C, 4),P(MN.G, 3), P(MN.C, 3));
+            MidiFileInfo r = new MidiFileInfo(4);
+            MidiTrackInfo s = r.GetTrack(0);
+            MidiTrackInfo a = r.GetTrack(1);
+            MidiTrackInfo t = r.GetTrack(2);
+            MidiTrackInfo b = r.GetTrack(3);
 
-            MidiFileInfo c = new MidiFileInfo(4);
-            MidiTrackInfo s = c.GetTrack(0);
-            MidiTrackInfo a = c.GetTrack(1);
-            MidiTrackInfo t = c.GetTrack(2);
-            MidiTrackInfo b = c.GetTrack(3);
-
-            s.AddNote(new Note(0, 128, P(MN.C, 4), 0x60));
-            a.AddNote(new Note(0, 120, P(MN.E, 4), 0x60));
-            t.AddNote(new Note(0, 120, P(MN.G, 4), 0x60));
-            b.AddNote(new Note(0, 120, P(MN.B, 4), 0x60));
-            return c;
+            int now =0;
+            for (int i = 0; i < chordList.Count; ++i)
+            {
+                now += interval;
+                s.AddNote(new Note(now, interval - 1, chordList[i].GetPitch(0), volume));
+                a.AddNote(new Note(now, interval - 1, chordList[i].GetPitch(1), volume));
+                t.AddNote(new Note(now, interval - 1, chordList[i].GetPitch(2), volume));
+                b.AddNote(new Note(now, interval - 1, chordList[i].GetPitch(3), volume));
+            }
+            return r;
         }
 
-        private void OutputMidi(MidiFileInfo c, BinaryWriter bw) {
-            c.WriteMidi(bw);
+        private void CreateMusic()
+        {
+            chordList = new List<Chord>();
+            chordList.Add(new Chord(P(MN.B, 4), P(MN.G, 4), P(MN.E, 3), P(MN.C, 3)));
+            chordList.Add(new Chord(P(MN.E, 4), P(MN.C, 4), P(MN.G, 3), P(MN.C, 3)));
+        }
+
+        private void OutputMidi(BinaryWriter bw) {
+            MidiFileInfo mfi = ChordListToMidiFile(128, 0x60);
+            mfi.Write(bw);
         }
     }
 }
