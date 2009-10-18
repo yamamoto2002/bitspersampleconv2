@@ -11,9 +11,9 @@ using System.IO;
 namespace Compose
 {
     /// <summary>
-    /// phone name  do re mi
+    /// Musical note do re mi
     /// </summary>
-    enum PN
+    enum MN
     {
         Silence = -1,
         C,
@@ -32,7 +32,7 @@ namespace Compose
 
     struct Pitch
     {
-        public PN  phoneName;
+        public MN  musicalNote;
         public int octave;
     }
 
@@ -123,7 +123,7 @@ namespace Compose
         }
 
         public int CountMidiBytes(ref int timeCursorRW) {
-            if (pitch.phoneName == PN.Silence)
+            if (pitch.musicalNote == MN.Silence)
             {
                 return 0;
             }
@@ -139,13 +139,13 @@ namespace Compose
 
         // returns new time cursor
         public int Write(int timeCursor, MidiWriter mw) {
-            if (pitch.phoneName == PN.Silence)
+            if (pitch.musicalNote == MN.Silence)
             {
                 return timeCursor;
             }
 
             // pitch
-            int p = (int)pitch.phoneName + 0x3c;
+            int p = (int)pitch.musicalNote + 0x3c;
             switch (pitch.octave) {
                 case 1: p -= 12 * 3; break;
                 case 2: p -= 12 * 2; break;
@@ -327,9 +327,9 @@ namespace Compose
             }
         }
 
-        Pitch P(PN n, int octave) {
+        Pitch P(MN n, int octave) {
             Pitch p = new Pitch();
-            p.phoneName = n;
+            p.musicalNote = n;
             p.octave = octave;
             return p;
         }
@@ -337,7 +337,7 @@ namespace Compose
         private MidiFileInfo CreateMusic()
         {
             Chord chord = new Chord();
-            chord.Set(P(PN.E, 4), P(PN.C, 4),P(PN.G, 3), P(PN.C, 3));
+            chord.Set(P(MN.E, 4), P(MN.C, 4),P(MN.G, 3), P(MN.C, 3));
 
             MidiFileInfo c = new MidiFileInfo(4);
             MidiTrackInfo s = c.GetTrack(0);
@@ -345,10 +345,10 @@ namespace Compose
             MidiTrackInfo t = c.GetTrack(2);
             MidiTrackInfo b = c.GetTrack(3);
 
-            s.AddNote(new Note(0, 128, P(PN.C, 4), 0x60));
-            a.AddNote(new Note(0, 120, P(PN.E, 4), 0x60));
-            t.AddNote(new Note(0, 120, P(PN.G, 4), 0x60));
-            b.AddNote(new Note(0, 120, P(PN.B, 4), 0x60));
+            s.AddNote(new Note(0, 128, P(MN.C, 4), 0x60));
+            a.AddNote(new Note(0, 120, P(MN.E, 4), 0x60));
+            t.AddNote(new Note(0, 120, P(MN.G, 4), 0x60));
+            b.AddNote(new Note(0, 120, P(MN.B, 4), 0x60));
             return c;
         }
 
