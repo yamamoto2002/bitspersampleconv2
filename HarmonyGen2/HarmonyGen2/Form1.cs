@@ -58,7 +58,7 @@ namespace HarmonyGen2
          * 7       -----------------------------------------------
          * 8       G_CLEF_Y---------------------------------------
          * 9       -----------------------------------------------
-         * 10
+         * 10      G_O4C_Y
          * 11
          * 12
          * 13
@@ -70,29 +70,32 @@ namespace HarmonyGen2
          * 19      -----------------------------------------------
          * 20      -----------------------------------------------
          * 21 MARGIN_W
-         * 22
+         * 22      F_O2C_Y
          * 23
          * 24 BOTTOM_Y
          * */
-
-        const int   BAR_INTERVAL_PIXEL = 16;
+        
+        const int   BAR_INTERVAL_PIXEL = 10;
+        const int   NOTE_INTERVAL_Y_PIXEL = BAR_INTERVAL_PIXEL/2;
         const int   G_START_BAR_Y = 5;
         const int   F_START_BAR_Y = 16;
-        const float G_CLEF_Y = BAR_INTERVAL_PIXEL * 3.3f;
-        const float F_CLEF_Y = BAR_INTERVAL_PIXEL * 14.3f;
-        const int   MARGIN_W = BAR_INTERVAL_PIXEL * 1;
+        const float G_CLEF_Y_PIXEL = BAR_INTERVAL_PIXEL * 3.3f;
+        const float F_CLEF_Y_PIXEL = BAR_INTERVAL_PIXEL * 14.3f;
+        const int G_O4C_Y_PIXEL = BAR_INTERVAL_PIXEL * 10;
+        const int F_O2C_Y_PIXEL = BAR_INTERVAL_PIXEL * 22;
+        const int MARGIN_W_PIXEL = BAR_INTERVAL_PIXEL * 1;
         const int   CHORD_SPACE_PIXEL = 64;
-        const int   CHORD_START_PIXEL_X = MARGIN_W + 6 * BAR_INTERVAL_PIXEL;
-        const int   BOTTOM_Y = 24 * BAR_INTERVAL_PIXEL;
+        const int CHORD_START_PIXEL_X = MARGIN_W_PIXEL + 6 * BAR_INTERVAL_PIXEL;
+        const int BOTTOM_Y_PIXEL = 24 * BAR_INTERVAL_PIXEL;
 
-        const float   NOTE_W = 19;
-        const float   NOTE_H = 15;
+        const float NOTE_W_PIXEL = 19.0f * BAR_INTERVAL_PIXEL / 16;
+        const float NOTE_H_PIXEL = 15.0f * BAR_INTERVAL_PIXEL / 16;
 
         private void PaintCursor(Graphics g)
         {
             Point top = new Point(
                 CHORD_START_PIXEL_X + CHORD_SPACE_PIXEL * cursorPos, 0);
-            Point bottom = new Point(top.X, BOTTOM_Y);
+            Point bottom = new Point(top.X, BOTTOM_Y_PIXEL);
 
             Pen pen = new Pen(Color.Black, 2.0f);
             pen.StartCap = LineCap.Square;
@@ -102,25 +105,96 @@ namespace HarmonyGen2
             g.DrawLine(pen, top, bottom);
         }
 
-        private void PaintNote(Graphics g, Pitch pitch, Part part)
+        private int MusicalNoteToNoteDistanceFromC(MN musicalNote)
         {
-            Point pos = new Point(
-                CHORD_START_PIXEL_X + CHORD_SPACE_PIXEL * cursorPos,
-                G_START_BAR_Y * BAR_INTERVAL_PIXEL);
-            SolidBrush brush = new SolidBrush(Color.Black);
+            switch (musicalNote){
+                case MN.C:
+                case MN.CIS:
+                    return 0;
+                case MN.D:
+                case MN.DIS:
+                    return 1;
+                case MN.E:
+                    return 2;
+                case MN.F:
+                case MN.FIS:
+                    return 3;
+                case MN.G:
+                case MN.GIS:
+                    return 4;
+                case MN.A:
+                case MN.AIS:
+                    return 5;
+                case MN.B:
+                    return 6;
+                default:
+                    return -1;
+            }
+        }
 
-            switch (part) {
+        private int PitchToGClefY(Pitch p)
+        {
+            if (p.octave < 3) {
+                return -1;
+            }
+            return (p.octave - 4) * 7 + MusicalNoteToNoteDistanceFromC(p.musicalNote);
+        }
+
+        private int PitchToFClefY(Pitch p)
+        {
+            if (p.octave < 1)
+            {
+                return -1;
+            }
+            return (p.octave - 2) * 7 + MusicalNoteToNoteDistanceFromC(p.musicalNote);
+        }
+
+        private int PitchAndPartToY(Pitch pitch, Part part)
+        {
+            switch (part)
+            {
             case Part.Soprano:
             case Part.Alto:
-                g.FillEllipse(brush,
-                    pos.X - NOTE_W / 2.0f,
-                    pos.Y - NOTE_H / 2.0f,
-                    NOTE_W,
-                    NOTE_H);
-                break;
+                return G_O4C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * PitchToGClefY(pitch);
             case Part.Tenor:
             case Part.Bass:
+                return F_O2C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * PitchToFClefY(pitch);
+            default:
+                System.Diagnostics.Debug.Assert(false);
                 break;
+            }
+            return -1;
+        }
+
+        private void PaintNote(Graphics g, Pitch pitch, Part part)
+        {
+            SolidBrush brush = new SolidBrush(Color.Black);
+
+            Point pos = new Point(
+                CHORD_START_PIXEL_X + CHORD_SPACE_PIXEL * cursorPos,
+                PitchAndPartToY(pitch,part));
+
+            g.FillEllipse(brush,
+                pos.X - NOTE_W_PIXEL / 2.0f,
+                pos.Y - NOTE_H_PIXEL / 2.0f,
+                NOTE_W_PIXEL,
+                NOTE_H_PIXEL);
+
+            // 棒
+            Pen pen = new Pen(Color.Black, 1.0f);
+            switch (part) {
+                case Part.Soprano:
+                case Part.Tenor:
+                    g.DrawLine(pen,
+                        pos.X + NOTE_W_PIXEL / 2, pos.Y,
+                        pos.X + NOTE_W_PIXEL / 2, pos.Y - NOTE_INTERVAL_Y_PIXEL * 7);
+                    break;
+                case Part.Alto:
+                case Part.Bass:
+                    g.DrawLine(pen,
+                        pos.X - NOTE_W_PIXEL / 2, pos.Y,
+                        pos.X - NOTE_W_PIXEL / 2, pos.Y + NOTE_INTERVAL_Y_PIXEL * 7);
+                    break;
             }
         }
 
@@ -144,7 +218,7 @@ namespace HarmonyGen2
             Point upperRight = new Point(xy.X + wh.Width, xy.Y);
 
             for (int i=0; i < 5; ++i) {
-                Point left = new Point(xy.X + MARGIN_W, xy.Y);
+                Point left = new Point(xy.X + MARGIN_W_PIXEL, xy.Y);
                 Point right = new Point(upperRight.X, upperRight.Y);
 
                 left.Y += (i + G_START_BAR_Y) * BAR_INTERVAL_PIXEL;
@@ -152,7 +226,7 @@ namespace HarmonyGen2
                 g.DrawLine(pen, left, right);
             }
             for (int i=0; i < 5; ++i) {
-                Point left = new Point(xy.X + MARGIN_W, xy.Y);
+                Point left = new Point(xy.X + MARGIN_W_PIXEL, xy.Y);
                 Point right = new Point(upperRight.X, upperRight.Y);
 
                 left.Y += (i + F_START_BAR_Y) * BAR_INTERVAL_PIXEL;
@@ -160,11 +234,11 @@ namespace HarmonyGen2
                 g.DrawLine(pen, left, right);
             }
 
-            PointF gClefPos = new PointF(MARGIN_W, G_CLEF_Y);
-            PointF fClefPos = new PointF(MARGIN_W, F_CLEF_Y);
+            PointF gClefPos = new PointF(MARGIN_W_PIXEL, G_CLEF_Y_PIXEL);
+            PointF fClefPos = new PointF(MARGIN_W_PIXEL, F_CLEF_Y_PIXEL);
             SolidBrush brush = new SolidBrush(Color.Black);
-            Font font = new Font("MusicalSymbols", 40);
-            g.DrawString("&", font, brush, gClefPos);
+            Font font = new Font("MusiSync", 56.0f *BAR_INTERVAL_PIXEL/16);
+            g.DrawString("G", font, brush, gClefPos);
             g.DrawString("?", font, brush, fClefPos);
         }
 
@@ -193,5 +267,6 @@ namespace HarmonyGen2
         {
 
         }
+
     }
 }
