@@ -31,6 +31,7 @@
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.radioBass3 = new System.Windows.Forms.RadioButton();
             this.radioBass2 = new System.Windows.Forms.RadioButton();
@@ -47,22 +48,21 @@
             this.radioNumber3 = new System.Windows.Forms.RadioButton();
             this.radioNumber2 = new System.Windows.Forms.RadioButton();
             this.radioNumber1 = new System.Windows.Forms.RadioButton();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
-            this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.groupBox6.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            this.groupBox6.SuspendLayout();
+            this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -106,9 +106,21 @@
             // 
             this.splitContainer1.Panel2.Controls.Add(this.groupBox6);
             this.splitContainer1.Panel2.Controls.Add(this.groupBox5);
-            this.splitContainer1.Size = new System.Drawing.Size(929, 663);
-            this.splitContainer1.SplitterDistance = 382;
+            this.splitContainer1.Size = new System.Drawing.Size(929, 578);
+            this.splitContainer1.SplitterDistance = 313;
             this.splitContainer1.TabIndex = 2;
+            // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.groupBox4);
+            this.groupBox6.Controls.Add(this.groupBox3);
+            this.groupBox6.Controls.Add(this.groupBox2);
+            this.groupBox6.Location = new System.Drawing.Point(12, 3);
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.Size = new System.Drawing.Size(468, 236);
+            this.groupBox6.TabIndex = 8;
+            this.groupBox6.TabStop = false;
+            this.groupBox6.Text = "和音の設定";
             // 
             // groupBox4
             // 
@@ -116,7 +128,7 @@
             this.groupBox4.Controls.Add(this.radioBass2);
             this.groupBox4.Controls.Add(this.radioBass1);
             this.groupBox4.Controls.Add(this.radioBass0);
-            this.groupBox4.Location = new System.Drawing.Point(246, 21);
+            this.groupBox4.Location = new System.Drawing.Point(230, 21);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(146, 134);
             this.groupBox4.TabIndex = 6;
@@ -170,12 +182,12 @@
             // 
             this.groupBox3.Controls.Add(this.radioType7);
             this.groupBox3.Controls.Add(this.radioType3);
-            this.groupBox3.Location = new System.Drawing.Point(112, 21);
+            this.groupBox3.Location = new System.Drawing.Point(96, 21);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(128, 96);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "和音の形体";
+            this.groupBox3.Text = "形体";
             // 
             // radioType7
             // 
@@ -212,10 +224,10 @@
             this.groupBox2.Controls.Add(this.radioNumber1);
             this.groupBox2.Location = new System.Drawing.Point(6, 21);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(100, 205);
+            this.groupBox2.Size = new System.Drawing.Size(84, 205);
             this.groupBox2.TabIndex = 4;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "和音の度数";
+            this.groupBox2.Text = "度数";
             // 
             // radioNumber7
             // 
@@ -289,6 +301,16 @@
             this.radioNumber1.Text = "I (&1)";
             this.radioNumber1.UseVisualStyleBackColor = true;
             // 
+            // groupBox5
+            // 
+            this.groupBox5.Controls.Add(this.groupBox1);
+            this.groupBox5.Location = new System.Drawing.Point(551, 3);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(366, 246);
+            this.groupBox5.TabIndex = 7;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "選択編集";
+            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.radioButton4);
@@ -344,33 +366,11 @@
             this.radioButton1.Text = "&Soprano";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
-            // groupBox5
-            // 
-            this.groupBox5.Controls.Add(this.groupBox1);
-            this.groupBox5.Location = new System.Drawing.Point(551, 3);
-            this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(366, 262);
-            this.groupBox5.TabIndex = 7;
-            this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "選択編集";
-            // 
-            // groupBox6
-            // 
-            this.groupBox6.Controls.Add(this.groupBox4);
-            this.groupBox6.Controls.Add(this.groupBox3);
-            this.groupBox6.Controls.Add(this.groupBox2);
-            this.groupBox6.Location = new System.Drawing.Point(12, 3);
-            this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(468, 246);
-            this.groupBox6.TabIndex = 8;
-            this.groupBox6.TabStop = false;
-            this.groupBox6.Text = "和音の設定";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(929, 687);
+            this.ClientSize = new System.Drawing.Size(929, 602);
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
@@ -380,16 +380,16 @@
             this.menuStrip1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.ResumeLayout(false);
+            this.groupBox6.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox5.ResumeLayout(false);
-            this.groupBox6.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
