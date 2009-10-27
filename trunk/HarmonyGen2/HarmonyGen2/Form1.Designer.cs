@@ -54,6 +54,10 @@
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.radioCondensed = new System.Windows.Forms.RadioButton();
+            this.radioSparse = new System.Windows.Forms.RadioButton();
+            this.radioOctave = new System.Windows.Forms.RadioButton();
             this.menuStrip1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -63,6 +67,7 @@
             this.groupBox2.SuspendLayout();
             this.groupBox5.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.groupBox7.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -112,6 +117,7 @@
             // 
             // groupBox6
             // 
+            this.groupBox6.Controls.Add(this.groupBox7);
             this.groupBox6.Controls.Add(this.groupBox4);
             this.groupBox6.Controls.Add(this.groupBox3);
             this.groupBox6.Controls.Add(this.groupBox2);
@@ -366,6 +372,52 @@
             this.radioButton1.Text = "&Soprano";
             this.radioButton1.UseVisualStyleBackColor = true;
             // 
+            // groupBox7
+            // 
+            this.groupBox7.Controls.Add(this.radioOctave);
+            this.groupBox7.Controls.Add(this.radioSparse);
+            this.groupBox7.Controls.Add(this.radioCondensed);
+            this.groupBox7.Location = new System.Drawing.Point(96, 123);
+            this.groupBox7.Name = "groupBox7";
+            this.groupBox7.Size = new System.Drawing.Size(128, 103);
+            this.groupBox7.TabIndex = 7;
+            this.groupBox7.TabStop = false;
+            this.groupBox7.Text = "上3声の配分";
+            // 
+            // radioCondensed
+            // 
+            this.radioCondensed.AutoSize = true;
+            this.radioCondensed.Checked = true;
+            this.radioCondensed.Location = new System.Drawing.Point(7, 21);
+            this.radioCondensed.Name = "radioCondensed";
+            this.radioCondensed.Size = new System.Drawing.Size(106, 19);
+            this.radioCondensed.TabIndex = 0;
+            this.radioCondensed.TabStop = true;
+            this.radioCondensed.Text = "密集配分(&M)";
+            this.radioCondensed.UseVisualStyleBackColor = true;
+            // 
+            // radioSparse
+            // 
+            this.radioSparse.AutoSize = true;
+            this.radioSparse.Location = new System.Drawing.Point(7, 46);
+            this.radioSparse.Name = "radioSparse";
+            this.radioSparse.Size = new System.Drawing.Size(104, 19);
+            this.radioSparse.TabIndex = 1;
+            this.radioSparse.TabStop = true;
+            this.radioSparse.Text = "開離配分(&K)";
+            this.radioSparse.UseVisualStyleBackColor = true;
+            // 
+            // radioOctave
+            // 
+            this.radioOctave.AutoSize = true;
+            this.radioOctave.Location = new System.Drawing.Point(7, 69);
+            this.radioOctave.Name = "radioOctave";
+            this.radioOctave.Size = new System.Drawing.Size(100, 19);
+            this.radioOctave.TabIndex = 2;
+            this.radioOctave.TabStop = true;
+            this.radioOctave.Text = "Oct配分(&O)";
+            this.radioOctave.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -390,6 +442,8 @@
             this.groupBox5.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -424,6 +478,10 @@
         private System.Windows.Forms.RadioButton radioBass0;
         private System.Windows.Forms.GroupBox groupBox6;
         private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.GroupBox groupBox7;
+        private System.Windows.Forms.RadioButton radioOctave;
+        private System.Windows.Forms.RadioButton radioSparse;
+        private System.Windows.Forms.RadioButton radioCondensed;
     }
 }
 
