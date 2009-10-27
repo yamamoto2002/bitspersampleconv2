@@ -30,6 +30,11 @@ namespace Compose
     {
         public MN  musicalNote;
         public int octave;
+
+        public Pitch(MN aMusicalNote, int aOctave) {
+            musicalNote = aMusicalNote;
+            octave = aOctave;
+        }
     }
 
     public class MidiWriter

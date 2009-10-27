@@ -90,6 +90,7 @@ namespace HarmonyGen2
 
         const float NOTE_W_PIXEL = 19.0f * BAR_INTERVAL_PIXEL / 16;
         const float NOTE_H_PIXEL = 15.0f * BAR_INTERVAL_PIXEL / 16;
+        const float LEDGER_LINE_PIXEL = NOTE_W_PIXEL*1.8f;
 
         private void PaintCursor(Graphics g)
         {
@@ -132,6 +133,7 @@ namespace HarmonyGen2
             }
         }
 
+        // ト音記号で下のドからの距離
         private int PitchToGClefY(Pitch p)
         {
             if (p.octave < 3) {
@@ -140,6 +142,7 @@ namespace HarmonyGen2
             return (p.octave - 4) * 7 + MusicalNoteToNoteDistanceFromC(p.musicalNote);
         }
 
+        //　ヘ音記号で真ん中のドからの距離
         private int PitchToFClefY(Pitch p)
         {
             if (p.octave < 1)
@@ -149,7 +152,7 @@ namespace HarmonyGen2
             return (p.octave - 2) * 7 + MusicalNoteToNoteDistanceFromC(p.musicalNote);
         }
 
-        private int PitchAndPartToY(Pitch pitch, Part part)
+        private int PitchAndPartToYPixel(Pitch pitch, Part part)
         {
             switch (part)
             {
@@ -166,19 +169,93 @@ namespace HarmonyGen2
             return -1;
         }
 
+        private void PaintLedgerLines(Graphics g, Point notePos, Pitch pitch, Part part)
+        {
+            Pen pen = new Pen(Color.Black, 2.0f);
+
+            Pitch upperA  = new Pitch(MN.A, 5);
+            Pitch centerC = new Pitch(MN.C, 4);
+            Pitch lowerE = new Pitch(MN.E, 2);
+
+            switch (part) {
+            case Part.Soprano:
+            case Part.Alto:
+                {
+                    if (PitchToGClefY(upperA) <= PitchToGClefY(pitch))
+                    {
+                        for (int i = PitchToGClefY(upperA); i <= PitchToGClefY(pitch); i += 2) {
+                            Point pos = new Point(notePos.X, G_O4C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * i);
+                            g.DrawLine(pen,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y);
+                        }
+                    }
+                    else if (PitchToGClefY(pitch) <= PitchToGClefY(centerC))
+                    {
+                        for (int i = PitchToGClefY(centerC); i >= PitchToGClefY(pitch); i -= 2)
+                        {
+                            Point pos = new Point(notePos.X, G_O4C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * i);
+                            g.DrawLine(pen,
+                                pos.X - LEDGER_LINE_PIXEL / 2,
+                                pos.Y,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y);
+                        }
+                    }
+                }
+                break;
+            case Part.Tenor:
+            case Part.Bass:
+                {
+                    if (PitchToFClefY(centerC) <= PitchToFClefY(pitch))
+                    {
+                        for (int i = PitchToFClefY(centerC); i <= PitchToFClefY(pitch); i += 2)
+                        {
+                            Point pos = new Point(notePos.X, F_O2C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * i);
+                            g.DrawLine(pen,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y);
+                        }
+                    }
+                    else if (PitchToFClefY(pitch) <= PitchToFClefY(lowerE))
+                    {
+                        for (int i = PitchToFClefY(lowerE); i >= PitchToFClefY(pitch); i -= 2)
+                        {
+                            Point pos = new Point(notePos.X, F_O2C_Y_PIXEL - NOTE_INTERVAL_Y_PIXEL * i);
+                            g.DrawLine(pen,
+                                pos.X - LEDGER_LINE_PIXEL / 2,
+                                pos.Y,
+                                pos.X + LEDGER_LINE_PIXEL / 2,
+                                pos.Y);
+                        }
+                    }
+                }
+                break;
+                default:
+                break;
+            }
+        }
+
         private void PaintNote(Graphics g, Pitch pitch, Part part)
         {
             SolidBrush brush = new SolidBrush(Color.Black);
 
             Point pos = new Point(
                 CHORD_START_PIXEL_X + CHORD_SPACE_PIXEL * cursorPos,
-                PitchAndPartToY(pitch,part));
+                PitchAndPartToYPixel(pitch,part));
 
             g.FillEllipse(brush,
                 pos.X - NOTE_W_PIXEL / 2.0f,
                 pos.Y - NOTE_H_PIXEL / 2.0f,
                 NOTE_W_PIXEL,
                 NOTE_H_PIXEL);
+
+            // ledger lines
+            PaintLedgerLines(g, pos, pitch, part);
 
             // 棒
             Pen pen = new Pen(Color.Black, 1.0f);
