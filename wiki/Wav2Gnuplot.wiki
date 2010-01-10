@@ -29,7 +29,7 @@ http://bitspersampleconv2.googlecode.com/files/Wav2Gnuplot2.jpg
 (11.wav.dat、22.wav.datがWav2Gnuplotで出力したデータとする。)
 
 {{{
-gnuplot> set terminal png small color picsize 3040 2560
+gnuplot> set terminal png large size 3040, 2560
 gnuplot> set output "output2.png"
 gnuplot> plot "11.wav.dat" with lines, "22.wav.dat" with lines
 gnuplot> quit
@@ -37,7 +37,7 @@ gnuplot> quit
 
 3つのWAVファイルのサンプルデータをプロットするには、以下のようにします。
 {{{
-gnuplot> set terminal png small color picsize 3040 2560
+gnuplot> set terminal png large size 3040, 2560
 gnuplot> set output "output2.png"
 gnuplot> plot "11.wav.dat" with lines, "22.wav.dat" with lines, "33.wav.dat" with lines
 gnuplot> quit
