@@ -43,4 +43,4 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/
   * ダイアログに入れられた値の範囲チェック。
 
 === バージョン 1.0.0 ===
-新規作成
+  * 新規作成
