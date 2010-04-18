@@ -40,8 +40,8 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/
 = 更新履歴 =
 
 === バージョン 1.0.1 ===
-  * マルチコア対応。
   * ダイアログに入れられた値の範囲チェック。
+  * マルチコア対応。Intel Core i7-980Xでの実行結果。見事にすべてのCPUに負荷が分散しています http://bitspersampleconv2.googlecode.com/files/taskman.png
 
 === バージョン 1.0.0 ===
   * 新規作成
