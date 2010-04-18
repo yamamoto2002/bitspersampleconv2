@@ -35,10 +35,10 @@
         <GroupBox Grid.Row="1" Header="出力するデータ" Name="groupBox2">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
-                    <RowDefinition />
+                    <RowDefinition Height="54*" />
+                    <RowDefinition Height="30*" />
+                    <RowDefinition Height="42*" />
+                    <RowDefinition Height="42*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
@@ -48,9 +48,12 @@
                 <ListBox Grid.Column="1" Name="listBoxShape">
                     <ListBoxItem Content="サイン波" />
                     <ListBoxItem Content="矩形波" IsSelected="True" />
+                    <ListBoxItem Content="のこぎり波(下降)" />
+                    <ListBoxItem Content="のこぎり波(上昇)" />
+                    <ListBoxItem Content="三角波" />
                 </ListBox>
-                <Label Content="出力レベル(dB)" Grid.Row="1" HorizontalAlignment="Stretch" Name="label4" VerticalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
-                <TextBox Grid.Column="1" Grid.Row="1" Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" />
+                <Label Content="出力レベル(dB)" HorizontalAlignment="Stretch" Name="label4" VerticalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Grid.Row="1" />
+                <TextBox Grid.Column="1" Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" Grid.Row="1" />
                 <Label HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="1,0,0,1" Name="label5" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="2" Content="長さ(秒)" />
                 <TextBox Margin="1,0,-1,0" Name="textBoxSeconds" Text="30" VerticalContentAlignment="Center" Grid.Column="1" Grid.Row="2" />
                 <Label Content="信号周波数(Hz)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="0,0,1,1" Name="label6" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="3" />
