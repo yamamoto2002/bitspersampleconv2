@@ -17,3 +17,11 @@ http://bitspersampleconv2.googlecode.com/files/sqwave2ss.png
 http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
+
+= ソースコード =
+
+SVNリポジトリに入っています。
+
+このあたりで矩形波を作っています。
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#249
