@@ -10,6 +10,7 @@ SqWave2は矩形波WAVファイルを出力するツールです。
 
 http://bitspersampleconv2.googlecode.com/files/SqWave10000.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
+
 デスクトップにSqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
 
 http://bitspersampleconv2.googlecode.com/files/sqwave2ss.png
