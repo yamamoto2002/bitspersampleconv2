@@ -28,6 +28,7 @@ http://bitspersampleconv2.googlecode.com/files/spectrum.png
 http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
+
 ↑エイリアシング歪が生じています。これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
 = ソースコード =
