@@ -1,0 +1,19 @@
+#summary 矩形波WAVファイルを出力するツールSqWave2
+
+= 説明 =
+
+SqWave2は矩形波WAVファイルを出力するツールです。
+
+WaveGeneの矩形波出力波形がいまいちだったので作りました。
+
+= 使用方法 =
+
+http://bitspersampleconv2.googlecode.com/files/SqWave10000.zip
+をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
+デスクトップにSqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
+
+http://bitspersampleconv2.googlecode.com/files/sqwave2ss.png
+
+http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
+
+http://bitspersampleconv2.googlecode.com/files/spectrum.png
