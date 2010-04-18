@@ -14,13 +14,15 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10000.zip
 
 http://bitspersampleconv2.googlecode.com/files/sqwave2ss.png
 
-SqWave2の出力波形とスペクトル
+== SqWave2の出力波形とスペクトル ==
+
 http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
-参考：WaveGene 1.40の出力波形とスペクトル
+== 参考：WaveGene 1.40の出力波形とスペクトル==
 
+http://bitspersampleconv2.googlecode.com/files/WG_WaveForm.png
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 
