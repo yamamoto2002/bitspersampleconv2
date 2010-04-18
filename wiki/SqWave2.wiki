@@ -23,10 +23,11 @@ http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 == 参考：!WaveGene 1.40の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
+エイリアシング歪が生じています
+
 http://bitspersampleconv2.googlecode.com/files/WG_WaveForm.png
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
-
 
 = ソースコード =
 
