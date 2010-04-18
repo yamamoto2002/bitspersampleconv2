@@ -56,6 +56,21 @@ namespace sqwave2
             textBoxOutput.Text = path;
         }
 
+        enum CreateWavDataResult
+        {
+            Success,
+            LevelOver
+        }
+
+        enum SignalShape
+        {
+            SineWave,
+            SquareWave,
+            SawToothWaveDesc,
+            SawToothWaveAsc,
+            TriangleWave,
+        };
+
         struct Settings
         {
             public int seconds;
@@ -137,27 +152,67 @@ namespace sqwave2
 
             textBoxLog.Text = "";
 
-            if (ss == SignalShape.SquareWave) {
-
-                double harmonics = 0;
-                for (int i = 1; ; ++i) {
-                    harmonics = 2 * i - 1;
-                    double level = dB + 20 * Math.Log10(1.0 / harmonics);
-                    if (harmonics * freq < sampleRate/2 &&
-                        -96.0 < level) {
-                        /*
-                        if (harmonics == 1) {
-                            textBoxLog.Text += string.Format("基本周波数: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+            switch (ss) {
+            case SignalShape.SineWave:
+                break;
+            case SignalShape.TriangleWave: {
+                    double harmonics = 0;
+                    for (int i = 1; ; ++i) {
+                        harmonics = 2 * i - 1;
+                        double level = dB + 20 * Math.Log10(1.0 / harmonics / harmonics);
+                        if (harmonics * freq < sampleRate / 2 &&
+                            -96.0 < level) {
                         } else {
-                            textBoxLog.Text += string.Format("第{0}次高調波: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
-                        }*/
-                    } else {
-                        break;
+                            break;
+                        }
+                    }
+                    if (harmonics <= 5) {
+                        textBoxLog.Text += string.Format("あまり三角波っぽい形にはなりません\r\n");
                     }
                 }
-                if (harmonics <= 5) {
-                    textBoxLog.Text += string.Format("あまり矩形波っぽい形にはなりません\r\n");
+                break;
+            case SignalShape.SawToothWaveDesc:
+            case SignalShape.SawToothWaveAsc: {
+                    double harmonics = 0;
+                    for (int i = 1; ; ++i) {
+                        harmonics = i;
+                        double level = dB + 20 * Math.Log10(1.0 / harmonics);
+                        if (harmonics * freq < sampleRate / 2 &&
+                            -96.0 < level) {
+                        } else {
+                            break;
+                        }
+                    }
+                    if (harmonics <= 5) {
+                        textBoxLog.Text += string.Format("あまりのこぎり波っぽい形にはなりません\r\n");
+                    }
                 }
+                break;
+            case SignalShape.SquareWave: {
+                    double harmonics = 0;
+                    for (int i = 1; ; ++i) {
+                        harmonics = 2 * i - 1;
+                        double level = dB + 20 * Math.Log10(1.0 / harmonics);
+                        if (harmonics * freq < sampleRate / 2 &&
+                            -96.0 < level) {
+                            /*
+                            if (harmonics == 1) {
+                                textBoxLog.Text += string.Format("基本周波数: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+                            } else {
+                                textBoxLog.Text += string.Format("第{0}次高調波: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+                            }*/
+                        } else {
+                            break;
+                        }
+                    }
+                    if (harmonics <= 5) {
+                        textBoxLog.Text += string.Format("あまり矩形波っぽい形にはなりません\r\n");
+                    }
+                }
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
             }
 
             textBoxLog.Text += string.Format("書き込み開始: {0}\r\n", s.path);
@@ -215,17 +270,6 @@ namespace sqwave2
 
         ////////////////////////////////////////////////////////
 
-        enum CreateWavDataResult
-        {
-            Success,
-            LevelOver
-        }
-
-        enum SignalShape {
-            SineWave,
-            SquareWave,
-        };
-
         private CreateWavDataResult CreateWavData(int sampleRate, int bitsPerSample, SignalShape ss, double freq, int amplitude, int seconds, out WavData wavData) {
             List<PcmSamples1Channel> samples = new List<PcmSamples1Channel>();
 
@@ -241,6 +285,15 @@ namespace sqwave2
                 break;
             case SignalShape.SquareWave:
                 result = CreateSquareWave(ch, sampleRate, freq, amplitude);
+                break;
+            case SignalShape.SawToothWaveDesc:
+                result = CreateSawToothWave(ch, sampleRate, freq, amplitude, false);
+                break;
+            case SignalShape.SawToothWaveAsc:
+                result = CreateSawToothWave(ch, sampleRate, freq, amplitude, true);
+                break;
+            case SignalShape.TriangleWave:
+                result = CreateTriangleWave(ch, sampleRate, freq, amplitude);
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -290,6 +343,83 @@ namespace sqwave2
                         break;
                     }
                     double x = amplitude / harmonics * Math.Sin(step * i * harmonics);
+                    v += x;
+                }
+
+                short sv = (short)v;
+                if (v < -32768) {
+                    result = CreateWavDataResult.LevelOver;
+                    sv = -32768;
+                }
+                if (32767 < v) {
+                    result = CreateWavDataResult.LevelOver;
+                    sv = 32767;
+                }
+                ch.Set16(i, sv);
+            });
+
+            return result;
+        }
+
+        private CreateWavDataResult CreateSawToothWave(PcmSamples1Channel ch, int sampleRate, double freq, int amplitude, bool bInvert) {
+            Console.WriteLine("CreateSawToothWave sampleRate={0} freq={1} amp={2} invert={3}", sampleRate, freq, amplitude, bInvert);
+
+            double ampWithPhase = amplitude;
+            if (bInvert) {
+                ampWithPhase = -amplitude;
+            }
+
+            CreateWavDataResult result = CreateWavDataResult.Success;
+            double step = 2.0 * Math.PI * (freq / sampleRate);
+            Parallel.For(0, ch.NumSamples, delegate(int i) {
+                double v = 0.0;
+                for (int h = 1; ; ++h) {
+                    double harmonics = h;
+                    if (amplitude / harmonics < 1.0) {
+                        break;
+                    }
+                    if (sampleRate / 2 <= harmonics * freq) {
+                        break;
+                    }
+                    double x = ampWithPhase / harmonics * Math.Sin(step * i * harmonics);
+                    v += x;
+                }
+
+                short sv = (short)v;
+                if (v < -32768) {
+                    result = CreateWavDataResult.LevelOver;
+                    sv = -32768;
+                }
+                if (32767 < v) {
+                    result = CreateWavDataResult.LevelOver;
+                    sv = 32767;
+                }
+                ch.Set16(i, sv);
+            });
+
+            return result;
+        }
+
+        private CreateWavDataResult CreateTriangleWave(PcmSamples1Channel ch, int sampleRate, double freq, double amplitude) {
+            Console.WriteLine("CreateTriangleWave sampleRate={0} freq={1} amp={2}", sampleRate, freq, amplitude);
+
+            CreateWavDataResult result = CreateWavDataResult.Success;
+            double step = 2.0 * Math.PI * (freq / sampleRate);
+            Parallel.For(0, ch.NumSamples, delegate(int i) {
+                double v = 0.0;
+                for (int h = 1; ; ++h) {
+                    double harmonics = 2 * h - 1;
+                    if (amplitude / harmonics / harmonics < 1.0) {
+                        break;
+                    }
+                    if (sampleRate / 2 <= harmonics * freq) {
+                        break;
+                    }
+                    double x = amplitude / harmonics / harmonics * Math.Sin(step * i * harmonics);
+                    if ((h & 1) == 0) {
+                        // hが偶数のときは-1倍する
+                        x = -x;
+                    }
                     v += x;
                 }
 
