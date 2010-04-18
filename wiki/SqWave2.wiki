@@ -13,7 +13,7 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10002.zip
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
 
-アンインストールは、コントロールパネルの[プログラムと機能]からSqWave2を選んでアンインストールを選択するとできます。
+アンインストールは、コントロールパネルの[プログラムと機能]から!SqWave2を選んでアンインストールを選択するとできます。
 
 http://bitspersampleconv2.googlecode.com/files/sqwave2ss10002.png
 
