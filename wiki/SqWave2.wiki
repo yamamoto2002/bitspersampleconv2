@@ -37,6 +37,11 @@ SVNリポジトリに入っています。
 
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#277
 
+= 問題点 =
+
+  * ナイキスト周波数までテーラー展開の係数を足すという方法で波形を作っているため、時間がかかります
+
+
 = 更新履歴 =
 
 === バージョン 1.0.1 ===
