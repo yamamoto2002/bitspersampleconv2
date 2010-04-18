@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace sqwave2
 {
@@ -70,14 +71,36 @@ namespace sqwave2
             int seconds = 0;
             try {
                 seconds = System.Convert.ToInt32(textBoxSeconds.Text);
-            } catch (System.InvalidOperationException ex) {
-                MessageBox.Show("エラー: 長さには 0よりも大きい整数を入力してください");
+            } catch (System.Exception ex) {
+                MessageBox.Show("エラー: 長さには 0よりも大きい整数を半角で入力してください");
                 return;
             }
+            if (seconds <= 0) {
+                MessageBox.Show("エラー: 長さには 0よりも大きい整数を半角で入力してください");
+                return;
+            }
+
             int sampleRate = System.Convert.ToInt32(((ListBoxItem)listBoxSampleFreq.SelectedItem).Content);
             int bitsPerSample = System.Convert.ToInt32(((ListBoxItem)listBoxBits.SelectedItem).Content);
-            double dB = System.Convert.ToDouble(textBoxLevel.Text);
-            double freq = System.Convert.ToDouble(textBoxFreq.Text);
+            
+            double dB = 0;
+            try {
+                dB = System.Convert.ToDouble(textBoxLevel.Text);
+            } catch (System.Exception ex) {
+                MessageBox.Show("エラー: 出力レベルには 0以下の数値を半角で入力してください");
+                return;
+            }
+            double freq = 0;
+            try {
+                freq = System.Convert.ToDouble(textBoxFreq.Text);
+            } catch (System.Exception ex) {
+                MessageBox.Show("エラー: 信号周波数には0.1以上の数値を半角で入力してください");
+                return;
+            }
+            if (freq <= 0.1) {
+                MessageBox.Show("エラー: 信号周波数には0.1以上の数値を半角で入力してください");
+                return;
+            }
             SignalShape ss = (SignalShape)listBoxShape.SelectedIndex;
 
             Settings s;
@@ -122,7 +145,12 @@ namespace sqwave2
                     double level = dB + 20 * Math.Log10(1.0 / harmonics);
                     if (harmonics * freq < sampleRate/2 &&
                         -96.0 < level) {
-                        textBoxLog.Text += string.Format("第{0}次高調波: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+                        /*
+                        if (harmonics == 1) {
+                            textBoxLog.Text += string.Format("基本周波数: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+                        } else {
+                            textBoxLog.Text += string.Format("第{0}次高調波: {1}Hz {2:0.0}dB\r\n", harmonics, harmonics * freq, level);
+                        }*/
                     } else {
                         break;
                     }
@@ -230,7 +258,7 @@ namespace sqwave2
             CreateWavDataResult result = CreateWavDataResult.Success;
 
             double step = 2.0 * Math.PI * (freq / sampleRate);
-            for (int i = 0; i < ch.NumSamples; ++i) {
+            Parallel.For(0, ch.NumSamples, delegate(int i) {
                 int v = (int)(amplitude * Math.Sin(step * i));
                 short sv = (short)v;
                 if (v < -32768) {
@@ -242,7 +270,7 @@ namespace sqwave2
                     sv = 32767;
                 }
                 ch.Set16(i, sv);
-            }
+            });
             return result;
         }
 
@@ -251,14 +279,14 @@ namespace sqwave2
 
             CreateWavDataResult result = CreateWavDataResult.Success;
             double step = 2.0 * Math.PI * (freq / sampleRate);
-            for (int i = 0; i < ch.NumSamples; ++i) {
+            Parallel.For(0, ch.NumSamples, delegate(int i) {
                 double v = 0.0;
-                for (int h=1; ; ++h) {
+                for (int h = 1; ; ++h) {
                     double harmonics = 2 * h - 1;
                     if (amplitude / harmonics < 1.0) {
                         break;
                     }
-                    if (sampleRate/2 <= harmonics * freq) {
+                    if (sampleRate / 2 <= harmonics * freq) {
                         break;
                     }
                     double x = amplitude / harmonics * Math.Sin(step * i * harmonics);
@@ -275,7 +303,7 @@ namespace sqwave2
                     sv = 32767;
                 }
                 ch.Set16(i, sv);
-            }
+            });
 
             return result;
         }
