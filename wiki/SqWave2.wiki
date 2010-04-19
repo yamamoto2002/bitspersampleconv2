@@ -38,23 +38,3 @@ SVNリポジトリに入っています。
 このあたりで矩形波を作っています。
 
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#330
-
-= 問題点 =
-
-  * ナイキスト周波数までテーラー展開の係数を足すという方法で波形を作っているため、時間がかかります。もっと高速な方法で、同じ精度を出すことができるのですが
-
-= 更新履歴 =
-
-=== !SqWave2 バージョン 1.0.2 ===
-  * のこぎり波、三角波もでるようにした
-
-=== !SqWave2 バージョン 1.0.1 ===
-  * ダイアログに入れられた値の範囲チェック。
-  * マルチコア対応。Intel Core i7-980Xでの実行結果。見事にすべてのCPUコアに負荷が分散していますｗ http://bitspersampleconv2.googlecode.com/files/taskman.png
-
-=== !SqWave2 バージョン 1.0.0 ===
-  * 新規作成
-
-=== !SqWave1 バージョン 1.0.0 ===
-  * 新規作成。
-  * 誤ってプロジェクトファイルを壊してしまったため廃棄
