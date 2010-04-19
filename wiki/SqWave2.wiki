@@ -1,5 +1,6 @@
 #summary 矩形波WAVファイルを出力するツールSqWave2
 
+
 = 説明 =
 
 !SqWave2は矩形波WAVファイルを出力するツールです。
