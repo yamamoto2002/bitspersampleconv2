@@ -1,22 +1,27 @@
-#summary 矩形波WAVファイルを出力するツールSqWave2
+#summary 矩形波の入ったWAVファイルを出力するツールSqWave2
 
 
 = 説明 =
 
-!SqWave2は矩形波WAVファイルを出力するツールです。
+!SqWave2は矩形波の入ったWAVファイルを出力するツールです。
 
 !WaveGene 1.40の矩形波出力波形に納得いかない感じだったので作りました。
 
 = 使用方法 =
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10002.zip
+http://bitspersampleconv2.googlecode.com/files/SqWave10004.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
 
 アンインストールは、コントロールパネルの[プログラムと機能]から!SqWave2を選んでアンインストールを選択するとできます。
 
-http://bitspersampleconv2.googlecode.com/files/sqwave2ss10002.png
+既に旧バージョンのSqWaveをインストールされている方で、
+最新バージョンに更新したい場合、
+最新バージョンをインストールする前に旧バージョンを手動でアンインストールする必要はありません。
+最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。
+
+http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 
 == !SqWave2の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
@@ -36,18 +41,25 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 SVNリポジトリに入っています。
 
+このプログラムは.NET Framework 4を使用して作りました。
+
 このあたりで矩形波を作っています。
 
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#330
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#354
 
 = 更新履歴 =
 
+=== !SqWave2 バージョン 1.0.4 ===
+  * 級数加算打ち切り周波数をナイキスト周波数との比の％で入力できるようにしました。
+
 === !SqWave2 バージョン 1.0.2 ===
-  * のこぎり波、三角波もでるようにした
+  * のこぎり波、三角波もでるようにしました。
 
 === !SqWave2 バージョン 1.0.1 ===
   * ダイアログに入れられた値の範囲チェック。
-  * マルチコア対応。Intel Core i7-980Xでの実行結果。見事にすべてのCPUコアに負荷が分散していますｗ http://bitspersampleconv2.googlecode.com/files/taskman.png
+  * マルチコア対応。Intel Core i7-980Xでの実行結果。見事にすべてのCPUコアに負荷が分散していますｗ
+
+http://bitspersampleconv2.googlecode.com/files/taskman.png
 
 === !SqWave2 バージョン 1.0.0 ===
   * 新規作成
