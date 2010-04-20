@@ -1,7 +1,7 @@
 ﻿<Window x:Class="sqwave2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="sqwave2" Height="611" Width="392">
+        Title="SqWave2" Height="611" Width="392">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="165*" />
@@ -18,8 +18,8 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Label Content="サンプリング周波数(Hz)" Margin="6,6,0,9" Name="label1" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" />
-                <Label Content="量子化ビット数(bit)" HorizontalContentAlignment="Right" Margin="6,0,0,1" Name="label2" VerticalContentAlignment="Center" Grid.Row="1" />
+                <Label Content="サンプリング周波数(Hz)" Name="label1" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" />
+                <Label Content="量子化ビット数(bit)" HorizontalContentAlignment="Right" Margin="6,0,0,0" Name="label2" VerticalContentAlignment="Center" Grid.Row="1" />
                 <ListBox Grid.Column="1" Name="listBoxSampleFreq">
                     <ListBoxItem Content="44100" />
                     <ListBoxItem Content="48000" IsSelected="False" />
@@ -36,16 +36,17 @@
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="54*" />
-                    <RowDefinition Height="30*" />
-                    <RowDefinition Height="42*" />
-                    <RowDefinition Height="42*" />
+                    <RowDefinition Height="29*" />
+                    <RowDefinition Height="29*" />
+                    <RowDefinition Height="29*" />
+                    <RowDefinition Height="28*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
+                    <ColumnDefinition Width="224*" />
+                    <ColumnDefinition Width="134*" />
                 </Grid.ColumnDefinitions>
                 <Label Content="波形" Name="label3" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
-                <ListBox Grid.Column="1" Name="listBoxShape">
+                <ListBox Name="listBoxShape" Grid.Column="1">
                     <ListBoxItem Content="サイン波" />
                     <ListBoxItem Content="矩形波" IsSelected="True" />
                     <ListBoxItem Content="のこぎり波(下降)" />
@@ -53,11 +54,13 @@
                     <ListBoxItem Content="三角波" />
                 </ListBox>
                 <Label Content="出力レベル(dB)" HorizontalAlignment="Stretch" Name="label4" VerticalAlignment="Stretch" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Grid.Row="1" />
-                <TextBox Grid.Column="1" Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" Grid.Row="1" />
-                <Label HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="1,0,0,1" Name="label5" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="2" Content="長さ(秒)" />
-                <TextBox Margin="1,0,-1,0" Name="textBoxSeconds" Text="30" VerticalContentAlignment="Center" Grid.Column="1" Grid.Row="2" />
-                <Label Content="信号周波数(Hz)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="0,0,1,1" Name="label6" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="3" />
-                <TextBox Grid.Column="1" Grid.Row="3" Margin="1,0,0,1" Name="textBoxFreq" Text="10000" VerticalContentAlignment="Center" />
+                <TextBox Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" Grid.Row="1" Grid.Column="1" />
+                <Label HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Margin="1,0,0,0" Name="label5" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="2" Content="長さ(秒)" />
+                <TextBox Name="textBoxSeconds" Text="30" VerticalContentAlignment="Center" Grid.Row="2" Grid.Column="1" />
+                <Label Content="信号周波数(Hz)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Name="label6" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="3" />
+                <TextBox Grid.Row="3" Name="textBoxFreq" Text="10000" VerticalContentAlignment="Center" Grid.Column="1" />
+                <Label Content="級数加算打ち切り(1/2fsとの%)" Grid.Row="4" Margin="1,0,0,0" Name="label7" HorizontalContentAlignment="Right" />
+                <TextBox Grid.Column="1" Grid.Row="4" Name="textBoxTrunc" Text="99.0" VerticalContentAlignment="Center" />
             </Grid>
         </GroupBox>
         <GroupBox Grid.Row="2" Header="出力ファイル名" Name="groupBox3" Height="68" VerticalAlignment="Top">
