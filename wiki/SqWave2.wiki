@@ -26,14 +26,17 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 == !SqWave2の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
 http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
+
 ↑図1
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
+
 ↑図2
 
 == 参考：!WaveGene 1.40の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
 http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
+
 ↑図3
 
 図1と図3を見比べると、WaveGeneは綺麗な矩形波だし、SqWaveはガタガタじゃん、
@@ -43,6 +46,7 @@ http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
 図2、図4、図5で波形の良し悪しを判断してください。
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
+
 ↑図4
 
 ↑エイリアシング歪が生じています。これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
@@ -50,6 +54,7 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 == !SqWave2と!WaveGeneの出力を16倍オーバーサンプルした波形を比較 ==
 
 http://bitspersampleconv2.googlecode.com/files/16xoversample.png
+
 ↑図5
 
 (192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
