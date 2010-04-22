@@ -26,24 +26,35 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 == !SqWave2の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
 http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
+↑図1
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
+↑図2
 
 == 参考：!WaveGene 1.40の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
 
 http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
+↑図3
+
+図1と図3を見比べると、WaveGeneは綺麗な矩形波だし、SqWaveはガタガタじゃん、
+と思うかもしれませんが、
+図1と図3の青い実線の波形は、たいした意味はなく、
+この波形がDACのアナログ出力に出るわけではないので
+図2、図4、図5で波形の良し悪しを判断してください。
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
+↑図4
 
 ↑エイリアシング歪が生じています。これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
 == !SqWave2と!WaveGeneの出力を16倍オーバーサンプルした波形を比較 ==
 
 http://bitspersampleconv2.googlecode.com/files/16xoversample.png
+↑図5
 
 (192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
 
-16倍オーバーサンプルしているDACからは、大体こんなアナログ出力波形が出るということです。
+16倍オーバーサンプルしているDACのアナログ出力からは、大体図5のような波形が出るということです。
 
 = ソースコード =
 
