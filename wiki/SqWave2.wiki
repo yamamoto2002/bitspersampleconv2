@@ -57,7 +57,7 @@ http://bitspersampleconv2.googlecode.com/files/16xoversample.png
 
 (192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
 
-16倍オーバーサンプルしているDACのアナログ出力からは、大体図5のような波形が出ます。
+DACのアナログ出力からは、大体図5のような波形が出ます。
 !SqWave2の出力波形は!WaveGeneよりも安定しています。
 
 なお、16倍オーバーサンプリングはsndfile-resampleを用いて以下のようにして行いました。
