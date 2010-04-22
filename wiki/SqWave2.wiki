@@ -37,6 +37,14 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 ↑エイリアシング歪が生じています。これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
+== !SqWave2と!WaveGeneの出力を16倍オーバーサンプルした波形を比較 ==
+
+http://bitspersampleconv2.googlecode.com/files/16xoversample.png
+
+(192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
+
+16倍オーバーサンプルしているDACからは、大体こんなアナログ出力波形が出るということです。
+
 = ソースコード =
 
 SVNリポジトリに入っています。
