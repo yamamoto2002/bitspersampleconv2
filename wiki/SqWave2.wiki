@@ -39,7 +39,7 @@ http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
 
 ↑図3
 
-図1と図3を見比べると、WaveGeneは綺麗な矩形波だし、SqWaveはガタガタじゃん、
+図1と図3を見比べると、!WaveGeneは綺麗な矩形波だし、!SqWaveはガタガタじゃん、
 と思うかもしれませんが、
 図1と図3の青い実線の波形は、たいした意味はなく、
 この波形がDACのアナログ出力に出るわけではないので
@@ -60,6 +60,13 @@ http://bitspersampleconv2.googlecode.com/files/16xoversample.png
 (192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
 
 16倍オーバーサンプルしているDACのアナログ出力からは、大体図5のような波形が出るということです。
+
+16倍オーバーサンプリングはsndfile-resampleを用いて以下のようにして行いました。
+sndfile-resampleは極めて高精度なリサンプルができるのでおすすめです。
+{{{
+sndfile-resample -by 8 -c 0 SQ10K_192.wav SQ10K_1536.wav
+sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
+}}}
 
 = ソースコード =
 
