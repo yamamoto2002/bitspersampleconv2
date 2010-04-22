@@ -39,10 +39,9 @@ http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
 
 ↑図3
 
-図1と図3を見比べると、!WaveGeneは綺麗な矩形波だし、!SqWaveはガタガタじゃん、
-と思うかもしれませんが、
-図1と図3の青い実線の波形は、たいした意味はなく、
-この波形がDACのアナログ出力に出るわけではないので
+図1と図3を見比べると、!WaveGeneは綺麗な矩形波だし、!SqWave2はガタガタじゃん、
+と思われるかもしれませんが、図1と図3の青い実線の波形は、たいした意味はなく、
+DACのアナログ出力にこの波形が出るわけではないので
 図2、図4、図5で波形の良し悪しを判断してください。
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
