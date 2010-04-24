@@ -23,51 +23,51 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004.zip
 
 http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 
-== !SqWave2の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
+== !SqWave2と!WaveGeneの出力波形とスペクトル ==
 
-http://bitspersampleconv2.googlecode.com/files/sqwave2WaveForm.png
+(192kHzサンプリング、矩形波、10kHz、-10dB)
 
-↑図1
+http://bitspersampleconv2.googlecode.com/files/raw.png
 
-青い実線の波形は、たいした意味はなく、
-DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図5で比較できます。)
+↑図1 出力データの比較
 
-http://bitspersampleconv2.googlecode.com/files/spectrum.png
+図1は出力データをそのままグラフにプロットしたもので、縦軸が波高値、横軸が時間です。
+赤い線が!SqWave2の出力データ、緑の線がWaveGeneの出力データです。
+グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。
 
-↑図2
+DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図2で比較できます。)
 
-== 参考：!WaveGene 1.40の出力波形とスペクトル(192kHzサンプリング、矩形波、10kHz、-10dB) ==
+http://bitspersampleconv2.googlecode.com/files/8x.png
 
-http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
+↑図2 8倍オーバーサンプリング処理後の出力データの比較
 
-↑図3
+縦軸が波高値、横軸が時間です。
+赤い線が!SqWave2の出力データ、緑の線がWaveGeneの出力データです。
+グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。
 
-青い実線の波形は、たいした意味はなく、
-DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図5で比較できます。)
-
-http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
-
-↑図4
-
-↑エイリアシング歪が生じています。これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
-
-== !SqWave2と!WaveGeneの出力を16倍オーバーサンプルした波形を比較 ==
-
-http://bitspersampleconv2.googlecode.com/files/16xoversample.png
-
-↑図5
-
-(192kHzサンプリング、矩形波、10kHz、-10dB。上が!SqWave2、下が!WaveGene)
-
-DACのアナログ出力からは、大体図5のような波形が出ます。
+DACのアナログ出力からは、大体図2のような波形が出ます。
 !SqWave2の出力波形は!WaveGeneよりも安定しています。
 
-なお、16倍オーバーサンプリングはsndfile-resampleを用いて以下のようにして行いました。
+最初の半波長ぐらいはどちらも波形が乱れています
+
+なお、オーバーサンプリングはsndfile-resampleを用いて以下のようにして行いました。
 sndfile-resampleは極めて高精度なリサンプルができるのでおすすめです。
 {{{
 sndfile-resample -by 8 -c 0 SQ10K_192.wav SQ10K_1536.wav
 sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 }}}
+
+http://bitspersampleconv2.googlecode.com/files/spectrum.png
+
+↑図3 !SqWave2の出力データのスペクトログラム
+
+
+http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
+
+↑図4 !WaveGeneの出力データのスペクトログラム
+
+!WaveGeneの出力データはエイリアシング歪が生じています。
+これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
 = ソースコード =
 
