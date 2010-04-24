@@ -27,7 +27,7 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
-↑図1 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
+↑*図1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
 
 図1は出力データをそのままグラフにプロットしたもので、縦軸が波高値、横軸が時間です。
 赤い＋点が!SqWave2の出力データ、緑の×点が!WaveGeneの出力データです。
@@ -37,7 +37,7 @@ DACのアナログ出力にこの波形が出るわけではないです。(DAC�
 
 http://bitspersampleconv2.googlecode.com/files/8x.png
 
-↑図2 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
+↑*図2* 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
 
 縦軸が波高値、横軸が時間です。
 出力レベルが小さい赤い線が!SqWave2の出力データ、
@@ -58,11 +58,11 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
-↑図3 !SqWave2の出力データのスペクトログラム
+↑*図3* !SqWave2の出力データのスペクトログラム
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
-↑図4 !WaveGeneの出力データのスペクトログラム
+↑*図4* !WaveGeneの出力データのスペクトログラム
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
