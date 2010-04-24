@@ -25,11 +25,9 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
 
 == !SqWave2と!WaveGeneの出力波形とスペクトル ==
 
-(192kHzサンプリング、矩形波、10kHz、-10dB)
-
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
-↑図1 出力データの比較
+↑図1 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
 
 図1は出力データをそのままグラフにプロットしたもので、縦軸が波高値、横軸が時間です。
 赤い線が!SqWave2の出力データ、緑の線がWaveGeneの出力データです。
@@ -39,7 +37,7 @@ DACのアナログ出力にこの波形が出るわけではないです。(DAC�
 
 http://bitspersampleconv2.googlecode.com/files/8x.png
 
-↑図2 8倍オーバーサンプリング処理後の出力データの比較
+↑図2 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
 
 縦軸が波高値、横軸が時間です。
 赤い線が!SqWave2の出力データ、緑の線がWaveGeneの出力データです。
@@ -60,7 +58,6 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 ↑図3 !SqWave2の出力データのスペクトログラム
-
 
 http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
 
