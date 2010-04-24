@@ -60,9 +60,9 @@ http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 ↑図3 !SqWave2の出力データのスペクトログラム
 
-http://bitspersampleconv2.googlecode.com/files/WG_WaveForm2.png
+http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
-↑図4 !WaveGeneの出力データをプロットしたもの
+↑図4 !WaveGeneの出力データのスペクトログラム
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
