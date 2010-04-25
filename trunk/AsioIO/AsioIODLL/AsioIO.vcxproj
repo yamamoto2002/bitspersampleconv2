@@ -46,9 +46,10 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <CustomBuildStep>
-      <Command>copy $(SolutionDir)\Debug\AsioIODLL.dll $(SolutionDir)\AsioTestGui\bin\Debug
-</Command>
-      <Outputs>AsioIODLL.dll;%(Outputs)</Outputs>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -67,8 +68,10 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <CustomBuildStep>
-      <Command>copy $(SolutionDir)$(Configuration)\AsioIODLL.dll $(SolutionDir)\AsioTestGui\bin\$(Configuration)</Command>
-      <Outputs>AsioIODLL.dll;%(Outputs)</Outputs>
+      <Command>
+      </Command>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
