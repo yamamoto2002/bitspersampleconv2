@@ -100,30 +100,6 @@ AsioSamplesToDouble(ASIOSamples &a)
     return ASIO64toDouble(a);
 }
 
-int
-AsioWrap_getDriverNum(void)
-{
-    return getAsioDriverNum();
-}
-
-bool
-AsioWrap_getDriverName(int n, char *name_return, int size)
-{
-    return getAsioDriverName(n, name_return, size);
-}
-
-bool
-AsioWrap_loadDriver(int n)
-{
-    return loadAsioDriver(n);
-}
-
-void
-AsioWrap_unloadDriver(void)
-{
-    unloadAsioDriver();
-}
-
 struct AsioPropertyInfo {
     ASIODriverInfo adi;
     long inputChannels;
@@ -190,14 +166,14 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
     long buffSize = ap->preferredSize;
 
     for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
-        if (ap->bufferInfos[i].isInput == true &&
+        if (ap->bufferInfos[i].isInput == ASIOTrue &&
             ap->channelInfos[i].channel == inputWavData.channel) {
             assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
             memcpy(&inputWavData.data[inputWavData.pos],
                 ap->bufferInfos[i].buffers[index], buffSize * 4);
             inputWavData.pos += buffSize;
         }
-        if (ap->bufferInfos[i].isInput == false &&
+        if (ap->bufferInfos[i].isInput == ASIOFalse &&
             ap->channelInfos[i].channel == outputWavData.channel) {
             assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
 
@@ -284,7 +260,36 @@ asioMessages(long selector, long value, void* message, double* opt)
 //----------------------------------------------------------------------------------
 // AsioWrap APIs
 
-int
+extern "C" __declspec(dllexport)
+int __stdcall
+AsioWrap_getDriverNum(void)
+{
+    return getAsioDriverNum();
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+AsioWrap_getDriverName(int n, char *name_return, int size)
+{
+    return getAsioDriverName(n, name_return, size);
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+AsioWrap_loadDriver(int n)
+{
+    return loadAsioDriver(n);
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+AsioWrap_unloadDriver(void)
+{
+    unloadAsioDriver();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
 AsioWrap_setup(int sampleRate)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
@@ -412,21 +417,24 @@ AsioWrap_setup(int sampleRate)
     return ASE_OK;
 }
 
-int
+extern "C" __declspec(dllexport)
+int __stdcall
 AsioWrap_getInputChannelsNum(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
     return ap->inputChannels;
 }
 
-int
+extern "C" __declspec(dllexport)
+int __stdcall
 AsioWrap_getOutputChannelsNum(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
     return ap->outputChannels;
 }
 
-bool
+extern "C" __declspec(dllexport)
+bool __stdcall
 AsioWrap_getInputChannelName(int n, char *name_return, int size)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
@@ -440,7 +448,8 @@ AsioWrap_getInputChannelName(int n, char *name_return, int size)
     return true;
 }
 
-bool
+extern "C" __declspec(dllexport)
+bool __stdcall
 AsioWrap_getOutputChannelName(int n, char *name_return, int size)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
@@ -455,7 +464,8 @@ AsioWrap_getOutputChannelName(int n, char *name_return, int size)
     return true;
 }
 
-void
+extern "C" __declspec(dllexport)
+void __stdcall
 AsioWrap_unsetup(void)
 {
     ASIODisposeBuffers();
@@ -470,7 +480,8 @@ AsioWrap_unsetup(void)
     outputWavData.data = NULL;
 }
 
-void
+extern "C" __declspec(dllexport)
+void __stdcall
 AsioWrap_setOutput(int outputChannel, int *data, int samples)
 {
     delete[] outputWavData.data;
@@ -483,7 +494,8 @@ AsioWrap_setOutput(int outputChannel, int *data, int samples)
     outputWavData.channel = outputChannel;
 }
 
-void
+extern "C" __declspec(dllexport)
+void __stdcall
 AsioWrap_setInput(int inputChannel, int samples)
 {
     delete[] inputWavData.data;
@@ -495,14 +507,16 @@ AsioWrap_setInput(int inputChannel, int samples)
     inputWavData.channel = inputChannel;
 }
 
-void
+extern "C" __declspec(dllexport)
+void __stdcall
 AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples)
 {
     assert(inputWavData.data);
     memcpy_s(recordedData_return, samples *4, inputWavData.data, inputWavData.pos *4);
 }
 
-int
+extern "C" __declspec(dllexport)
+int __stdcall
 AsioWrap_start(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
@@ -520,7 +534,8 @@ AsioWrap_start(void)
     return rv;
 }
 
-bool
+extern "C" __declspec(dllexport)
+bool __stdcall
 AsioWrap_run(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
@@ -543,7 +558,8 @@ AsioWrap_run(void)
     return true;
 }
 
-void
+extern "C" __declspec(dllexport)
+void __stdcall
 AsioWrap_stop(void)
 {
     printf("AsioWrap_stop()\n");

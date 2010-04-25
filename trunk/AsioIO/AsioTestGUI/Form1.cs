@@ -7,29 +7,32 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using AsioCS;
+using WavRWLib2;
 
 namespace AsioTestGUI
 {
     public partial class Form1 : Form
     {
-        private AsioFromCS afc;
+        private AsioWrap afc;
 
         public Form1()
         {
             InitializeComponent();
 
-            afc = new AsioFromCS();
+            afc = new AsioWrap();
+            int nDrivers = afc.DriverNumGet();
 
-            Console.WriteLine("driverNum=" +afc.DriverNumGet());
-            for (int i = 0; i < afc.DriverNumGet(); ++i) {
+            Console.WriteLine("driverNum=" + nDrivers);
+            for (int i = 0; i < nDrivers; ++i) {
                 listBoxDrivers.Items.Add(afc.DriverNameGet(i));
             }
-            if (0 < afc.DriverNumGet()) {
+            if (0 < nDrivers) {
                 listBoxDrivers.SelectedIndex = 0;
                 buttonLoadDriver.Enabled = true;
             }
 
-            if (1 == afc.DriverNumGet()) {
+            if (1 == nDrivers) {
                 buttonLoadDriver_Click(null, null);
             }
         }
@@ -197,7 +200,7 @@ namespace AsioTestGUI
 
         private void buttonAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Pulse5 by Yamamoto Software Lab.\nASIO Technology by Steinberg Media Technology GmbH.");
+            MessageBox.Show(string.Format("Pulse5 by Yamamoto Software Lab.\n\n{0}",afc.AsioTrademarkStringGet()));
         }
     }
 }
