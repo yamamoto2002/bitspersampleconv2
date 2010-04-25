@@ -1,6 +1,7 @@
 #ifndef H_AsioWrap
 #define H_AsioWrap
 
+/*
 int  AsioWrap_getDriverNum(void);
 bool AsioWrap_getDriverName(int n, char *name_return, int size);
 
@@ -30,5 +31,5 @@ bool AsioWrap_run(void);
 void AsioWrap_stop(void);
 
 void AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples);
-
+*/
 #endif /* H_AsioWrap */
