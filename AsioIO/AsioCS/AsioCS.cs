@@ -69,7 +69,7 @@ namespace AsioCS
          **/
         public string DriverNameGet(int n) {
             StringBuilder buf = new StringBuilder(64);
-            AsioWrap_getDriverName(n, buf, 64);
+            AsioWrap_getDriverName(n, buf, buf.Capacity);
             return buf.ToString();
         }
 
