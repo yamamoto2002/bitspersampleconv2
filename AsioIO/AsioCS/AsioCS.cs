@@ -92,7 +92,7 @@ namespace Asio
                 break;
             case AsioStatus.DriverLoaded:
                 System.Diagnostics.Debug.Assert(
-                    newState == AsioStatus.PreInit ||
+                    newState == AsioStatus.DriverNotLoaded ||
                     newState == AsioStatus.SampleRateSet);
                 break;
             case AsioStatus.SampleRateSet:
@@ -213,9 +213,6 @@ namespace Asio
         /** unset samplerate
          */
         public void Unsetup() {
-            System.Diagnostics.Debug.Assert(
-                state == AsioStatus.SampleRateSet ||
-                state == AsioStatus.Prepared);
             AsioWrap_unsetup();
             ChangeState(AsioStatus.DriverLoaded);
         }
