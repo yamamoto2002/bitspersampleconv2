@@ -57,6 +57,7 @@ namespace AsioTestGUI
                 string errStr = string.Empty;
                 switch (rv) {
                 case -5003: errStr = "Device Not Found"; break;
+                case -1000: errStr = "hardware input or output is not present or available"; break;
                 default: break;
                 }
                 if (errStr == string.Empty) {
@@ -64,6 +65,9 @@ namespace AsioTestGUI
                 } else {
                     MessageBox.Show(string.Format("ASIO setup({0}) failed {1} ({2:X8})", SAMPLE_RATE, errStr, rv));
                 }
+                asio.Unsetup();
+                asio.DriverUnload();
+                buttonLoadDriver.Enabled = true;
                 return;
             }
 
@@ -80,7 +84,8 @@ namespace AsioTestGUI
                 listBoxOutput.SelectedIndex = 0;
             }
 
-            if (0 < listBoxInput.Items.Count &&
+            if (0 == rv &&
+                0 < listBoxInput.Items.Count &&
                 0 < listBoxOutput.Items.Count) {
                 buttonStart.Enabled = true;
             }
