@@ -17,6 +17,8 @@ EXPORTS
 	ASIOGetSamplePosition
 	AsioTimeStampToDouble
 	AsioSamplesToDouble
+	AsioWrap_init
+	AsioWrap_term
 	AsioWrap_getDriverNum
 	AsioWrap_getDriverName
 	AsioWrap_loadDriver
