@@ -7,25 +7,27 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using AsioCS;
+using Asio;
 using WavRWLib2;
 
 namespace AsioTestGUI
 {
     public partial class Form1 : Form
     {
-        private AsioWrap afc;
+        private AsioCS asio;
+        const int SAMPLE_RATE = 96000;
 
         public Form1()
         {
             InitializeComponent();
 
-            afc = new AsioWrap();
-            int nDrivers = afc.DriverNumGet();
+            asio = new AsioCS();
+            asio.Init();
+            int nDrivers = asio.DriverNumGet();
 
             Console.WriteLine("driverNum=" + nDrivers);
             for (int i = 0; i < nDrivers; ++i) {
-                listBoxDrivers.Items.Add(afc.DriverNameGet(i));
+                listBoxDrivers.Items.Add(asio.DriverNameGet(i));
             }
             if (0 < nDrivers) {
                 listBoxDrivers.SelectedIndex = 0;
@@ -39,32 +41,40 @@ namespace AsioTestGUI
 
         public void FinalizeAll()
         {
-            afc.Unsetup();
-            afc.DriverUnload();
+            asio.Term();
         }
 
         private void buttonLoadDriver_Click(object sender, EventArgs e)
         {
             buttonLoadDriver.Enabled = false;
-            bool bRv = afc.DriverLoad(listBoxDrivers.SelectedIndex);
+            bool bRv = asio.DriverLoad(listBoxDrivers.SelectedIndex);
             if (!bRv) {
                 return;
             }
 
-            int rv = afc.Setup(96000);
+            int rv = asio.Setup(SAMPLE_RATE);
             if (0 != rv) {
-                MessageBox.Show(string.Format("afc.Setup(96000) failed {0:X8}", rv));
+                string errStr = string.Empty;
+                switch (rv) {
+                case -5003: errStr = "Device Not Found"; break;
+                default: break;
+                }
+                if (errStr == string.Empty) {
+                    MessageBox.Show(string.Format("ASIO setup({0}) failed {1:X8}", SAMPLE_RATE, rv));
+                } else {
+                    MessageBox.Show(string.Format("ASIO setup({0}) failed {1} ({2:X8})", SAMPLE_RATE, errStr, rv));
+                }
                 return;
             }
 
-            for (int i = 0; i < afc.InputChannelsNumGet(); ++i) {
-                listBoxInput.Items.Add(afc.InputChannelNameGet(i));
+            for (int i = 0; i < asio.InputChannelsNumGet(); ++i) {
+                listBoxInput.Items.Add(asio.InputChannelNameGet(i));
             }
             if (0 < listBoxInput.Items.Count) {
                 listBoxInput.SelectedIndex = 0;
             }
-            for (int i = 0; i < afc.OutputChannelsNumGet(); ++i) {
-                listBoxOutput.Items.Add(afc.OutputChannelNameGet(i));
+            for (int i = 0; i < asio.OutputChannelsNumGet(); ++i) {
+                listBoxOutput.Items.Add(asio.OutputChannelNameGet(i));
             }
             if (0 < listBoxOutput.Items.Count) {
                 listBoxOutput.SelectedIndex = 0;
@@ -77,20 +87,26 @@ namespace AsioTestGUI
         }
 
         BackgroundWorker bw;
-        int inputChannelNum;
-        int seconds;
-        string writeFilePath;
+        int m_inputChannelNum;
+        int m_seconds;
+        string m_writeFilePath;
 
         private void DoWork(object o, DoWorkEventArgs args) {
             Console.WriteLine("DoWork started\n");
 
             int count = 0;
-            while (!afc.Run()) {
+            while (!asio.Run()) {
                 ++count;
-                bw.ReportProgress(100 * count / seconds);
+                Console.WriteLine("count={0} m_seconds={1}", count, m_seconds);
+                int percent = 100 * count / m_seconds;
+                if (100 < percent) {
+                    percent = 100;
+                }
+
+                bw.ReportProgress(percent);
             }
-            int [] recordedData = afc.RecordedDataGet(inputChannelNum, seconds * 96000);
-            PcmSamples1Channel ch0 = new PcmSamples1Channel(seconds * 96000, 16);
+            int[] recordedData = asio.RecordedDataGet(m_inputChannelNum, m_seconds * SAMPLE_RATE);
+            PcmSamples1Channel ch0 = new PcmSamples1Channel(m_seconds * SAMPLE_RATE, 16);
             int max = 0;
             int min = 0;
             for (int i = 0; i < recordedData.Length; ++i) {
@@ -117,8 +133,8 @@ namespace AsioTestGUI
             chList.Add(ch0);
 
             WavData wd = new WavData();
-            wd.Create(96000, 16, chList);
-            using (BinaryWriter bw = new BinaryWriter(File.Open(writeFilePath, FileMode.Create))) {
+            wd.Create(SAMPLE_RATE, 16, chList);
+            using (BinaryWriter bw = new BinaryWriter(File.Open(m_writeFilePath, FileMode.Create))) {
                 wd.Write(bw);
             }
 
@@ -139,28 +155,35 @@ namespace AsioTestGUI
         // 1 oct 22.5Hz to approx. 20000Hz ... 10 variations
 
         public bool Start() {
-            inputChannelNum = listBoxInput.SelectedIndex;
+            m_inputChannelNum = listBoxInput.SelectedIndex;
 
-            seconds = 0;
-            for (double f = 27.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
-                ++seconds;
+            double startFreq = 22.5;
+            double endFreq = 20000.0;
+            int nSamples = SAMPLE_RATE;
+
+            System.Diagnostics.Debug.Assert(SAMPLE_RATE <= nSamples);
+
+            int nFreq = 0;
+            for (double f = startFreq; f < endFreq; f *= Math.Pow(2, 1.0 / 3.0)) {
+                ++nFreq;
             }
+            m_seconds = nFreq;
 
-            int [] outputData = new int[seconds * 96000];
+            int[] outputData = new int[nFreq * nSamples];
             int pos = 0;
-            for (double f = 22.5; f < 20000.0; f *= Math.Pow(2, 1.0 / 3.0)) {
-                for (int i = 0; i < 96000; ++i) {
+            for (double f = startFreq; f < endFreq; f *= Math.Pow(2, 1.0 / 3.0)) {
+                for (int i = 0; i < nSamples; ++i) {
                     outputData[pos + i] = 0;
                 }
 
-                for (int i = 0; i < 96000 * (int)numericUpDownPulseCount.Value / f; ++i) {
-                    outputData[pos + i] = (int)(System.Int32.MaxValue * Math.Sin(2.0 * Math.PI * (i *f / 96000)));
+                for (int i = 0; i < SAMPLE_RATE * (int)numericUpDownPulseCount.Value / f; ++i) {
+                    outputData[pos + i] = (int)(System.Int32.MaxValue * Math.Sin(2.0 * Math.PI * (i * f / SAMPLE_RATE)));
                 }
-                pos += 96000;
+                pos += nSamples;
             }
-            afc.OutputSet(listBoxOutput.SelectedIndex, outputData);
-            afc.InputSet(listBoxInput.SelectedIndex, outputData.Length);
-            afc.Start();
+            asio.OutputSet(listBoxOutput.SelectedIndex, outputData, false);
+            asio.InputSet(listBoxInput.SelectedIndex, outputData.Length);
+            asio.Start();
 
             progressBar1.Value = 0;
             progressBar1.Visible = true;
@@ -176,7 +199,7 @@ namespace AsioTestGUI
         }
 
         private void buttonStart_Click(object sender, EventArgs e) {
-            writeFilePath = textBoxFilePath.Text;
+            m_writeFilePath = textBoxFilePath.Text;
             buttonStart.Enabled = false;
             Start();
         }
@@ -195,12 +218,12 @@ namespace AsioTestGUI
         private void buttonStop_Click(object sender, EventArgs e)
         {
             buttonStop.Enabled = false;
-            afc.Stop();
+            asio.Stop();
         }
 
         private void buttonAbout_Click(object sender, EventArgs e)
         {
-            MessageBox.Show(string.Format("Pulse5 by Yamamoto Software Lab.\n\n{0}",afc.AsioTrademarkStringGet()));
+            MessageBox.Show(string.Format("Pulse5 by Yamamoto Software Lab.\n\n{0}",asio.AsioTrademarkStringGet()));
         }
     }
 }

@@ -8,7 +8,7 @@
     <ProjectGuid>{CE14235A-60E0-4D63-AD0E-2B27332D811F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AsioCS</RootNamespace>
+    <RootNamespace>Asio</RootNamespace>
     <AssemblyName>AsioCS</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
