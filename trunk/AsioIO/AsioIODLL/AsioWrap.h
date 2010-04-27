@@ -1,3 +1,8 @@
+/* ASIO wrapper API
+ * DLL functions are imported from AsioCS.cs
+ * if you add new function, you must also add in AsioIODLL.def
+ */
+
 #ifndef H_AsioWrap
 #define H_AsioWrap
 
