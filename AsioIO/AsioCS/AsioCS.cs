@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Asio
 {
-    /** simple wrapper class of ASIO API
+    /** simple wrapper class of C++ ASIO Wrapper API
      */
     public class AsioCS
     {
