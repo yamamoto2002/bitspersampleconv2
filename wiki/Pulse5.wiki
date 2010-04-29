@@ -27,6 +27,16 @@ http://bitspersampleconv2.googlecode.com/files/Pulse5x86Setup10008.zip
 64ビットWindows用:
 http://bitspersampleconv2.googlecode.com/files/Pulse5x64Setup10008.zip
 
+Visual Studio 2010ランタイムライブラリがリンク切れになっているので
+以下の場所からダウンロードしてインストールしておいて下さい:
+
+32ビットWindows用:
+http://www.microsoft.com/downloads/details.aspx?familyid=A7B7A05E-6DE6-4D3A-A423-37BF0912DB84&displaylang=ja
+
+64ビットWindows用:
+http://www.microsoft.com/downloads/details.aspx?displaylang=ja&FamilyID=bd512d9e-43c8-4655-81bf-9350143d5867
+
+
 =使用方法=
 
 ASIOデバイス自体の性能を測るときは入力端子と出力端子をケーブルでつなげます。
