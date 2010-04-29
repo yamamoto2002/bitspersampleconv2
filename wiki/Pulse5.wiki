@@ -19,22 +19,24 @@ Version 1.0.3
  * Creative X-Fi titanium PCI-e　オーディオクリエイションモード、マスタークロック96kHz、ビットマッチプレイバック、ビットマッチレコーディング
  * M-AUDIO !ProFire 2626
 
-=ダウンロード=
-
-32ビットWindows用:
-http://bitspersampleconv2.googlecode.com/files/Pulse5x86Setup10008.zip
-
-64ビットWindows用:
-http://bitspersampleconv2.googlecode.com/files/Pulse5x64Setup10008.zip
+=インストール=
 
 Visual C++ 2010ランタイムライブラリがリンク切れになっているので
-以下の場所からダウンロードしてインストールしておいて下さい:
+予め以下の場所からダウンロードしてインストールして下さい:
 
 32ビットWindows用:
 http://www.microsoft.com/downloads/details.aspx?familyid=A7B7A05E-6DE6-4D3A-A423-37BF0912DB84&displaylang=ja
 
 64ビットWindows用:
 http://www.microsoft.com/downloads/details.aspx?displaylang=ja&FamilyID=bd512d9e-43c8-4655-81bf-9350143d5867
+
+その後、Pulse5を以下の場所よりダウンロードし、中に入っているsetup.exeをダブルクリックしてインストールを行います。
+
+32ビットWindows用:
+http://bitspersampleconv2.googlecode.com/files/Pulse5x86Setup10008.zip
+
+64ビットWindows用:
+http://bitspersampleconv2.googlecode.com/files/Pulse5x64Setup10008.zip
 
 
 =使用方法=
