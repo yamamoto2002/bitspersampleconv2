@@ -11,12 +11,12 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 =動作確認デバイス=
 
 Version 1.0.4
- * M-AUDIO ProFire 2626
+ * M-AUDIO !ProFire 2626
  * Realtek ASIO
 
 Version 1.0.3
  * Creative X-Fi titanium PCI-e　オーディオクリエイションモード、マスタークロック96kHz、ビットマッチプレイバック、ビットマッチレコーディング
- * M-AUDIO ProFire 2626
+ * M-AUDIO !ProFire 2626
 
 =ダウンロード=
 
