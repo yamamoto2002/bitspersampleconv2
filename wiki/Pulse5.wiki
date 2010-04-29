@@ -11,7 +11,7 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 
 =動作確認デバイス=
 
-Version 1.0.5
+Version 1.0.7
  * M-AUDIO !ProFire 2626
  * Realtek ASIO
 
@@ -21,7 +21,7 @@ Version 1.0.3
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/Pulse5Setup10005.zip
+http://bitspersampleconv2.googlecode.com/files/Pulse5Setup10007.zip
 
 =使用方法=
 
