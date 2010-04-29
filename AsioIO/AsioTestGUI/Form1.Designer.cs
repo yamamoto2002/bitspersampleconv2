@@ -133,6 +133,7 @@
             this.listBoxOutput.Location = new System.Drawing.Point(4, 17);
             this.listBoxOutput.Margin = new System.Windows.Forms.Padding(2);
             this.listBoxOutput.Name = "listBoxOutput";
+            this.listBoxOutput.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.listBoxOutput.Size = new System.Drawing.Size(311, 148);
             this.listBoxOutput.TabIndex = 3;
             // 
