@@ -198,7 +198,7 @@ namespace AsioTestGUI
             foreach (int idx in listBoxOutput.SelectedIndices) {
                 asio.OutputSet(idx, outputData, false);
             }
-            //asio.InputSet(listBoxInput.SelectedIndex, outputData.Length);
+            asio.InputSet(listBoxInput.SelectedIndex, outputData.Length);
 
             if (0 <= listBoxClockSources.SelectedIndex) {
                 asio.ClockSourceSet(listBoxClockSources.SelectedIndex);
