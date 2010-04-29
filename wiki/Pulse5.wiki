@@ -21,7 +21,11 @@ Version 1.0.3
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/Pulse5Setup10007.zip
+32ビットWindows用:
+http://bitspersampleconv2.googlecode.com/files/Pulse5x86Setup10008.zip
+
+64ビットWindows用:
+http://bitspersampleconv2.googlecode.com/files/Pulse5x64Setup10008.zip
 
 =使用方法=
 
