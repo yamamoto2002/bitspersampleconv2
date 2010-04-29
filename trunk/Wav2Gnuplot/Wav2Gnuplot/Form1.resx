@@ -143,10 +143,17 @@
   </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="groupBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 12</value>
+    <value>16, 15</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="groupBox1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox1.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="groupBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>445, 53</value>
+    <value>593, 66</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="groupBox1.TabIndex" type="System.Int32, mscorlib">
@@ -165,13 +172,16 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;groupBox1.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>7</value>
   </data>
   <data name="buttonBrowseReadWavFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>321, 16</value>
+    <value>428, 20</value>
+  </data>
+  <data name="buttonBrowseReadWavFile.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonBrowseReadWavFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>118, 23</value>
+    <value>157, 29</value>
   </data>
   <data name="buttonBrowseReadWavFile.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -192,10 +202,13 @@
     <value>0</value>
   </data>
   <data name="textBoxReadWavFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
+    <value>8, 22</value>
+  </data>
+  <data name="textBoxReadWavFile.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxReadWavFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>309, 19</value>
+    <value>411, 22</value>
   </data>
   <data name="textBoxReadWavFile.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -237,10 +250,16 @@
     <value>1</value>
   </data>
   <data name="groupBox2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 71</value>
+    <value>16, 89</value>
+  </data>
+  <data name="groupBox2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox2.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="groupBox2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>445, 53</value>
+    <value>593, 66</value>
   </data>
   <data name="groupBox2.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -258,13 +277,16 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;groupBox2.ZOrder" xml:space="preserve">
-    <value>5</value>
+    <value>6</value>
   </data>
   <data name="buttonBrowseWriteFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>321, 16</value>
+    <value>428, 20</value>
+  </data>
+  <data name="buttonBrowseWriteFile.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonBrowseWriteFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>118, 23</value>
+    <value>157, 29</value>
   </data>
   <data name="buttonBrowseWriteFile.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -285,10 +307,13 @@
     <value>0</value>
   </data>
   <data name="textBoxWriteFile.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
+    <value>8, 22</value>
+  </data>
+  <data name="textBoxWriteFile.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxWriteFile.Size" type="System.Drawing.Size, System.Drawing">
-    <value>309, 19</value>
+    <value>411, 22</value>
   </data>
   <data name="textBoxWriteFile.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -306,10 +331,13 @@
     <value>1</value>
   </data>
   <data name="buttonStart.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 254</value>
+    <value>16, 318</value>
+  </data>
+  <data name="buttonStart.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="buttonStart.Size" type="System.Drawing.Size, System.Drawing">
-    <value>445, 23</value>
+    <value>593, 29</value>
   </data>
   <data name="buttonStart.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -327,20 +355,22 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;buttonStart.ZOrder" xml:space="preserve">
-    <value>4</value>
+    <value>5</value>
   </data>
   <data name="textBoxConsole.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 283</value>
+    <value>16, 354</value>
+  </data>
+  <data name="textBoxConsole.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="textBoxConsole.Multiline" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="textBoxConsole.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
     <value>Vertical</value>
   </data>
   <data name="textBoxConsole.Size" type="System.Drawing.Size, System.Drawing">
-    <value>445, 94</value>
+    <value>592, 116</value>
   </data>
   <data name="textBoxConsole.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -355,7 +385,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;textBoxConsole.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>4</value>
   </data>
   <metadata name="backgroundWorker1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -385,10 +415,16 @@
     <value>1</value>
   </data>
   <data name="groupBox3.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 130</value>
+    <value>16, 162</value>
+  </data>
+  <data name="groupBox3.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox3.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="groupBox3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>214, 46</value>
+    <value>285, 58</value>
   </data>
   <data name="groupBox3.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
@@ -406,16 +442,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;groupBox3.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>3</value>
   </data>
   <data name="label1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="label1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>119, 20</value>
+    <value>159, 25</value>
+  </data>
+  <data name="label1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="label1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>55, 12</value>
+    <value>68, 15</value>
   </data>
   <data name="label1.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -436,10 +475,13 @@
     <value>0</value>
   </data>
   <data name="numericStartPos.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
+    <value>8, 22</value>
+  </data>
+  <data name="numericStartPos.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="numericStartPos.Size" type="System.Drawing.Size, System.Drawing">
-    <value>107, 19</value>
+    <value>141, 22</value>
   </data>
   <data name="numericStartPos.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -484,10 +526,16 @@
     <value>1</value>
   </data>
   <data name="groupBox4.Location" type="System.Drawing.Point, System.Drawing">
-    <value>232, 130</value>
+    <value>309, 162</value>
+  </data>
+  <data name="groupBox4.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox4.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="groupBox4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>225, 46</value>
+    <value>300, 58</value>
   </data>
   <data name="groupBox4.TabIndex" type="System.Int32, mscorlib">
     <value>5</value>
@@ -505,16 +553,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;groupBox4.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="label2.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="label2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>119, 20</value>
+    <value>159, 25</value>
+  </data>
+  <data name="label2.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
   </data>
   <data name="label2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>47, 12</value>
+    <value>57, 15</value>
   </data>
   <data name="label2.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -535,10 +586,13 @@
     <value>0</value>
   </data>
   <data name="numericOutputSamples.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
+    <value>8, 22</value>
+  </data>
+  <data name="numericOutputSamples.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="numericOutputSamples.Size" type="System.Drawing.Size, System.Drawing">
-    <value>107, 19</value>
+    <value>141, 22</value>
   </data>
   <data name="numericOutputSamples.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -583,10 +637,16 @@
     <value>1</value>
   </data>
   <data name="groupBox5.Location" type="System.Drawing.Point, System.Drawing">
-    <value>12, 182</value>
+    <value>16, 228</value>
+  </data>
+  <data name="groupBox5.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox5.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="groupBox5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>200, 66</value>
+    <value>267, 82</value>
   </data>
   <data name="groupBox5.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -604,16 +664,19 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;groupBox5.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <data name="checkBoxCh1.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="checkBoxCh1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 40</value>
+    <value>8, 50</value>
+  </data>
+  <data name="checkBoxCh1.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="checkBoxCh1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>114, 16</value>
+    <value>138, 19</value>
   </data>
   <data name="checkBoxCh1.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -637,10 +700,13 @@
     <value>True</value>
   </data>
   <data name="checkBoxCh0.Location" type="System.Drawing.Point, System.Drawing">
-    <value>6, 18</value>
+    <value>8, 22</value>
+  </data>
+  <data name="checkBoxCh0.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
   </data>
   <data name="checkBoxCh0.Size" type="System.Drawing.Size, System.Drawing">
-    <value>107, 16</value>
+    <value>132, 19</value>
   </data>
   <data name="checkBoxCh0.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -660,6 +726,111 @@
   <data name="&gt;&gt;checkBoxCh0.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
+  <data name="&gt;&gt;label3.Name" xml:space="preserve">
+    <value>label3</value>
+  </data>
+  <data name="&gt;&gt;label3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label3.Parent" xml:space="preserve">
+    <value>groupBox6</value>
+  </data>
+  <data name="&gt;&gt;label3.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Name" xml:space="preserve">
+    <value>numericUpDownSubSampleOffset</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Parent" xml:space="preserve">
+    <value>groupBox6</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="groupBox6.Location" type="System.Drawing.Point, System.Drawing">
+    <value>291, 228</value>
+  </data>
+  <data name="groupBox6.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox6.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="groupBox6.Size" type="System.Drawing.Size, System.Drawing">
+    <value>318, 82</value>
+  </data>
+  <data name="groupBox6.TabIndex" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="groupBox6.Text" xml:space="preserve">
+    <value>subsample offset</value>
+  </data>
+  <data name="&gt;&gt;groupBox6.Name" xml:space="preserve">
+    <value>groupBox6</value>
+  </data>
+  <data name="&gt;&gt;groupBox6.Type" xml:space="preserve">
+    <value>System.Windows.Forms.GroupBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;groupBox6.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;groupBox6.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="label3.Location" type="System.Drawing.Point, System.Drawing">
+    <value>177, 30</value>
+  </data>
+  <data name="label3.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 0, 4, 0</value>
+  </data>
+  <data name="label3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>133, 29</value>
+  </data>
+  <data name="label3.TabIndex" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="label3.Text" xml:space="preserve">
+    <value>samples</value>
+  </data>
+  <data name="&gt;&gt;label3.Name" xml:space="preserve">
+    <value>label3</value>
+  </data>
+  <data name="&gt;&gt;label3.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;label3.Parent" xml:space="preserve">
+    <value>groupBox6</value>
+  </data>
+  <data name="&gt;&gt;label3.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="numericUpDownSubSampleOffset.Location" type="System.Drawing.Point, System.Drawing">
+    <value>11, 28</value>
+  </data>
+  <data name="numericUpDownSubSampleOffset.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>4, 4, 4, 4</value>
+  </data>
+  <data name="numericUpDownSubSampleOffset.Size" type="System.Drawing.Size, System.Drawing">
+    <value>159, 22</value>
+  </data>
+  <data name="numericUpDownSubSampleOffset.TabIndex" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Name" xml:space="preserve">
+    <value>numericUpDownSubSampleOffset</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Type" xml:space="preserve">
+    <value>System.Windows.Forms.NumericUpDown, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.Parent" xml:space="preserve">
+    <value>groupBox6</value>
+  </data>
+  <data name="&gt;&gt;numericUpDownSubSampleOffset.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
@@ -667,10 +838,13 @@
     <value>Japanese</value>
   </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
-    <value>6, 12</value>
+    <value>8, 15</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>469, 389</value>
+    <value>625, 486</value>
+  </data>
+  <data name="$this.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>5, 5, 5, 5</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>Wav2Gnuplot</value>

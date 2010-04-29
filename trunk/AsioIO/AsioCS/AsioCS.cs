@@ -62,7 +62,20 @@ namespace Asio
         [DllImport("AsioIODLL.dll")]
         private extern static void AsioWrap_getRecordedData(int inputChannel, int [] recordedData_return, int samples);
 
-        private enum AsioStatus {
+        [DllImport("AsioIODLL.dll")]
+        private extern static int AsioWrap_controlPanel();
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static int AsioWrap_getClockSourceNum();
+
+        [DllImport("AsioIODLL.dll", CharSet = CharSet.Ansi)]
+        private extern static bool AsioWrap_getClockSourceName(int idx, System.Text.StringBuilder name_return, int size);
+
+        [DllImport("AsioIODLL.dll")]
+        private extern static int AsioWrap_setClockSource(int idx);
+
+        private enum AsioStatus
+        {
             PreInit,
             DriverNotLoaded, //< driver unloaded
             DriverLoaded,  //< driver loaded but samplerate is not set
@@ -325,7 +338,41 @@ namespace Asio
         }
 
         public string AsioTrademarkStringGet() {
-            return "ASIO is a trademark and software of Steinberg Media Technologies GmbH";
+            return "ASIO Interface Specification v 2.1\nASIO is a trademark and software of Steinberg Media Technologies GmbH";
+        }
+
+        /** disp controlpanel
+         */
+        public int ControlPanel() {
+            return AsioWrap_controlPanel();
+        }
+
+        /** returns num of clock sources
+         */
+        public int ClockSourceNumGet() {
+            System.Diagnostics.Debug.Assert(AsioStatus.SampleRateSet <= state);
+
+            return AsioWrap_getClockSourceNum();
+        }
+
+        /** returns clock source name
+         * @param idx clock source index (0 ... ClockSourceNumGet()-1)
+         */
+        public string ClockSourceNameGet(int idx) {
+            System.Diagnostics.Debug.Assert(AsioStatus.SampleRateSet <= state);
+
+            StringBuilder buf = new StringBuilder(64);
+            AsioWrap_getClockSourceName(idx, buf, buf.Capacity);
+            return buf.ToString();
+        }
+
+        /** set clock source
+         * @param idx clock source index (0 ... ClockSourceNumGet()-1)
+         */
+        public int ClockSourceSet(int idx) {
+            System.Diagnostics.Debug.Assert(AsioStatus.SampleRateSet <= state);
+
+            return AsioWrap_setClockSource(idx);
         }
     }
 }

@@ -84,11 +84,20 @@ namespace AsioTestGUI
                 listBoxOutput.SelectedIndex = 0;
             }
 
+            for (int i = 0; i < asio.ClockSourceNumGet(); ++i) {
+                listBoxClockSources.Items.Add(asio.ClockSourceNameGet(i));
+            }
+            if (0 < listBoxOutput.Items.Count) {
+                listBoxClockSources.SelectedIndex = 0;
+            }
+
             if (0 == rv &&
                 0 < listBoxInput.Items.Count &&
                 0 < listBoxOutput.Items.Count) {
                 buttonStart.Enabled = true;
             }
+            listBoxDrivers.Enabled = false;
+            buttonControlPanel.Enabled = true;
         }
 
         BackgroundWorker bw;
@@ -102,7 +111,7 @@ namespace AsioTestGUI
             int count = 0;
             while (!asio.Run()) {
                 ++count;
-                Console.WriteLine("count={0} m_seconds={1}", count, m_seconds);
+                Console.WriteLine("\nForm1.DoWork() count={0} m_seconds={1}", count, m_seconds);
                 int percent = 100 * count / m_seconds;
                 if (100 < percent) {
                     percent = 100;
@@ -188,6 +197,11 @@ namespace AsioTestGUI
             }
             asio.OutputSet(listBoxOutput.SelectedIndex, outputData, false);
             asio.InputSet(listBoxInput.SelectedIndex, outputData.Length);
+
+            if (0 <= listBoxClockSources.SelectedIndex) {
+                asio.ClockSourceSet(listBoxClockSources.SelectedIndex);
+            }
+
             asio.Start();
 
             progressBar1.Value = 0;
@@ -229,6 +243,13 @@ namespace AsioTestGUI
         private void buttonAbout_Click(object sender, EventArgs e)
         {
             MessageBox.Show(string.Format("Pulse5 by Yamamoto Software Lab.\n\n{0}",asio.AsioTrademarkStringGet()));
+        }
+
+        private void buttonControlPanel_Click(object sender, EventArgs e) {
+            int rv = asio.ControlPanel();
+            if (-1000 == rv) {
+                MessageBox.Show(string.Format("Control panel is not present on this device.", rv));
+            }
         }
     }
 }

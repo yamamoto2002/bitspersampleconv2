@@ -41,6 +41,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -58,7 +60,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="WaveRW.cs" />
+    <Compile Include="AboutBox.xaml.cs">
+      <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SignalGenerator.cs" />
+    <Page Include="AboutBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -96,7 +105,20 @@
     </None>
     <AppDesigner Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AsioIO\AsioCS\AsioCS.csproj">
+      <Project>{CE14235A-60E0-4D63-AD0E-2B27332D811F}</Project>
+      <Name>AsioCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WavRWLib2\WavRWLib2.csproj">
+      <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
+      <Name>WavRWLib2</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy $(SolutionDir)$(ConfigurationName)\AsioIODLL.dll $(TargetDir)</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
