@@ -27,7 +27,7 @@ http://bitspersampleconv2.googlecode.com/files/Pulse5x86Setup10008.zip
 64ビットWindows用:
 http://bitspersampleconv2.googlecode.com/files/Pulse5x64Setup10008.zip
 
-Visual Studio 2010ランタイムライブラリがリンク切れになっているので
+Visual C++ 2010ランタイムライブラリがリンク切れになっているので
 以下の場所からダウンロードしてインストールしておいて下さい:
 
 32ビットWindows用:
