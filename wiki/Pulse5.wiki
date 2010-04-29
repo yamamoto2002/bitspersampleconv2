@@ -24,10 +24,10 @@ Version 1.0.3
 予め以下の場所からVisual C++ 2010ランタイムライブラリをダウンロードしてインストールして下さい:
 
 32ビットWindows用:
-http://www.microsoft.com/downloads/details.aspx?familyid=A7B7A05E-6DE6-4D3A-A423-37BF0912DB84&displaylang=ja
+http://www.microsoft.com/downloads/details.aspx?familyid=a7b7a05e-6de6-4d3a-a423-37bf0912db84
 
 64ビットWindows用:
-http://www.microsoft.com/downloads/details.aspx?displaylang=ja&FamilyID=bd512d9e-43c8-4655-81bf-9350143d5867
+http://www.microsoft.com/downloads/details.aspx?familyid=bd512d9e-43c8-4655-81bf-9350143d5867
 
 その後、Pulse5を以下の場所よりダウンロードし、中に入っているsetup.exeをダブルクリックしてインストールを行います。
 
