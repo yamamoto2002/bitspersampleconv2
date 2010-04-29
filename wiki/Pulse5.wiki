@@ -20,7 +20,7 @@ Version 1.0.3
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/Pulse5Setup10004.zip
+http://bitspersampleconv2.googlecode.com/files/Pluse5Setup10004.zip
 
 =使用方法=
 
