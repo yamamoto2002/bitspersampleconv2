@@ -66,17 +66,7 @@ https://bitspersampleconv2.googlecode.com/svn/trunk/
 AsioIO\AsioIODLL\copyasiofiles.batを実行するとASIOSDKの中から
 asio.cppなど9つのファイルをAsioIO\AsioIODLL\にコピーします
 
-Visual C++を起動してAsioIO\AsioIO.slnを読み込みます。
-AsioIODLLプロジェクトをビルドします。
-
-できたAsioIODLL.dllとAsioIODLL.libをAsioTestGUI\bin\Debugにコピーします
-
-VisualC#を起動してPulse5プロジェクトをデバッグビルドします
-
-実行します
-
-ASIOにアクセスするDLLはC++で作成。
-ユーザーインターフェースはC#で作成したためこのような面倒なことになっています
+Visual Studio 2010でPulse5.slnを開いてF5でビルドして実行します
 
 C#側からC++側に再生するデータを再生開始前に全部送るつくりになっています。
 このためASIOデバイスからやってくるbufferSwitchコールバックがC++内で処理され、
