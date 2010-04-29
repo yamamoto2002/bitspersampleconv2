@@ -21,8 +21,7 @@ Version 1.0.3
 
 =インストール=
 
-Visual C++ 2010ランタイムライブラリがリンク切れになっているので
-予め以下の場所からダウンロードしてインストールして下さい:
+予め以下の場所からVisual C++ 2010ランタイムライブラリをダウンロードしてインストールして下さい:
 
 32ビットWindows用:
 http://www.microsoft.com/downloads/details.aspx?familyid=A7B7A05E-6DE6-4D3A-A423-37BF0912DB84&displaylang=ja
