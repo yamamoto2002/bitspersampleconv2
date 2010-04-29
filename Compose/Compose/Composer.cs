@@ -104,6 +104,16 @@ namespace Compose
         // Tenorの音域:   C3～A4
         // Bassの音域:    F2～D4
 
+        // Soprano～Alto間 同度～1oct
+        // Alto～Tenor間 同度～1oct
+        // Tenor～Bass間 同度～12度
+
+        // Sop～Ten間が1octより狭い: 密集配分
+        // Sop～Ten間が1oct: oct配分
+        // Sop～Ten間が1octより広い: 乖離配分
+
+        // 上3声はバスを下回ってはいけない。
+
         // 根音は特別の場合に省略可能。
         // 第3音は省略不可。VやV7の第3音は重複不可。
         // 第5音は省略可能。

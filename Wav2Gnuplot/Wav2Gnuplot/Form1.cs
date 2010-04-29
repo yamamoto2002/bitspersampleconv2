@@ -120,23 +120,24 @@ namespace Wav2Gnuplot
 
             Console.WriteLine(rm.GetString("WavFileSummary"), wavData.NumSamples);
             resultString += string.Format(rm.GetString("WavFileSummary"), wavData.NumSamples);
+            double offset = (double)numericUpDownSubSampleOffset.Value;
 
             if (checkBoxCh0.Checked && !checkBoxCh1.Checked) {
                 using (StreamWriter sw = new StreamWriter(textBoxWriteFile.Text)) {
                     for (int i=startPos; i < startPos + outputSamples; ++i) {
-                        sw.WriteLine("{0} {1}", i, wavData.Sample16Get(0, i));
+                        sw.WriteLine("{0} {1}", i+offset, wavData.Sample16Get(0, i));
                     }
                 }
             } else if (!checkBoxCh0.Checked && checkBoxCh1.Checked) {
                 using (StreamWriter sw = new StreamWriter(textBoxWriteFile.Text)) {
                     for (int i=startPos; i < startPos + outputSamples; ++i) {
-                        sw.WriteLine("{0} {1}", i, wavData.Sample16Get(1, i));
+                        sw.WriteLine("{0} {1}", i + offset, wavData.Sample16Get(1, i));
                     }
                 }
             } else if (checkBoxCh0.Checked && checkBoxCh1.Checked) {
                 using (StreamWriter sw = new StreamWriter(textBoxWriteFile.Text)) {
                     for (int i=startPos; i < startPos + outputSamples; ++i) {
-                        sw.WriteLine("{0} {1} {2}", i, wavData.Sample16Get(0, i), wavData.Sample16Get(1, i));
+                        sw.WriteLine("{0} {1} {2}", i + offset, wavData.Sample16Get(0, i), wavData.Sample16Get(1, i));
                     }
                 }
             }

@@ -46,6 +46,9 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.checkBoxCh1 = new System.Windows.Forms.CheckBox();
             this.checkBoxCh0 = new System.Windows.Forms.CheckBox();
+            this.groupBox6 = new System.Windows.Forms.GroupBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.numericUpDownSubSampleOffset = new System.Windows.Forms.NumericUpDown();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -53,6 +56,8 @@
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericOutputSamples)).BeginInit();
             this.groupBox5.SuspendLayout();
+            this.groupBox6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSubSampleOffset)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox1
@@ -195,10 +200,45 @@
             this.checkBoxCh0.UseVisualStyleBackColor = true;
             this.checkBoxCh0.CheckedChanged += new System.EventHandler(this.checkBoxCh0_CheckedChanged);
             // 
+            // groupBox6
+            // 
+            this.groupBox6.Controls.Add(this.label3);
+            this.groupBox6.Controls.Add(this.numericUpDownSubSampleOffset);
+            resources.ApplyResources(this.groupBox6, "groupBox6");
+            this.groupBox6.Name = "groupBox6";
+            this.groupBox6.TabStop = false;
+            // 
+            // label3
+            // 
+            resources.ApplyResources(this.label3, "label3");
+            this.label3.Name = "label3";
+            // 
+            // numericUpDownSubSampleOffset
+            // 
+            this.numericUpDownSubSampleOffset.DecimalPlaces = 2;
+            this.numericUpDownSubSampleOffset.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
+            resources.ApplyResources(this.numericUpDownSubSampleOffset, "numericUpDownSubSampleOffset");
+            this.numericUpDownSubSampleOffset.Maximum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.numericUpDownSubSampleOffset.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.numericUpDownSubSampleOffset.Name = "numericUpDownSubSampleOffset";
+            // 
             // Form1
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
@@ -219,6 +259,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numericOutputSamples)).EndInit();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
+            this.groupBox6.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numericUpDownSubSampleOffset)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -244,6 +286,9 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.CheckBox checkBoxCh1;
         private System.Windows.Forms.CheckBox checkBoxCh0;
+        private System.Windows.Forms.GroupBox groupBox6;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.NumericUpDown numericUpDownSubSampleOffset;
     }
 }
 

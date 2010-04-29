@@ -35,3 +35,4 @@ EXPORTS
 	AsioWrap_run
 	AsioWrap_getRecordedData
 	AsioWrap_stop
+	AsioWrap_controlPanel

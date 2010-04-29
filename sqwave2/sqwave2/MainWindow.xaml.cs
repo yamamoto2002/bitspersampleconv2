@@ -15,6 +15,8 @@ using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using AsioCS;
+using System.Reflection;
 
 namespace sqwave2
 {
@@ -24,14 +26,110 @@ namespace sqwave2
     public partial class MainWindow : Window
     {
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private AsioWrap aw;
+
+        private bool uiInitialized = false;
+
+        enum OutputMode
+        {
+            WavFile,
+            Asio,
+            NUM
+        }
+
+        OutputMode mode = OutputMode.WavFile;
+
+        enum AsioStatus
+        {
+            NotReady,
+            Ready
+        }
+
+        AsioStatus s;
+
+        struct OutputFormat
+        {
+            public int sampleRate;
+            public int bitsPerSample;
+
+            public void Set(int sampleRate, int bitsPerSample) {
+                this.sampleRate = sampleRate;
+                this.bitsPerSample = bitsPerSample;
+            }
+        }
+
+        // 出力フォーマットのマスターデータ(ASIOとWAVで切り替わるので)
+        OutputFormat [] outputFormats;
 
         public MainWindow() {
             InitializeComponent();
+
+            outputFormats = new OutputFormat[(int)OutputMode.NUM];
+            outputFormats[0].Set(192000, 16);
+            outputFormats[1].Set(0, 0);
+
+            aw = new AsioWrap();
+
             backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(backgroundWorker1_DoWork);
             backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
 
-            textBoxOutput.Text = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\output.wav";
+            textBoxOutputFilePath.Text = System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal) + "\\output.wav";
+            uiInitialized = true;
+            UpdateUIStatus();
+        }
+
+        private void UpdateUIStatus() {
+            if (!uiInitialized) {
+                return;
+            }
+
+            switch (mode) {
+            case OutputMode.WavFile:
+                textBoxOutputFilePath.IsEnabled = true;
+                listBoxAsioDevices.IsEnabled = false;
+                listBoxAsioChannels.IsEnabled = false;
+                buttonRef.IsEnabled = true;
+                textBoxSeconds.IsEnabled = true;
+
+                break;
+            case OutputMode.Asio:
+                textBoxOutputFilePath.IsEnabled = false;
+                listBoxAsioDevices.IsEnabled = true;
+                listBoxAsioChannels.IsEnabled = true;
+                buttonRef.IsEnabled = false;
+                textBoxSeconds.IsEnabled = false;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+
+            {
+                // outputFormats[mode]に入っている情報を元に出力フォーマットにチェックを入れる。
+                int sampleRate = outputFormats[(int)mode].sampleRate;
+                for (int i = 0; i < listBoxSampleFreq.Items.Count; ++i) {
+                    ListBoxItem lbi = (ListBoxItem)listBoxSampleFreq.Items[i];
+                    int v = Convert.ToInt32(lbi.Content);
+
+                    if (v == sampleRate && listBoxSampleFreq.SelectedIndex != i) {
+                        listBoxSampleFreq.SelectedIndex = i;
+                    }
+                }
+            }
+
+            {
+                // outputFormats[mode]に入っている情報を元に量子化ビット数にチェックを入れる。
+                int bitsPerSample = outputFormats[(int)mode].bitsPerSample;
+                for (int i = 0; i < listBoxBits.Items.Count; ++i) {
+                    ListBoxItem lbi = (ListBoxItem)listBoxBits.Items[i];
+                    int v = Convert.ToInt32(lbi.Content);
+
+                    if (v == bitsPerSample && listBoxBits.SelectedIndex != i) {
+                        listBoxBits.SelectedIndex = i;
+                    }
+                }
+            }
         }
 
         private string SaveDialogAndAskPath() {
@@ -53,36 +151,8 @@ namespace sqwave2
         private void buttonRef_Click(object sender, RoutedEventArgs e) {
             string path = SaveDialogAndAskPath();
 
-            textBoxOutput.Text = path;
+            textBoxOutputFilePath.Text = path;
         }
-
-        enum CreateWavDataResult
-        {
-            Success,
-            LevelOver
-        }
-
-        enum SignalShape
-        {
-            SineWave,
-            SquareWave,
-            SawToothWaveDesc,
-            SawToothWaveAsc,
-            TriangleWave,
-        };
-
-        struct Settings
-        {
-            public int seconds;
-            public int sampleRate;
-            public int bitsPerSample;
-            public double dB;
-            public double freq;
-            public SignalShape ss;
-            public string path;
-            public double truncationRatio; //< ナイキスト周波数=1.0
-            public int amplitude;
-        };
 
         private void buttonStart_Click(object sender, RoutedEventArgs e) {
             int seconds = 0;
@@ -104,18 +174,18 @@ namespace sqwave2
             try {
                 dB = System.Convert.ToDouble(textBoxLevel.Text);
             } catch (System.Exception ex) {
-                MessageBox.Show("エラー: 出力レベルには 0以下の数値を半角で入力してください");
+                MessageBox.Show("エラー: 出力レベルには 数値を半角で入力してください");
                 return;
             }
             double freq = 0;
             try {
                 freq = System.Convert.ToDouble(textBoxFreq.Text);
             } catch (System.Exception ex) {
-                MessageBox.Show("エラー: 信号周波数には0.1以上の数値を半角で入力してください");
+                MessageBox.Show("エラー: 信号周波数には0.0001以上の数値を半角で入力してください");
                 return;
             }
-            if (freq <= 0.1) {
-                MessageBox.Show("エラー: 信号周波数には0.1以上の数値を半角で入力してください");
+            if (freq < 0.0001) {
+                MessageBox.Show("エラー: 信号周波数には0.0001以上の数値を半角で入力してください");
                 return;
             }
 
@@ -140,7 +210,7 @@ namespace sqwave2
             s.dB = dB;
             s.freq = freq;
             s.ss = ss;
-            s.path = textBoxOutput.Text;
+            s.path = textBoxOutputFilePath.Text;
             s.truncationRatio = trunc * 0.01;
             s.amplitude = (int)(((2 << (s.bitsPerSample - 2)) - 1) * Math.Pow(10, s.dB / 20.0));
 
@@ -151,14 +221,14 @@ namespace sqwave2
 
             switch (bitsPerSample) {
             case 16:
-                if (dB < -96.0 || 0.0 < dB) {
-                    MessageBox.Show("エラー: 出力レベルには -96～0の範囲の数値を入力してください");
+                if (dB < -96.0) {
+                    MessageBox.Show("エラー: 出力レベルには -96.0以上の数値を入力してください");
                     return;
                 }
                 break;
             case 24:
-                if (dB < -120.0 || 0.0 < dB) {
-                    MessageBox.Show("エラー: 出力レベルには -120～0の範囲の数値を入力してください");
+                if (dB < -120.0) {
+                    MessageBox.Show("エラー: 出力レベルには -120.0以上の数値を入力してください");
                     return;
                 }
                 break;
@@ -184,7 +254,7 @@ namespace sqwave2
                         }
                     }
                     if (harmonics <= 5) {
-                        textBoxLog.Text += string.Format("あまり三角波っぽい形にはなりません\r\n");
+                        textBoxLog.Text += string.Format("高調波成分が少ないためあまり三角波っぽい形にはなりません\r\n");
                     }
                 }
                 break;
@@ -201,7 +271,7 @@ namespace sqwave2
                         }
                     }
                     if (harmonics <= 5) {
-                        textBoxLog.Text += string.Format("あまりのこぎり波っぽい形にはなりません\r\n");
+                        textBoxLog.Text += string.Format("高調波成分が少ないためあまりのこぎり波っぽい形にはなりません\r\n");
                     }
                 }
                 break;
@@ -223,7 +293,7 @@ namespace sqwave2
                         }
                     }
                     if (harmonics <= 5) {
-                        textBoxLog.Text += string.Format("あまり矩形波っぽい形にはなりません\r\n");
+                        textBoxLog.Text += string.Format("高調波成分が少ないためあまり矩形波っぽい形にはなりません\r\n");
                     }
                 }
                 break;
@@ -239,17 +309,18 @@ namespace sqwave2
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e) {
             Settings s = (Settings)e.Argument;
+            SignalGenerator sg = new SignalGenerator();
 
             WavData wavData;
-            CreateWavDataResult cwdr
-                = CreateWavData(s, out wavData);
+            SignalGeneratorResult cwdr
+                = sg.GenerateSignal(s, out wavData);
 
             string resultString = "書き込むデータの準備: ";
             switch (cwdr) {
-            case CreateWavDataResult.Success:
+            case SignalGeneratorResult.Success:
                 resultString += "成功\r\n";
                 break;
-            case CreateWavDataResult.LevelOver:
+            case SignalGeneratorResult.LevelOver:
                 resultString += "レベルオーバーでクリップしました。出力レベルを下げてください\r\n";
                 break;
             default:
@@ -283,183 +354,61 @@ namespace sqwave2
             return rv;
         }
 
-        ////////////////////////////////////////////////////////
+        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
+            Application.Current.Shutdown();
+        }
 
-        private CreateWavDataResult CreateWavData(Settings s, out WavData wavData) {
-            List<PcmSamples1Channel> samples = new List<PcmSamples1Channel>();
+        private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
+            AboutBox dlg = new AboutBox();
 
-            int nSample = s.seconds * s.sampleRate;
-            PcmSamples1Channel ch = new PcmSamples1Channel(nSample, s.bitsPerSample);
-            samples.Add(ch);
+            dlg.Owner = this;
+            dlg.SetText(string.Format("{0} version {1}\n\n{2}",
+            AssemblyProduct, AssemblyVersion, aw.AsioTrademarkStringGet()));
+            dlg.ShowDialog();
+        }
 
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
-            CreateWavDataResult result = CreateWavDataResult.Success;
-            double truncFreq = (s.sampleRate / 2) * s.truncationRatio;
-
-            switch (s.ss) {
-            case SignalShape.SineWave:
-                result = CreateSineWave(ch, s.sampleRate, s.freq, s.amplitude);
-                break;
-            case SignalShape.SquareWave:
-                result = CreateSquareWave(ch, s.sampleRate, s.freq, s.amplitude, truncFreq);
-                break;
-            case SignalShape.SawToothWaveDesc:
-                result = CreateSawToothWave(ch, s.sampleRate, s.freq, s.amplitude, truncFreq, false);
-                break;
-            case SignalShape.SawToothWaveAsc:
-                result = CreateSawToothWave(ch, s.sampleRate, s.freq, s.amplitude, truncFreq, true);
-                break;
-            case SignalShape.TriangleWave:
-                result = CreateTriangleWave(ch, s.sampleRate, s.freq, s.amplitude, truncFreq);
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
+        #region アセンブリ情報
+        public string AssemblyVersion {
+            get {
+                return string.Format("{0}.{1}.{2}",
+                    Assembly.GetExecutingAssembly().GetName().Version.Major,
+                    Assembly.GetExecutingAssembly().GetName().Version.Minor,
+                    Assembly.GetExecutingAssembly().GetName().Version.Build);
             }
-
-            sw.Stop();
-            Console.WriteLine("{0} ms", sw.ElapsedMilliseconds);
-
-
-            wavData = new WavData();
-            wavData.Create(s.sampleRate, s.bitsPerSample, samples);
-            return result;
         }
 
-        private CreateWavDataResult CreateSineWave(PcmSamples1Channel ch, int sampleRate, double freq, int amplitude) {
-            Console.WriteLine("CreateSineWave sampleRate={0} freq={1} amp={2}", sampleRate, freq, amplitude);
-
-            CreateWavDataResult result = CreateWavDataResult.Success;
-
-            double step = 2.0 * Math.PI * (freq / sampleRate);
-            Parallel.For(0, ch.NumSamples, delegate(int i) {
-                int v = (int)(amplitude * Math.Sin(step * i));
-                short sv = (short)v;
-                if (v < -32768) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = -32768;
+        public string AssemblyProduct {
+            get {
+                object[] attributes = Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(AssemblyProductAttribute), false);
+                if (attributes.Length == 0) {
+                    return "";
                 }
-                if (32767 < v) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = 32767;
-                }
-                ch.Set16(i, sv);
-            });
-            return result;
-        }
-
-        private CreateWavDataResult CreateSquareWave(PcmSamples1Channel ch, int sampleRate, double freq, int amplitude, double truncFreq) {
-            Console.WriteLine("CreateSquareWave sampleRate={0} freq={1} amp={2} trunc={3}", sampleRate, freq, amplitude, truncFreq);
-
-            CreateWavDataResult result = CreateWavDataResult.Success;
-            double step = 2.0 * Math.PI * (freq / sampleRate);
-            Parallel.For(0, ch.NumSamples, delegate(int i) {
-                double v = 0.0;
-                for (int h = 1; ; ++h) {
-                    double harmonics = 2 * h - 1;
-                    if (amplitude / harmonics < 1.0) {
-                        break;
-                    }
-                    if (truncFreq <= harmonics * freq) {
-                        break;
-                    }
-                    double x = amplitude / harmonics * Math.Sin(step * i * harmonics);
-                    v += x;
-                }
-
-                short sv = (short)v;
-                if (v < -32768) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = -32768;
-                }
-                if (32767 < v) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = 32767;
-                }
-                ch.Set16(i, sv);
-            });
-
-            return result;
-        }
-
-        private CreateWavDataResult CreateSawToothWave(PcmSamples1Channel ch, int sampleRate, double freq, int amplitude, double truncFreq, bool bInvert) {
-            Console.WriteLine("CreateSawToothWave sampleRate={0} freq={1} amp={2} trunc={3} invert={4}", sampleRate, freq, amplitude, truncFreq, bInvert);
-
-            double ampWithPhase = amplitude;
-            if (bInvert) {
-                ampWithPhase = -amplitude;
+                return ((AssemblyProductAttribute)attributes[0]).Product;
             }
+        }
+        #endregion
 
-            CreateWavDataResult result = CreateWavDataResult.Success;
-            double step = 2.0 * Math.PI * (freq / sampleRate);
-            Parallel.For(0, ch.NumSamples, delegate(int i) {
-                double v = 0.0;
-                for (int h = 1; ; ++h) {
-                    double harmonics = h;
-                    if (amplitude / harmonics < 1.0) {
-                        break;
-                    }
-                    if (truncFreq <= harmonics * freq) {
-                        break;
-                    }
-                    double x = ampWithPhase / harmonics * Math.Sin(step * i * harmonics);
-                    v += x;
-                }
-
-                short sv = (short)v;
-                if (v < -32768) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = -32768;
-                }
-                if (32767 < v) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = 32767;
-                }
-                ch.Set16(i, sv);
-            });
-
-            return result;
+        private void MenuItemHelpWeb_Click(object sender, RoutedEventArgs e) {
+            try {
+                System.Diagnostics.Process.Start("http://code.google.com/p/bitspersampleconv2/wiki/SqWave2");
+            } catch (System.ComponentModel.Win32Exception) {
+            }
         }
 
-        private CreateWavDataResult CreateTriangleWave(PcmSamples1Channel ch, int sampleRate, double freq, double amplitude, double truncFreq) {
-            Console.WriteLine("CreateTriangleWave sampleRate={0} freq={1} amp={2} trunc={3}", sampleRate, freq, amplitude, truncFreq);
-
-            CreateWavDataResult result = CreateWavDataResult.Success;
-            double step = 2.0 * Math.PI * (freq / sampleRate);
-            
-            Parallel.For(0, ch.NumSamples, delegate(int i) {
-                double v = 0.0;
-                for (int h = 1; ; ++h) {
-                    double harmonics = 2 * h - 1;
-                    if (amplitude / harmonics / harmonics < 1.0) {
-                        break;
-                    }
-                    if (truncFreq <= harmonics * freq) {
-                        break;
-                    }
-                    double x = amplitude / harmonics / harmonics * Math.Sin(step * i * harmonics);
-                    if ((h & 1) == 0) {
-                        // hが偶数のときは-1倍する
-                        x = -x;
-                    }
-                    v += x;
-                }
-
-                short sv = (short)v;
-                if (v < -32768) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = -32768;
-                }
-                if (32767 < v) {
-                    result = CreateWavDataResult.LevelOver;
-                    sv = 32767;
-                }
-                ch.Set16(i, sv);
-            });
-
-            return result;
+        private void radioButtonOutFile_Checked(object sender, RoutedEventArgs e) {
+            mode = OutputMode.WavFile;
+            UpdateUIStatus();
         }
+
+        private void radioButtonOutAsio_Checked(object sender, RoutedEventArgs e) {
+            mode = OutputMode.Asio;
+
+            bool rv = AsioInit();
+
+            if (rv) {
+            }
+            UpdateUIStatus();
+        }
+
     }
 }

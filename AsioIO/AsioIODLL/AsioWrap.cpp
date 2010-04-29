@@ -13,18 +13,121 @@
 #include <assert.h>
 #include <stdio.h>
 
+#define ASIOWRAP_CLOCKSOURCE_NUM (32)
+
 static HANDLE s_hEvent;
 
 struct WavData {
-    int *data;
     int samples;
-    int pos;
-    int channel;
+    int pos; /**< next data index to read/write */
+    int channelIdx; /* buffer index */
 	bool repeat;
+	bool end;
+    int *data;
+
+	void Clear(void);
+	void SetInput32(const int *pInputData, int dataCount);
+	void SetInput16(const short *pInputData, int dataCount);
+	void SetOutput32(int *pOutputData, int dataCount);
+	void SetOutput16(short *pOutputData, int dataCount);
 };
 
-static WavData s_outputWavData;
-static WavData s_inputWavData;
+void WavData::Clear(void)
+{
+	delete[] data;
+	data = NULL;
+	
+	samples = 0;
+	pos = 0;
+	end = true;
+}
+
+void WavData::SetInput32(const int *pInputData, int dataCount)
+{
+	if (data) {
+		int count = dataCount;
+		if (samples < pos + dataCount) {
+			//printf("WavData::SetInput32 last data has come.\n");
+			count = samples - pos;
+			end = true;
+		}
+
+		if (count != 0) {
+			memcpy(&data[pos], pInputData, count * 4);
+			pos += count;
+		}
+	} else {
+		end = true;
+	}
+}
+
+void WavData::SetInput16(const short *pInputData, int dataCount)
+{
+	//printf("WavData::SetInput16 dataCount=%d bufferRemains=%d\n", dataCount, samples - pos);
+
+	if (data) {
+		int count = dataCount;
+		if (samples < pos + dataCount) {
+			//printf("WavData::SetInput16 last data has come.\n");
+			count = samples - pos;
+			end = true;
+		}
+
+		if (0 < count) {
+			for (int i=0; i<count; ++i) {
+				data[pos+i] = pInputData[i]<<16;
+			}
+			pos += count;
+		}
+	} else {
+		end = true;
+	}
+}
+
+void WavData::SetOutput32(int *pOutputData, int dataCount)
+{
+	if (data) {
+		int count = dataCount;
+		if (samples < pos + dataCount) {
+			//printf("WavData::SetOutput32 last data has come.\n");
+			count = samples - pos;
+			end = true;
+		}
+
+		if (0 < count) {
+			memcpy(pOutputData, &data[pos], count*4);
+			pos += count;
+		}
+	} else {
+		end = true;
+	}
+}
+
+void WavData::SetOutput16(short *pOutputData, int dataCount)
+{
+	//printf("WavData::SetOutput16 dataCount=%d bufferRemains=%d\n", dataCount, samples - pos);
+
+	if (data) {
+		int count = dataCount;
+		if (samples < pos + dataCount) {
+			//printf("WavData::SetOutput16 last data has come.\n");
+			count = samples - pos;
+			end = true;
+		}
+
+		if (0 < count) {
+			for (int i=0; i<count; ++i) {
+				pOutputData[i] = data[pos+i]>>16;
+			}
+			pos += count;
+		}
+	} else {
+		end = true;
+	}
+}
+
+static WavData s_outWav;
+static WavData s_inWav;
 
 static int
 getAsioDriverNum(void)
@@ -101,6 +204,9 @@ struct AsioPropertyInfo {
     double samples;
     double tcSamples;
     long  sysRefTime;
+
+	ASIOClockSource clockSources[ASIOWRAP_CLOCKSOURCE_NUM];
+	long numOfClockSources;
 };
 
 static AsioPropertyInfo *
@@ -117,8 +223,6 @@ ASIOTime *
 bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
-
-    static long processedSamples = 0;
 
     ap->tInfo = *timeInfo;
 
@@ -149,28 +253,38 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 
     for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
         if (ap->bufferInfos[i].isInput == ASIOTrue &&
-            ap->channelInfos[i].channel == s_inputWavData.channel) {
-            assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
-
-			printf("bufferSwitch input data=%p pos=%d buffSize=%d samples=%d\n", 
-				s_inputWavData.data, s_inputWavData.pos, buffSize, s_inputWavData.samples);
-			if (s_inputWavData.data && s_inputWavData.pos + buffSize <= s_inputWavData.samples) {
-				memcpy(&s_inputWavData.data[s_inputWavData.pos],
-					ap->bufferInfos[i].buffers[index], buffSize * 4);
-				s_inputWavData.pos += buffSize;
+            i == s_inWav.channelIdx) {
+			switch (ap->channelInfos[i].type) {
+			case ASIOSTInt16LSB:
+				// Realtek ASIO
+				s_inWav.SetInput16((short*)ap->bufferInfos[i].buffers[index], buffSize);
+				break;
+			case ASIOSTInt32LSB:
+				// M-AUDIO ASIO
+				// Creative ASIO
+				s_inWav.SetInput32((int*)ap->bufferInfos[i].buffers[index], buffSize);
+				break;
+			default:
+				printf("input ap->channelInfos[i].type=%d\n", 
+					ap->channelInfos[i].type);
+	            assert(0);
+				break;
 			}
         }
         if (ap->bufferInfos[i].isInput == ASIOFalse &&
-            ap->channelInfos[i].channel == s_outputWavData.channel) {
-            assert(ASIOSTInt32LSB == ap->channelInfos[i].type);
-
-			printf("bufferSwitch output data=%p pos=%d buffSize=%d samples=%d\n", 
-				s_outputWavData.data, s_outputWavData.pos, buffSize, s_outputWavData.samples);
-
-			if (s_outputWavData.data && s_outputWavData.pos + buffSize <= s_outputWavData.samples) {
-				memcpy(ap->bufferInfos[i].buffers[index],
-					&s_outputWavData.data[s_outputWavData.pos], buffSize * 4);
-				s_outputWavData.pos += buffSize;
+            i-ap->inputChannels == s_outWav.channelIdx) {
+			switch (ap->channelInfos[i].type) {
+			case ASIOSTInt16LSB:
+				s_outWav.SetOutput16((short*)ap->bufferInfos[i].buffers[index], buffSize);
+				break;
+			case ASIOSTInt32LSB:
+				s_outWav.SetOutput32((int*)ap->bufferInfos[i].buffers[index], buffSize);
+				break;
+			default:
+				printf("output ap->channelInfos[i].type=%d\n", 
+					ap->channelInfos[i].type);
+				assert(0);
+				break;
 			}
         }
     }
@@ -179,12 +293,12 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
         ASIOOutputReady();
     }
 
-    if (s_outputWavData.samples <= s_outputWavData.pos + buffSize ||
-        s_inputWavData.samples <= s_inputWavData.pos + buffSize) {
-		printf("bufferSwitch  SetEvent\n");
-        SetEvent(s_hEvent);
-    } else {
-        processedSamples += buffSize;
+    if (s_inWav.end && s_outWav.end) {
+		printf("\nbufferSwitch in/out data end. prefSize=%d inPos=%d outPos=%d SetEvent\n",
+			ap->preferredSize, s_inWav.pos, s_outWav.pos);
+		if (s_hEvent) {
+	        SetEvent(s_hEvent);
+		}
     }
 
     return 0L;
@@ -257,6 +371,8 @@ extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_init(void)
 {
+    printf(__FUNCTION__"()\n");
+
 	AsioDrvInit();
 }
 
@@ -264,6 +380,8 @@ extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_term(void)
 {
+    printf(__FUNCTION__"()\n");
+
 	AsioDrvTerm();
 }
 
@@ -301,6 +419,11 @@ AsioWrap_setup(int sampleRate)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
     ASIOError rv;
+
+	assert(s_inWav.data == NULL);
+	assert(s_outWav.data == NULL);
+	s_inWav.Clear();
+	s_outWav.Clear();
 
     ap->sampleRate = sampleRate;
 
@@ -421,6 +544,17 @@ AsioWrap_setup(int sampleRate)
     printf ("ASIOGetLatencies() input=%d output=%d\n",
         ap->inputLatency, ap->outputLatency);
 
+	ap->numOfClockSources = ASIOWRAP_CLOCKSOURCE_NUM;
+	rv = ASIOGetClockSources(ap->clockSources, &ap->numOfClockSources);
+    printf ("ASIOGetClockSources() result=%d numOfClockSources=%d\n",
+		rv, ap->numOfClockSources);
+
+	ASIOClockSource *cs = ap->clockSources;
+	for (int i=0; i<ap->numOfClockSources; ++i) {
+		printf (" idx=%d assocCh=%d assocGrp=%d current=%d name=%s\n",
+			cs->index, cs->associatedChannel, cs->associatedGroup, cs->isCurrentSource, cs->name);
+	}
+
     return ASE_OK;
 }
 
@@ -477,50 +611,52 @@ AsioWrap_unsetup(void)
 {
     ASIODisposeBuffers();
     printf("ASIODisposeBuffers()\n");
-    ASIOExit();
+
+	ASIOExit();
     printf("ASIOExit()\n");
 
-    delete[] s_inputWavData.data;
-    s_inputWavData.data = NULL;
-
-    delete[] s_outputWavData.data;
-    s_outputWavData.data = NULL;
+	s_inWav.Clear();
+	s_outWav.Clear();
 }
 
 extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_setOutput(int outputChannel, int *data, int samples, bool repeat)
 {
-    delete[] s_outputWavData.data;
-    s_outputWavData.data = NULL;
+    delete[] s_outWav.data;
+    s_outWav.data = NULL;
 
-    s_outputWavData.data = new int[samples];
-    memcpy(s_outputWavData.data, data, samples * 4);
-    s_outputWavData.samples = samples;
-    s_outputWavData.pos = 0;
-    s_outputWavData.channel = outputChannel;
-	s_outputWavData.repeat = true;
+    s_outWav.data = new int[samples];
+    memcpy(s_outWav.data, data, samples * 4);
+    s_outWav.samples = samples;
+    s_outWav.pos = 0;
+    s_outWav.channelIdx = outputChannel;
+	s_outWav.repeat = true;
+	s_outWav.end = false;
+	printf("AsioWrap_setOutput %d\n", outputChannel);
 }
 
 extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_setInput(int inputChannel, int samples)
 {
-    delete[] s_inputWavData.data;
-    s_inputWavData.data = NULL;
+    delete[] s_inWav.data;
+    s_inWav.data = NULL;
 
-    s_inputWavData.data = new int[samples];
-    s_inputWavData.samples = samples;
-    s_inputWavData.pos = 0;
-    s_inputWavData.channel = inputChannel;
+    s_inWav.data = new int[samples];
+    s_inWav.samples = samples;
+    s_inWav.pos = 0;
+    s_inWav.channelIdx = inputChannel;
+	s_inWav.end = false;
+	printf("AsioWrap_setInput %d\n", inputChannel);
 }
 
 extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples)
 {
-    assert(s_inputWavData.data);
-    memcpy_s(recordedData_return, samples *4, s_inputWavData.data, s_inputWavData.pos *4);
+    assert(s_inWav.data);
+    memcpy_s(recordedData_return, samples *4, s_inWav.data, s_inWav.pos *4);
 }
 
 extern "C" __declspec(dllexport)
@@ -531,7 +667,8 @@ AsioWrap_start(void)
 
     assert(!s_hEvent);
     s_hEvent = CreateEvent(NULL, FALSE, FALSE, "AsioWrap");
-    printf("CreateEvent()\n");
+    printf("\n\n\n\nAsioWrap_start CreateEvent() inEnd=%d outEnd=%d\n",
+		s_inWav.end, s_outWav.end);
 
     ASIOError rv = ASIOStart();
     if (rv == ASE_OK) {
@@ -557,8 +694,9 @@ AsioWrap_run(void)
         return false;
     }
 
-    ASIOStop();
-    printf("ASIOStop()\n");
+    ASIOError ae;
+	ae = ASIOStop();
+    printf("ASIOStop() result=%d\n", ae);
 
     CloseHandle(s_hEvent);
     s_hEvent = NULL;
@@ -575,4 +713,50 @@ AsioWrap_stop(void)
         printf("AsioWrap_stop calling SetEvent()\n");
         SetEvent(s_hEvent);
     }
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+AsioWrap_controlPanel(void)
+{
+	return (int)ASIOControlPanel();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+AsioWrap_getClockSourceNum()
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+	return ap->numOfClockSources;
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+AsioWrap_getClockSourceName(int n, char *name_return, int size)
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
+	assert(0 <= n && n < ap->numOfClockSources);
+
+	ASIOClockSource *cs = ap->clockSources;
+
+	sprintf(name_return, "%s id=%d Ac=%d Ag=%d",
+		cs[n].name, cs[n].index, cs[n].associatedChannel, cs[n].associatedGroup);
+	return true;
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+AsioWrap_setClockSource(int idx)
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
+	assert(0 <= idx && idx < ap->numOfClockSources);
+
+	ASIOClockSource *cs = ap->clockSources;
+
+	printf("AsioWrap_setClockSource(%d) csIdx=%d\n",
+		idx, cs[idx].index);
+
+	return (int)ASIOSetClockSource(cs[idx].index);
 }

@@ -40,4 +40,11 @@ extern "C" __declspec(dllexport) void  __stdcall AsioWrap_stop(void);
 
 extern "C" __declspec(dllexport) void  __stdcall AsioWrap_getRecordedData(int inputChannel, int recordedData_return[], int samples);
 
+extern "C" __declspec(dllexport) int   __stdcall AsioWrap_controlPanel(void);
+
+extern "C" __declspec(dllexport) int   __stdcall AsioWrap_getClockSourceNum(void);
+extern "C" __declspec(dllexport) bool  __stdcall AsioWrap_getClockSourceName(int n, char *name_return, int size);
+extern "C" __declspec(dllexport) int   __stdcall AsioWrap_setClockSource(int idx);
+
+
 #endif /* H_AsioWrap */
