@@ -1,4 +1,5 @@
 #summary パルスを出力して録音し、WAVファイルを作成するPulse5
+#labels Featured
 
 Pulse5はASIOデバイスから5波長分の長さの正弦波のパルスを22.5Hz～18286Hzまでの1/3oct刻みで順に出力し、
 同時にASIOデバイスから録音するプログラムです。
@@ -10,7 +11,7 @@ ASIO4ALLでは駄目で本物のASIO2デバイスでないとうまく動作し�
 
 =動作確認デバイス=
 
-Version 1.0.4
+Version 1.0.5
  * M-AUDIO !ProFire 2626
  * Realtek ASIO
 
@@ -20,7 +21,7 @@ Version 1.0.3
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/Pluse5Setup10004.zip
+http://bitspersampleconv2.googlecode.com/files/Pulse5Setup10005.zip
 
 =使用方法=
 
@@ -44,7 +45,7 @@ Pulse5を起動し、画面のグループボックス1～4まで設定を行っ
 
 3～5まで行ったらStartを押します
 
-http://bitspersampleconv2.googlecode.com/files/Pulse5_10004.png
+http://bitspersampleconv2.googlecode.com/files/Pulse5_10005.png
 
 =ソースコードからexeを作る方法=
 
