@@ -338,7 +338,7 @@ namespace Asio
         }
 
         public string AsioTrademarkStringGet() {
-            return "ASIO Interface Specification v 2.1\nASIO is a trademark and software of Steinberg Media Technologies GmbH";
+            return "ASIO version 2.1\nASIO is a trademark and software of Steinberg Media Technologies GmbH";
         }
 
         /** disp controlpanel
