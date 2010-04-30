@@ -17,15 +17,10 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 
 アンインストールは、コントロールパネルの[プログラムと機能]から!SqWave2を選んでアンインストールを選択するとできます。
 
-既に旧バージョンの!SqWaveがインストールされている状態で、
-最新バージョンに更新したい場合、
-最新バージョンをインストールする前に旧バージョンを手動でアンインストールする必要はありません。
-最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。
+http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 CTRLキーを押しながら出力チャンネルを選択すると
 出力チャンネルを複数選択できます。
-
-http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 ==ASIO出力動作確認デバイス==
 
