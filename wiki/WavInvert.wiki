@@ -1,4 +1,5 @@
 #summary Wavファイルの位相を反転するプログラムWavInvert
+#labels Featured
 
 WavInvertはWavファイルの位相を反転します。
 
