@@ -6,8 +6,9 @@
 ||min buffer size       (bytes)|| 88           || 64                    || 64          ||
 ||preferred buffer size (bytes)|| 352          || 4096                  || 256         ||
 ||max buffer size       (bytes)|| 1764         || 4096                  || 2048        ||
-||Output ready supported       || Yes          || Yes                   || No          ||
 ||internal clock generator name|| internal     || See Control Panel     || Big Ben     ||
+||Output ready supported       || Yes          || Yes                   || No          ||
+||ASIO Control Panel           || Not exists   || Exists                || Exists      ||
 
 = Realtek ASIO =
 
