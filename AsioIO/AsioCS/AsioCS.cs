@@ -74,7 +74,7 @@ namespace Asio
         [DllImport("AsioIODLL.dll")]
         private extern static int AsioWrap_setClockSource(int idx);
 
-        private enum AsioStatus
+        public enum AsioStatus
         {
             PreInit,
             DriverNotLoaded, //< driver unloaded
@@ -85,6 +85,10 @@ namespace Asio
         }
 
         private AsioStatus state = AsioStatus.PreInit;
+
+        public AsioStatus GetStatus() {
+            return state;
+        }
 
         private void ChangeState(AsioStatus newState) {
             Console.WriteLine("AsioWrap.ChangeState() {0} ==> {1}",
@@ -321,9 +325,15 @@ namespace Asio
         /** stop input/output tasks
          */
         public void Stop() {
-            System.Diagnostics.Debug.Assert(AsioStatus.Running == state);
-            AsioWrap_stop();
-            ChangeState(AsioStatus.Prepared);
+            if (AsioStatus.Prepared == state) {
+                return;
+            }
+            if (AsioStatus.Running == state) {
+                AsioWrap_stop();
+                ChangeState(AsioStatus.Prepared);
+                return;
+            }
+            System.Diagnostics.Debug.Assert(false);
         }
 
         /** run looper (this is a blocking function. call from dedicated thread)

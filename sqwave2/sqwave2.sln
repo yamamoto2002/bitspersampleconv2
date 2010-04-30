@@ -2,12 +2,18 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "sqwave2", "sqwave2\sqwave2.csproj", "{CC6A181F-D033-417D-B8F0-C47A1085F123}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6B24AC00-59D1-485F-BB9E-3568F031B8D8} = {6B24AC00-59D1-485F-BB9E-3568F031B8D8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WavRWLib2", "..\WavRWLib2\WavRWLib2.csproj", "{77005090-E2C5-4063-9681-0D0EED33A2B2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AsioIODLL", "..\AsioIO\AsioIODLL\AsioIO.vcxproj", "{6B24AC00-59D1-485F-BB9E-3568F031B8D8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsioCS", "..\AsioIO\AsioCS\AsioCS.csproj", "{CE14235A-60E0-4D63-AD0E-2B27332D811F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6B24AC00-59D1-485F-BB9E-3568F031B8D8} = {6B24AC00-59D1-485F-BB9E-3568F031B8D8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
