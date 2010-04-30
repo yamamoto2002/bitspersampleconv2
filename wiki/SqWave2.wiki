@@ -35,6 +35,8 @@ ASIO出力モードは、まだ安定動作しません
 
 192kHzサンプリングの出力ができるASIOデバイスでないと動作しないと思います。
 
+[ASIO ASIOデバイスについて]
+
 ==動作確認OS==
  * Windows XP Professional SP3 32ビット版
  * Windows 7 Professional 64ビット版
