@@ -28,7 +28,7 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 以下のASIOデバイスでは動作しました。
  * M-AUDIO !ProFire 2626
- * Realtek ASIO
+ * Realtek ALC889
 
 以下のASIOデバイスでは動作しませんでした。
  * ASIO4ALL …なぜか間欠的に音が鳴る
