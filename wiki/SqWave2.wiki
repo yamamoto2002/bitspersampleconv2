@@ -1,4 +1,5 @@
 #summary 矩形波の入ったWAVファイルを出力するツールSqWave2
+#labels Featured
 
 
 = 説明 =
@@ -22,6 +23,15 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。さらに言うと、この場合zipの中に入っているsetup.exeではなく!SqWave2Setup.msiをダブルクリックしてインストールすると、.NET Framework 4がPCに入っているかどうかをチェックしないので、インストールが早くできて良いです。
 
 http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
+
+==ASIO出力動作確認デバイス==
+
+以下のASIOデバイスでは動作しました
+ * M-AUDIO !ProFire 2626
+ * Realtek ASIO
+
+以下のASIOデバイスでは動作しませんでした
+ * ASIO4ALL …なぜか間欠的に音が鳴る
 
 == !SqWave2と!WaveGeneの出力波形とスペクトル ==
 
