@@ -33,6 +33,10 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 以下のASIOデバイスでは動作しませんでした
  * ASIO4ALL …なぜか間欠的に音が鳴る
 
+==動作確認OS==
+ * Windows XP Professional SP3 32ビット版
+ * Windows 7 Professional 64ビット版
+
 == !SqWave2と!WaveGeneの出力波形とスペクトル ==
 
 http://bitspersampleconv2.googlecode.com/files/raw.png
