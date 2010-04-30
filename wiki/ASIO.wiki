@@ -1,14 +1,12 @@
 #summary ASIO parameters of various ASIO devices
 #labels Featured
 
-= Summary =
-
 ||                      || Realtek ASIO || M-AUDIO !ProFire || ASIO4ALL    ||
 ||output buffer format  || !STint16LSB  || !STInt32LSB      || !STInt32LSB ||
 ||min buffer size       || 88           || 64               || 64          ||
 ||preferred buffer size || 352          || 4096             || 256         ||
 ||max buffer size       || 1764         || 4096             || 2048        ||
- 
+
 = Realtek ASIO =
 
 {{{
