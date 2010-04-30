@@ -22,12 +22,6 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 最新バージョンをインストールする前に旧バージョンを手動でアンインストールする必要はありません。
 最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。さらに言うと、この場合zipの中に入っているsetup.exeではなく!SqWave2Setup.msiをダブルクリックしてインストールすると、.NET Framework 4がPCに入っているかどうかをチェックしないので、インストールが早くできて良いです。
 
-もしかすると、予め以下の場所からVisual C++ 2010ランタイムライブラリをダウンロードしてインストールする必要があるかもしれません。おそらく要らないとは思います。
-
-32ビット Windows用: http://www.microsoft.com/downloads/details.aspx?familyid=a7b7a05e-6de6-4d3a-a423-37bf0912db84&displaylang=ja
-
-64ビットWindows用: http://www.microsoft.com/downloads/details.aspx?familyid=bd512d9e-43c8-4655-81bf-9350143d5867&displaylang=ja 
-
 http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 ==ASIO出力動作確認デバイス==
