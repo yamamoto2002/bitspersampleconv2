@@ -108,3 +108,7 @@ http://bitspersampleconv2.googlecode.com/files/taskman.png
 === !SqWave1 バージョン 1.0.0 ===
   * 新規作成。
   * 誤ってプロジェクトファイルを壊してしまったため廃棄
+
+----
+
+ASIO is a trademark of Steinberg Media Technologies GmbH.
