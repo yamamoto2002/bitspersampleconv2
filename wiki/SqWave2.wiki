@@ -87,9 +87,12 @@ SVNリポジトリに入っています。
 
 このプログラムは.NET Framework 4を使用して作りました。
 
-このあたりで矩形波を作っています。
+= 開発方法 =
+TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trunk/ からPulse5のソースコードをチェックアウトします
 
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#354
+チェックアウトしてきたツリーにASIO SDKをunzipしたものをコピーして 同じ親ディレクトリのなかにASIOSDK2とAsioIOがある状態にして AsioIO\AsioIODLL\copyasiofiles.batを実行するとASIOSDKの中から asio.cppなど9つのファイルをAsioIO\AsioIODLL\にコピーします
+
+Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します 
 
 = 更新履歴 =
 
