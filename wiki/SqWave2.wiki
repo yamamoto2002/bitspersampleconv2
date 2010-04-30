@@ -24,6 +24,12 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 
 http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
+もしかすると、予め以下の場所からVisual C++ 2010ランタイムライブラリをダウンロードしてインストールする必要があるかもしれません。
+
+32ビット Windows用: http://www.microsoft.com/downloads/details.aspx?familyid=a7b7a05e-6de6-4d3a-a423-37bf0912db84&displaylang=ja
+
+64ビットWindows用: http://www.microsoft.com/downloads/details.aspx?familyid=bd512d9e-43c8-4655-81bf-9350143d5867&displaylang=ja 
+
 ==ASIO出力動作確認デバイス==
 
 以下のASIOデバイスでは動作しました
