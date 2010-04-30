@@ -755,9 +755,9 @@ AsioWrap_run(void)
 
     assert(s_hEvent);
 
-    printf("WaitForSingleObject() start\n");
+    printf("AsioWrap_run() WaitForSingleObject() start\n");
     DWORD rv = WaitForSingleObject(s_hEvent, 1000);
-    printf("WaitForSingleObject() %x\n", rv);
+    printf("AsioWrap_run() WaitForSingleObject() %x\n", rv);
     if (rv == WAIT_TIMEOUT) {
         return false;
     }

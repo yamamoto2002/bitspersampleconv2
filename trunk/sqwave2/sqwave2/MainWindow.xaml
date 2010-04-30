@@ -1,7 +1,8 @@
 ﻿<Window x:Class="sqwave2.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="SqWave2" Height="635" Width="819">
+        xmlns:MyNamespace="clr-namespace:sqwave2"
+        Title="SqWave2" Height="635" Width="819" Closed="Window_Closed" Closing="Window_Closing">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition />
@@ -37,57 +38,62 @@
         <GroupBox Header="出力するデータ" Name="groupBox2" Margin="0,320,0,6" Height="276">
             <Grid>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="150*" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
-                    <RowDefinition Height="30" />
+                    <RowDefinition Height="92*" />
+                    <RowDefinition Height="40*" />
+                    <RowDefinition Height="40*" />
+                    <RowDefinition Height="40*" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="224*" />
-                    <ColumnDefinition Width="134*" />
+                    <ColumnDefinition Width="192*" />
+                    <ColumnDefinition Width="195*" />
                 </Grid.ColumnDefinitions>
                 <Label Content="波形" Name="label3" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
-                <ListBox Name="listBoxShape" Grid.Column="1">
+                <ListBox Name="listBoxShape" Grid.Column="1" SelectionChanged="listBoxShape_SelectionChanged" >
                     <ListBoxItem Content="サイン波" />
                     <ListBoxItem Content="矩形波" IsSelected="True" />
                     <ListBoxItem Content="のこぎり波(下降)" />
                     <ListBoxItem Content="のこぎり波(上昇)" />
                     <ListBoxItem Content="三角波" />
                 </ListBox>
-                <Label Content="信号周波数(Hz)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Name="label6" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="1" />
-                <TextBox Grid.Row="1" Name="textBoxFreq" Text="10000" VerticalContentAlignment="Center" Grid.Column="1" />
-                <Label Content="級数加算打ち切り(1/2fsとの%)" Grid.Row="2" Margin="1,0,0,0" Name="label7" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
-                <TextBox Grid.Column="1" Grid.Row="2" Name="textBoxTrunc" Text="99.0" VerticalContentAlignment="Center" />
-                <GroupBox Grid.Column="1" Header="ログ出力" Margin="0,0,-401,6" Name="groupBox4" Height="177" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="396" Grid.RowSpan="3">
+                <Label Content="級数加算打ち切り(1/2fsとの%)" Grid.Row="2" Name="label7" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
+                <TextBox Grid.Column="1" Grid.Row="2" Name="textBoxTrunc" Text="99.0" VerticalContentAlignment="Center" TextChanged="textBoxTrunc_TextChanged" />
+                <GroupBox Grid.Column="1" Header="ログ出力" Margin="0,0,-401,6" Name="groupBox4" Height="111" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="396" Grid.RowSpan="2" Grid.Row="1">
                     <Grid>
                         <TextBox Margin="6" Name="textBoxLog" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
                     </Grid>
                 </GroupBox>
-                <Label Content="出力レベル(dB)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Name="label4" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="3" Margin="1,0,0,0" />
-                <TextBox Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" Grid.Row="3" Grid.Column="1" Margin="0,0,1,0" />
+                <Label Content="出力レベル(dB)" HorizontalAlignment="Stretch" HorizontalContentAlignment="Right" Name="label4" VerticalAlignment="Stretch" VerticalContentAlignment="Center" Grid.Row="3" />
+                <TextBox Name="textBoxLevel" Text="-10" VerticalContentAlignment="Center" Grid.Row="3" Grid.Column="1" TextChanged="textBoxLevel_TextChanged" />
+                <TextBox Name="textBoxFreq" Text="10000" VerticalContentAlignment="Center" TextChanged="textBoxFreq_TextChanged" Grid.Row="1" Grid.Column="1" />
+                <Label Content="周波数(Hz)" HorizontalContentAlignment="Right" Name="label6" VerticalContentAlignment="Center" Grid.Row="1" />
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Column="1" Header="出力先" Name="groupBox3" Margin="0,29,2,225" Height="348">
+        <GroupBox Grid.Column="1" Header="出力先" Name="groupBox3" Margin="0,29,2,165" Height="408">
             <Grid>
                 <RadioButton Content="ファイルにWAV形式で出力" Height="16" Margin="12,6,6,0" Name="radioButtonOutFile" VerticalAlignment="Top" IsChecked="True" Checked="radioButtonOutFile_Checked" />
                 <RadioButton Content="ASIOデバイスに出力" Height="16" HorizontalAlignment="Left" Margin="12,128,0,0" Name="radioButtonOutAsio" VerticalAlignment="Top" Width="368" Checked="radioButtonOutAsio_Checked" />
-                <GroupBox Header="ASIO設定" Margin="11,150,6,6" Name="groupBox5">
+                <GroupBox Header="ASIO設定" Margin="11,150,6,0" Name="groupBox5" Height="227" VerticalAlignment="Top">
                     <Grid >
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="50*" />
-                            <RowDefinition Height="50*" />
+                            <RowDefinition Height="40*" />
+                            <RowDefinition Height="40*" />
+                            <RowDefinition Height="30*" />
+                            <RowDefinition Height="30*" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="107*" />
                             <ColumnDefinition Width="249*" />
                         </Grid.ColumnDefinitions>
-                        <ListBox Name="listBoxAsioDevices" Grid.Column="1" />
-                        <Label Content="出力デバイス" Name="label8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
-                        <ListBox Grid.Row="1" Name="listBoxAsioChannels" Grid.Column="1" />
+                        <ListBox Name="listBoxAsioDevices" Grid.Column="1" SelectionChanged="listBoxAsioDevices_SelectionChanged" Width="249" />
+                        <Label Content="出力デバイス選択" Name="label8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
+                        <ListBox Grid.Row="1" Name="listBoxAsioChannels" Grid.Column="1" SelectionMode="Multiple" Width="249" />
                         <TextBlock Grid.Row="1" Name="textBlock1" Text="出力チャンネル (複数選択可)" TextWrapping="Wrap" TextAlignment="Right" VerticalAlignment="Stretch" />
+                        <Label Content="クロックソース" HorizontalContentAlignment="Right" Name="label10" VerticalContentAlignment="Center" Grid.Row="2" Width="107" />
+                        <ListBox Name="listBoxAsioClockSource" Grid.Column="1" Grid.Row="2" Width="249" />
+                        <Button Content="ASIOデバイスコントロールパネル..." Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" Name="buttonAsioControlPanel" Width="249" Click="buttonAsioControlPanel_Click" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="WAV設定" Margin="11,28,4,197" Name="groupBox6">
+                <GroupBox Header="WAV設定" Margin="11,28,4,0" Name="groupBox6" Height="94" VerticalAlignment="Top">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition />
@@ -116,6 +122,7 @@
                 <MenuItem Header="バージョン情報(_A)" Click="MenuItemHelpAbout_Click" />
             </MenuItem>
         </Menu>
-        <Button Content="出力開始(_S)" Height="29" Margin="0,0,6,12" Name="buttonStart" VerticalAlignment="Bottom" Click="buttonStart_Click" Grid.Column="1" />
+        <Button Content="出力開始(_S)" Height="29" Margin="0,0,0,12" Name="buttonStart" VerticalAlignment="Bottom" Click="buttonStart_Click" Grid.Column="1" HorizontalAlignment="Left" Width="192" />
+        <Button Content="出力中止(_T)" Height="29" HorizontalAlignment="Left" Margin="198,0,0,13" Name="buttonStop" VerticalAlignment="Bottom" Width="192" Grid.Column="1" Click="buttonStop_Click" />
     </Grid>
 </Window>
