@@ -9,7 +9,7 @@
 
 = 使用方法 =
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10004.zip
+http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
@@ -21,7 +21,7 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10004.zip
 最新バージョンをインストールする前に旧バージョンを手動でアンインストールする必要はありません。
 最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。さらに言うと、この場合zipの中に入っているsetup.exeではなく!SqWave2Setup.msiをダブルクリックしてインストールすると、.NET Framework 4がPCに入っているかどうかをチェックしないので、インストールが早くできて良いです。
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10004ss.png
+http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 == !SqWave2と!WaveGeneの出力波形とスペクトル ==
 
@@ -76,6 +76,9 @@ SVNリポジトリに入っています。
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/sqwave2/sqwave2/MainWindow.xaml.cs#354
 
 = 更新履歴 =
+
+=== !SqWave2 バージョン 1.0.8 ===
+  * ASIO出力対応。
 
 === !SqWave2 バージョン 1.0.4 ===
   * 級数加算打ち切り周波数をナイキスト周波数との比の％で入力できるようにしました。
