@@ -22,6 +22,9 @@ http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 最新バージョンをインストールする前に旧バージョンを手動でアンインストールする必要はありません。
 最新バージョンを普通にインストールすると、インストーラーが全自動で旧バージョンをアンインストールしてから最新バージョンをインストールします。さらに言うと、この場合zipの中に入っているsetup.exeではなく!SqWave2Setup.msiをダブルクリックしてインストールすると、.NET Framework 4がPCに入っているかどうかをチェックしないので、インストールが早くできて良いです。
 
+CTRLキーを押しながら出力チャンネルを選択すると
+出力チャンネルを複数選択できます。
+
 http://bitspersampleconv2.googlecode.com/files/SqWave10008ss.png
 
 ==ASIO出力動作確認デバイス==
