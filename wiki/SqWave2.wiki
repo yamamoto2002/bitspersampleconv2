@@ -87,7 +87,7 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 Visual Studio 2010が必要です。
 
-TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trunk/ からPulse5のソースコードをチェックアウトします
+TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trunk をチェックアウトします
 
 チェックアウトしてきたツリーにASIO SDKをunzipしたものをコピーして 同じ親ディレクトリのなかにASIOSDK2とAsioIOがある状態にして AsioIO\AsioIODLL\copyasiofiles.batを実行するとASIOSDKの中から asio.cppなど9つのファイルをAsioIO\AsioIODLL\にコピーします
 
