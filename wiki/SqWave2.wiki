@@ -104,24 +104,30 @@ Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します
   * M-AUDIO !ProFire 2626のASIO出力が納得のいく出来になった。
   * ASIO4ALLで鳴るかどうかは接続先のデバイスによるようだ
   * !RealTek ASIOはまだ変な音が鳴る
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10009.zip
 
 === !SqWave2 バージョン 1.0.8 ===
   * ASIO出力対応。
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
 
 === !SqWave2 バージョン 1.0.4 ===
   * 級数加算打ち切り周波数をナイキスト周波数との比の％で入力できるようにしました。
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10004.zip
 
 === !SqWave2 バージョン 1.0.2 ===
   * のこぎり波、三角波もでるようにしました。
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10002.zip
 
 === !SqWave2 バージョン 1.0.1 ===
   * ダイアログに入れられた値の範囲チェック。
   * マルチコア対応。Intel Core i7-980Xでの実行結果。見事にすべてのCPUコアに負荷が分散していますｗ
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10001.zip
 
 http://bitspersampleconv2.googlecode.com/files/taskman.png
 
 === !SqWave2 バージョン 1.0.0 ===
   * 新規作成
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10000.zip
 
 === !SqWave1 バージョン 1.0.0 ===
   * 新規作成。
