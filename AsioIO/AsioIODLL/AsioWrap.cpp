@@ -103,15 +103,14 @@ void WavData::SetOutput32(int *pOutputData, int dataCount)
 				count = samples - pos;
 				memcpy(&pOutputData[writePos], &data[pos], count*4);
 				pos = 0;
-				writePos += count;
 			} else {
 				memcpy(&pOutputData[writePos], &data[pos], count*4);
-				writePos += count;
 				pos += count;
-				if (samples <= pos) {
+				if (samples == pos) {
 					pos = 0;
 				}
 			}
+			writePos += count;
 			dataCount -= count;
 		}
 	} else {
@@ -126,6 +125,9 @@ void WavData::SetOutput32(int *pOutputData, int dataCount)
 		if (0 < count) {
 			memcpy(pOutputData, &data[pos], count*4);
 			pos += count;
+		}
+		if (count < dataCount) {
+			memset(&pOutputData[count], 0, (dataCount-count)*4);
 		}
 	}
 }
@@ -149,18 +151,17 @@ void WavData::SetOutput16(short *pOutputData, int dataCount)
 				for (int i=0; i<count; ++i) {
 					pOutputData[i+writePos] = data[pos+i]>>16;
 				}
-				writePos += count;
 				pos = 0;
 			} else {
 				for (int i=0; i<count; ++i) {
 					pOutputData[i+writePos] = data[pos+i]>>16;
 				}
-				writePos += count;
 				pos += count;
-				if (samples <= pos) {
+				if (samples == pos) {
 					pos = 0;
 				}
 			}
+			writePos += count;
 			dataCount -= count;
 		}
 	} else {
@@ -177,6 +178,11 @@ void WavData::SetOutput16(short *pOutputData, int dataCount)
 				pOutputData[i] = data[pos+i]>>16;
 			}
 			pos += count;
+		}
+		if (count < dataCount) {
+			for (int i=count; i<dataCount; ++i) {
+				pOutputData[i] = 0;
+			}
 		}
 	}
 }
@@ -247,6 +253,7 @@ struct AsioPropertyInfo {
     long minSize;
     long maxSize;
     long preferredSize;
+	long bufferSize;
     long granularity;
     ASIOSampleRate sampleRate; /**< input param: 96000 or 44100 or whatever */
     bool postOutput;
@@ -304,7 +311,7 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 
     ap->sysRefTime = GetTickCount();
 
-    long buffSize = ap->preferredSize;
+	long buffSize = ap->bufferSize;
 
     for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
         if (ap->bufferInfos[i].isInput == ASIOTrue &&
@@ -527,6 +534,7 @@ AsioWrap_setup(int sampleRate)
     printf ("ASIOGetBufferSize() min=%d max=%d preferred=%d granularity=%d\n",
              ap->minSize, ap->maxSize,
              ap->preferredSize, ap->granularity);
+	ap->bufferSize = ap->maxSize;
 
     rv = ASIOCanSampleRate(ap->sampleRate);
     if (ASE_OK != rv) {
@@ -576,7 +584,7 @@ AsioWrap_setup(int sampleRate)
     asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
 
     rv = ASIOCreateBuffers(ap->bufferInfos,
-        totalChannels, ap->preferredSize, &asioCallbacks);
+        totalChannels, ap->bufferSize, &asioCallbacks);
     if (ASE_OK != rv) {
         printf ("ASIOCreateBuffers() failed %d\n", rv);
         return rv;
@@ -737,6 +745,24 @@ AsioWrap_start(void)
     assert(!s_hEvent);
     s_hEvent = CreateEvent(NULL, FALSE, FALSE, "AsioWrap");
     printf("\nAsioWrap_start CreateEvent()\n");
+
+	// clear ASIO buffer
+	int totalChannels = ap->inputChannels + ap->outputChannels;
+	for (int i=ap->inputChannels; i<totalChannels; ++i) {
+		switch (ap->channelInfos[i].type) {
+		case ASIOSTInt32LSB:
+			memset(ap->bufferInfos[i].buffers[0], 0, ap->bufferSize*4);
+			memset(ap->bufferInfos[i].buffers[1], 0, ap->bufferSize*4);
+			break;
+		case ASIOSTInt16LSB:
+			memset(ap->bufferInfos[i].buffers[0], 0, ap->bufferSize*2);
+			memset(ap->bufferInfos[i].buffers[1], 0, ap->bufferSize*2);
+			break;
+		default:
+			assert(0);
+			break;
+		}
+	}
 
     ASIOError rv = ASIOStart();
     if (rv == ASE_OK) {
