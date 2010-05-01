@@ -10,7 +10,7 @@
 
 = 使用方法 =
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10008.zip
+http://bitspersampleconv2.googlecode.com/files/SqWave10009.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
@@ -96,6 +96,11 @@ TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trun
 Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します 
 
 = 更新履歴 =
+
+=== !SqWave2 バージョン 1.0.9 ===
+  * M-AUDIO ProFire 2626のASIO出力が納得のいく出来になった。
+  * ASIO出力バッファサイズをpreferredからmaxに増やす。
+  * 2回目以降のASIOStartで前回の最後の出力が1バッファ分繰り返される問題を修正。
 
 === !SqWave2 バージョン 1.0.8 ===
   * ASIO出力対応。
