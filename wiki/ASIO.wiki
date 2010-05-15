@@ -1,14 +1,37 @@
 #summary ASIO device parameters of various ASIO devices
 #labels Featured
 
-||                             || Realtek ASIO || M-AUDIO !ProFire 2626 || ASIO4ALL    ||
-||output buffer format         || sint16 LSB   || sint32 LSB            || sint32 LSB  ||
-||min buffer size       (bytes)|| 88           || 64                    || 64          ||
-||preferred buffer size (bytes)|| 352          || 4096                  || 256         ||
-||max buffer size       (bytes)|| 1764         || 4096                  || 2048        ||
-||internal clock generator name|| internal     || See Control Panel     || Big Ben     ||
-||Output ready supported       || Yes          || Yes                   || No          ||
-||ASIO Control Panel           || Not exists   || Exists                || Exists      ||
+||                             || Realtek ASIO || M-AUDIO !ProFire 2626 || ASIO4ALL    ||Prodigy HD2||
+||output buffer format         || sint16 LSB   || sint32 LSB            || sint32 LSB  ||||
+||min buffer size       (bytes)|| 88           || 64                    || 64          ||256(Default)||
+||preferred buffer size (bytes)|| 352          || 4096                  || 256         ||256(Default)||
+||max buffer size       (bytes)|| 1764         || 4096                  || 2048        ||256(Default)||
+||internal clock generator name|| internal     || See Control Panel     || Big Ben     ||Prodigy HD2 Clock||
+||Output ready supported       || Yes          || Yes                   || No          ||Yes||
+||ASIO Control Panel           || Not exists   || Exists                || Exists      ||Not Exists but no error reported when asioControlPanel()||
+
+= Prodigy HD2 v1.08(64bit) =
+
+{{{
+  asioVersion:   0
+  driverVersion: 2
+  Name:          Prodigy HD2
+ASIOGetChannels() inputs=4 outputs=4
+ASIOGetBufferSize() min=256 max=256 preferred=256 granularity=0
+ASIOSetSampleRate(sampleRate=96000.000000)
+ASIOOutputReady() Supported
+i= 0 ch= 0 isInput=1 chGroup=00000000 type=18 name=L:Prodigy HD2 1/2
+i= 1 ch= 1 isInput=1 chGroup=00000000 type=18 name=R:Prodigy HD2 1/2
+i= 2 ch= 2 isInput=1 chGroup=00000000 type=18 name=L:Prodigy HD2 3/4
+i= 3 ch= 3 isInput=1 chGroup=00000000 type=18 name=R:Prodigy HD2 3/4
+i= 4 ch= 0 isInput=0 chGroup=00000000 type=18 name=L:Prodigy HD2 1/2
+i= 5 ch= 1 isInput=0 chGroup=00000000 type=18 name=R:Prodigy HD2 1/2
+i= 6 ch= 2 isInput=0 chGroup=00000000 type=18 name=L:Prodigy HD2 3/4
+i= 7 ch= 3 isInput=0 chGroup=00000000 type=18 name=R:Prodigy HD2 3/4
+ASIOGetLatencies() input=256 output=256
+ASIOGetClockSources() result=1 numOfClockSources=1
+ idx=0 assocCh=0 assocGrp=0 current=1 name=Prodigy HD2 Clock
+}}}
 
 = Realtek ASIO =
 
