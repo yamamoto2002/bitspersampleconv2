@@ -2,7 +2,7 @@
 #labels Featured
 
 ||                             || Realtek ASIO || M-AUDIO !ProFire 2626 || ASIO4ALL    ||Prodigy HD2||
-||output buffer format         || sint16 LSB   || sint32 LSB            || sint32 LSB  ||||
+||output buffer format         || sint16 LSB   || sint32 LSB            || sint32 LSB  || sint32 LSB||
 ||min buffer size       (bytes)|| 88           || 64                    || 64          ||256(Default)||
 ||preferred buffer size (bytes)|| 352          || 4096                  || 256         ||256(Default)||
 ||max buffer size       (bytes)|| 1764         || 4096                  || 2048        ||256(Default)||
