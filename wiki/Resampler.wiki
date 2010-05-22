@@ -55,4 +55,8 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 = 総括 =
 
 この中ではSecret Rabbit Code libsamplerate-0.1.7のsndfile-resample 
-が最高性能。foobar2000も十分に良い。
+が最高性能。
+
+foobar2000も十分に良い。
+
+Resample 1.8.1は関係ない周波数成分が発生しているのでおすすめできない。
