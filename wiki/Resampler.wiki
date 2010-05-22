@@ -39,7 +39,7 @@ http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_sndfileR
 
 http://www.mega-nerd.com/SRC/fb2k.html
 
-http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_foobar2000SRC.png
+http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000SRC.png
 
 == Resample 1.8.1 ==
 
