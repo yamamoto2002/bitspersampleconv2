@@ -88,6 +88,8 @@ Secret Rabbit Code libsamplerate-0.1.7とは出力データが違っており、
 
 foobar2000付属のResamplerは十分に良い。
 
+foobar2000用SSRCプラグインは、Secret Rabbit Code libsamplerate-0.1.7ほどではないが、良い。
+
 Resample 1.8.1は出力レベルが変わっており、関係ない周波数成分が-50dBぐらい発生しているのでおすすめできない。
 
 ここまで書いて、もっと徹底的に調べているページを発見
