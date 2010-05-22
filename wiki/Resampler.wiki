@@ -72,4 +72,4 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 
 foobar2000も十分に良い。
 
-Resample 1.8.1は出力レベルが変わっており、関係ない周波数成分が発生しているのでおすすめできない。
+Resample 1.8.1は出力レベルが変わっており、関係ない周波数成分が-50dBぐらい発生しているのでおすすめできない。
