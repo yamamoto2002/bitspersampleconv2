@@ -68,7 +68,7 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 = 総括 =
 
 この中ではSecret Rabbit Code libsamplerate-0.1.7のsndfile-resample 
-が最高性能。しかも、これ以上の音質性能改善の余地はなさそうである。
+が最高性能。しかも、これ以上の性能改善の余地はなさそうである。
 
 foobar2000も十分に良い。
 
