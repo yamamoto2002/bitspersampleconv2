@@ -35,6 +35,12 @@ $ sndfile-resample -to 96000 -c 0 from.wav to.wav
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_sndfileResample.png
 
+== foobar2000用 Secret Rabbit Code v 1.0.3 ==
+
+http://www.mega-nerd.com/SRC/fb2k.html
+
+http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_foobar2000SRC.png
+
 == Resample 1.8.1 ==
 
 https://ccrma.stanford.edu/~jos/resample/
@@ -58,6 +64,13 @@ foobar2000 でWAVファイルを右クリックし、Convert→DSP欄でResample
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000UltraMode.png
 
+== foobar2000用 SSRC 0.57 ==
+
+http://otachan.com/foo_dsp_ssrc.html
+
+http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_SSRC.png
+
+
 == 比較用Animated GIF ==
 
 3秒に1回切り替わります
@@ -70,6 +83,9 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 この中ではSecret Rabbit Code libsamplerate-0.1.7のsndfile-resample 
 が最高性能。しかも、これ以上の性能改善の余地はなさそうである。
 
-foobar2000も十分に良い。
+foobar2000用Secret Rabbit Code plugin v1.0.3は
+Secret Rabbit Code libsamplerate-0.1.7とは出力データが違っており、やや劣る。
+
+foobar2000付属のResamplerは十分に良い。
 
 Resample 1.8.1は出力レベルが変わっており、関係ない周波数成分が-50dBぐらい発生しているのでおすすめできない。
