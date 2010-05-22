@@ -43,7 +43,7 @@ http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar20
 
 比較用Animated GIF
 
-http://bitspersampleconv2.googlecode.com/files/resamplerCompared.png
+http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 
 
 == 総括 ==
