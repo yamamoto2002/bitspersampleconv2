@@ -84,7 +84,7 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 が最高性能。しかも、これ以上の性能改善の余地はなさそうである。
 
 foobar2000用Secret Rabbit Code plugin v1.0.3は
-Secret Rabbit Code libsamplerate-0.1.7とは出力データが違っており、やや劣る。
+Secret Rabbit Code libsamplerate-0.1.7とは出力データが違っており、わずかに劣るようである。
 
 foobar2000付属のResamplerは十分に良い。
 
