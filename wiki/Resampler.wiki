@@ -28,20 +28,32 @@
 http://www.mega-nerd.com/SRC/
 
 コンバータータイプはBest Sinc Interpolatorを指定。
+{{{
+$ sndfile-resample -to 96000 -c 0 from.wav to.wav
+}}}
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_sndfileResample.png
 
 == Resample 1.8.1 ==
 
 https://ccrma.stanford.edu/~jos/resample/
+{{{
+$ resample -to 96000 from.wav to.wav
+}}}
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_resample.png
 
 == foobar2000 Resampler ==
 
+foobar2000 でWAVファイルを右クリックし、Convert→DSP欄でResamplerを選択
+プロパティでサンプリングレートを96000に設定。
+
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000.png
 
 == foobar2000 Resampler Ultra mode ==
+
+foobar2000 でWAVファイルを右クリックし、Convert→DSP欄でResamplerを選択
+プロパティでサンプリングレートを96000に設定。Ultraのチェックを入れる。
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000UltraMode.png
 
