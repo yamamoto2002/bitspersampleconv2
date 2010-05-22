@@ -12,12 +12,14 @@
   * 30秒
 のWAVファイルを出力
 
+2. 各コンバーターを使用して、96000HzのWAVに変換。
 
-WaveSpectraで再生
+3. !WaveSpectraで再生し、スペクトル図を見て、関係ない周波数が出ているかどうかを比較。
+
+!WaveSpectraの設定は
   * 縦軸 dB レンジ120dB
   * FFT サンプルデータ数 65536
   * 窓関数 ブラックマン-ハリス
-スペクトル図を見て、関係ない周波数が出ているかどうかを比較
 
 == 結果 ==
 
@@ -38,6 +40,11 @@ http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar20
 foobar2000 Resampler Ultra mode
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000UltraMode.png
+
+比較用Animated GIF
+
+http://bitspersampleconv2.googlecode.com/files/resamplerCompared.png
+
 
 == 総括 ==
 
