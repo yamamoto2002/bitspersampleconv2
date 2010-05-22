@@ -81,7 +81,7 @@ http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 = 総括 =
 
 この中ではSecret Rabbit Code libsamplerate-0.1.7のsndfile-resample 
-が最高性能。この測定条件の変換に、これ以上の性能改善の余地はなさそうである。
+が最高性能。この測定条件の変換に関しては、これ以上の性能改善の余地はなさそうである。
 
 foobar2000用Secret Rabbit Code plugin v1.0.3は
 Secret Rabbit Code libsamplerate-0.1.7とは出力データが違っており、わずかに劣るようである。
