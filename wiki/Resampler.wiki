@@ -3,7 +3,7 @@
 
 = サンプリングレート変換プログラムの性能比較 =
 
-== 方法 ==
+= 方法 =
 
 1. SqWave2を使用して
   * サンプリング周波数44100Hz
@@ -21,32 +21,38 @@
   * FFT サンプルデータ数 65536
   * 窓関数 ブラックマン-ハリス
 
-== 結果 ==
+= 結果 =
 
-Secret Rabbit Code libsamplerate-0.1.7のsndfile-resample http://www.mega-nerd.com/SRC/
+== Secret Rabbit Code libsamplerate-0.1.7のsndfile-resample ==
+
+http://www.mega-nerd.com/SRC/
 
 コンバータータイプはBest Sinc Interpolatorを指定。
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_sndfileResample.png
 
-Resample 1.8.1 https://ccrma.stanford.edu/~jos/resample/
+== Resample 1.8.1 ==
+
+https://ccrma.stanford.edu/~jos/resample/
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_resample.png
 
-foobar2000 Resampler
+== foobar2000 Resampler ==
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000.png
 
-foobar2000 Resampler Ultra mode
+== foobar2000 Resampler Ultra mode ==
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_foobar2000UltraMode.png
 
-比較用Animated GIF
+== 比較用Animated GIF ==
+
+3秒に1回切り替わります
 
 http://bitspersampleconv2.googlecode.com/files/resamplerCompared.gif
 
 
-== 総括 ==
+= 総括 =
 
 この中ではSecret Rabbit Code libsamplerate-0.1.7のsndfile-resample 
 が最高性能。foobar2000も十分に良い。
