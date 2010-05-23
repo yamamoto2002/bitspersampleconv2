@@ -47,6 +47,7 @@ https://ccrma.stanford.edu/~jos/resample/
 {{{
 $ resample -to 96000 from.wav to.wav
 }}}
+25kHz付近に-50dBくらいの、元の信号には存在しない成分が生じています
 
 http://bitspersampleconv2.googlecode.com/files/44100_2kRect_to_96000_by_resample.png
 
