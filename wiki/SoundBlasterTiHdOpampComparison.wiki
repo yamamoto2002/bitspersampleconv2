@@ -28,17 +28,16 @@ OSは Windows7 64ビット版
 ==周波数特性==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
 
-http://bitspersampleconv2.googlecode.com/files/ns1.png
-http://bitspersampleconv2.googlecode.com/files/ns2.png
+==S/N比==
+|| http://bitspersampleconv2.googlecode.com/files/ns1.png|| http://bitspersampleconv2.googlecode.com/files/ns2.png|| 
 
-http://bitspersampleconv2.googlecode.com/files/dr1.png
-http://bitspersampleconv2.googlecode.com/files/dr2.png
+==ダイナミックレンジ==
+||http://bitspersampleconv2.googlecode.com/files/dr1.png||http://bitspersampleconv2.googlecode.com/files/dr2.png||
 
-http://bitspersampleconv2.googlecode.com/files/thd1.png
-http://bitspersampleconv2.googlecode.com/files/thd2.png
+==相互変調歪 IMD+Noise==
+||http://bitspersampleconv2.googlecode.com/files/thd1.png||http://bitspersampleconv2.googlecode.com/files/thd2.png||
 
-http://bitspersampleconv2.googlecode.com/files/imd1.png
-http://bitspersampleconv2.googlecode.com/files/imd2.png
+==ステレオクロストーク==
+||http://bitspersampleconv2.googlecode.com/files/imd1.png||http://bitspersampleconv2.googlecode.com/files/imd2.png||
 
-http://bitspersampleconv2.googlecode.com/files/ct1.png
-http://bitspersampleconv2.googlecode.com/files/ct2.png
+||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
