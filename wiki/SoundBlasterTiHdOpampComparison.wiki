@@ -33,7 +33,7 @@ OSは Windows7 64ビット版
 
 LME49720の場合。24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
 
-OPA2604は、げじげじのピンがしなやかで、高級感がある。
+OPA2604は、ICから出ているげじげじピンがしなやかで、高級感がある。
 
 http://bitspersampleconv2.googlecode.com/files/impulse.png
 
