@@ -28,7 +28,7 @@ OSは Windows7 64ビット版
 
 ===インパルス応答波形===
 
-LME49720の場合。24bit 96kHzで録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
+LME49720の場合。24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
 
 http://bitspersampleconv2.googlecode.com/files/impulse.png
 
