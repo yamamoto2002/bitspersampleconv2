@@ -1,7 +1,7 @@
-#summary Sound Blaster Titanium HD OPAMP交換
+#summary Sound Blaster X-Fi Titanium HD OPAMP交換
 #labels Featured
 
-= Sound Blaster Titanium HD OPAMP交換 =
+= Sound Blaster X-Fi Titanium HD OPAMP交換 =
 
 オペアンプを交換してRMAA 6.2.3で性能を比較します。
 
