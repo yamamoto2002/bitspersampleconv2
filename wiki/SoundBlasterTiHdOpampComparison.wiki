@@ -26,6 +26,16 @@ OSは Windows7 64ビット版
 ||ステレオクロストーク, dB    || -110.1     || -113.3      || -111.7      || -111.9      || -112.1      || -110.6      || -110.4      ||
 ||取得価格(2個あたり) ||？||1360円||540円||150円||50円||100円||33円||
 
+==総評==
+
+買ったら最初から付いていたNJM2114Dは十分な性能がある。
+
+NJM2114D、OPA2604、LME49720、NJM5532DD、NJM4558DDは互角。
+
+NJM4558DDが安くてよい。
+
+NJM072DはJ-FET入力であり、特徴的なキラキラした音が出る。
+
 ==周波数特性==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
 
