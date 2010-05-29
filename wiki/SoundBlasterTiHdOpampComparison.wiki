@@ -27,6 +27,7 @@ RMAAでMMEやDirectSoundを使用して24ビット、96kHzの測定をする際�
 ==Sound Blasterの設定==
 
 Sound BlasterはデフォルトでEAXエフェクトが有効になっている。
+これはRMAA測定の邪魔になるので
 [スタート][すべてのプログラム][Creative][Creativeオーディオコントロールパネル]
 [EAXエフェクト][EAX エフェクトを有効にする] のチェックをはずす。
 
