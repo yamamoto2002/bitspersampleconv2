@@ -1,4 +1,4 @@
-#summary Sound Blaster Ti HD OPAMP交換
+#summary Sound Blaster Titanium HD OPAMP交換
 #labels Featured
 
 = Sound Blaster Ti HD OPAMP交換 =
@@ -25,6 +25,12 @@ OSは Windows7 64ビット版
 ||IMD+Noise, ％               || 0.0025     || 0.0024      || 0.0023      || 0.0024      || 0.0026      || 0.759       || 0.384       ||
 ||ステレオクロストーク, dB    || -110.1     || -113.3      || -111.7      || -111.9      || -112.1      || -110.6      || -110.4      ||
 ||取得価格(2個あたり) ||？||1360円||540円||150円||50円||100円||33円||
+
+===インパルス応答波形===
+
+LME49720の場合。24bit 96kHzで録音したものをsndfile-resampleで8倍オーバーサンプル。形状は左右対称であり、位相回転の問題はない。
+
+http://bitspersampleconv2.googlecode.com/files/impulse.png
 
 ==総評==
 
