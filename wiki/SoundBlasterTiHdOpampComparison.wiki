@@ -34,7 +34,8 @@ NJM2114D、OPA2604、LME49720、NJM5532DD、NJM4558DDは互角。
 
 NJM4558DDが安くてよい。
 
-NJM072DはJ-FET入力であり、特徴的なキラキラした音が出る。
+NJM072DはJ-FET入力であり、出力レベルが1dBほど低下する。
+特徴的なキラキラした音が出る。
 
 ==周波数特性==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
