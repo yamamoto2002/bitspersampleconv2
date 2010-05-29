@@ -34,10 +34,11 @@ OSは Windows7 64ビット版
 ==ダイナミックレンジ==
 ||http://bitspersampleconv2.googlecode.com/files/dr1.png||http://bitspersampleconv2.googlecode.com/files/dr2.png||
 
-==相互変調歪 IMD+Noise==
+==全高調波歪率==
 ||http://bitspersampleconv2.googlecode.com/files/thd1.png||http://bitspersampleconv2.googlecode.com/files/thd2.png||
 
-==ステレオクロストーク==
+==相互変調歪 IMD+Noise==
 ||http://bitspersampleconv2.googlecode.com/files/imd1.png||http://bitspersampleconv2.googlecode.com/files/imd2.png||
 
+==ステレオクロストーク==
 ||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
