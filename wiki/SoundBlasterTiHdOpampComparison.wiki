@@ -33,8 +33,6 @@ OSは Windows7 64ビット版
 
 LME49720の場合。24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
 
-OPA2604は、ICから出ているげじげじピンがしなやかで、高級感がある。
-
 http://bitspersampleconv2.googlecode.com/files/impulse.png
 
 =総評=
@@ -45,6 +43,8 @@ NJM2114D、OPA2604、LME49720、NJM5532DD、NJM4558DDは互角。NJM4558DDが安
 
 NJM072DはJ-FET入力であり、出力レベルが1dBほど低下する。
 特徴的なキラキラした音が出る。
+
+OPA2604は、ICから出ているげじげじピンがしなやかで、高級感がある。
 
 ==周波数特性==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
