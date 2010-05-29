@@ -67,7 +67,7 @@ NJM072DはJ-FET入力である。他のオペアンプよりも、出力レベ�
 OPA2604は、ICから出ているげじげじピンがしなやかで、高級感がある。
 
 LM358Nは、オーディオ用ではありませんが、
-思ったよりもまとも。
+予想よりもまとも。
 
 ==周波数特性==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
