@@ -103,10 +103,3 @@ http://bitspersampleconv2.googlecode.com/files/impulse.png
 
 他の機器で録音してダイナミックレンジが著しく低下していれば
 クロックジッターが多いといえるだろう。
-
-そこで、X-Fi Ti HDのRCAライン出力をProFire2626のライン入力1と2に入力し
-ダイナミックレンジを計測した。
-
-http://bitspersampleconv2.googlecode.com/files/dynamics.png
-
-クロックジッターによる顕著な音質劣化はなさそうである。
