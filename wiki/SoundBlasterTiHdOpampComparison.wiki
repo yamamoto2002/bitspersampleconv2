@@ -29,12 +29,6 @@ OSは Windows7 64ビット版
 ||取得価格(2個あたり) ||(140円)||1,360円||540円||150円||50円||100円||33円||
 
 
-==インパルス応答波形==
-
-LME49720の場合。24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
-
-http://bitspersampleconv2.googlecode.com/files/impulse.png
-
 =総評=
 
 買ったら最初から付いていたNJM2114Dは十分な性能がある。
@@ -65,3 +59,10 @@ OPA2604は、ICから出ているげじげじピンがしなやかで、高級�
 
 ==ステレオクロストーク==
 ||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
+
+
+==インパルス応答波形と位相特性について==
+
+LME49720の場合。24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプル。理想的な形状である。左右対称であり、位相回転の問題はない。
+
+http://bitspersampleconv2.googlecode.com/files/impulse.png
