@@ -90,7 +90,7 @@ LM358Nは、オーディオ用ではありませんが、
 ||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
 
 
-=インパルス応答波形と位相特性について=
+=インパルス応答波形と周波数-位相特性について=
 
 以下の図は24bit 96kHz アナログRCA出力をアナログRCA入力でループバック録音したものをsndfile-resampleで8倍オーバーサンプルした図です。
 
