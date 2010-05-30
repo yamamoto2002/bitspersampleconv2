@@ -115,11 +115,15 @@ Sound Blaster Ti HDを2枚持っている人は試すとよいと思います。
 
 Creative公式ページの情報によれば
 {{{
+(24bit 96kHz)
+
+DACのS/N比
 50kΩ負荷時？122dB
 330Ω負荷時 117dB
 33Ω負荷時 115dB
+
+なお、ADCのS/N比 118dB
 }}}
-(24bit 96kHz)
 
 とのことです。
 
