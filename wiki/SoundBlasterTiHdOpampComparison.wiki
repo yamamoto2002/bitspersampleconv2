@@ -120,8 +120,8 @@ http://bitspersampleconv2.googlecode.com/files/impulse.png
 
   * A. 1個目のSound BlasterのRCAライン出力を2個目のSound BlasterのAUX入力につなげて96kHz、24ビットでRMAA
   * B. 1個目のSound BlasterのRCAライン出力を2個目のSound BlasterのAUX入力につなげて96kHz、16ビットでRMAA
-  * C. 1個目のSound BlasterのRCAライン出力を2個目のSound BlasterのAUX入力につなげて96kHz、24ビットでRMAA
-  * D. 1個目のSound BlasterのRCAライン出力を2個目のSound BlasterのAUX入力につなげて96kHz、24ビットでRMAA
+  * C. 1個目のSound BlasterのRCAライン出力を1個目のSound BlasterのAUX入力につなげて96kHz、24ビットでRMAA
+  * D. 1個目のSound BlasterのRCAライン出力を1個目のSound BlasterのAUX入力につなげて96kHz、24ビットでRMAA
 これらの結果を見て、
 CからAへの悪化とDからBへの悪化具合を比べたときにAよりもBが健闘している場合、
 それはジッタの影響である可能性が高いかもしれませんが、
