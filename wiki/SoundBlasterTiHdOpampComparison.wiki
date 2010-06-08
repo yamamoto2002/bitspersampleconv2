@@ -119,6 +119,7 @@ OPA2134PAとNJM072DはFET入力、NJM2114DはバイポーラーTr入力です。
 NJM072Dは著しく悪い。
 
 この回路では、バイポーラー有利とか、FET有利とか、そういうことはないようです。
+それよりも、FET入力同士、バイポーラ入力同士のなかでの、オペアンプの品種による差のほうが大きい。
 
 http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 
