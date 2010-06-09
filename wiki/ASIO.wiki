@@ -1,14 +1,12 @@
 #summary ASIO device parameters of various ASIO devices
 #labels Featured
 
-||                             || Realtek ASIO || M-AUDIO !ProFire 2626 || ASIO4ALL    ||Prodigy HD2||
-||output buffer format         || sint16 LSB   || sint32 LSB            || sint32 LSB  || sint32 LSB||
-||min buffer size       (bytes)|| 88           || 64                    || 64          ||256(Default)||
-||preferred buffer size (bytes)|| 352          || 4096                  || 256         ||256(Default)||
-||max buffer size       (bytes)|| 1764         || 4096                  || 2048        ||256(Default)||
-||internal clock generator name|| internal     || See Control Panel     || Big Ben     ||Prodigy HD2 Clock||
-||Output ready supported       || Yes          || Yes                   || No          ||Yes||
-||ASIO Control Panel           || Not exists   || Exists                || Exists      ||Not Exists but no error reported when asioControlPanel()||
+||||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel||
+||Realtek ASIO||sint16 LSB||88||352||1764||internal||Yes||Not exists||
+||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||
+||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||
+||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||
+
 
 = Prodigy HD2 v1.08(64bit) =
 
