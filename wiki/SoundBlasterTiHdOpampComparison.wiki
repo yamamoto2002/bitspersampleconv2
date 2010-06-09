@@ -213,4 +213,6 @@ http://bitspersampleconv2.googlecode.com/files/fr3.png
 
 Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
+出力バッファサイズを32768バイトまで増やせるため遅いPCでも音飛びしにくいです
+
 詳しくは[ASIO]にまとめてあります
