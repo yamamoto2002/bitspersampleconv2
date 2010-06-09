@@ -1,7 +1,7 @@
 #summary ASIO device parameters of various ASIO devices
 #labels Featured
 
-||device \ params||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel|| max output sample rate||
+||device\params||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel|| max output sample rate||
 ||Realtek ASIO||sint16 LSB||88||352||1764||internal||Yes||Not exists||192kHz||
 ||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||192kHz||
 ||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||?||
