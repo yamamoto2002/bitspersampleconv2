@@ -6,7 +6,7 @@
 ||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||192kHz||
 ||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||?||
 ||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||192kHz||
-||Creative ASIO||sint32 LSB||96||32768||4800||Internal||Yes||Exists||96kHz||
+||Creative ASIO||sint32 LSB||96||32768||4800(Default)||Internal||Yes||Exists||96kHz||
 
 = Creative SB X-Fi ASIO =
 {{{
