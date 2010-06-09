@@ -1,12 +1,62 @@
 #summary ASIO device parameters of various ASIO devices
 #labels Featured
 
-||device \ params||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel||
-||Realtek ASIO||sint16 LSB||88||352||1764||internal||Yes||Not exists||
-||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||
-||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||
-||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||
+||device \ params||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel|| max output sample rate||
+||Realtek ASIO||sint16 LSB||88||352||1764||internal||Yes||Not exists||192kHz||
+||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||192kHz||
+||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||?||
+||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||192kHz||
+||Creative ASIO||sint32 LSB||96||32768||4800||Internal||Yes||Exists||96kHz||
 
+= Creative SB X-Fi ASIO =
+{{{
+  asioVersion:   0
+  driverVersion: 2
+  Name:          SB X-Fi ASIO [0001]
+ASIOGetChannels() inputs=18 outputs=18
+ASIOGetBufferSize() min=96 max=32768 preferred=4800 granularity=8
+ASIOSetSampleRate(sampleRate=96000.000000)
+ASIOOutputReady() Supported
+i= 0 ch= 0 isInput=1 chGroup=80000001 type=18 name=Mix FL
+i= 1 ch= 1 isInput=1 chGroup=80000002 type=18 name=Mix FR
+i= 2 ch= 2 isInput=1 chGroup=80000000 type=18 name=Mix RL
+i= 3 ch= 3 isInput=1 chGroup=80000000 type=18 name=Mix RR
+i= 4 ch= 4 isInput=1 chGroup=80000000 type=18 name=Mix FC
+i= 5 ch= 5 isInput=1 chGroup=80000000 type=18 name=Mix LFE
+i= 6 ch= 6 isInput=1 chGroup=80000000 type=18 name=Mix RC or SL
+i= 7 ch= 7 isInput=1 chGroup=80000000 type=18 name=Mix RC or SR
+i= 8 ch= 8 isInput=1 chGroup=00000001 type=18 name=Digital-In L
+i= 9 ch= 9 isInput=1 chGroup=00000001 type=18 name=Digital-In R
+i=10 ch=10 isInput=1 chGroup=00000000 type=18 name=Line-In 2/Mic 2 L
+i=11 ch=11 isInput=1 chGroup=00000000 type=18 name=Line-In 2/Mic 2 R
+i=12 ch=12 isInput=1 chGroup=00000000 type=18 name=Auxiliary 2 L
+i=13 ch=13 isInput=1 chGroup=00000000 type=18 name=Auxiliary 2 R
+i=14 ch=14 isInput=1 chGroup=00000000 type=18 name=Mic In L
+i=15 ch=15 isInput=1 chGroup=00000000 type=18 name=Mic In R
+i=16 ch=16 isInput=1 chGroup=00000001 type=18 name=SPDIF In L
+i=17 ch=17 isInput=1 chGroup=00000001 type=18 name=SPDIF In R
+i=18 ch= 0 isInput=0 chGroup=00000000 type=18 name=Front L/R
+i=19 ch= 1 isInput=0 chGroup=00000000 type=18 name=Front L/R
+i=20 ch= 2 isInput=0 chGroup=00000000 type=18 name=Rear L/R
+i=21 ch= 3 isInput=0 chGroup=00000000 type=18 name=Rear L/R
+i=22 ch= 4 isInput=0 chGroup=00000000 type=18 name=Front C/Sub
+i=23 ch= 5 isInput=0 chGroup=00000000 type=18 name=Front C/Sub
+i=24 ch= 6 isInput=0 chGroup=00000000 type=18 name=Rear C/Top
+i=25 ch= 7 isInput=0 chGroup=00000000 type=18 name=Rear C/Top
+i=26 ch= 8 isInput=0 chGroup=00000000 type=18 name=Side L/R
+i=27 ch= 9 isInput=0 chGroup=00000000 type=18 name=Side L/R
+i=28 ch=10 isInput=0 chGroup=00008000 type=18 name=FX 1 L/R
+i=29 ch=11 isInput=0 chGroup=00008000 type=18 name=FX 1 L/R
+i=30 ch=12 isInput=0 chGroup=00008000 type=18 name=FX 2 L/R
+i=31 ch=13 isInput=0 chGroup=00008000 type=18 name=FX 2 L/R
+i=32 ch=14 isInput=0 chGroup=00008000 type=18 name=FX 3 L/R
+i=33 ch=15 isInput=0 chGroup=00008000 type=18 name=FX 3 L/R
+i=34 ch=16 isInput=0 chGroup=00008000 type=18 name=FX 4 L/R
+i=35 ch=17 isInput=0 chGroup=00008000 type=18 name=FX 4 L/R
+ASIOGetLatencies() input=32868 output=32768
+ASIOGetClockSources() result=0 numOfClockSources=1
+ idx=0 assocCh=-1 assocGrp=-1 current=1 name=Internal
+}}}
 
 = Prodigy HD2 v1.08(64bit) =
 
