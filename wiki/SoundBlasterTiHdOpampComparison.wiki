@@ -41,6 +41,38 @@ CMSS 3Dエフェクトもオフにする。
 
 [ビットマッチ][ビットマッチ プレイバックを有効にする]をチェックする。
 
+= RMAA測定結果 =
+
+== 諸特性比較表 ==
+
+||オペアンプ＼テスト内容||周波数特性 (40Hz～15kHz), dB||雑音レベル, dB(A)||ダイナミックレンジ, dB(A)||全高調波歪率, ％||IMD+Noise, ％||ステレオクロストーク, dB||取得価格(2個あたり)||
+||LM358N||+0.02,-0.11||-112.5||112.3||0.192||0.384||-110.4||33円||
+||NJM072D||+0.02,-0.11||-115.9||115.8||1.548||0.759||-110.6||100円||
+||NJM4558DD||+0.02,-0.11||-115.4||115.1||0.0023||0.0026||-112.1||50円||
+||NJM5532DD||+0.02,-0.11||-116.9||116.9||0.0020||0.0024||-111.9||150円||
+||NJM2114D||+0.02,-0.11||-116.1||116.5||0.0020||0.0025||-110.1||(140円)||
+||LME49720NA||+0.02,-0.11||-115.4||115.8||0.0019||0.0023||-111.7||540円||
+||OPA2134PA||+0.02,-0.11||-116.9||116.9||0.0020||0.0024||-112.4||1,072円||
+||OPA2604AP||+0.02,-0.11||-116.7||117.0||0.0019||0.0024||-113.3||1,360円||
+
+==周波数特性==
+|| http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
+
+==雑音レベル==
+|| http://bitspersampleconv2.googlecode.com/files/ns1.png|| http://bitspersampleconv2.googlecode.com/files/ns2.png|| 
+
+==ダイナミックレンジ==
+||http://bitspersampleconv2.googlecode.com/files/dr1.png||http://bitspersampleconv2.googlecode.com/files/dr2.png||
+
+==全高調波歪率==
+||http://bitspersampleconv2.googlecode.com/files/thd1.png||http://bitspersampleconv2.googlecode.com/files/thd2.png||
+
+==相互変調歪 IMD+Noise==
+||http://bitspersampleconv2.googlecode.com/files/imd1.png||http://bitspersampleconv2.googlecode.com/files/imd2.png||
+
+==ステレオクロストーク==
+||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
+
 =測定結果について考察=
 
 買ったら最初から付いていたNJM2114Dは十分な性能がある。
@@ -79,38 +111,6 @@ LM358Nは、オーディオ用ではありませんが、
   * LME49720NAとNJM4558DDとNJM2114Dも、自然である。OPA2134とどう違うかとというと、正直分からない。
   * NJM072Dは、輝かしい音がする。
   * LM358Nは、HTC製造と書いてある。あのHTC社かな？と調べたところ、あのHTCではないようである。意外にも普通に鳴る。NJM072Dと同様、音楽がフォルテになるとやかましくなる感じがする。歪っぽい音とはどういう音か知ることができるので、買っておいても良いかもしれない。安いし。
-
-= RMAA測定結果 =
-
-== 諸特性比較表 ==
-
-||オペアンプ＼テスト内容||周波数特性 (40Hz～15kHz), dB||雑音レベル, dB(A)||ダイナミックレンジ, dB(A)||全高調波歪率, ％||IMD+Noise, ％||ステレオクロストーク, dB||取得価格(2個あたり)||
-||LM358N||+0.02,-0.11||-112.5||112.3||0.192||0.384||-110.4||33円||
-||NJM072D||+0.02,-0.11||-115.9||115.8||1.548||0.759||-110.6||100円||
-||NJM4558DD||+0.02,-0.11||-115.4||115.1||0.0023||0.0026||-112.1||50円||
-||NJM5532DD||+0.02,-0.11||-116.9||116.9||0.0020||0.0024||-111.9||150円||
-||NJM2114D||+0.02,-0.11||-116.1||116.5||0.0020||0.0025||-110.1||(140円)||
-||LME49720NA||+0.02,-0.11||-115.4||115.8||0.0019||0.0023||-111.7||540円||
-||OPA2134PA||+0.02,-0.11||-116.9||116.9||0.0020||0.0024||-112.4||1,072円||
-||OPA2604AP||+0.02,-0.11||-116.7||117.0||0.0019||0.0024||-113.3||1,360円||
-
-==周波数特性==
-|| http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
-
-==雑音レベル==
-|| http://bitspersampleconv2.googlecode.com/files/ns1.png|| http://bitspersampleconv2.googlecode.com/files/ns2.png|| 
-
-==ダイナミックレンジ==
-||http://bitspersampleconv2.googlecode.com/files/dr1.png||http://bitspersampleconv2.googlecode.com/files/dr2.png||
-
-==全高調波歪率==
-||http://bitspersampleconv2.googlecode.com/files/thd1.png||http://bitspersampleconv2.googlecode.com/files/thd2.png||
-
-==相互変調歪 IMD+Noise==
-||http://bitspersampleconv2.googlecode.com/files/imd1.png||http://bitspersampleconv2.googlecode.com/files/imd2.png||
-
-==ステレオクロストーク==
-||http://bitspersampleconv2.googlecode.com/files/ct1.png||http://bitspersampleconv2.googlecode.com/files/ct2.png||
 
 =FET入力とバイポーラーTr入力による特性の違いについて=
 
