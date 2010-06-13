@@ -15,6 +15,10 @@ http://www.steinberg.net/en/company/3rd_party_developer.html
 あとは、適当なCコンパイラがあれば開発できます。
 Visual C++ Express Editionは、ただで配っています。
 
+ASIO APIを使用するサンプルプログラムは、手前味噌ですが、このあたりをご覧になっていただければよろしいかと思います。
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/AsioIO/AsioIODLL/AsioWrap.cpp
+
 =ASIOを使用してPCM音声を再生する方法=
 
 1. まず、ASIOデバイスを列挙し、アプリケーション使用者にどのデバイスを使用するか選択させます。選択されたデバドラをロードします。
