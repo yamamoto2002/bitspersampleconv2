@@ -28,6 +28,8 @@ bufferSize = SInt32=1サンプルあたり4バイト x 4096サンプル x ステ
 
 この2つのバッファをASIOに登録します。
 
+http://bitspersampleconv2.googlecode.com/files/asio01.png
+
 4. バッファ0に0サンプル目から4095サンプル目までの4096サンプル分のPCM音声データを書きこみます。バッファ0やバッファ1はメインメモリ上にあるので、C言語では、ただ代入文をforループするか、あるいはmemcpyするだけです。
 
 さらに、バッファ1に4096サンプル目から8191サンプル目までの4096サンプル分のPCM音声データを書きこみます。
@@ -38,8 +40,6 @@ bufferSize = SInt32=1サンプルあたり4バイト x 4096サンプル x ステ
 
 BufferSwitchコールバックを受け取ったら、
 バッファ0はもう読み出されていないので、バッファ0に8192サンプル目から12287サンプル目までの4096サンプル分のPCM音声データを埋めます。この処理が、バッファ1の再生が終わるまでの間に間に合えば、音声は破綻なく再生できます。
-
-http://bitspersampleconv2.googlecode.com/files/asio01.png
 
 =ASIO device parameters of various ASIO devices=
 
