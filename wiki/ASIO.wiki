@@ -7,8 +7,13 @@ ASIO is a trademark of Steinberg Media Technologies GmbH.
 
 ASIOは、PCM音声を録再するためのAPI群です。
 
+==ASIO APIを使用したプログラムを開発するためには==
+
 http://www.steinberg.net/en/company/3rd_party_developer.html  
-から、ASIO SDKをダウンロードします。
+から、ASIO SDKをダウンロードします。(無料)
+
+あとは、適当なCコンパイラがあれば開発できます。
+Visual C++ Express Editionは、ただで配っています。
 
 =ASIOを使用してPCM音声を再生する方法=
 
