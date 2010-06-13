@@ -19,7 +19,7 @@ ASIO APIを使用するサンプルプログラムは、手前味噌ですが、
 
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/AsioIO/AsioIODLL/AsioWrap.cpp
 
-=ASIOを使用してPCM音声を再生する方法=
+=ASIOを使用してPCM音声を再生する方法(概要)=
 
 1. まず、ASIOデバイスを列挙し、アプリケーション使用者にどのデバイスを使用するか選択させます。選択されたデバドラをロードします。
 
