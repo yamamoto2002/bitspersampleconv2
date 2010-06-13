@@ -50,14 +50,14 @@ http://bitspersampleconv2.googlecode.com/files/asio01.png
 !BufferSwitchコールバックを受け取ったら、
 バッファ0はもう読み出されていないので、バッファ0に8192サンプル目から12287サンプル目までの4096サンプル分のPCM音声データを埋めます。この処理が、バッファ1の再生が終わるまでの間に間に合えば、音声は破綻なく再生できます。
 
+=ASIO device parameters of various ASIO devices=
+
 
 
 以下に様々なASIOデバイスのパラメータを列挙します。
 
 min buffer sizeがどのデバイスも非常に少ない数になっています。たとえばProfireは64サンプルとありますが、サンプリングレート192kHzの場合、0.33ミリ秒分のデータしか入らず、0.33ミリ秒ごとにバッファを埋め直さなければなりません。これはWindowsやMac OSや普通のLinuxでは不可能で、リアルタイムスケジューラを持ったリアルタイムOSでなければ厳しい数字です。最近はコンシューマーデスクトップ向けOSで、Ubuntu RealtimeのようなリアルタイムOSが出てきたみたいですが、
 0.33ミリ秒とか、そこまでのリアルタイム性は電子楽器ですらも要求されないので、余裕を持って大きめのサイズにする方が音切れの可能性が減って良いと思います。
-
-=ASIO device parameters of various ASIO devices=
 
 ||device\params||output buffer format||min buffer size       (bytes)||preferred buffer size (bytes)||max buffer size       (bytes)||internal clock generator name||Output ready supported||ASIO Control Panel|| max output sample rate||
 ||Realtek ASIO||sint16 LSB||88||352||1764||internal||Yes||Not exists||192kHz||
