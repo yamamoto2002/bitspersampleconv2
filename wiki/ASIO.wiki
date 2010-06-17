@@ -8,7 +8,6 @@ ASIO is a trademark of Steinberg Media Technologies GmbH.
 ASIOは、PCM音声を録再するためのAPI群です。
 
 ASIOに対応したオーディオインターフェースを用意し、
-
 Foobar2000＋ASIOプラグインといったASIO対応のソフトで、
 ASIOを使用して音楽を再生するような設定を行った上で、音楽ファイルを再生すると、
 ようするに、元データに忠実な再生ができると期待できます。
