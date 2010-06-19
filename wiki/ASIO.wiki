@@ -12,7 +12,7 @@ Foobar2000＋ASIOプラグインといったASIO対応のソフトで、
 ASIOを使用して音楽を再生するような設定を行った上で、音楽ファイルを再生すると、
 ようするに、元データに忠実な再生ができると期待できます。
 
-==ASIO APIを使用したプログラムを開発するためには==
+=ASIO APIを使用したプログラムを作る=
 
 http://www.steinberg.net/en/company/3rd_party_developer.html  
 から、ASIO SDKをダウンロードします。(無料)
