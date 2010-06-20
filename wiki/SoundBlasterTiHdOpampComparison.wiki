@@ -234,20 +234,26 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
  無負荷時
 
-|| 原信号波形 || NJM2114D || NJM072D ||
-|| http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
+|| 原信号波形 ||
+|| http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| 
+
+|| NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
 
 == 1kHz矩形波(もどき)出力波形 ==
 
 ↓ 無負荷時
 
-|| 原信号波形 || NJM2114D || NJM072D ||
-|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
+|| 原信号波形 || 
+|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
+
+||NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
 
 ↓ 100pF容量負荷
 
-|| 原信号波形 || NJM2114D || NJM072D ||
-|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
+|| NJM2114D || NJM072D ||
+|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
 
 == 10kHz正弦波出力波形 ==
 
