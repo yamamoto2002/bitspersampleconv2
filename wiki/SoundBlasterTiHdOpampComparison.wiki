@@ -58,6 +58,10 @@ CMSS 3Dエフェクトもオフにする。
 
 (4本の線が完全に重なっていて、最後に書いたマゼンタ色の線だけが書かれているように見えます。) 
 
+縦軸のスケールをよく見て下さい。20Hzで-0.2dBのレベル低下です。
+「ベースの音程出ないし，ピアノの低弦はアップライトピアノの音になっちゃう 」 
+というようなことは起こらないと思います。
+
 ==雑音レベル(Noise level)==
 || http://bitspersampleconv2.googlecode.com/files/ns1.png|| http://bitspersampleconv2.googlecode.com/files/ns2.png|| 
 
