@@ -237,4 +237,40 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 || 原信号波形 || NJM2114D || NJM072D ||
 || http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
 
-== 1kHz矩形波 ==
+== 1kHz矩形波(もどき)出力波形 ==
+
+↓ 無負荷時
+
+|| 原信号波形 || NJM2114D || NJM072D ||
+|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
+
+↓ 100pF容量負荷
+
+|| 原信号波形 || NJM2114D || NJM072D ||
+|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
+
+== 10kHz正弦波出力波形 ==
+
+無負荷時
+
+|| NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_10kHzS.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzS.png|| 
+
+== 10kHz正弦波出力時スペクトログラム ==
+
+無負荷時
+
+|| NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzFFT.png||
+
+ 
+==考察==
+
+使用したオシロは SoftDSP社のSDS 200Aです。
+このオシロは200MHz、電圧の分解能48dBという性能です。
+すべての波形グラフは、1秒間の残光表示をしてあります。
+
+発振の兆候は見られませんでした。
+
+インパルス応答波形を見ると、NJM072Dは明らかにピーク電圧が低いです。
+この回路には、NJM072Dは向いていないようです。
