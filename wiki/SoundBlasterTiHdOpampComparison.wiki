@@ -243,7 +243,7 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 || 原信号波形 ||
 || http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| 
 
-↓ 無負荷時 ASIO出力 96kHz 24bit
+↓ 無負荷時 ASIO出力 RCA出力端子 左チャンネル 96kHz 24bit
 
 || NJM2114D || NJM072D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
@@ -253,26 +253,26 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 || 原信号波形 || 
 || http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
 
-↓ 無負荷時 ASIO出力 96kHz 16bit
+↓ 無負荷時  ASIO出力 RCA出力端子 左チャンネル 96kHz 16bit
 
 ||NJM2114D || NJM072D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
 
-↓ 100pF容量負荷 ASIO出力 96kHz 16bit
+↓ 100pF容量負荷 ASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
 
 || NJM2114D || NJM072D ||
 || http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
 
 == 10kHz正弦波出力波形 ==
 
-↓ 無負荷時 ASIO出力 96kHz 16bit
+↓ 無負荷時 ASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
 
 || NJM2114D || NJM072D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_10kHzS.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzS.png|| 
 
 == 10kHz正弦波出力時スペクトログラム ==
 
-↓ 無負荷時 ASIO出力 96kHz 16bit
+↓ 無負荷時 ASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
 
 || NJM2114D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||
