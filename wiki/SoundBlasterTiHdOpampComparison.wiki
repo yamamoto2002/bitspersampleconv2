@@ -56,6 +56,8 @@ CMSS 3Dエフェクトもオフにする。
 ==周波数特性(Frequency response)==
 || http://bitspersampleconv2.googlecode.com/files/fr1.png ||http://bitspersampleconv2.googlecode.com/files/fr2.png||
 
+(4本の線が完全に重なっていて、最後に書いたマゼンタ色の線だけが書かれているように見えます。) 
+
 ==雑音レベル(Noise level)==
 || http://bitspersampleconv2.googlecode.com/files/ns1.png|| http://bitspersampleconv2.googlecode.com/files/ns2.png|| 
 
