@@ -227,3 +227,14 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 出力バッファサイズを32768バイトまで増やせるため、遅いPCでも音飛びしにくいです。
 
 詳しくは[ASIO]にまとめてあります。
+
+= オシロスコープで波形を観察 =
+
+==インパルス応答波形==
+
+ 無負荷時
+
+|| 原信号波形 || NJM2114D || NJM072D ||
+|| http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
+
+== 1kHz矩形波 ==
