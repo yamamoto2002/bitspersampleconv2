@@ -157,7 +157,7 @@ http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 
 万一、DACとADCで位相がぴったり逆回転していた場合は、そうとは言えませんが。
 おそらくそのような問題もないでしょう。
-(このページの下のほうに、オシロスコープによる観測結果を追記しました。)
+(このページの下のほうに、オシロスコープによる観測結果を追記しました。オシロスコープから、この図とよく似た図が出てきました。)
 
 http://bitspersampleconv2.googlecode.com/files/impulse.png
 
