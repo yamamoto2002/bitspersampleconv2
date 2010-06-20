@@ -108,6 +108,10 @@ LM358Nは、オーディオ用ではありませんが、予想よりも良い�
 
 http://av.watch.impress.co.jp/docs/20100524/96khz.htm
 
+Windowsミキサーのマスターサンプルレートを96kHzに設定して
+96kHzでの性能を測定すれば、
+MMEやDirectSoundでもASIOに迫る性能が出るみたいです。
+どう考えてもASIOの方が簡便で合理的ですが
 
 =音質に関して=
 
