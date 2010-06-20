@@ -266,8 +266,11 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
 無負荷時
 
-|| NJM2114D || NJM072D ||
-||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzFFT.png||
+|| NJM2114D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||
+
+|| NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/072_10kHzFFT.png||
 
  
 ==考察==
