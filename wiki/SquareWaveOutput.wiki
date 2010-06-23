@@ -13,6 +13,8 @@ http://bitspersampleconv2.googlecode.com/files/raw.png
 
 ↑*図1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
 
+==図1の説明==
+
 図1は出力データをそのままグラフにプロットしたもので、縦軸がサンプル値、横軸が時間です。
 赤い＋点が!SqWave2の出力データ、緑の×点が!WaveGeneの出力データです。
 グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図2、図5と図6で比較できます。)
@@ -24,6 +26,8 @@ http://bitspersampleconv2.googlecode.com/files/raw.png
 http://bitspersampleconv2.googlecode.com/files/8x.png
 
 ↑*図2* 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
+
+==図2の説明==
 
 縦軸がサンプル値、横軸が時間です。
 出力レベルが小さい赤い線が!SqWave2の出力データ、
@@ -52,6 +56,8 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 ↑*図4* !WaveGeneの10kHz 矩形波出力データのスペクトログラム
 
+==図4の説明==
+
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
@@ -59,11 +65,15 @@ http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
 
 ↑*図5* !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
 
+==図5の説明==
+
 安定した出力が出ています。
 
 http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
 
 ↑*図6* !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
+
+==図6の説明==
 
 半波長ごとに時間長さが変化する複雑な波形のため、オシロスコープがうまく同期しません。
 
@@ -82,6 +92,8 @@ http://bitspersampleconv2.googlecode.com/files/9600.png
 
 ↑*図7* 出力サンプル値　最初の100サンプルをプロットしたもの
 
+==図7の説明==
+
 どちらも、4分の1波長ぶんのデータがあればそれを左右対称、上下対称に展開して残りのデータを作れるような、シンメトリーなデータが出てきています
 
 http://bitspersampleconv2.googlecode.com/files/9600x8.png
@@ -96,7 +108,7 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
 ↑*図10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
 
-== 考察 ==
+= 考察 =
 
 9600Hz 矩形波　192kHzサンプリングという条件では、!SqWave2も!WaveGeneも可聴域に関係ない周波数成分は含まれていません。
 
