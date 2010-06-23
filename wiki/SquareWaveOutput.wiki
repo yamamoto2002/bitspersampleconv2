@@ -96,8 +96,7 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
 == 考察 ==
 
- 9600Hz 矩形波　192kHzサンプリングという条件では、
-!SqWave2も!WaveGeneも、可聴域に関係ない周波数成分は含まれていません。
+9600Hz 矩形波　192kHzサンプリングという条件では、!SqWave2も!WaveGeneも可聴域に関係ない周波数成分は含まれていません。
 
 !WaveGeneは出力レベルが間違っています。
 
