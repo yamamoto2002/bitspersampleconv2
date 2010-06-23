@@ -129,6 +129,8 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
 ↑*図10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
 
+== 考察 ==
+
 サンプリング周波数と出力する矩形波の周波数が割り切れる周波数比の場合は
 !SqWave2も!WaveGeneも、可聴域に関係ない周波数成分は含まれません。
 
