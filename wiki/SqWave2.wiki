@@ -93,11 +93,11 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
 
-↑*図5* !SqWave2 ASIO出力 ProFire2626のアナログ音声出力波形をオシロスコープで観察
+↑*図5* !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
 
 http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
 
-↑*図6* !WaveGene ASIO出力 ProFire2626のアナログ音声出力波形をオシロスコープで観察
+↑*図6* !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
 
 半波長ごとに時間長さが変化する複雑な波形のため、うまく同期しません
 
