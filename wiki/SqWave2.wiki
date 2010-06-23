@@ -43,6 +43,12 @@ ASIO出力モードは、すべての環境で安定動作するところまで�
 
 = !SqWave2と!WaveGeneの10kHz 矩形波出力波形とスペクトル比較 =
 
+サンプリング周波数192kHz
+量子化ビット数16bit
+出力レベル-10dB
+10kHz 矩形波
+という条件で!SqWave2と!WaveGeneの出力波形とスペクトルを比較しました。
+
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
 ↑*図1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
