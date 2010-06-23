@@ -121,24 +121,20 @@ http://bitspersampleconv2.googlecode.com/files/9600x8.png
 
 ↑*図8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
 
-http://bitspersampleconv2.googlecode.com/files/9600x8.png
-
-↑*図9* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
-
 http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
 
-↑*図10* !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム
+↑*図9* !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム
 
 http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
-↑*図11* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
+↑*図10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
 
 サンプリング周波数と出力する矩形波の周波数が割り切れる周波数比の場合は
 !SqWave2も!WaveGeneも、可聴域に関係ない周波数成分は含まれません。
 
 !WaveGeneは出力レベルが間違っています。
 
-高調波成分の出力レベルが異なります。第5次高調波成分 48000Hzのところにカーソルを合わせて出力レベル値を比べました(図10と図11)
+高調波成分の出力レベルが異なります。第5次高調波成分 48000Hzのところにカーソルを合わせて出力レベル値を比べました(図9と図10参照)
 
   * !SqWave2は第5次高調波が第1次高調波の-14dB
   * !WaveGeneは第5次高調波が第1次高調波の-13dB
