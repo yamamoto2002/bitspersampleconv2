@@ -41,7 +41,7 @@ ASIO出力モードは、すべての環境で安定動作するところまで�
  * Windows XP Professional SP3 32ビット版
  * Windows 7 Professional 64ビット版
 
-== !SqWave2と!WaveGeneの出力波形とスペクトル ==
+= !SqWave2と!WaveGeneの10kHz 矩形波出力波形とスペクトル比較 =
 
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
