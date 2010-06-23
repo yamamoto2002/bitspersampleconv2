@@ -82,14 +82,55 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
-↑*図3* !SqWave2の出力データのスペクトログラム
+↑*図3* !SqWave2の10kHz 矩形波出力データのスペクトログラム
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
-↑*図4* !WaveGeneの出力データのスペクトログラム
+↑*図4* !WaveGeneの10kHz 矩形波出力データのスペクトログラム
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
+
+http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
+
+↑*図5* !SqWave2 ASIO出力 ProFire2626のアナログ音声出力波形をオシロスコープで観察
+
+http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
+
+↑*図6* !WaveGene ASIO出力 ProFire2626のアナログ音声出力波形をオシロスコープで観察
+
+半波長ごとに時間長さが変化する複雑な波形のため、うまく同期しません
+
+*「割り切れる」9600Hzの矩形波を192kHzサンプリングで出力した場合の比較 *
+
+http://bitspersampleconv2.googlecode.com/files/9600.png
+
+↑*図7* 出力サンプル値　最初の100サンプルをプロットしたもの
+
+http://bitspersampleconv2.googlecode.com/files/9600x8.png
+
+↑*図8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
+
+http://bitspersampleconv2.googlecode.com/files/9600x8.png
+
+↑*図9* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
+
+http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
+
+↑*図10* !SqWave2の9600Hz 矩形波出力データのスペクトログラム
+
+http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
+
+↑*図11* !WaveGeneの9600Hz 矩形波出力データのスペクトログラム
+
+サンプリング周波数と出力する矩形波の周波数が「割り切れる」周波数比の場合!SqWave2も!WaveGeneも、可聴域に関係ない周波数成分は含まれていません。ただ、高調波成分のレベルが異なります。第5次高調波成分 48000Hzのところにカーソルを合わせて出力レベルを比べました(図10と図11)
+
+  * !SqWave2は第5次高調波が第1次高調波の-14dB
+  * !WaveGeneは第5次高調波が第1次高調波の-13dB
+
+矩形波のフーリエ級数の式によると、第5次高調波は、5分の1 = -13.98dB含まれているのが正しい
+
+したがって!SqWave2のほうが正確な出力波形が出ています。
 
 = 開発方法 =
 
