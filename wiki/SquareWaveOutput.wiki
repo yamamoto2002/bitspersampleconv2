@@ -82,6 +82,8 @@ http://bitspersampleconv2.googlecode.com/files/9600.png
 
 ↑*図7* 出力サンプル値　最初の100サンプルをプロットしたもの
 
+どちらも、4分の1波長ぶんのデータがあればそれを左右対称、上下対称に展開して残りのデータを作れるような、シンメトリーなデータが出てきています
+
 http://bitspersampleconv2.googlecode.com/files/9600x8.png
 
 ↑*図8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
