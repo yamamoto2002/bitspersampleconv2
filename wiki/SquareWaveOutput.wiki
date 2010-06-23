@@ -7,7 +7,7 @@
  * 量子化ビット数16bit
  * 出力レベル-10dB
  * 10kHz 矩形波
-という条件で!SqWave2と!WaveGeneの出力波形とスペクトルを比較しました。
+という条件でSqWave2と!WaveGeneの出力波形とスペクトルを比較しました。
 
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
