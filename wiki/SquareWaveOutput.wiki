@@ -136,39 +136,39 @@ PCM音声信号はナイキスト周波数を超える正弦波の情報を表�
 
 エイリアシングを発生させないために、ナイキスト周波数を超える周波数成分は、デジタル領域で生成しないようにする必要があります。
 
-==図2-1 24kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-1 24kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine24k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine24k_1536.png
 
-==図2-2 36kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-2 36kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine36k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine36k_1536.png
 
-==図2-3 48kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-3 48kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine48k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine48k_1536.png
 
-==図2-4 60kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-4 60kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine60k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine60k_1536.png
 
-==図2-5 72kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-5 72kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine72k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine72k_1536.png
 
-==図2-6 84kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-6 84kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine84k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine84k_1536.png
 
 以上(図2-1～図2-6)のように、ナイキスト周波数未満の正弦波信号は、綺麗にアナログ出力に出てきます。
 
-==図2-7 96kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-7 96kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 
 http://bitspersampleconv2.googlecode.com/files/Sine96k.png
 
@@ -176,7 +176,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine96k_1536.png
 
 ↑ここで破綻が起こります。ナイキスト周波数ぴったりの正弦波は、位相によって出力が0～1倍になります。
 
-==図2-8 108kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-8 108kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine108k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine108k_1536.png
@@ -185,7 +185,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine108k_1536.png
 
 この状況を「エイリアシングが発生している」といいます。
 
-==図2-9 120kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
+==図2-9 120kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine120k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine120k_1536.png
@@ -194,7 +194,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine120k_1536.png
 
 なお、エイリアシングの説明とは関係ないですが
 図2-xのPCMデータプロットは0秒目から100サンプルのプロットですが、
-図2-xのDAC出力波形の図は、sndfile-resampleで8倍オーバーサンプルしたもので、
+図2-xのDAC出力波形シミュレーションの図は、sndfile-resampleで8倍オーバーサンプルしたもので、
 正弦波出力開始から1秒経過後の波形をプロットしています。
 オーバーサンプル処理は、前後に十分な数のデータが必要なので、
 正弦波出力開始直後は出力が安定しないため1秒後の波形をプロットしました。
@@ -231,7 +231,7 @@ http://bitspersampleconv2.googlecode.com/files/10kRect_10000_FFT.png
 (図3-3の出力データを!WaveSpectraでFFTしました。
 8倍オーバーサンプル後のデータではありません。)
 
-==図3-5 DAC出力波形 ==
+==図3-5 DAC出力波形シミュレーション ==
 
 http://bitspersampleconv2.googlecode.com/files/10kRect_beyond_nyquist_waveform.png
 
