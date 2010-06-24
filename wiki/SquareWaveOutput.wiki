@@ -154,6 +154,8 @@ http://bitspersampleconv2.googlecode.com/files/Sine84k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine84k_1536.png
 
+以上(図2-1～図2-6)のように、ナイキスト周波数未満の正弦波信号は、綺麗にアナログ出力に出てきます。
+
 ==図2-7 96kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 
 http://bitspersampleconv2.googlecode.com/files/Sine96k.png
