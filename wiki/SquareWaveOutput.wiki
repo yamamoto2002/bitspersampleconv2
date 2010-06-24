@@ -11,13 +11,13 @@
 
 http://bitspersampleconv2.googlecode.com/files/raw.png
 
-↑*図1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
+↑*図1-1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
 
-==図1の説明==
+==図1-1の説明==
 
-図1は出力データをそのままグラフにプロットしたもので、縦軸がサンプル値、横軸が時間です。
+図1-1は出力データをそのままグラフにプロットしたもので、縦軸がサンプル値、横軸が時間です。
 赤い＋点が!SqWave2の出力データ、緑の×点が!WaveGeneの出力データです。
-グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図2、図5と図6で比較できます。)
+グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図1-2、図1-5と図1-6で比較できます。)
 
 !WaveGeneの出力である緑の×印をよく見ると、×が連続している個数が、5分の2が9サンプル、5分の3が10サンプルになっています。これは10kHzが192kHzで「割り切れない」ため、矩形波の半波長5個分の時間に、192000分の9秒の半波長を2回、192000分の10秒を3回含むような山谷を繰り返すことで、全体として10kHzの音が出るようにしているのです。これによって、半波長ごとに時間長さが伸び縮みする波形が出てきて、オシロスコープで観察すると不安定な波形が出力されているように見える原因でしょう。
 
@@ -25,9 +25,9 @@ http://bitspersampleconv2.googlecode.com/files/raw.png
 
 http://bitspersampleconv2.googlecode.com/files/8x.png
 
-↑*図2* 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
+↑*図1-2* 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
 
-==図2の説明==
+==図1-2の説明==
 
 縦軸がサンプル値、横軸が時間です。
 出力レベルが小さい赤い線が!SqWave2の出力データ、
@@ -35,7 +35,7 @@ http://bitspersampleconv2.googlecode.com/files/8x.png
 グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。
 
 教科書通りの8倍オーバーサンプリングを行うDACのアナログ出力からは、
-大体図2のような波形が出ます。
+大体図1-2のような波形が出ます。
 !SqWave2の出力波形は!WaveGeneよりも安定しています。
 
 最初の半波長ぐらいはどちらも波形が乱れています。この理由は、オーバーサンプリング処理は、
@@ -50,22 +50,22 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
-↑*図3* !SqWave2の10kHz 矩形波出力データのスペクトログラム
+↑*図1-3* !SqWave2の10kHz 矩形波出力データのスペクトログラム
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
-↑*図4* !WaveGeneの10kHz 矩形波出力データのスペクトログラム
+↑*図1-4* !WaveGeneの10kHz 矩形波出力データのスペクトログラム
 
-==図4の説明==
+==図1-4の説明==
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
 http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
 
-↑*図5* !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
+↑*図1-5* !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
 
-==図5の説明==
+==図1-5の説明==
 
 安定した出力が出ています。
 
@@ -73,7 +73,7 @@ http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
 
 ↑*図6* !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
 
-==図6の説明==
+==図1-6の説明==
 
 半波長ごとに時間長さが変化する複雑な波形のため、オシロスコープがうまく同期しません。
 
@@ -90,23 +90,23 @@ http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
 
 http://bitspersampleconv2.googlecode.com/files/9600.png
 
-↑*図7* 出力サンプル値　最初の100サンプルをプロットしたもの
+↑*図1-7* 出力サンプル値　最初の100サンプルをプロットしたもの
 
-==図7の説明==
+==図1-7の説明==
 
 どちらも、4分の1波長ぶんのデータがあればそれを左右対称、上下対称に展開して残りのデータを作れるような、シンメトリーなデータが出てきています
 
 http://bitspersampleconv2.googlecode.com/files/9600x8.png
 
-↑*図8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
+↑*図1-8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
 
 http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
 
-↑*図9* !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム
+↑*図1-9* !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム
 
 http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
-↑*図10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
+↑*図1-10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
 
 = 考察 =
 
@@ -124,51 +124,77 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 したがって割り切れる周波数比のような条件でも、
 !WaveGeneよりも!SqWave2のほうが正確な出力波形が出るみたいです。
 
-=なぜフーリエ級数の正弦波加算処理をナイキスト周波数で打ち切る必要があるのかについて=
+=なぜフーリエ級数の正弦波加算処理をナイキスト周波数で打ち切る必要があるのか=
 
 !SqWave2はフーリエ級数の正弦波加算処理をナイキスト周波数の99％で打ち切っています。
 
-ナイキスト周波数を超える成分を加算するとエイリアシング(折り返し雑音)が発生するからです
+その理由は、ナイキスト周波数を超える成分を加算するとエイリアシング(折り返し雑音)が発生するからです。
 エイリアシングとはどのような現象かというと、DACにナイキスト周波数+αの正弦波を入力すると
-ナイキスト周波数-αの正弦波が出てくるという現象です。これは図にするとわかりやすいです。
+ナイキスト周波数-αの正弦波が出てくるという現象です。これは図にするとわかりやすいです(図2-1から図2-9)。
 
-PCM音声はナイキスト周波数を超える正弦波の情報を表現する方法を持っていないのです
+PCM音声信号はナイキスト周波数を超える正弦波の情報を表現する方法を持っていないのです。
 
+エイリアシングを発生させないために、ナイキスト周波数を超える周波数成分は、デジタル領域で生成しないようにする必要があります。
+
+==図2-1 24kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine24k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine24k_1536.png
 
+==図2-2 36kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine36k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine36k_1536.png
 
+==図2-3 48kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine48k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine48k_1536.png
 
+==図2-4 60kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine60k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine60k_1536.png
 
+==図2-5 72kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine72k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine72k_1536.png
 
+==図2-6 84kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine84k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine84k_1536.png
+
+==図2-7 96kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 
 http://bitspersampleconv2.googlecode.com/files/Sine96k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine96k_1536.png
 
+↑ここで破綻が起こります。ナイキスト周波数ぴったりの正弦波は、位相によって出力が0～1倍になります。
+
+==図2-8 108kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine108k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine108k_1536.png
 
+↑108kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに84kHzの正弦波と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
+
+この状況を「エイリアシングが発生している」といいます。
+
+==図2-9 120kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形 ==
 http://bitspersampleconv2.googlecode.com/files/Sine120k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine120k_1536.png
+
+↑120kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに72kHzの正弦波と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
+
+なお、エイリアシングの説明とは関係ないですが
+図2-xのDAC出力波形の図は、正弦波出力開始から1秒経過後の波形図です。
+オーバーサンプル処理は、前後に十分な数のデータが必要なので、
+正弦波出力開始直後は出力が安定しません。
+
 
 ----
 
