@@ -215,10 +215,10 @@ http://bitspersampleconv2.googlecode.com/files/10kRect_200.png
 
 ==図3-2 加算打ち切り周波数 200％ スペクトログラム ==
 
-(図3-1の出力データをWaveSpectraでFFTしました。
-8倍オーバーサンプル後のデータではありません。)
-
 http://bitspersampleconv2.googlecode.com/files/10kRect_200_FFT.png
+
+(図3-1の出力データを!WaveSpectraでFFTしました。
+8倍オーバーサンプル後のデータではありません。)
 
 ==図3-3 加算打ち切り周波数 10000％ 出力データをプロット ==
 
@@ -228,7 +228,7 @@ http://bitspersampleconv2.googlecode.com/files/10kRect_10000.png
 
 http://bitspersampleconv2.googlecode.com/files/10kRect_10000_FFT.png
 
-(図3-3の出力データをWaveSpectraでFFTしました。
+(図3-3の出力データを!WaveSpectraでFFTしました。
 8倍オーバーサンプル後のデータではありません。)
 
 =考察=
