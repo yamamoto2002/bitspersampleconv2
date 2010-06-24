@@ -46,11 +46,17 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 ==図1-3 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
 
+!SqWave2の10kHz 矩形波出力データをWaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。以下FFTの図は同様です。
+
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 ==図1-4 !WaveGeneの10kHz 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
+
+(!WaveGeneの10kHz 矩形波出力データをWaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。)
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
@@ -203,6 +209,9 @@ http://bitspersampleconv2.googlecode.com/files/10kRect_200.png
 
 ==図3-2 加算打ち切り周波数 200％ スペクトログラム ==
 
+(図3-1の出力データをWaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。)
+
 http://bitspersampleconv2.googlecode.com/files/10kRect_200_FFT.png
 
 ==図3-3 加算打ち切り周波数 10000％ 出力データをプロット ==
@@ -212,6 +221,11 @@ http://bitspersampleconv2.googlecode.com/files/10kRect_10000.png
 ==図3-4 加算打ち切り周波数 10000％ スペクトログラム ==
 
 http://bitspersampleconv2.googlecode.com/files/10kRect_10000_FFT.png
+
+(図3-3の出力データをWaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。)
+
+=考察=
 
 図3-2、図3-4を見比べると、折り返し雑音が、折り返しを繰り返しながら発生していく様子がよくわかります。
 
