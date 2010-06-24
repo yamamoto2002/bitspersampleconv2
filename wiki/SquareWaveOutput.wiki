@@ -9,11 +9,9 @@
  * 10kHz 矩形波
 という条件でSqWave2と!WaveGeneの出力波形とスペクトルを比較しました。
 
+==図1-1 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)==
+
 http://bitspersampleconv2.googlecode.com/files/raw.png
-
-↑*図1-1* 出力データの比較(192kHzサンプリング、矩形波、10kHz、-10dB)
-
-==図1-1の説明==
 
 図1-1は出力データをそのままグラフにプロットしたもので、縦軸がサンプル値、横軸が時間です。
 赤い＋点が!SqWave2の出力データ、緑の×点が!WaveGeneの出力データです。
@@ -23,11 +21,9 @@ http://bitspersampleconv2.googlecode.com/files/raw.png
 
 !SqWave2の出力である赤色の＋点は、一見乱雑にプロットされているように見えますが、これらすべての点は10kHz矩形波のフーリエ級数をナイキスト周波数近くまで足しこんでできる連続波形の上に乗っているのです。そのため、これを理想的なDACに入力すると、オーバーサンプル処理とLPF処理によって「10kHz矩形波のフーリエ級数をナイキスト周波数近くまで足しこんでできる連続波形」が完全に再現されアナログ音声出力から出てきます。
 
+==図1-2 図1-1のデータの8倍オーバーサンプリング処理後の出力データの比較==
+
 http://bitspersampleconv2.googlecode.com/files/8x.png
-
-↑*図1-2* 図1のデータの8倍オーバーサンプリング処理後の出力データの比較
-
-==図1-2の説明==
 
 縦軸がサンプル値、横軸が時間です。
 出力レベルが小さい赤い線が!SqWave2の出力データ、
@@ -48,32 +44,26 @@ sndfile-resample -by 8 -c 0 SQ10K_192.wav SQ10K_1536.wav
 sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 }}}
 
+==図1-3 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
+
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
-↑*図1-3* !SqWave2の10kHz 矩形波出力データのスペクトログラム
+==図1-4 !WaveGeneの10kHz 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
-
-↑*図1-4* !WaveGeneの10kHz 矩形波出力データのスペクトログラム
-
-==図1-4の説明==
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
 
+==図1-5 !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+
 http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
-
-↑*図1-5* !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
-
-==図1-5の説明==
 
 安定した出力が出ています。
 
+==図6 !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+
 http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
-
-↑*図6* !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察
-
-==図1-6の説明==
 
 半波長ごとに時間長さが変化する複雑な波形のため、オシロスコープがうまく同期しません。
 
@@ -88,25 +78,23 @@ http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
  * 量子化ビット数16bit
 という条件で比較しました。
 
+==図1-7 出力サンプル値　最初の100サンプルをプロットしたもの==
+
 http://bitspersampleconv2.googlecode.com/files/9600.png
-
-↑*図1-7* 出力サンプル値　最初の100サンプルをプロットしたもの
-
-==図1-7の説明==
 
 どちらも、4分の1波長ぶんのデータがあればそれを左右対称、上下対称に展開して残りのデータを作れるような、シンメトリーなデータが出てきています
 
+==図1-8 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの==
+
 http://bitspersampleconv2.googlecode.com/files/9600x8.png
 
-↑*図1-8* 出力サンプル値　最初の100サンプルを8倍オーバーサンプルし、実線でつないだもの
+==図1-9 !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
 
-↑*図1-9* !SqWave2の9600Hz -10dB  矩形波出力データのスペクトログラム
+=図1-10 !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
-
-↑*図1-10* !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム
 
 = 考察 =
 
