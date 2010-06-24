@@ -46,8 +46,8 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 ==図1-3 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
 
-!SqWave2の10kHz 矩形波出力データを!WaveSpectraでFFTしました
-8倍オーバーサンプル後のデータではありません。以下FFTの図は同様です。
+(!SqWave2の10kHz 矩形波出力データを!WaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。以下FFTの図は同様です。)
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
