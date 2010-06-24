@@ -46,7 +46,7 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 ==図1-3 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
 
-!SqWave2の10kHz 矩形波出力データをWaveSpectraでFFTしました
+!SqWave2の10kHz 矩形波出力データを!WaveSpectraでFFTしました
 8倍オーバーサンプル後のデータではありません。以下FFTの図は同様です。
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
@@ -55,7 +55,7 @@ http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
-(!WaveGeneの10kHz 矩形波出力データをWaveSpectraでFFTしました
+(!WaveGeneの10kHz 矩形波出力データを!WaveSpectraでFFTしました
 8倍オーバーサンプル後のデータではありません。)
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
@@ -98,9 +98,15 @@ http://bitspersampleconv2.googlecode.com/files/9600x8.png
 
 http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
 
+(図1-7の出力データを!WaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。)
+
 =図1-10 !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
+
+(図1-7の出力データを!WaveSpectraでFFTしました
+8倍オーバーサンプル後のデータではありません。)
 
 = 考察 =
 
