@@ -167,7 +167,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine108k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine108k_1536.png
 
-↑108kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに84kHzの正弦波と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
+↑108kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに84kHzの正弦波の位相が180度ずれた情報と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
 
 この状況を「エイリアシングが発生している」といいます。
 
@@ -176,7 +176,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine120k.png
 
 http://bitspersampleconv2.googlecode.com/files/Sine120k_1536.png
 
-↑120kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに72kHzの正弦波と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
+↑120kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに72kHzの正弦波の位相が180度ずれた情報と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
 
 なお、エイリアシングの説明とは関係ないですが
 図2-xのDAC出力波形の図は、正弦波出力開始から1秒経過後の波形図です。
