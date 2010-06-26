@@ -270,6 +270,8 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
 == 1kHz矩形波(もどき)出力波形 ==
 
+原信号波形が完全な矩形になっていない理由については、[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput SqWave2とWaveGeneの 10kHz 矩形波出力波形とスペクトル比較]をご覧ください。
+
 || 原信号波形 SqWave2 で生成した96kHzサンプリングの1kHz矩形波を、図示のためにsndfile-resampleで8倍オーバーサンプルしたもの。 || 
 || http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
 
