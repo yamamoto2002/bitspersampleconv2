@@ -315,3 +315,8 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 インパルス応答波形を見ると、NJM072Dは明らかにピーク電圧が低いです。
 こういうのは、スルーレートが関係しているんでしょうかね。
 ともかく、この回路には、NJM072Dは向いていないようです。
+
+ダールジールのアンプの音が好みの方にはNJM072Dと歪率特性が似ているのでおすすめできます：
+
+http://stereophile.com/integratedamps/dartzeel_cth-8550_integrated_amplifier/index4.html
+http://www.stereophile.com/solidpoweramps/405dartzeel/index4.html
