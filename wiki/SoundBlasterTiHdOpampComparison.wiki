@@ -265,7 +265,7 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 || 理想的な出力信号波形 ||
 || http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| 
 
-無負荷時 ASIO出力 RCA出力端子 左チャンネル 96kHz 24bit。
+↓無負荷時 ASIO出力 RCA出力端子 左チャンネル 96kHz 24bit。
 
 || NJM2114D || NJM072D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
