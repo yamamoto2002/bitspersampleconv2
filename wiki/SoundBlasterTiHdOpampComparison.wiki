@@ -270,7 +270,7 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 || NJM2114D || NJM072D ||
 ||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
 
-左のほうに1と書いてあるマーカーがある位置が0Vです。縦軸は1V/DIV、横軸は40μs/DIVです。
+左のほうに1と書いてあるマーカーがある位置が0Vです。縦軸は500mV/DIV、横軸は40μs/DIVです。
 
 インパルス応答波形の形状を観察すると、デジタルフィルターはシャープロールオフ型であり、LPFによる位相回転の影響は見られません。素直な形状です。
 
