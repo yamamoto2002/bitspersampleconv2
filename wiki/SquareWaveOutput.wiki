@@ -101,7 +101,7 @@ http://bitspersampleconv2.googlecode.com/files/SQ9600_192.png
 (図1-7の出力データを!WaveSpectraでFFTしました。
 8倍オーバーサンプル後のデータではありません。)
 
-=図1-10 !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム==
+==図1-10 !WaveGeneの9600Hz -10dB 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
