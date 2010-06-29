@@ -188,7 +188,7 @@ http://bitspersampleconv2.googlecode.com/files/Sine108k_1536.png
 
 ↑108kHzの正弦波を作ったつもりが、PCMデジタルデータがすでに84kHzの正弦波(図2-6)の位相が180度ずれた情報と全く同じ情報になっています。DACのアナログ出力からは84kHzの正弦波が出ます。
 
-この状況を「エイリアシングが発生している」といいます。
+この状況を「エイリアシング(折り返し雑音)が発生している」といいます。
 
 ==図2-9 120kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
 http://bitspersampleconv2.googlecode.com/files/Sine120k.png
