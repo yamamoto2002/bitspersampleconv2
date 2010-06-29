@@ -137,7 +137,12 @@ PCM音声信号はナイキスト周波数を超える正弦波の情報を表�
 エイリアシングを発生させないために、ナイキスト周波数を超える周波数成分は、デジタル領域で生成しないようにする必要があります。
 
 ==図2-1 24kHz正弦波、192kHzサンプリング PCMデータのプロットとDACの出力波形シミュレーション ==
+
+↓DACに入力するPCMデータ
+
 http://bitspersampleconv2.googlecode.com/files/Sine24k.png
+
+↓DACのアナログ出力波形(simulated)
 
 http://bitspersampleconv2.googlecode.com/files/Sine24k_1536.png
 
