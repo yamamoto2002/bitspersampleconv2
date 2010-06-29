@@ -142,7 +142,7 @@ PCM音声信号はナイキスト周波数を超える正弦波の情報を表�
 
 http://bitspersampleconv2.googlecode.com/files/Sine24k.png
 
-↓DACのアナログ出力波形(simulated)
+↓DACのアナログ出力波形(simulated) 以下図2-9まで同様です。
 
 http://bitspersampleconv2.googlecode.com/files/Sine24k_1536.png
 
