@@ -340,3 +340,6 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
 これは良い資料ですよ
 http://www.sg-acoustics.ch/analogue_audio/ic_opamps/pdf/opamp_distortion.pdf
+
+Jungさんは、アナログ・デバイセズでオペアンプを作っている人です
+http://waltjung.org/index.html
