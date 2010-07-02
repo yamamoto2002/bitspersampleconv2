@@ -287,7 +287,7 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
 == 1kHz矩形波(もどき)出力波形 ==
 
-原信号波形が完全な矩形にならない(肩が斜めになっていて、頂上がぶよぶよとしている)理由は、DACが出力できる周波数が有限だからです。矩形波生成プログラムに!WaveGeneではなくSqWave2を使用している理由は、[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput SqWave2とWaveGeneの 10kHz 矩形波出力波形とスペクトル比較]をご覧ください。
+原信号波形が完全な矩形にならない(肩が斜めになっていて、頂上がぶよぶよとしている)理由は、DACが出力できる周波数が有限だから(無限に高くしていっても矩形波には近づきませんが…)です。矩形波生成プログラムに!WaveGeneではなくSqWave2を使用している理由は、[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput SqWave2とWaveGeneの 10kHz 矩形波出力波形とスペクトル比較]をご覧ください。
 
 || 原信号波形 !SqWave2 で生成した96kHzサンプリングの1kHz矩形波を、図示のためにsndfile-resampleで8倍オーバーサンプルしたもの。 || 
 || http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
