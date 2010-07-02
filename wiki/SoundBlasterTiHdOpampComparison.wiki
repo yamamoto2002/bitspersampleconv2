@@ -335,3 +335,8 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 
   * http://stereophile.com/integratedamps/dartzeel_cth-8550_integrated_amplifier/index4.html の図9
   * http://www.stereophile.com/solidpoweramps/405dartzeel/index4.html の図6
+
+=オペアンプ音質比較資料=
+
+これは良い資料ですよ
+http://www.sg-acoustics.ch/analogue_audio/ic_opamps/pdf/opamp_distortion.pdf
