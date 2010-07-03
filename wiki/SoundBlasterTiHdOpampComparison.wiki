@@ -166,6 +166,89 @@ http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 
 http://bitspersampleconv2.googlecode.com/files/impulse.png
 
+= オシロスコープで波形を観察 =
+
+サウンドブラスターのRCAアナログ音声出力端子にオシロスコープのプローブを当てて測定しました。
+
+使用したオシロスコープのは SoftDSP社のSDS 200Aです。
+このオシロは200MHz、電圧軸の分解能48dB(256段階)という性能です。
+
+==インパルス応答波形==
+
+(サンプリング周波数96kHz、量子化ビット数24ビット)
+
+ずーっと0がつづいていて、1サンプルだけ＋8388607(最大値)になり、またずーっと0が続くというデジタルデータをDACに入力します。
+すると、アナログ出力には、以下の「理想的な出力信号波形」のような出力波形が出るのが理想です。裾野のビヨビヨは理想的には無限に広がります。
+
+|| 理想的な出力信号波形 ||
+|| http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| 
+
+↓無負荷時 ASIO出力 RCA出力端子 左チャンネル 96kHz 24bit。
+
+|| NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
+
+左のほうに1と書いてあるマーカーがある位置が0Vです。縦軸は500mV/DIV、横軸は40μs/DIVです。
+
+インパルス応答波形の形状を観察すると、デジタルフィルターはシャープロールオフ型であり、LPFによる位相回転の影響は見られません。素直な形状です。
+
+このグラフを見ながら音楽を聞くと、NJM2114Dは、立ち上がりの速い、瞬発力のある音に聴こえる気がするかもｗ
+
+
+== 1kHz矩形波(もどき)出力波形 ==
+
+原信号波形が完全な矩形にならない(肩が斜めになっていて、頂上がぶよぶよとしている)理由は、DACが出力できる周波数が有限だから(無限に高くしていっても矩形波には近づきませんが…)です。矩形波生成プログラムに!WaveGeneではなくSqWave2を使用している理由は、[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput SqWave2とWaveGeneの 10kHz 矩形波出力波形とスペクトル比較]をご覧ください。
+
+|| 原信号波形 !SqWave2 で生成した96kHzサンプリングの1kHz矩形波を、図示のためにsndfile-resampleで8倍オーバーサンプルしたもの。 || 
+|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
+
+↓ 無負荷時  !SqWave2でASIO出力 RCA出力端子 左チャンネル 96kHz 16bit
+
+||NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
+
+↓ 100pF容量負荷 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
+
+|| NJM2114D || NJM072D ||
+|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
+
+== 10kHz正弦波出力波形 ==
+
+↓ 無負荷時 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
+
+|| NJM2114D || NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_10kHzS.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzS.png|| 
+
+== 10kHz正弦波出力時スペクトログラム ==
+
+↓ 無負荷時 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
+
+|| NJM2114D ||
+||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||
+
+|| NJM072D ||
+||http://bitspersampleconv2.googlecode.com/files/072_10kHzFFT.png||
+
+ 
+==考察==
+
+使用したオシロスコープは SoftDSP社のSDS 200Aです。
+このオシロスコープは200MHz、電圧軸の分解能48dB(256段階)という性能です。
+
+すべての波形グラフは、1秒間の残光表示設定になっていますので、
+もし発振があれば、線が縦に太くなります。
+
+発振の兆候は見られませんでした。
+
+インパルス応答波形を見ると、NJM072Dは明らかにピーク電圧が低いです。
+こういうのは、スルーレートが関係しているんでしょうかね。
+ともかく、この回路には、NJM072Dは向いていないようです。
+
+ダールジール等の無帰還アンプの音が好みの方には、NJM072Dを装着するとIMD特性が似るので、NJM072Dへの交換を試してみると良いかもしれません。ダールジールはスルーレートが優れていて、NJM072Dは優れていないので、出てくる音が似るかどうかはわかりませんが
+
+  * http://stereophile.com/integratedamps/dartzeel_cth-8550_integrated_amplifier/index4.html の図9
+  * http://www.stereophile.com/solidpoweramps/405dartzeel/index4.html の図6
+
 =クロックジッターによる音質劣化について=
 
 同一のサウンドカードで録再すると、クロックが同一のため、
@@ -256,89 +339,6 @@ Creative X-Fi Titanium HDはASIOに対応しているのが良いです。
 出力バッファサイズを32768バイトまで増やせるため、遅いPCでも音飛びしにくいです。
 
 詳しくは[ASIO]にまとめてあります。
-
-= オシロスコープで波形を観察 =
-
-サウンドブラスターのRCAアナログ音声出力端子にオシロスコープのプローブを当てて測定しました。
-
-使用したオシロスコープのは SoftDSP社のSDS 200Aです。
-このオシロは200MHz、電圧軸の分解能48dB(256段階)という性能です。
-
-==インパルス応答波形==
-
-(サンプリング周波数96kHz、量子化ビット数24ビット)
-
-ずーっと0がつづいていて、1サンプルだけ＋8388607(最大値)になり、またずーっと0が続くというデジタルデータをDACに入力します。
-すると、アナログ出力には、以下の「理想的な出力信号波形」のような出力波形が出るのが理想です。裾野のビヨビヨは理想的には無限に広がります。
-
-|| 理想的な出力信号波形 ||
-|| http://bitspersampleconv2.googlecode.com/files/pulseinput.png|| 
-
-↓無負荷時 ASIO出力 RCA出力端子 左チャンネル 96kHz 24bit。
-
-|| NJM2114D || NJM072D ||
-||http://bitspersampleconv2.googlecode.com/files/2114_pulse.png||http://bitspersampleconv2.googlecode.com/files/072_pulse.png|| 
-
-左のほうに1と書いてあるマーカーがある位置が0Vです。縦軸は500mV/DIV、横軸は40μs/DIVです。
-
-インパルス応答波形の形状を観察すると、デジタルフィルターはシャープロールオフ型であり、LPFによる位相回転の影響は見られません。素直な形状です。
-
-このグラフを見ながら音楽を聞くと、NJM2114Dは、立ち上がりの速い、瞬発力のある音に聴こえる気がするかもｗ
-
-
-== 1kHz矩形波(もどき)出力波形 ==
-
-原信号波形が完全な矩形にならない(肩が斜めになっていて、頂上がぶよぶよとしている)理由は、DACが出力できる周波数が有限だから(無限に高くしていっても矩形波には近づきませんが…)です。矩形波生成プログラムに!WaveGeneではなくSqWave2を使用している理由は、[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput SqWave2とWaveGeneの 10kHz 矩形波出力波形とスペクトル比較]をご覧ください。
-
-|| 原信号波形 !SqWave2 で生成した96kHzサンプリングの1kHz矩形波を、図示のためにsndfile-resampleで8倍オーバーサンプルしたもの。 || 
-|| http://bitspersampleconv2.googlecode.com/files/1kHzRect96x8.png|| 
-
-↓ 無負荷時  !SqWave2でASIO出力 RCA出力端子 左チャンネル 96kHz 16bit
-
-||NJM2114D || NJM072D ||
-||http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect.png|| 
-
-↓ 100pF容量負荷 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
-
-|| NJM2114D || NJM072D ||
-|| http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
-
-== 10kHz正弦波出力波形 ==
-
-↓ 無負荷時 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
-
-|| NJM2114D || NJM072D ||
-||http://bitspersampleconv2.googlecode.com/files/2114_10kHzS.png||http://bitspersampleconv2.googlecode.com/files/072_10kHzS.png|| 
-
-== 10kHz正弦波出力時スペクトログラム ==
-
-↓ 無負荷時 !SqWave2でASIO出力 RCA出力端子 左チャンネル  96kHz 16bit
-
-|| NJM2114D ||
-||http://bitspersampleconv2.googlecode.com/files/2114_10kHzFFT.png||
-
-|| NJM072D ||
-||http://bitspersampleconv2.googlecode.com/files/072_10kHzFFT.png||
-
- 
-==考察==
-
-使用したオシロスコープは SoftDSP社のSDS 200Aです。
-このオシロスコープは200MHz、電圧軸の分解能48dB(256段階)という性能です。
-
-すべての波形グラフは、1秒間の残光表示設定になっていますので、
-もし発振があれば、線が縦に太くなります。
-
-発振の兆候は見られませんでした。
-
-インパルス応答波形を見ると、NJM072Dは明らかにピーク電圧が低いです。
-こういうのは、スルーレートが関係しているんでしょうかね。
-ともかく、この回路には、NJM072Dは向いていないようです。
-
-ダールジール等の無帰還アンプの音が好みの方には、NJM072Dを装着するとIMD特性が似るので、NJM072Dへの交換を試してみると良いかもしれません。ダールジールはスルーレートが優れていて、NJM072Dは優れていないので、出てくる音が似るかどうかはわかりませんが
-
-  * http://stereophile.com/integratedamps/dartzeel_cth-8550_integrated_amplifier/index4.html の図9
-  * http://www.stereophile.com/solidpoweramps/405dartzeel/index4.html の図6
 
 =オペアンプ音質比較資料=
 
