@@ -18,7 +18,7 @@ Sound Blasterのオペアンプを交換し、RMAA 6.2.3を用いて測定を行
   * Sound Blasterを挿したスロットは下から2番目のx1スロットです。
   * 他にProdigy HD2を1個上のPCIスロットに挿しています。
   * ATX電源はSeasonic SS-550HT。
-  * ディスクはIntel X25-M 160G2GC
+  * Intel X25-M 160G2GC
 
 =設定=
 
