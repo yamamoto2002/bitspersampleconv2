@@ -11,7 +11,9 @@ Sound Blasterのオペアンプを交換し、RMAA 6.2.3を用いて測定を行
 
 出力端子に近いほうの2個は、デフォルトのLME49710のままです。
 
-  * マザーボードはIntel DX58SO マザーボードBIOSは5314。
+=PCの構成=
+
+  * マザーボードはIntel DX58SO。BIOSリビジョンは5314。
   * CPUはIntel i7 980X。
   * グラボはGeforce GTX 260。
   * オンボードサウンドのRealtek 889Aは有効のまま。
