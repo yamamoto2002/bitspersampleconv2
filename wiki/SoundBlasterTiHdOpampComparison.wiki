@@ -22,6 +22,9 @@ Sound Blasterのオペアンプを交換し、RMAA 6.2.3を用いて測定を行
   * ATX電源はSeasonic SS-550HT。
   * Intel X25-M 160G2GC
 
+ちなみに、SB X-Fi Ti HDを2枚挿すと、OSのブートまで行くが、ブルースクリーンが発生します。
+PC1台につき1枚までにしましょう。
+
 =設定=
 
 24bit 96kHz !DirectSound出力 RCAアナログ出力/MME入力 RCAアナログ入力(AUX入力)のループバックで測定。
