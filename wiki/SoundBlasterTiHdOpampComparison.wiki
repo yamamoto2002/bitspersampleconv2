@@ -18,7 +18,7 @@ Sound Blasterのオペアンプを交換し、RMAA 6.2.3を用いて測定を行
   * グラボはGeforce GTX 260。
   * オンボードサウンドのRealtek 889Aは有効のまま。
   * Sound Blasterを挿したスロットは下から2番目のx1スロットです。
-  * 他にサウンドカードProdigy HD2を1個上のPCIスロットに挿しています。
+  * 他にサウンドカードAudioTrak Prodigy HD2を1個上のPCIスロットに挿しています。
   * IEEE1394でRME !FireFace400とM-AUDIO Profire2626がデイジーチェーン接続しています。
   * ATX電源はSeasonic SS-550HT。
   * Intel X25-M 160G2GC
