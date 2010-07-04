@@ -21,6 +21,7 @@ Sound Blasterのオペアンプを交換し、RMAA 6.2.3を用いて測定を行
   * 他にProdigy HD2を1個上のPCIスロットに挿しています。
   * ATX電源はSeasonic SS-550HT。
   * Intel X25-M 160G2GC
+  * OSはWindows7の64ビット版です。
 
 ちなみに、SB X-Fi Ti HDを2枚挿すと、OSのブートまで行くが、ブルースクリーンが発生します。
 PC1台につき1枚までにしましょう。
@@ -30,8 +31,6 @@ PC1台につき1枚までにしましょう。
 24bit 96kHz !DirectSound出力 RCAアナログ出力/MME入力 RCAアナログ入力(AUX入力)のループバックで測定。
 
 RCAケーブルは長さ1mの赤白ケーブル。
-
-OSはWindows7の64ビット版です。
 
 ==Windowsミキサーの設定==
 
