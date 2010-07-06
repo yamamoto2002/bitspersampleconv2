@@ -69,7 +69,40 @@ min buffer sizeがどのデバイスも非常に少ない数になっていま�
 ||M-AUDIO !ProFire 2626||sint32 LSB||64||4096||4096||See Control Panel||Yes||Exists||192kHz||
 ||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||?||
 ||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||192kHz||
-||Creative ASIO||sint32 LSB||96||32768||4800(Default)||Internal||Yes||Exists||96kHz||
+||Creative ASIO||sint32 LSB||96||4800(Default)||32768||Internal||Yes||Exists||96kHz||
+||RME Fireface400||sint32 LSB||48||256(default)||1024||Settings||Not Exists but no error reported when asioControlPanel()||Exists||192kHz||
+
+= RME Fireface400 =
+
+{{{
+  asioVersion:   0
+  driverVersion: 1
+  Name:          hdspfire
+ASIOGetChannels() inputs=8 outputs=8
+ASIOGetBufferSize() min=1024 max=1024 preferred=1024 granularity=0
+ASIOSetSampleRate(sampleRate=192000.000000)
+ASIOOutputReady() Supported
+i= 0 ch= 0 isInput=1 chGroup=00000000 type=18 name=Analog 1 (1)
+i= 1 ch= 1 isInput=1 chGroup=00000000 type=18 name=Analog 2 (1)
+i= 2 ch= 2 isInput=1 chGroup=00000000 type=18 name=Analog 3 (1)
+i= 3 ch= 3 isInput=1 chGroup=00000000 type=18 name=Analog 4 (1)
+i= 4 ch= 4 isInput=1 chGroup=00000000 type=18 name=Analog 5 (1)
+i= 5 ch= 5 isInput=1 chGroup=00000000 type=18 name=Analog 6 (1)
+i= 6 ch= 6 isInput=1 chGroup=00000000 type=18 name=Analog 7 (1)
+i= 7 ch= 7 isInput=1 chGroup=00000000 type=18 name=Analog 8 (1)
+i= 8 ch= 0 isInput=0 chGroup=00000000 type=18 name=Analog 1 (1)
+i= 9 ch= 1 isInput=0 chGroup=00000000 type=18 name=Analog 2 (1)
+i=10 ch= 2 isInput=0 chGroup=00000000 type=18 name=Analog 3 (1)
+i=11 ch= 3 isInput=0 chGroup=00000000 type=18 name=Analog 4 (1)
+i=12 ch= 4 isInput=0 chGroup=00000000 type=18 name=Analog 5 (1)
+i=13 ch= 5 isInput=0 chGroup=00000000 type=18 name=Analog 6 (1)
+i=14 ch= 6 isInput=0 chGroup=00000000 type=18 name=Analog 7 (1)
+i=15 ch= 7 isInput=0 chGroup=00000000 type=18 name=Analog 8 (1)
+ASIOGetLatencies() input=1064 output=1312
+ASIOGetClockSources() result=0 numOfClockSources=1
+ idx=0 assocCh=0 assocGrp=0 current=1 name=Settings
+}}}
+
 
 = Creative SB X-Fi ASIO =
 {{{
