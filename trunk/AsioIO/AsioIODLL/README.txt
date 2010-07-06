@@ -1,4 +1,4 @@
-1. ASIO SDKを以下の場所からダウンロードしてASIOSDK2ディレクトリが出来ます。
+1. ASIO SDKを以下の場所からダウンロードしてきます。展開するとASIOSDK2ディレクトリが出来ます。
 http://www.steinberg.net/en/company/3rd_party_developer.html
 
 2. 以下のリポジトリを、svn チェックアウトします。
