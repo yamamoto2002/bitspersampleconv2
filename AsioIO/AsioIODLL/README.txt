@@ -10,9 +10,9 @@ C:\work\BpsConvWin2\ディレクトリにチェックアウトしたとして話を進めます。
 AsioIOディレクトリとASIOSDK2ディレクトリが並列に並ぶように、
 エクスプローラでASIOSDK2ディレクトリをコピーします。すると以下のような感じになります：
 
-C:\work\BpsConvWin2\AsioIO\AsioIO.sln 等
-C:\work\BpsConvWin2\ASIOSDK2\readme.txt 等
-C:\work\BpsConvWin2\sqwave2\sqwave2.sln 等
+C:\work\BpsConvWin2\AsioIO\AsioIO.sln 等がある
+C:\work\BpsConvWin2\ASIOSDK2\readme.txt 等がある
+C:\work\BpsConvWin2\sqwave2\sqwave2.sln 等がある
 
 4. C:\work\BpsConvWin2\AsioIO\AsioIODLL\copyasiofiles.batを実行します。
 以下のファイルがC:\work\BpsConvWin2\AsioIO\AsioIODLL\の中にコピーされます:
