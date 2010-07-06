@@ -15,7 +15,7 @@ long AsioDrvGetCurrentDriverIndex(void);
 long AsioDrvOpenDriver(int,void **);
 long AsioDrvCloseDriver(int);
 long AsioDrvGetNumDev(void);
-long AsioDrvGetDriverName(int, char *, int);		
+long AsioDrvGetDriverName(int, char *, int);
 long AsioDrvGetDriverPath(int, char *, int);
 long AsioDrvGetDriverCLSID(int, CLSID *);
 
