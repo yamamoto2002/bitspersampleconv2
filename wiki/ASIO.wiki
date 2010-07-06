@@ -70,7 +70,7 @@ min buffer sizeがどのデバイスも非常に少ない数になっていま�
 ||ASIO4ALL||sint32 LSB||64||256||2048||Big Ben||No||Exists||?||
 ||Prodigy HD2||sint32 LSB||256(Default)||256(Default)||256(Default)||Prodigy HD2 Clock||Yes||Not Exists but no error reported when asioControlPanel()||192kHz||
 ||Creative ASIO||sint32 LSB||96||4800(Default)||32768||Internal||Yes||Exists||96kHz||
-||RME Fireface400||sint32 LSB||48||256(default)||1024||Settings||Not Exists but no error reported when asioControlPanel()||Exists||192kHz||
+||RME Fireface400||sint32 LSB||48||256(default)||1024||Settings||Yes||Not Exists but no error reported when asioControlPanel()||192kHz||
 
 = RME Fireface400 =
 
