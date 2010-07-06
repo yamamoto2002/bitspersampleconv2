@@ -1,8 +1,6 @@
 cd ..\..
 
 
-copy ASIOSDK2\common\asio.cpp      AsioIO\AsioIODLL\
-copy ASIOSDK2\common\asio.h        AsioIO\AsioIODLL\
 copy ASIOSDK2\common\asiosys.h     AsioIO\AsioIODLL\
 copy ASIOSDK2\common\iasiodrv.h    AsioIO\AsioIODLL\
 
