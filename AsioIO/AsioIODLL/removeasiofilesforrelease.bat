@@ -1,5 +1,3 @@
-del asio.cpp
-del asio.h
 del asiosys.h
 del iasiodrv.h
 
