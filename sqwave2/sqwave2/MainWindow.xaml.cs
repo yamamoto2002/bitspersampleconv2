@@ -284,10 +284,12 @@ namespace sqwave2
                 }
             }
 
+        /*
             if (sampleRate <= freq * 2) {
                 MessageBox.Show("エラー: 信号周波数をサンプリング周波数の半分未満にしてください");
                 return;
             }
+        */
 
             switch (bitsPerSample) {
             case 16:
@@ -297,8 +299,8 @@ namespace sqwave2
                 }
                 break;
             case 24:
-                if (dB < -120.0) {
-                    MessageBox.Show("エラー: 出力レベルには -120.0以上の数値を入力してください");
+                if (dB < -144.0) {
+                    MessageBox.Show("エラー: 出力レベルには -144.0以上の数値を入力してください");
                     return;
                 }
                 break;
@@ -446,8 +448,8 @@ namespace sqwave2
                     }
                     // 開始
                     asio.Start();
-                    backgroundWorker1.ReportProgress(3, 
-                        string.Format("出力開始。{0}Hz {1} {2}dB\r\n", sgwa.sgParams.freq, sgwa.sgParams.ss, sgwa.sgParams.dB));
+                    /* backgroundWorker1.ReportProgress(3, 
+                        string.Format("出力開始。{0}Hz {1} {2}dB\r\n", sgwa.sgParams.freq, sgwa.sgParams.ss, sgwa.sgParams.dB)); */
                     while (!asio.Run()) {
                     }
                     backgroundWorker1.ReportProgress(3, "出力終了。\r\n");
