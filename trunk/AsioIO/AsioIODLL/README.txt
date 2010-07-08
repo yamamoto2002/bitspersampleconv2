@@ -16,6 +16,10 @@ C:\work\BpsConvWin2\sqwave2\sqwave2.sln 等がある
 
 4. C:\work\BpsConvWin2\AsioIO\AsioIODLL\copyasiofiles.batを実行します。
 以下のファイルがC:\work\BpsConvWin2\AsioIO\AsioIODLL\の中にコピーされます:
+ASIOSDK2/common/asio.h
+ASIOSDK2/common/asio.cpp
+ASIOSDK2/common/asiodrivers.h
+ASIOSDK2/common/asiodrivers.cpp
 ASIOSDK2/common/asiosys.h
 ASIOSDK2/common/iasiodrv.h
 
