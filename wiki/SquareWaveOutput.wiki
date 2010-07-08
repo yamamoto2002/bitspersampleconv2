@@ -44,13 +44,13 @@ sndfile-resample -by 8 -c 0 SQ10K_192.wav SQ10K_1536.wav
 sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 }}}
 
-==図1-3 !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+==図1-3 DACの出力波形をオシロスコープで観察　!SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形==
 
 http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
 
 安定した出力が出ています。
 
-==図1-4 !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+==図1-4 DACの出力波形をオシロスコープで観察　!WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形==
 
 http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
 
