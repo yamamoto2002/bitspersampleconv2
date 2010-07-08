@@ -9,7 +9,7 @@
 
 #include "asiosys.h"
 #include "asio.h"
-#include "asiodrivers.h"
+#include "AsioIOIF.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -19,6 +19,10 @@
 static HANDLE s_hEvent;
 
 struct WavData {
+    bool Use(void) {
+        return !end;
+    }
+
     int samples;
     int pos; /**< next data index to read/write */
     int channelIdx; /* buffer index */
@@ -26,11 +30,20 @@ struct WavData {
     bool end;
     int *data;
 
+    ASIOSampleType sampleType;
+
+    unsigned char *asioBuffers[2];
+
     void Clear(void);
-    void SetInput32(const int *pInputData, int dataCount);
-    void SetInput16(const short *pInputData, int dataCount);
-    void SetOutput32(int *pOutputData, int dataCount);
-    void SetOutput16(short *pOutputData, int dataCount);
+    void SetInput32(int index, int dataCount);
+    void SetInput16(int index, int dataCount);
+    void SetOutput32(int index, int dataCount);
+    void SetOutput16(int index, int dataCount);
+
+    void AsioBufferDisposed(void) {
+        asioBuffers[0] = 0;
+        asioBuffers[1] = 0;
+    }
 };
 
 void WavData::Clear(void)
@@ -45,8 +58,10 @@ void WavData::Clear(void)
     end = true;
 }
 
-void WavData::SetInput32(const int *pInputData, int dataCount)
+void WavData::SetInput32(int index, int dataCount)
 {
+    const int *pInputData = 
+        (int*)asioBuffers[index];
     if (data) {
         int count = dataCount;
         if (samples < pos + dataCount) {
@@ -64,8 +79,11 @@ void WavData::SetInput32(const int *pInputData, int dataCount)
     }
 }
 
-void WavData::SetInput16(const short *pInputData, int dataCount)
+void WavData::SetInput16(int index, int dataCount)
 {
+    const short *pInputData =
+        (short*)asioBuffers[index];
+
     //printf("WavData::SetInput16 dataCount=%d bufferRemains=%d\n", dataCount, samples - pos);
 
     if (data) {
@@ -87,10 +105,19 @@ void WavData::SetInput16(const short *pInputData, int dataCount)
     }
 }
 
-void WavData::SetOutput32(int *pOutputData, int dataCount)
+void WavData::SetOutput32(int index, int dataCount)
 {
+    int *pOutputData =
+        (int*)asioBuffers[index];
+
     if (!data) {
         end = true;
+    }
+
+    if (end) {
+        if (pOutputData) {
+            memset(pOutputData, 0, dataCount*4);
+        }
         return;
     }
 
@@ -114,30 +141,45 @@ void WavData::SetOutput32(int *pOutputData, int dataCount)
             dataCount -= count;
         }
     } else {
+
         // not repeat.
         int count = dataCount;
+
         if (samples < pos + dataCount) {
-            //printf("WavData::SetOutput32 last data has come.\n");
+            // pos + dataCount == endpos
+            // data is insufficient;
             count = samples - pos;
             end = true;
-        }
+        } 
 
         if (0 < count) {
             memcpy(pOutputData, &data[pos], count*4);
             pos += count;
         }
+
         if (count < dataCount) {
-            memset(&pOutputData[count], 0, (dataCount-count)*4);
+            for (int i=count; i<dataCount; ++i) {
+                pOutputData[i] = 0;
+            }
         }
     }
 }
 
-void WavData::SetOutput16(short *pOutputData, int dataCount)
+void WavData::SetOutput16(int index, int dataCount)
 {
+    short *pOutputData =
+        (short*)asioBuffers[index];
+
     //printf("WavData::SetOutput16 dataCount=%d bufferRemains=%d\n", dataCount, samples - pos);
 
     if (!data) {
         end = true;
+    }
+
+    if (end) {
+        if (pOutputData) {
+            memset(pOutputData, 0, dataCount*2);
+        }
         return;
     }
 
@@ -167,12 +209,13 @@ void WavData::SetOutput16(short *pOutputData, int dataCount)
     } else {
         // not repeat.
         int count = dataCount;
+
         if (samples < pos + dataCount) {
             //printf("WavData::SetOutput16 last data has come.\n");
+            // data is insufficient
             count = samples - pos;
             end = true;
         }
-
         if (0 < count) {
             for (int i=0; i<count; ++i) {
                 pOutputData[i] = data[pos+i]>>16;
@@ -189,6 +232,15 @@ void WavData::SetOutput16(short *pOutputData, int dataCount)
 
 static WavData s_outWavArray[ASIOWRAP_OUTPUT_CHANNEL_NUM];
 static WavData s_inWav;
+
+static void
+asioBufferDisposed(void)
+{
+    s_inWav.AsioBufferDisposed();
+    for (int i=0; i<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++i) {
+        s_outWavArray[i].AsioBufferDisposed();
+    }
+}
 
 static int
 getAsioDriverNum(void)
@@ -211,6 +263,7 @@ getAsioDriverName(int n, char *name_return, int size)
     return true;
 }
 
+/*
 static bool
 loadAsioDriver(int n)
 {
@@ -226,6 +279,7 @@ unloadAsioDriver(void)
 {
     AsioDrvRemoveCurrentDriver();
 }
+*/
 
 #if NATIVE_INT64
     #define ASIO64toDouble(a)  (a)
@@ -248,20 +302,29 @@ AsioSamplesToDouble(ASIOSamples &a)
 
 struct AsioPropertyInfo {
     ASIODriverInfo adi;
-    long inputChannels;
-    long outputChannels;
+    long inputChannels;   /**< デバイスの入力チャンネル総数。*/
+    long outputChannels;  /**< デバイスの出力チャンネル総数。*/
+
+    int useInputChannelNum;  /**< 使用する入力チャンネル総数 */
+    int useOutputChannelNum; /**< 使用する出力チャンネル総数 */
+
     long minSize;
     long maxSize;
     long preferredSize;
     long bufferSize;
+
     long granularity;
     ASIOSampleRate sampleRate; /**< input param: 96000 or 44100 or whatever */
+
     bool postOutput;
+
     ASIOTime tInfo;
     ASIOBufferInfo  *bufferInfos;
     ASIOChannelInfo *channelInfos;
+
     long inputLatency;
     long outputLatency;
+
     double nanoSeconds;
     double samples;
     double tcSamples;
@@ -313,43 +376,40 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
 
     long buffSize = ap->bufferSize;
 
-    for (int i = 0; i <ap->inputChannels + ap->outputChannels; i++) {
-        if (ap->bufferInfos[i].isInput == ASIOTrue &&
-            i == s_inWav.channelIdx) {
-            switch (ap->channelInfos[i].type) {
+    if (s_inWav.Use()) {
+        switch (s_inWav.sampleType) {
+        case ASIOSTInt16LSB:
+            // Realtek ASIO
+            s_inWav.SetInput16(index, buffSize);
+            break;
+        case ASIOSTInt32LSB:
+            // M-AUDIO ASIO
+            // Creative ASIO
+            s_inWav.SetInput32(index, buffSize);
+            break;
+        default:
+            printf("input sampleType=%d\n", 
+                s_inWav.sampleType);
+            assert(0);
+            break;
+        }
+    }
+
+    for (int i=0; i<ap->useOutputChannelNum; ++i) {
+        WavData &wd = s_outWavArray[i];
+
+        if (wd.Use()) {
+            switch (wd.sampleType) {
             case ASIOSTInt16LSB:
-                // Realtek ASIO
-                s_inWav.SetInput16((short*)ap->bufferInfos[i].buffers[index], buffSize);
+                wd.SetOutput16(index, buffSize);
                 break;
             case ASIOSTInt32LSB:
-                // M-AUDIO ASIO
-                // Creative ASIO
-                s_inWav.SetInput32((int*)ap->bufferInfos[i].buffers[index], buffSize);
+                wd.SetOutput32(index, buffSize);
                 break;
             default:
-                printf("input ap->channelInfos[i].type=%d\n", 
-                    ap->channelInfos[i].type);
+                printf("output %d sampleType=%d\n", i, wd.sampleType);
                 assert(0);
                 break;
-            }
-        }
-        if (ap->bufferInfos[i].isInput == ASIOFalse) {
-            for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
-                if (i - ap->inputChannels == s_outWavArray[ch].channelIdx) {
-                    switch (ap->channelInfos[i].type) {
-                    case ASIOSTInt16LSB:
-                        s_outWavArray[ch].SetOutput16((short*)ap->bufferInfos[i].buffers[index], buffSize);
-                        break;
-                    case ASIOSTInt32LSB:
-                        s_outWavArray[ch].SetOutput32((int*)ap->bufferInfos[i].buffers[index], buffSize);
-                        break;
-                    default:
-                        printf("output ap->channelInfos[i].type=%d\n", 
-                            ap->channelInfos[i].type);
-                        assert(0);
-                        break;
-                    }
-                }
             }
         }
     }
@@ -361,8 +421,8 @@ bufferSwitchTimeInfo(ASIOTime *timeInfo, long index, ASIOBool processNow)
     if (!s_inWav.end) {
         return 0;
     }
-    for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
-        if (!s_outWavArray[ch].end) {
+    for (int i=0; i<ap->useOutputChannelNum; ++i) {
+        if (!s_outWavArray[i].end) {
             return 0;
         }
     }
@@ -407,9 +467,7 @@ asioMessages(long selector, long value, void* message, double* opt)
         || value == kAsioEngineVersion
         || value == kAsioResyncRequest
         || value == kAsioLatenciesChanged
-        || value == kAsioSupportsTimeInfo
-        || value == kAsioSupportsTimeCode
-        || value == kAsioSupportsInputMonitor)
+        )
             ret = 1L;
         break;
     case kAsioResetRequest:
@@ -474,14 +532,16 @@ extern "C" __declspec(dllexport)
 bool __stdcall
 AsioWrap_loadDriver(int n)
 {
-    return loadAsioDriver(n);
+    char name[64];
+    getAsioDriverName(n, name, sizeof name-1);
+    return AsioDrvLoadDriver(name);
 }
 
 extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_unloadDriver(void)
 {
-    unloadAsioDriver();
+    AsioDrvRemoveCurrentDriver();
 }
 
 extern "C" __declspec(dllexport)
@@ -522,7 +582,10 @@ AsioWrap_setup(int sampleRate)
 
     int totalChannels = ap->inputChannels + ap->outputChannels;
 
+    assert(!ap->bufferInfos);
     ap->bufferInfos  = new ASIOBufferInfo[totalChannels];
+
+    assert(!ap->channelInfos);
     ap->channelInfos = new ASIOChannelInfo[totalChannels];
 
     rv = ASIOGetBufferSize(&ap->minSize, &ap->maxSize,
@@ -559,41 +622,15 @@ AsioWrap_setup(int sampleRate)
     printf ("ASIOOutputReady() %s\n",
         ap->postOutput ? "Supported" : "Not supported");
 
-    ASIOBufferInfo *info = ap->bufferInfos;
-
-    for (int i=0; i<ap->inputChannels; ++i) {
-        info->isInput    = ASIOTrue;
-        info->channelNum = i;
-        info->buffers[0] = 0;
-        info->buffers[1] = 0;
-        ++info;
-    }
-
-    for (int i=0; i<ap->outputChannels; ++i) {
-        info->isInput    = ASIOFalse;
-        info->channelNum = i;
-        info->buffers[0] = 0;
-        info->buffers[1] = 0;
-        ++info;
-    }
-
-    static ASIOCallbacks asioCallbacks;
-    asioCallbacks.bufferSwitch         = &bufferSwitch;
-    asioCallbacks.sampleRateDidChange  = &sampleRateChanged;
-    asioCallbacks.asioMessage          = &asioMessages;
-    asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
-
-    rv = ASIOCreateBuffers(ap->bufferInfos,
-        totalChannels, ap->bufferSize, &asioCallbacks);
-    if (ASE_OK != rv) {
-        printf ("ASIOCreateBuffers() failed %d\n", rv);
-        return rv;
-    }
-    printf ("ASIOCreateBuffers() success.\n");
-
     for (int i=0; i<totalChannels; i++) {
-        ap->channelInfos[i].channel = ap->bufferInfos[i].channelNum;
-        ap->channelInfos[i].isInput = ap->bufferInfos[i].isInput;
+        if (i < ap->inputChannels) {
+            ap->channelInfos[i].channel = i;
+            ap->channelInfos[i].isInput = true;
+        } else {
+            ap->channelInfos[i].channel = i-ap->inputChannels;
+            ap->channelInfos[i].isInput = false;
+        }
+
         rv = ASIOGetChannelInfo(&ap->channelInfos[i]);
         if (ASE_OK != rv) {
             printf ("ASIOGetChannelInfo() failed %d\n", rv);
@@ -628,6 +665,27 @@ AsioWrap_setup(int sampleRate)
     }
 
     return ASE_OK;
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+AsioWrap_unsetup(void)
+{
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
+    ASIOExit();
+    printf("ASIOExit()\n");
+
+    s_inWav.Clear();
+    for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
+        s_outWavArray[ch].Clear();
+    }
+
+    assert(ap->bufferInfos);
+    delete[] ap->bufferInfos;  ap->bufferInfos = 0;
+
+    assert(ap->channelInfos);
+    delete[] ap->channelInfos; ap->channelInfos = 0;
 }
 
 extern "C" __declspec(dllexport)
@@ -679,26 +737,12 @@ AsioWrap_getOutputChannelName(int n, char *name_return, int size)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-AsioWrap_unsetup(void)
-{
-    ASIODisposeBuffers();
-    printf("ASIODisposeBuffers()\n");
-
-    ASIOExit();
-    printf("ASIOExit()\n");
-
-    s_inWav.Clear();
-    for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
-        s_outWavArray[ch].Clear();
-    }
-}
-
-extern "C" __declspec(dllexport)
-void __stdcall
 AsioWrap_setOutput(int ch, int *data, int samples, bool repeat)
 {
-    assert(0 <= ch && ch < ASIOWRAP_OUTPUT_CHANNEL_NUM);
+    AsioPropertyInfo *ap = asioPropertyInstance();
     WavData &wd = s_outWavArray[ch];
+
+    assert(0 <= ch && ch < ASIOWRAP_OUTPUT_CHANNEL_NUM);
 
     delete[] wd.data;
     wd.data = NULL;
@@ -708,8 +752,9 @@ AsioWrap_setOutput(int ch, int *data, int samples, bool repeat)
     wd.samples = samples;
     wd.pos = 0;
     wd.channelIdx = ch;
-    wd.repeat = true;
+    wd.repeat = repeat;
     wd.end = false;
+    wd.sampleType = ap->channelInfos[ap->inputChannels + ch].type;
     printf("AsioWrap_setOutput %d\n", ch);
 }
 
@@ -717,6 +762,8 @@ extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_setInput(int inputChannel, int samples)
 {
+    AsioPropertyInfo *ap = asioPropertyInstance();
+
     delete[] s_inWav.data;
     s_inWav.data = NULL;
 
@@ -725,6 +772,7 @@ AsioWrap_setInput(int inputChannel, int samples)
     s_inWav.pos = 0;
     s_inWav.channelIdx = inputChannel;
     s_inWav.end = false;
+    s_inWav.sampleType = ap->channelInfos[inputChannel].type;
     printf("AsioWrap_setInput %d\n", inputChannel);
 }
 
@@ -741,30 +789,98 @@ int __stdcall
 AsioWrap_start(void)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
+    ASIOError rv;
 
-    assert(!s_hEvent);
-    s_hEvent = CreateEvent(NULL, FALSE, FALSE, "AsioWrap");
-    printf("\nAsioWrap_start CreateEvent()\n");
+    /* 使用するチャンネルだけASIOバッファを確保する */
+    ap->useInputChannelNum = 0;
+    ap->useOutputChannelNum = 0;
+    ASIOBufferInfo *info = ap->bufferInfos;
+    if (s_inWav.Use()) {
+        info->isInput = ASIOTrue;
+        info->channelNum = s_inWav.channelIdx;
+        info->buffers[0] = 0;
+        info->buffers[1] = 0;
 
-    // clear ASIO buffer
-    int totalChannels = ap->inputChannels + ap->outputChannels;
-    for (int i=ap->inputChannels; i<totalChannels; ++i) {
-        switch (ap->channelInfos[i].type) {
+        printf("input ch=%d \n", info->channelNum);
+
+        ++info;
+        ++ap->useInputChannelNum;
+    }
+    for (int i=0; i<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++i) {
+        WavData &wd = s_outWavArray[i];
+        if (wd.Use()) {
+            info->isInput = ASIOFalse;
+            info->channelNum = wd.channelIdx;
+            info->buffers[0] = 0;
+            info->buffers[1] = 0;
+
+            printf("output ch=%d \n", info->channelNum);
+
+            ++info;
+            ++ap->useOutputChannelNum;
+        }
+    }
+
+    static ASIOCallbacks asioCallbacks;
+    asioCallbacks.bufferSwitch         = &bufferSwitch;
+    asioCallbacks.sampleRateDidChange  = &sampleRateChanged;
+    asioCallbacks.asioMessage          = &asioMessages;
+    asioCallbacks.bufferSwitchTimeInfo = &bufferSwitchTimeInfo;
+
+    printf("calling ASIOCreateBuffers(in=%d out=%d bufsz=%d)\n",
+        ap->useInputChannelNum, ap->useOutputChannelNum, ap->bufferSize);
+    rv = ASIOCreateBuffers(ap->bufferInfos,
+        ap->useInputChannelNum + ap->useOutputChannelNum,
+        ap->bufferSize, &asioCallbacks);
+    if (ASE_OK != rv) {
+        printf ("ASIOCreateBuffers() failed %d\n", rv);
+        return rv;
+    }
+    printf ("ASIOCreateBuffers() success.\n");
+
+    /* ASIOバッファができたので、ポインタをWavInfoに入れる */
+    info = ap->bufferInfos;
+    if (s_inWav.Use()) {
+        WavData &wd = s_inWav;
+        wd.asioBuffers[0] = (unsigned char *)info->buffers[0];
+        wd.asioBuffers[1] = (unsigned char *)info->buffers[1];
+
+        printf("input Use=%d ch=%d asioBuffer[0]=%p asioBuffer[1]=%p pos=%d samples=%d repeat=%d sampleType=%d data=%p\n",
+            wd.Use(), wd.channelIdx, wd.asioBuffers[0], wd.asioBuffers[1], wd.pos, wd.samples, wd.repeat, wd.sampleType, wd.data);
+
+        ++info;
+    }
+    for (int i=0; i<ap->useOutputChannelNum; ++i) {
+        WavData &wd = s_outWavArray[i];
+        wd.asioBuffers[0] = (unsigned char *)info->buffers[0];
+        wd.asioBuffers[1] = (unsigned char *)info->buffers[1];
+
+        printf("output Use=%d ch=%d asioBuffer[0]=%p asioBuffer[1]=%p pos=%d samples=%d repeat=%d sampleType=%d data=%p\n",
+            wd.Use(), wd.channelIdx, wd.asioBuffers[0], wd.asioBuffers[1], wd.pos, wd.samples, wd.repeat, wd.sampleType, wd.data);
+
+        // clear ASIO output buffer
+        switch (wd.sampleType) {
         case ASIOSTInt32LSB:
-            memset(ap->bufferInfos[i].buffers[0], 0, ap->bufferSize*4);
-            memset(ap->bufferInfos[i].buffers[1], 0, ap->bufferSize*4);
+            memset(wd.asioBuffers[0], 0, ap->bufferSize*4);
+            memset(wd.asioBuffers[1], 0, ap->bufferSize*4);
             break;
         case ASIOSTInt16LSB:
-            memset(ap->bufferInfos[i].buffers[0], 0, ap->bufferSize*2);
-            memset(ap->bufferInfos[i].buffers[1], 0, ap->bufferSize*2);
+            memset(wd.asioBuffers[0], 0, ap->bufferSize*2);
+            memset(wd.asioBuffers[1], 0, ap->bufferSize*2);
             break;
         default:
             assert(0);
             break;
         }
+
+        ++info;
     }
 
-    ASIOError rv = ASIOStart();
+    assert(!s_hEvent);
+    s_hEvent = CreateEvent(NULL, FALSE, FALSE, "AsioWrap");
+    printf("\nAsioWrap_start CreateEvent()\n");
+
+    rv = ASIOStart();
     if (rv == ASE_OK) {
         printf("ASIOStart() success.\n\n");
     } else {
@@ -782,7 +898,7 @@ AsioWrap_run(void)
     assert(s_hEvent);
 
     printf("AsioWrap_run() WaitForSingleObject() start\n");
-    DWORD rv = WaitForSingleObject(s_hEvent, 1000);
+    DWORD rv = WaitForSingleObject(s_hEvent, 10000);
     printf("AsioWrap_run() WaitForSingleObject() %x\n", rv);
     if (rv == WAIT_TIMEOUT) {
         return false;
@@ -791,6 +907,14 @@ AsioWrap_run(void)
     ASIOError ae;
     ae = ASIOStop();
     printf("ASIOStop() result=%d\n", ae);
+    if (rv != ASE_OK) {
+        printf("ASIOStop() %d ERROR!!!!!!!!!!!!!!!!!!!!!!!!\n", ae);
+    }
+
+    ASIODisposeBuffers();
+    printf("ASIODisposeBuffers()\n");
+
+    asioBufferDisposed();
 
     CloseHandle(s_hEvent);
     s_hEvent = NULL;
