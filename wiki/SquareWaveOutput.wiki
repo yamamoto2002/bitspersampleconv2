@@ -15,7 +15,7 @@ http://bitspersampleconv2.googlecode.com/files/raw.png
 
 図1-1は出力データをそのままグラフにプロットしたもので、縦軸がサンプル値、横軸が時間です。
 赤い＋点が!SqWave2の出力データ、緑の×点が!WaveGeneの出力データです。
-グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図1-2、図1-5と図1-6で比較できます。)
+グラフの一番左 0のところは0サンプル目(最初のサンプル値)です。DACのアナログ出力にこの波形が出るわけではないです。(DACの出力波形の綺麗さについては図1-2～図1-4で比較できます。)
 
 !WaveGeneの出力である緑の×印をよく見ると、×が連続している個数が、5分の2が9サンプル、5分の3が10サンプルになっています。これは10kHzが192kHzで「割り切れない」ため、矩形波の半波長5個分の時間に、192000分の9秒の半波長を2回、192000分の10秒を3回含むような山谷を繰り返すことで、全体として10kHzの音が出るようにしているのです。これによって、半波長ごとに時間長さが伸び縮みする波形が出てきて、オシロスコープで観察すると不安定な波形が出力されているように見える原因でしょう。
 
@@ -44,14 +44,29 @@ sndfile-resample -by 8 -c 0 SQ10K_192.wav SQ10K_1536.wav
 sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 }}}
 
-==図1-3 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
+==図1-3 !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+
+http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
+
+安定した出力が出ています。
+
+==図1-4 !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
+
+http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
+
+半波長ごとに時間長さが変化する複雑な波形のため、オシロスコープがうまく同期しません。
+
+なお、出力レベルが大きいので、縦軸のスケールを半分にしました。
+
+
+==図1-5 !SqWave2の10kHz 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/spectrum.png
 
 (!SqWave2の10kHz 矩形波出力データを!WaveSpectraでFFTしました。
 8倍オーバーサンプル後のデータではありません。)
 
-==図1-4 !WaveGeneの10kHz 矩形波出力データのスペクトログラム==
+==図1-6 !WaveGeneの10kHz 矩形波出力データのスペクトログラム==
 
 http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
@@ -60,21 +75,6 @@ http://bitspersampleconv2.googlecode.com/files/spectrum_wg.png
 
 !WaveGeneの出力データはエイリアシング歪が生じています。
 これだけ大きな音量で関係ない周波数成分が含まれていると、耳で聞いてもわかります。
-
-==図1-5 !SqWave2 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
-
-http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
-
-安定した出力が出ています。
-
-==図1-6 !WaveGene 10kHz矩形波 ASIO出力 !ProFire2626のアナログ音声出力波形をオシロスコープで観察==
-
-http://bitspersampleconv2.googlecode.com/files/WG10KOSC.png
-
-半波長ごとに時間長さが変化する複雑な波形のため、オシロスコープがうまく同期しません。
-
-なお、出力レベルが大きいので、縦軸のスケールを半分にしました。
-
 
 =割り切れる周波数比の場合の出力波形比較 =
 
