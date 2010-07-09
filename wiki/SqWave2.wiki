@@ -62,6 +62,7 @@ Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します
 = 更新履歴 =
 
 === !SqWave2 バージョン 1.0.10 ===
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10010.zip
   * ASIOのCreateBuffersを、使用ポートだけ確保するように修正。
   * RME Fireface 400が普通に鳴るようになった。
 
