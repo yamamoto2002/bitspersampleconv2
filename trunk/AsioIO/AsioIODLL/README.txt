@@ -27,12 +27,17 @@ ASIOSDK2/host/ginclude.h
 ASIOSDK2/pc/asiolist.cpp
 ASIOSDK2/pc/asiolist.h
 
-5. C:\work\BpsConvWin2\sqwave2\sqwave2.slnをVS2010で開いて、リビルドします
-これはGUIにC#を使っているので、一度に行うためにはVS2010(有料)が必要です。
-DLLをVisual C++ 2010 Expressで作って、Sqwave2をVisual C# 2010 Expressで作れば、タダで作れるかも。
+
+5. サンプルプログラム C:\work\BpsConvWin2\AsioIO\AsioTestCUI\AsioTestCui.slnを開いて
+リビルド、実行します。これは、Visual C++ Express editionでできると思います。
 
 AsioIO DLLだけをビルドする場合はC:\work\BpsConvWin2\AsioIO\AsioIODLL\AsioIO.vcprojを開いて、
 リビルドします。これは、Visual C++ Express editionでできると思います。
+
+C:\work\BpsConvWin2\sqwave2\sqwave2.slnをVS2010で開いて、リビルドします
+これはGUIにC#を使っているので、一度に行うためにはVS2010(有料)が必要です。
+DLLをVisual C++ 2010 Expressで作って、Sqwave2をVisual C# 2010 Expressで作れば、タダで作れるかも。
+
 
 
 ASIO is a trademark and software of Steinberg Media Technologies GmbH
