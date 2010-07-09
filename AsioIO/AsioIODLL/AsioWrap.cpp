@@ -232,6 +232,7 @@ void WavData::SetOutput16(int index, int dataCount)
 
 static WavData s_outWavArray[ASIOWRAP_OUTPUT_CHANNEL_NUM];
 static WavData s_inWav;
+static int g_useOutWavArray;
 
 static void
 asioBufferDisposed(void)
@@ -677,9 +678,10 @@ AsioWrap_unsetup(void)
     printf("ASIOExit()\n");
 
     s_inWav.Clear();
-    for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
-        s_outWavArray[ch].Clear();
+    for (int i=0; i<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++i) {
+        s_outWavArray[i].Clear();
     }
+    g_useOutWavArray = 0;
 
     assert(ap->bufferInfos);
     delete[] ap->bufferInfos;  ap->bufferInfos = 0;
@@ -735,12 +737,13 @@ AsioWrap_getOutputChannelName(int n, char *name_return, int size)
     return true;
 }
 
+
 extern "C" __declspec(dllexport)
 void __stdcall
 AsioWrap_setOutput(int ch, int *data, int samples, bool repeat)
 {
     AsioPropertyInfo *ap = asioPropertyInstance();
-    WavData &wd = s_outWavArray[ch];
+    WavData &wd = s_outWavArray[g_useOutWavArray];
 
     assert(0 <= ch && ch < ASIOWRAP_OUTPUT_CHANNEL_NUM);
 
@@ -755,7 +758,10 @@ AsioWrap_setOutput(int ch, int *data, int samples, bool repeat)
     wd.repeat = repeat;
     wd.end = false;
     wd.sampleType = ap->channelInfos[ap->inputChannels + ch].type;
-    printf("AsioWrap_setOutput %d\n", ch);
+
+    ++g_useOutWavArray;
+
+    printf("AsioWrap_setOutput %d useOut=%d\n", ch, g_useOutWavArray);
 }
 
 extern "C" __declspec(dllexport)
@@ -767,13 +773,21 @@ AsioWrap_setInput(int inputChannel, int samples)
     delete[] s_inWav.data;
     s_inWav.data = NULL;
 
-    s_inWav.data = new int[samples];
-    s_inWav.samples = samples;
-    s_inWav.pos = 0;
-    s_inWav.channelIdx = inputChannel;
-    s_inWav.end = false;
-    s_inWav.sampleType = ap->channelInfos[inputChannel].type;
-    printf("AsioWrap_setInput %d\n", inputChannel);
+    if (samples == 0) {
+        s_inWav.samples = 0;
+        s_inWav.pos = 0;
+        s_inWav.channelIdx = inputChannel;
+        s_inWav.end = true;
+        s_inWav.sampleType = 0;
+    } else {
+        s_inWav.data = new int[samples];
+        s_inWav.samples = samples;
+        s_inWav.pos = 0;
+        s_inWav.channelIdx = inputChannel;
+        s_inWav.end = false;
+        s_inWav.sampleType = ap->channelInfos[inputChannel].type;
+    }
+    printf("AsioWrap_setInput %d use=%d samples=%d\n", inputChannel, s_inWav.Use(), samples);
 }
 
 extern "C" __declspec(dllexport)
@@ -806,7 +820,7 @@ AsioWrap_start(void)
         ++info;
         ++ap->useInputChannelNum;
     }
-    for (int i=0; i<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++i) {
+    for (int i=0; i<g_useOutWavArray; ++i) {
         WavData &wd = s_outWavArray[i];
         if (wd.Use()) {
             info->isInput = ASIOFalse;
@@ -915,6 +929,14 @@ AsioWrap_run(void)
     printf("ASIODisposeBuffers()\n");
 
     asioBufferDisposed();
+
+    /* 出力チャンネル情報をクリアする。
+     * 入力チャンネル情報はクリアしない。
+     */
+    for (int ch=0; ch<ASIOWRAP_OUTPUT_CHANNEL_NUM; ++ch) {
+        s_outWavArray[ch].Clear();
+    }
+    g_useOutWavArray = 0;
 
     CloseHandle(s_hEvent);
     s_hEvent = NULL;
