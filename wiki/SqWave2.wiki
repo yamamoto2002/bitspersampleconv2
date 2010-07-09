@@ -12,7 +12,7 @@
 
 = 使用方法 =
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10009.zip
+http://bitspersampleconv2.googlecode.com/files/SqWave10010.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
@@ -31,12 +31,12 @@ ASIO出力モードは、未完成であり、すべての環境で安定動作�
 以下のASIOデバイスでは動作しました。
  * M-AUDIO !ProFire 2626
  * Creative X-Fi ASIO (ただしサンプリングレート192kHzに対応していないので、SqWave2起動後、左の欄で96000Hzにセットしてからデバドラを初期化する必要あり)
+ * RME FIREFACE 400 …ドライババージョン3.016で正常動作。ドライババージョン2.9992を使用すると、サンプリングレートを96kHzに設定すると正常動作しますが、192kHzに設定すると、間欠的に音が鳴ります。ちなみにFirefaceのデバドラは、バージョン2．9992時点で、MMEで音を鳴らしている最中にASIOドライバでサンプルレート設定を変更すると、ブルースクリーン(APC_INDEX_MISMATCH)が発生してWindowsが再起動します。
 
 以下のASIOデバイスでは正常動作しませんでした。私のバグが原因かもしれないので製品のせいではないかもしれません
  * ASIO4ALL …なぜか間欠的に音が鳴る。しかしそもそも、ASIO4ALLって、意味あるのでしょうか。積極的に対応する気になりません
  * Realtek ALC889 …変な音が出ます(音の出だしが1秒間ぐらいビィィィィンという感じになって、その後正常になる)
  * Prodigy HD2 …音はM-AUDIO並みにちゃんと鳴りますが、やたら不安定です。Foobar2000でも不安定になるのでProdigyのデバドラの問題か？
- * RME FIREFACE 400 …サンプリングレートを96kHzに設定すると正常動作しますが、192kHzに設定すると、間欠的に音が鳴ります。ちなみにFirefaceのデバドラは、バージョン2．9992時点で、MMEで音を鳴らしている最中にASIOドライバでサンプルレート設定を変更すると、ブルースクリーン(APC_INDEX_MISMATCH)が発生してWindowsが再起動します。
 
 正常動作しない場合の共通点を考えると、ハードウェアのサンプルバッファのサイズが少ない傾向があるような？あと、サンプルレートを上げると異常が出る傾向があるかな？
 ~~これは、おそらく!SqWave2が、(ASIOのサンプルプログラムを参考に作ったため)使っていないチャンネルまで全て使用するような設定を行っているのが問題なのかと思います。~~ 設定が足りてないか、バッファを書き込むタイミングの問題なのかな？？？
@@ -60,6 +60,10 @@ TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trun
 Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します 
 
 = 更新履歴 =
+
+=== !SqWave2 バージョン 1.0.10 ===
+  * ASIOのCreateBuffersを、使用ポートだけ確保するように修正。
+  * RME Fireface 400が普通に鳴るようになった。
 
 === !SqWave2 バージョン 1.0.9 ===
   * http://bitspersampleconv2.googlecode.com/files/SqWave10009.zip
