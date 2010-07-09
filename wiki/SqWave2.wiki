@@ -12,7 +12,7 @@
 
 = 使用方法 =
 
-http://bitspersampleconv2.googlecode.com/files/SqWave10010.zip
+http://bitspersampleconv2.googlecode.com/files/SqWave10011.zip
 をダウンロードして、中に入っているsetup.exeを実行するとインストールされます。
 
 デスクトップに!SqWave2という名前のショートカットが作られますのでこれをダブルクリックします。あとは画面の指示に従ってWAVファイルを出力します。
@@ -62,6 +62,10 @@ TortoiseSVNなどを使って https://bitspersampleconv2.googlecode.com/svn/trun
 Visual Studio 2010でsqwave2.slnを開いてF5でビルドして実行します 
 
 = 更新履歴 =
+
+=== !SqWave2 バージョン 1.0.11 ===
+  * http://bitspersampleconv2.googlecode.com/files/SqWave10011.zip
+  * 出力チャンネル設定がひどくバグっているのを修正。
 
 === !SqWave2 バージョン 1.0.10 ===
   * http://bitspersampleconv2.googlecode.com/files/SqWave10010.zip
