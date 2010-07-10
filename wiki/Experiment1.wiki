@@ -69,7 +69,7 @@ http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
 図5: 48kHzサンプリングの23kHz正弦波のPCMデータ
 
-http://bitspersampleconv2.googlecode.com/files/48kHz_23kHzsin.png
+http://bitspersampleconv2.googlecode.com/files/48k_23k_kaidan2.png 
 
 図6: 階段状の波形がDACから出てきたとしたらこうなるはずだが…
 
