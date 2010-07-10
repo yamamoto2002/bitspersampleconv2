@@ -40,7 +40,7 @@ sndfile-resampleで8倍オーバーサンプルして出てきた波形をプロ
 
 http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
-図3: DAC出力波形シミュレーション。
+図3: DAC出力波形(simulated)。
 
 http://bitspersampleconv2.googlecode.com/files/01_01x8.png
 
