@@ -47,7 +47,7 @@ http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
 http://bitspersampleconv2.googlecode.com/files/01_01x8.png
 
-図4: 元のPCMサンプル点とDAC出力波形(simulated)の関係。だいたい波形がサンプル点を通っているように見えますが、よく見ると微妙にずれたところを通っている場合もあります。そういうものです。
+図4: 元のPCMサンプル点とDAC出力波形(simulated)の関係。だいたい波形がサンプル点を通っているように見えますが、よく見ると微妙にずれたところを通っている場合もあります。そういうものです。アナログ出力波形がPCMデータサンプル点を通過しなければならないというルールはありません。
 
 = 考察 =
 
