@@ -42,6 +42,10 @@ http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
 図3: DAC出力波形シミュレーション。
 
+http://bitspersampleconv2.googlecode.com/files/01_01x8.png
+
+図4: 元のPCMサンプル点とDAC出力波形シミュレーション。
+
 = 考察 =
 
 図3を見て、右上のPCMデータのDAC出力波形と右下のPCMデータのDAC出力波形のどちらが
