@@ -18,6 +18,8 @@
 
 これら2つのデータをバイナリエディタで入力しWAVファイルを作成します。
 
+(入力PCMデータを8ビット左にシフトしてから8倍オーバーサンプルするDACを想定し、データを256倍したものを入力。)
+
 http://bitspersampleconv2.googlecode.com/files/stirling.png
 
 図1: バイナリエディタでPCMデータを作成。
