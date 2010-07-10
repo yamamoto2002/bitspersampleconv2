@@ -21,11 +21,10 @@
 http://bitspersampleconv2.googlecode.com/files/stirling.png
 図1: バイナリエディタでPCMデータを作成。
 
-= 2. PCMデータ DAC出力波形のシミュレーション =
-
 http://bitspersampleconv2.googlecode.com/files/01.png
-図2: PCMデータをそのままプロット。
+図2: 入力したPCMデータをグラフにそのままプロット。
 
+= 2. DAC出力波形のシミュレーション =
 
 http://bitspersampleconv2.googlecode.com/files/01x8.png
 図3: DAC出力波形シミュレーション。
