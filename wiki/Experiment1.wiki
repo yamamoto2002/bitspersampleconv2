@@ -63,7 +63,7 @@ DACの技術解説などで、PCMデジタルデータを階段状の波形で�
 DACから階段状の波形が出てくるものだと長いこと誤解しておりました。
 
 
-また、そこから類推して、48kHzサンプリングで23kHzの正弦波を出すと、1kHzのビートが発生するのではないかと思っていました(これも誤解です)。
+また、そこから類推して、48kHzサンプリングで23kHzの正弦波を出すと、1kHzのビートが発生するのではないかと思っていました(これも誤解です)。以下はその説明です。
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
@@ -71,7 +71,7 @@ http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_kaidan2.png 
 
-図6: 階段状の波形がDACから出てきたとしたらこうなるはずだが…
+図6: 階段状の波形がDACから出てきたとしたらこういう出力波形になるはずだが…
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_output.png
 
