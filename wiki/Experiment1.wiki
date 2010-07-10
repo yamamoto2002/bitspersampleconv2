@@ -76,3 +76,5 @@ http://bitspersampleconv2.googlecode.com/files/48kHz_23kHzsin.png
 http://bitspersampleconv2.googlecode.com/files/48k_23k_output.png
 
 図7: 図5のPCMデータをDACに入力したときにアナログ出力に出てくる波形(赤い実線)
+
+[http://code.google.com/p/bitspersampleconv2/wiki/SquareWaveOutput 矩形波の生成方法と性能比較]もあわせてご覧ください。
