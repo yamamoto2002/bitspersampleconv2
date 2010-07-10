@@ -71,8 +71,8 @@ http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
 http://bitspersampleconv2.googlecode.com/files/48kHz_23kHzsin.png
 
-図6: 階段状の波形がDACから出てきたとしたらこうなる
+図6: 階段状の波形がDACから出てきたとしたらこうなるはずだが…
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_output.png
 
-図7: DACのアナログから実際に出力される波形
+図7: 図5のPCMデータをDACに入力したときにアナログ出力に出てくる波形
