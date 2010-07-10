@@ -1,4 +1,5 @@
 #summary 実験: PCMデータのDAC出力波形シミュレーション
+#labels Featured
 
 = 実験: PCMデータのDAC出力波形シミュレーション =
 
