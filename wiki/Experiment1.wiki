@@ -30,7 +30,8 @@ http://bitspersampleconv2.googlecode.com/files/01_2.png
 
 = 2. DAC出力波形のシミュレーション =
 
-sndfile-resampleで8倍オーバーサンプルして出てきた波形をプロットします。
+あのPCMデータのDAC出力波形をシミュレーションします。
+sndfile-resampleで8倍オーバーサンプルして出てきた波形をプロット。
 
 http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
@@ -38,6 +39,7 @@ http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
 = 結論 =
 
-図3を見て、右上のPCMデータと右下のPCMデータのどちらが
-「元のアナログ信号」に近い形状かというと、
+図3を見て、右上のPCMデータのDAC出力波形と右下のPCMデータのDAC出力波形のどちらが
+「元のアナログ信号」に近い形状かを見比べます。
+
 なんとも言えない感じであり、右下のPCMデータのほうが有利とは言いがたい。
