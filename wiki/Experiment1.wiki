@@ -73,7 +73,7 @@ http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_kaidan2.png 
 
-図6: 階段状の波形がDACから出てきたとしたらこういう出力波形になるはずだが…
+図6: 階段状の波形がDACから出てきたとしたら、こういう感じの、1kHzの信号を24kHz矩形波の搬送波でAM変調したみたいな出力波形になるはずだが…
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_output.png
 
