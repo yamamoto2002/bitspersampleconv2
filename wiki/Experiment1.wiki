@@ -20,7 +20,7 @@ http://www.phileweb.com/review/column/image.php?id=118&row=1
 
 これら2つのデータをバイナリエディタで入力しWAVファイルを作成します。
 
-(データを256倍したものを入力。)
+(データを256倍したものを入力。この256倍処理は、本来はDACの中で行われます)
 
 http://bitspersampleconv2.googlecode.com/files/stirling.png
 
