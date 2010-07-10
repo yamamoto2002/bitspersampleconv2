@@ -4,7 +4,7 @@
 
 あのPCMデータのDAC出力波形をシミュレーションします。
 
-= PCMデータ =
+= 1. PCMデータ準備 =
 
 右上のPCMデータは
 {{{
@@ -16,4 +16,16 @@
 2,  4,  5,  6,  6,  5,  4,  3,  3,  3,  5,  6,  8,  9, 11, 12, 12, 11, 10,  8,  6,  4
 }}}
 
-2つのデータをバイナリエディタで入力しWAVファイルを作成します。
+これら2つのデータをバイナリエディタで入力しWAVファイルを作成します。
+
+http://bitspersampleconv2.googlecode.com/files/stirling.png
+図1: バイナリエディタでPCMデータを作成。
+
+= 2. PCMデータ DAC出力波形のシミュレーション =
+
+http://bitspersampleconv2.googlecode.com/files/01.png
+図2: PCMデータをそのままプロット。
+
+
+http://bitspersampleconv2.googlecode.com/files/01x8.png
+図3: DAC出力波形シミュレーション。
