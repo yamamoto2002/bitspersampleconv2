@@ -31,3 +31,8 @@ http://bitspersampleconv2.googlecode.com/files/01.png
 http://bitspersampleconv2.googlecode.com/files/01x8.png
 
 図3: DAC出力波形シミュレーション。
+
+= 結論 =
+
+右上のPCMデータと右下のPCMデータのどちらが「元のアナログ信号」に近いかというと、
+なんとも言えない感じがします。
