@@ -44,7 +44,7 @@ http://bitspersampleconv2.googlecode.com/files/01x8_2.png
 
 http://bitspersampleconv2.googlecode.com/files/01_01x8.png
 
-図4: 元のPCMサンプル点とDAC出力波形シミュレーション。
+図4: 元のPCMサンプル点とDAC出力波形(simulated)の関係。
 
 = 考察 =
 
