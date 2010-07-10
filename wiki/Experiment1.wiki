@@ -36,7 +36,7 @@ http://bitspersampleconv2.googlecode.com/files/01_2.png
 
 図2: 入力したPCMデータをグラフにそのままプロット。
 
-(図2の点を方眼紙の上に並べて階段状につなげると、そういう波形がDACのアナログ出力に出るという誤解を生む図ができます。)
+(図2の点を方眼紙の上にプロットして階段状につなげると、そういう波形がDACのアナログ出力に出るという誤解を生む、問題の図ができます。)
 
 = 2. DAC出力波形のシミュレーション =
 
@@ -76,7 +76,7 @@ http://bitspersampleconv2.googlecode.com/files/48k_23k.png
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_kaidan2.png 
 
-図6: 階段状の波形がDACから出てきたとしたら、こういう感じの、1kHzの正弦波信号を24kHz矩形波の搬送波でAM変調したみたいな(ちょっと違うけど)出力波形になるはずだが…
+図6: 階段状の波形がDACから出てくるとしたら、こういう感じの、1kHzの正弦波信号を24kHz矩形波の搬送波でAM変調したみたいな(ちょっと違うけど)出力波形になるはずだが…
 
 http://bitspersampleconv2.googlecode.com/files/48k_23k_output.png
 
