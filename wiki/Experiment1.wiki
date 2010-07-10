@@ -6,6 +6,8 @@ PCMデータのDAC出力波形をシミュレーションします。
 
 = 1. PCMデータ準備 =
 
+http://www.phileweb.com/review/column/image.php?id=118&row=1
+
 「右上のPCMデータ」は
 {{{
 2,  3,  2,  1,  2,  3,  5,  6,  6,  5,  3
