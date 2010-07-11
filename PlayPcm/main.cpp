@@ -12,7 +12,19 @@ Run(void)
 
     WasapiWrap ww;
 
-    HRF(ww.Init());
+    HRR(ww.Init());
+
+    HRR(ww.DoDeviceEnumeration());
+
+    for (int i=0; i<ww.GetDeviceCount(); ++i) {
+        wchar_t name[WW_DEVICE_NAME_COUNT];
+
+        ww.GetDeviceName(i, name, sizeof name);
+
+        printf("id=%d: %S\n", i, name);
+    }
+
+    ww.ChooseDevice(-1);
 
     ww.Term();
 
