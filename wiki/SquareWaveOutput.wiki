@@ -48,7 +48,7 @@ sndfile-resample -by 8 -c 0 WG10K_192.wav WG10K_1536.wav
 
 http://bitspersampleconv2.googlecode.com/files/SQ10KOSC.png
 
-オシロスコープは!SoftDSP社のSDS-200Aです。  M-AUDIO !ProFire2626のアナログ音声出力から安定した波形が出ています。
+オシロスコープはSoftDSP社のSDS-200Aです。  M-AUDIO !ProFire2626のアナログ音声出力から安定した波形が出ています。
 
 ==図1-4 DACの出力波形をオシロスコープで観察。!WaveGene 10kHz矩形波 ASIO出力 M-AUDIO !ProFire2626のアナログ音声出力波形==
 
