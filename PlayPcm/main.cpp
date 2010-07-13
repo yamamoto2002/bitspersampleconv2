@@ -60,14 +60,14 @@ Run(void)
 
     {
         WWPcmData data;
-        data.Init(44100);
+        data.Init(96000*3);
 
         ww.Start(&data);
 
         data.Term();
     }
 
-    Sleep(3000);
+    Sleep(1000);
     ww.Stop();
     ww.Unsetup();
 
