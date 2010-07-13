@@ -1,8 +1,10 @@
 #include "WasapiWrap.h"
 #include "WWUtil.h"
+#include <avrt.h>
 #include <assert.h>
 #include <functiondiscoverykeys.h>
 #include <strsafe.h>
+
 
 WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
@@ -11,10 +13,55 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 }
 
 
+void
+WWPcmData::Init(int samples)
+{
+    format = WWPcmFormatInt16Stereo;
+    bitsPerSample = 16;
+    nFrames = samples;
+    posFrame = 0;
+    
+    stream = (BYTE*)malloc(samples * 4);
+    for (int i=0; i<samples*4; ++i) {
+        stream[i] = rand();
+    }
+}
+
+void
+WWPcmData::Term(void)
+{
+    free(stream);
+    stream = NULL;
+}
+
+WWPcmData::~WWPcmData(void)
+{
+    assert(!stream);
+}
+
+void
+WWPcmData::CopyFrom(WWPcmData *rhs)
+{
+    *this = *rhs;
+
+    int bytes = nFrames * 4;
+
+    stream = (BYTE*)malloc(bytes);
+    CopyMemory(stream, rhs->stream, bytes);
+}
+
+
 WasapiWrap::WasapiWrap(void)
 {
     m_deviceCollection = NULL;
     m_deviceToUse      = NULL;
+    m_shutdownEvent    = NULL;
+    m_audioSamplesReadyEvent = NULL;
+    m_audioClient      = NULL;
+    m_mixFormat        = NULL;
+    m_frameBytes        = 0;
+    m_bufferSamples       = 0;
+    m_renderClient     = NULL;
 }
 
 
@@ -39,7 +86,8 @@ WasapiWrap::Init(void)
 void
 WasapiWrap::Term(void)
 {
-    assert(!m_deviceCollection);
+    SafeRelease(&m_deviceCollection);
+
     assert(!m_deviceToUse);
 
     CoUninitialize();
@@ -47,7 +95,8 @@ WasapiWrap::Term(void)
 
 
 static HRESULT
-DeviceNameGet(IMMDeviceCollection *dc, UINT id, wchar_t *name, size_t nameBytes)
+DeviceNameGet(
+    IMMDeviceCollection *dc, UINT id, wchar_t *name, size_t nameBytes)
 {
     HRESULT hr = 0;
 
@@ -90,9 +139,11 @@ WasapiWrap::DoDeviceEnumeration(void)
 
     m_deviceInfo.clear();
 
-    HRR(CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
+    HRR(CoCreateInstance(__uuidof(MMDeviceEnumerator),
+        NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
     
-    HRR(deviceEnumerator->EnumAudioEndpoints(eRender, DEVICE_STATE_ACTIVE, &m_deviceCollection));
+    HRR(deviceEnumerator->EnumAudioEndpoints(
+        eRender, DEVICE_STATE_ACTIVE, &m_deviceCollection));
 
     UINT nDevices = 0;
     HRG(m_deviceCollection->GetCount(&nDevices));
@@ -128,7 +179,6 @@ WasapiWrap::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
     assert(0 <= id && id < (int)m_deviceInfo.size());
 
     wcsncpy(name, m_deviceInfo[id].name, nameBytes/sizeof name[0] -1);
-
     return true;
 }
 
@@ -136,14 +186,267 @@ HRESULT
 WasapiWrap::ChooseDevice(int id)
 {
     HRESULT hr = 0;
+
     if (id < 0) {
         goto end;
     }
 
+    assert(m_deviceCollection);
+    assert(!m_deviceToUse);
 
+    HRG(m_deviceCollection->Item(id, &m_deviceToUse));
 
 end:
     SafeRelease(&m_deviceCollection);
     return hr;
 }
+
+static void
+MixFormatDebug(WAVEFORMATEX *v)
+{
+    printf(
+        "  cbSize=%d\n"
+        "  nAvgBytesPerSec=%d\n"
+        "  nBlockAlign=%d\n"
+        "  nChannels=%d\n"
+        "  nSamplesPerSec=%d\n"
+        "  wBitsPerSample=%d\n"
+        "  wFormatTag=0x%x\n",
+        v->cbSize,
+        v->nAvgBytesPerSec,
+        v->nBlockAlign,
+        v->nChannels,
+        v->nSamplesPerSec,
+        v->wBitsPerSample,
+        v->wFormatTag);
+}
+
+static void
+WFEXDebug(WAVEFORMATEXTENSIBLE *v)
+{
+    printf(
+        "  dwChannelMask=0x%x\n"
+        "  Samples.wValidBitsPerSample=%d\n"
+        "  SubFormat=0x%x\n",
+        v->dwChannelMask,
+        v->Samples.wValidBitsPerSample,
+        v->SubFormat);
+}
+
+HRESULT
+WasapiWrap::Setup(int sampleRate, int latencyMillisec)
+{
+    HRESULT hr = 0;
+    UINT32  renderBufferBytes;
+
+    m_shutdownEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    CHK(m_shutdownEvent);
+
+    m_audioSamplesReadyEvent =
+        CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    CHK(m_audioSamplesReadyEvent);
+
+    assert(m_deviceToUse);
+    assert(!m_audioClient);
+    HRG(m_deviceToUse->Activate(
+        __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
+
+    assert(!m_mixFormat);
+    HRG(m_audioClient->GetMixFormat(&m_mixFormat));
+    assert(m_mixFormat);
+
+    if (m_mixFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
+        printf("E: unsupported device ! mixformat == 0x%08x\n", m_mixFormat->wFormatTag);
+        hr = E_FAIL;
+        goto end;
+    }
+
+    MixFormatDebug(m_mixFormat);
+
+    WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)m_mixFormat;
+    wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+    wfex->Format.wBitsPerSample = 16;
+    wfex->Format.nSamplesPerSec = sampleRate;
+
+    wfex->Format.nBlockAlign = (m_mixFormat->wBitsPerSample / 8) * m_mixFormat->nChannels;
+    wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+    wfex->Samples.wValidBitsPerSample = 16;
+
+    WFEXDebug(wfex);
+    
+    HRG(m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,m_mixFormat,NULL));
+
+    m_frameBytes = m_mixFormat->nBlockAlign;
+    
+    REFERENCE_TIME bufferDuration = latencyMillisec*10000;
+
+    HRG(m_audioClient->Initialize(
+        AUDCLNT_SHAREMODE_EXCLUSIVE,
+        AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
+        bufferDuration, bufferDuration, m_mixFormat, NULL));
+
+    HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
+    HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
+    HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
+
+    renderBufferBytes = m_bufferSamples * m_frameBytes;
+
+
+end:
+    return hr;
+}
+
+void
+WasapiWrap::Unsetup(void)
+{
+    if (m_renderThread) {
+        SetEvent(m_renderThread);
+        WaitForSingleObject(m_renderThread, INFINITE);
+        CloseHandle(m_renderThread);
+        m_renderThread = NULL;
+    }
+
+    if (m_shutdownEvent) {
+        CloseHandle(m_shutdownEvent);
+        m_shutdownEvent = NULL;
+    }
+    if (m_audioSamplesReadyEvent) {
+        CloseHandle(m_audioSamplesReadyEvent);
+        m_audioSamplesReadyEvent = NULL;
+    }
+
+    SafeRelease(&m_deviceToUse);
+    SafeRelease(&m_audioClient);
+    SafeRelease(&m_renderClient);
+
+    if (m_mixFormat) {
+        CoTaskMemFree(m_mixFormat);
+        m_mixFormat = NULL;
+    }
+}
+
+HRESULT
+WasapiWrap::Start(WWPcmData *pcm)
+{
+    BYTE *pData = NULL;
+    HRESULT hr = 0;
+
+    m_renderThread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
+    assert(m_renderThread);
+
+    assert(m_renderClient);
+    HRG(m_renderClient->GetBuffer(m_bufferSamples, &pData));
+
+    assert(m_bufferSamples <= pcm->nFrames);
+    CopyMemory(pData, pcm->stream, m_bufferSamples * m_frameBytes);
+    HRG(m_renderClient->ReleaseBuffer(m_bufferSamples, 0));
+
+    pcm->posFrame = m_bufferSamples;
+    m_pcmData = new WWPcmData();
+    m_pcmData->CopyFrom(pcm);
+
+    assert(m_audioClient);
+    HRG(m_audioClient->Start());
+
+end:
+    return hr;
+}
+
+void
+WasapiWrap::Stop(void)
+{
+    HRESULT hr = 0;
+
+    if (m_shutdownEvent) {
+        SetEvent(m_shutdownEvent);
+    }
+
+    assert(m_audioClient);
+    m_audioClient->Stop();
+
+    if (m_renderThread) {
+        WaitForSingleObject(m_renderThread, INFINITE);
+
+        CloseHandle(m_renderThread);
+        m_renderThread = NULL;
+    }
+
+    if (m_pcmData) {
+        m_pcmData->Term();
+        delete m_pcmData;
+        m_pcmData = NULL;
+    }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// callbacks
+
+DWORD
+WasapiWrap::RenderEntry(LPVOID lpThreadParameter)
+{
+    WasapiWrap* self = (WasapiWrap*)lpThreadParameter;
+    return self->RenderMain();
+}
+
+DWORD
+WasapiWrap::RenderMain(void)
+{
+    bool stillPlaying = true;
+    HANDLE waitArray[2] = {m_shutdownEvent, m_audioSamplesReadyEvent};
+    HANDLE mmcssHandle = NULL;
+    DWORD mmcssTaskIndex = 0;
+    DWORD waitResult;
+    UINT32 *pFrames = NULL;
+    BYTE *pData = NULL;
+    HRESULT hr = 0;
+    int playFrames = 0;
+    
+    HRG(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+
+    mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
+    if (NULL == mmcssHandle) {
+        printf("Unable to enable MMCSS on render thread: %d\n", GetLastError());
+    }
+
+    while (stillPlaying) {
+        waitResult = WaitForMultipleObjects(2, waitArray, FALSE, INFINITE);
+        switch (waitResult) {
+        case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
+            stillPlaying = false;
+            break;
+        case WAIT_OBJECT_0 + 1:     // m_audioSamplesReadyEvent
+            playFrames = m_bufferSamples;
+            if (m_pcmData->nFrames < m_pcmData->posFrame + playFrames) {
+                playFrames = m_pcmData->nFrames - m_pcmData->posFrame;
+            }
+
+            if (playFrames <= 0) {
+                stillPlaying = false;
+                break;
+            }
+
+            pFrames = (UINT32 *)m_pcmData->stream;
+            pFrames += m_pcmData->posFrame;
+
+            assert(m_renderClient);
+            HRG(m_renderClient->GetBuffer(playFrames, &pData));
+
+            CopyMemory(pData, pFrames, playFrames * m_frameBytes);
+
+            HRG(m_renderClient->ReleaseBuffer(playFrames, 0));
+            break;
+        }
+    }
+
+end:
+    if (NULL != mmcssHandle) {
+        AvRevertMmThreadCharacteristics(mmcssHandle);
+        mmcssHandle = NULL;
+    }
+
+    CoUninitialize();
+    return hr;
+}
+
+
 

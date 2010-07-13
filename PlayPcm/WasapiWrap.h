@@ -1,7 +1,9 @@
 #pragma once
 
 #include <Windows.h>
-#include <mmdeviceapi.h>
+#include <MMDeviceAPI.h>
+#include <AudioClient.h>
+#include <AudioPolicy.h>
 #include <vector>
 
 #define WW_DEVICE_NAME_COUNT (256)
@@ -17,6 +19,25 @@ struct WWDeviceInfo {
     }
 
     WWDeviceInfo(int id, const wchar_t * name);
+};
+
+enum WWPcmFormatType {
+    WWPcmFormatInt16Stereo
+};
+
+struct WWPcmData {
+    WWPcmFormatType format;
+    int  bitsPerSample;
+    int  nFrames;
+    int  posFrame;
+    BYTE *stream;
+
+    void Init(int samples);
+    void Term(void);
+
+    ~WWPcmData(void);
+
+    void CopyFrom(WWPcmData *rhs);
 };
 
 class WasapiWrap {
@@ -35,9 +56,33 @@ public:
     // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
 
+    HRESULT Setup(int sampleRate, int latencyMillisec);
+    void Unsetup(void);
+
+    HRESULT Start(WWPcmData *data);
+
+    void Stop(void);
+
 private:
+    std::vector<WWDeviceInfo> m_deviceInfo;
     IMMDeviceCollection       *m_deviceCollection;
     IMMDevice                 *m_deviceToUse;
-    std::vector<WWDeviceInfo> m_deviceInfo;
+
+    HANDLE      m_shutdownEvent;
+    HANDLE      m_audioSamplesReadyEvent;
+
+    IAudioClient *m_audioClient;
+    WAVEFORMATEX *m_mixFormat;
+    int          m_frameBytes;
+    UINT32       m_bufferSamples;
+
+    IAudioRenderClient *m_renderClient;
+    HANDLE       m_renderThread;
+
+    static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
+
+    DWORD RenderMain(void);
+
+    WWPcmData    *m_pcmData;
 };
 
