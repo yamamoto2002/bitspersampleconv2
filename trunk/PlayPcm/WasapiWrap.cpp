@@ -280,10 +280,37 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
     
     REFERENCE_TIME bufferDuration = latencyMillisec*10000;
 
-    HRG(m_audioClient->Initialize(
+    hr = m_audioClient->Initialize(
         AUDCLNT_SHAREMODE_EXCLUSIVE,
         AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
-        bufferDuration, bufferDuration, m_mixFormat, NULL));
+        bufferDuration, bufferDuration, m_mixFormat, NULL);
+    if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
+        HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
+
+        SafeRelease(&m_audioClient);
+
+        bufferDuration = (REFERENCE_TIME)(
+            10000.0 *                         // (REFERENCE_TIME / ms) *
+            1000 *                            // (ms / s) *
+            m_bufferSamples /                 // frames /
+            m_mixFormat->nSamplesPerSec +     // (frames / s)
+            0.5);
+
+        HRG(m_deviceToUse->Activate(
+        __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
+
+        hr = m_audioClient->Initialize(
+            AUDCLNT_SHAREMODE_EXCLUSIVE, 
+            AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
+            bufferDuration, 
+            bufferDuration, 
+            m_mixFormat, 
+            NULL);
+    }
+    if (FAILED(hr)) {
+        printf("E: audioClient->Initialize failed 0x%08x\n", hr);
+        goto end;
+    }
 
     HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
     HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
@@ -434,6 +461,8 @@ WasapiWrap::RenderMain(void)
             CopyMemory(pData, pFrames, playFrames * m_frameBytes);
 
             HRG(m_renderClient->ReleaseBuffer(playFrames, 0));
+
+            m_pcmData->posFrame += playFrames;
             break;
         }
     }
