@@ -41,3 +41,5 @@ http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcm
   * 2チャンネル
   * 非圧縮PCM
 のWAVEファイルに対応。
+
+音は一応鳴るが、最終フレームのバッファ確保のサイズ計算に問題があり、ほとんど必ず最後にエラーメッセージが出て終了します。
