@@ -5,6 +5,8 @@
 
 !PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
+*音量の調節機能はまだありません。最大音量で鳴ると思います。*
+
 ==ダウンロード==
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcm100.exe
