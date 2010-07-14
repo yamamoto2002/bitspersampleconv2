@@ -12,12 +12,13 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
     wcsncpy(this->name, name, WW_DEVICE_NAME_COUNT-1);
 }
 
-
+/*
 void
 WWPcmData::Init(int samples)
 {
-    format = WWPcmFormatInt16Stereo;
     bitsPerSample = 16;
+    nChannels = 2;
+    int nSamplesPerSec = 96000;
     nFrames = samples;
     posFrame = 0;
     
@@ -26,6 +27,7 @@ WWPcmData::Init(int samples)
         stream[i] = rand();
     }
 }
+*/
 
 void
 WWPcmData::Term(void)
@@ -62,6 +64,7 @@ WasapiWrap::WasapiWrap(void)
     m_frameBytes        = 0;
     m_bufferSamples       = 0;
     m_renderClient     = NULL;
+    m_pcmData          = NULL;
 }
 
 
@@ -261,8 +264,6 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
         goto end;
     }
 
-    MixFormatDebug(m_mixFormat);
-
     WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)m_mixFormat;
     wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
     wfex->Format.wBitsPerSample = 16;
@@ -272,6 +273,7 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
     wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
     wfex->Samples.wValidBitsPerSample = 16;
 
+    MixFormatDebug(m_mixFormat);
     WFEXDebug(wfex);
     
     HRG(m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,m_mixFormat,NULL));
@@ -369,8 +371,7 @@ WasapiWrap::Start(WWPcmData *pcm)
     HRG(m_renderClient->ReleaseBuffer(m_bufferSamples, 0));
 
     pcm->posFrame = m_bufferSamples;
-    m_pcmData = new WWPcmData();
-    m_pcmData->CopyFrom(pcm);
+    m_pcmData = pcm;
 
     assert(m_audioClient);
     HRG(m_audioClient->Start());
@@ -388,8 +389,9 @@ WasapiWrap::Stop(void)
         SetEvent(m_shutdownEvent);
     }
 
-    assert(m_audioClient);
-    m_audioClient->Stop();
+    if (m_audioClient) {
+        m_audioClient->Stop();
+    }
 
     if (m_renderThread) {
         WaitForSingleObject(m_renderThread, INFINITE);
@@ -399,10 +401,18 @@ WasapiWrap::Stop(void)
     }
 
     if (m_pcmData) {
-        m_pcmData->Term();
-        delete m_pcmData;
         m_pcmData = NULL;
     }
+}
+
+bool
+WasapiWrap::Run(int millisec)
+{
+    DWORD rv = WaitForSingleObject(m_renderThread, millisec);
+    if (rv == WAIT_TIMEOUT) {
+        return false;
+    }
+    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
