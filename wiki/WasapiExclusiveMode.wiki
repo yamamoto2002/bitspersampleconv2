@@ -1,4 +1,4 @@
-#summary WASAPI排他モード
+#summary WASAPI排他モードでWAVファイルを再生
 #labels Featured
 
 = WASAPI排他モードでWAVファイルを再生 =
