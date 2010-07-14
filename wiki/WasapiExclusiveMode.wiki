@@ -13,13 +13,13 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcm100.exe
 
 CMDを開いてダウンロードしたディレクトリにcdして
 {{{
-playpcm
+playpcm100
 }}}
 
 でデバイス一覧が出ます。
 0番のデバイスにc:\data\001.wavを出力(再生)する場合は
 {{{
-playpcm -d 0 C:\data\001.wav
+playpcm100 -d 0 C:\data\001.wav
 }}}
 と入力します。
 
