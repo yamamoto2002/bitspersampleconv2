@@ -23,6 +23,10 @@ playpcm -d 0 C:\data\001.wav
 }}}
 と入力します。
 
+=ソースコード=
+
+http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcm
+
 =更新履歴=
 
 ===バージョン1.0===
@@ -30,5 +34,3 @@ playpcm -d 0 C:\data\001.wav
   * 量子化ビット数16ビット
   * 2チャンネル
 のWAVEファイルに対応。
-
-
