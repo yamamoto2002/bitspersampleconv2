@@ -6,3 +6,31 @@
 PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
 ==ダウンロード==
+
+http://bitspersampleconv2.googlecode.com/files/PlayPcm100.exe
+
+==使用方法==
+
+CMDを開いてダウンロードしたディレクトリにcdして
+{{{
+playpcm
+}}}
+
+でデバイス一覧が出ます。
+0番のデバイスにc:\data\001.wavを出力(再生)する場合は
+{{{
+playpcm -d 0 C:\data\001.wav
+}}}
+と入力します。
+
+=更新履歴=
+
+===バージョン1.0===
+
+  * 量子化ビット数16ビット
+  * 2チャンネル
+のWAVEファイルに対応。
+
+
+
+
