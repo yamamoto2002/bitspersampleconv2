@@ -1,0 +1,8 @@
+#summary WASAPI排他モード
+#labels Featured
+
+= WASAPI排他モードでWAVファイルを再生 =
+
+PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
+
+==ダウンロード==
