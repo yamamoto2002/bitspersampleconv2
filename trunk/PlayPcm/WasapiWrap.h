@@ -21,13 +21,10 @@ struct WWDeviceInfo {
     WWDeviceInfo(int id, const wchar_t * name);
 };
 
-enum WWPcmFormatType {
-    WWPcmFormatInt16Stereo
-};
-
 struct WWPcmData {
-    WWPcmFormatType format;
     int  bitsPerSample;
+    int  nChannels;
+    int  nSamplesPerSec;
     int  nFrames;
     int  posFrame;
     BYTE *stream;
@@ -60,6 +57,8 @@ public:
     void Unsetup(void);
 
     HRESULT Start(WWPcmData *data);
+
+    bool Run(int millisec);
 
     void Stop(void);
 
