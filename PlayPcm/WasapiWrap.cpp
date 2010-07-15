@@ -24,6 +24,8 @@ WWPcmData::Init(int samples)
     
     stream = (BYTE*)malloc(samples * 4);
     for (int i=0; i<samples*4; ++i) {
+        // このrand()の使い方は悪い見本。
+        // よい子は真似をしない事。
         stream[i] = rand();
     }
 }
