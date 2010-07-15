@@ -63,8 +63,7 @@ Run(int deviceId, WWPcmData *pcm)
     ww.Start(pcm);
 
     while (!ww.Run(1000)) {
-        // need mutex !
-        printf("%d / %d\n", pcm->posFrame, pcm->nFrames);
+        printf("%d / %d\n", ww.GetPosFrame(), ww.GetTotalFrameNum());
     }
 
 end:
@@ -82,7 +81,10 @@ PrintUsage(void)
         "    PlayPcm\n"
         "        Enumerate all available devices\n"
         "    PlayPcm -d [deviceId] input_wave_file_name\n"
-        "        Play wav file on deviceId device\n\n");
+        "        Play wav file on deviceId device\n"
+        "        Example:\n"
+        "            PlayPcm -d 1 C:\\wav\\music.wav\n\n"
+        );
 }
 
 /*

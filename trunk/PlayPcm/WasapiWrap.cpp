@@ -61,10 +61,12 @@ WasapiWrap::WasapiWrap(void)
     m_audioSamplesReadyEvent = NULL;
     m_audioClient      = NULL;
     m_mixFormat        = NULL;
-    m_frameBytes        = 0;
-    m_bufferSamples       = 0;
+    m_frameBytes       = 0;
+    m_bufferSamples    = 0;
     m_renderClient     = NULL;
+    m_renderThread     = NULL;
     m_pcmData          = NULL;
+    m_mutex            = NULL;
 }
 
 
@@ -84,6 +86,10 @@ WasapiWrap::Init(void)
     assert(!m_deviceToUse);
 
     HRR(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+
+    assert(!m_mutex);
+    m_mutex = CreateMutex(
+        NULL, FALSE, NULL);
 }
 
 void
@@ -92,6 +98,11 @@ WasapiWrap::Term(void)
     SafeRelease(&m_deviceCollection);
 
     assert(!m_deviceToUse);
+
+    if (m_mutex) {
+        CloseHandle(m_mutex);
+        m_mutex = NULL;
+    }
 
     CoUninitialize();
 }
@@ -425,6 +436,82 @@ WasapiWrap::RenderEntry(LPVOID lpThreadParameter)
     return self->RenderMain();
 }
 
+int
+WasapiWrap::GetTotalFrameNum(void)
+{
+    if (!m_pcmData) {
+        return 0;
+    }
+
+    return m_pcmData->nFrames;
+}
+
+int
+WasapiWrap::GetPosFrame(void)
+{
+    int result = 0;
+
+    assert(m_mutex);
+
+    WaitForSingleObject(m_mutex, INFINITE);
+    if (m_pcmData) {
+        result = m_pcmData->posFrame;
+    }
+    ReleaseMutex(m_mutex);
+
+    return result;
+}
+
+bool
+WasapiWrap::AudioSamplesReadyProc(void)
+{
+    bool result = true;
+    UINT32 *pFrames = NULL;
+    BYTE *pData = NULL;
+    HRESULT hr = 0;
+    int copyBytes = 0;
+
+    WaitForSingleObject(m_mutex, INFINITE);
+
+    copyBytes = m_bufferSamples;
+    if (m_pcmData->nFrames < m_pcmData->posFrame + copyBytes) {
+        copyBytes = m_pcmData->nFrames - m_pcmData->posFrame;
+    }
+
+    if (copyBytes <= 0) {
+        result = false;
+        goto end;
+    }
+
+    pFrames = (UINT32 *)m_pcmData->stream;
+    pFrames += m_pcmData->posFrame;
+
+    assert(m_renderClient);
+    hr = m_renderClient->GetBuffer(m_bufferSamples, &pData);
+    if (FAILED(hr)) {
+        result = false;
+        goto end;
+    }
+
+    CopyMemory(pData, pFrames, copyBytes * m_frameBytes);
+    if (0 < m_bufferSamples - copyBytes) {
+        memset(&pData[copyBytes*m_frameBytes], 0,
+            (m_bufferSamples - copyBytes)*m_frameBytes);
+    }
+
+    hr = m_renderClient->ReleaseBuffer(m_bufferSamples, 0);
+    if (FAILED(hr)) {
+        result = false;
+        goto end;
+    }
+
+    m_pcmData->posFrame += copyBytes;
+
+end:
+    ReleaseMutex(m_mutex);
+    return result;
+}
+
 DWORD
 WasapiWrap::RenderMain(void)
 {
@@ -433,10 +520,7 @@ WasapiWrap::RenderMain(void)
     HANDLE mmcssHandle = NULL;
     DWORD mmcssTaskIndex = 0;
     DWORD waitResult;
-    UINT32 *pFrames = NULL;
-    BYTE *pData = NULL;
     HRESULT hr = 0;
-    int playFrames = 0;
     
     HRG(CoInitializeEx(NULL, COINIT_MULTITHREADED));
 
@@ -452,27 +536,7 @@ WasapiWrap::RenderMain(void)
             stillPlaying = false;
             break;
         case WAIT_OBJECT_0 + 1:     // m_audioSamplesReadyEvent
-            playFrames = m_bufferSamples;
-            if (m_pcmData->nFrames < m_pcmData->posFrame + playFrames) {
-                playFrames = m_pcmData->nFrames - m_pcmData->posFrame;
-            }
-
-            if (playFrames <= 0) {
-                stillPlaying = false;
-                break;
-            }
-
-            pFrames = (UINT32 *)m_pcmData->stream;
-            pFrames += m_pcmData->posFrame;
-
-            assert(m_renderClient);
-            HRG(m_renderClient->GetBuffer(playFrames, &pData));
-
-            CopyMemory(pData, pFrames, playFrames * m_frameBytes);
-
-            HRG(m_renderClient->ReleaseBuffer(playFrames, 0));
-
-            m_pcmData->posFrame += playFrames;
+            stillPlaying = AudioSamplesReadyProc();
             break;
         }
     }
