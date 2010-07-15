@@ -2,7 +2,9 @@
 
 
 #define HRG(x)                                   \
-{   hr = x;                                      \
+{                                                \
+    /* printf("D: invoke %s\n", #x); */          \
+    hr = x;                                      \
     if (FAILED(hr)) {                            \
         printf("E: %s failed (%08x)\n", #x, hr); \
         goto end;                                \
@@ -10,7 +12,9 @@
 }                                                \
 
 #define HRR(x)                                   \
-{   hr = x;                                      \
+{                                                \
+    /* printf("D: invoke %s\n", #x); */          \
+    hr = x;                                      \
     if (FAILED(hr)) {                            \
         printf("E: %s failed (%08x)\n", #x, hr); \
         return hr;                               \

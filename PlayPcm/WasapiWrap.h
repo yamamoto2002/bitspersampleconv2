@@ -62,6 +62,9 @@ public:
 
     void Stop(void);
 
+    int GetPosFrame(void);
+    int GetTotalFrameNum(void);
+
 private:
     std::vector<WWDeviceInfo> m_deviceInfo;
     IMMDeviceCollection       *m_deviceCollection;
@@ -83,5 +86,9 @@ private:
     DWORD RenderMain(void);
 
     WWPcmData    *m_pcmData;
+
+    HANDLE m_mutex;
+
+    bool AudioSamplesReadyProc(void);
 };
 
