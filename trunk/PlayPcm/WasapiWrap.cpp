@@ -1,3 +1,5 @@
+// æ—¥æœ¬èªž UTF-8
+
 #include "WasapiWrap.h"
 #include "WWUtil.h"
 #include <avrt.h>
@@ -24,8 +26,8 @@ WWPcmData::Init(int samples)
     
     stream = (BYTE*)malloc(samples * 4);
     for (int i=0; i<samples*4; ++i) {
-        // ‚±‚Ìrand()‚ÌŽg‚¢•û‚Íˆ«‚¢Œ©–{B
-        // ‚æ‚¢Žq‚Í^Ž—‚ð‚µ‚È‚¢Ž–B
+        // ã“ã®rand()ã®ä½¿ã„æ–¹ã¯æ‚ªã„è¦‹æœ¬ã€‚
+        // ã‚ˆã„å­ã¯çœŸä¼¼ã‚’ã—ãªã„äº‹ã€‚
         stream[i] = rand();
     }
 }
