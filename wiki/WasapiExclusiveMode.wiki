@@ -13,19 +13,19 @@ Windows VistaとWindows 7に対応しております。
 
 ==ダウンロード==
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcm100.exe
+http://bitspersampleconv2.googlecode.com/files/PlayPcm101.zip
 
 ==使用方法==
 
-CMDを開いてダウンロードしたディレクトリにcdして
+CMDを開いてzipを展開したディレクトリにcdして
 {{{
-playpcm100
+playpcm
 }}}
 
 でデバイス一覧が出ます。
 0番のデバイスにc:\data\001.wavを出力(再生)する場合は
 {{{
-playpcm100 -d 0 C:\data\001.wav
+playpcm -d 0 C:\data\001.wav
 }}}
 と入力します。
 
@@ -34,6 +34,10 @@ playpcm100 -d 0 C:\data\001.wav
 http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcm
 
 =更新履歴=
+
+===バージョン1.1===
+  * 最終フレームのアライン失敗問題を修正。
+  * 再生位置の変数をmutexで守るようにした。
 
 ===バージョン1.0===
 
