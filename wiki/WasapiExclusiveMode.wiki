@@ -31,9 +31,10 @@ playpcm -d 0 C:\data\001.wav
 
 =ソースコード=
 
+閲覧だけなら:
 http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcm
 
-これをTortoiseSVNなどでチェックアウトしてきます。
+ビルドしたい場合は、Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
 VS2010で開いてビルド。
 
 =更新履歴=
