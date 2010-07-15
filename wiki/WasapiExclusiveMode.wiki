@@ -11,11 +11,11 @@ Windows VistaとWindows 7に対応しております。
 
 *音量の調節機能はありません。最大音量で鳴ります。音量はプリアンプで絞って下さい。*
 
-==ダウンロード==
+=ダウンロード=
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcm101.zip
 
-==使用方法==
+=使用方法=
 
 CMDを開いてzipを展開したディレクトリにcdして
 {{{
