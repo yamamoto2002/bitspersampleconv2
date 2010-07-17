@@ -5,7 +5,7 @@
 
 !PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
-Windows VistaとWindows 7に対応しております。
+Windows Vista(SP1以降)とWindows 7に対応しております。
 
 まだ作り中です。
 
