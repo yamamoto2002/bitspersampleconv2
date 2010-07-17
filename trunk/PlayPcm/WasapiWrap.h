@@ -70,8 +70,8 @@ private:
     IMMDeviceCollection       *m_deviceCollection;
     IMMDevice                 *m_deviceToUse;
 
-    HANDLE      m_shutdownEvent;
-    HANDLE      m_audioSamplesReadyEvent;
+    HANDLE       m_shutdownEvent;
+    HANDLE       m_audioSamplesReadyEvent;
 
     IAudioClient *m_audioClient;
     WAVEFORMATEX *m_mixFormat;
@@ -80,14 +80,13 @@ private:
 
     IAudioRenderClient *m_renderClient;
     HANDLE       m_renderThread;
+    WWPcmData    *m_pcmData;
+    HANDLE       m_mutex;
+    int          m_footerCount;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
 
     DWORD RenderMain(void);
-
-    WWPcmData    *m_pcmData;
-
-    HANDLE m_mutex;
 
     bool AudioSamplesReadyProc(void);
 };
