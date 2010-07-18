@@ -211,6 +211,13 @@ namespace WavRWLib2
 
         private List<PcmSamples1Channel> data;
 
+        private byte[] rawData;
+        int            numSamples;
+
+        public byte[] SampleRawGet() {
+            return rawData;
+        }
+
         public short Sample16Get(int ch, int pos)
         {
             return data[ch].Get16(pos);
@@ -223,7 +230,12 @@ namespace WavRWLib2
 
         public int NumSamples
         {
-            get { return data[0].NumSamples; }
+            get {
+                if (0 < data.Count) {
+                    return data[0].NumSamples;
+                }
+                return numSamples;
+            }
         }
 
         public void Create(uint subChunk2Size, List<PcmSamples1Channel> allChannelSamples)
@@ -238,12 +250,28 @@ namespace WavRWLib2
             this.data = allChannelSamples;
         }
 
-        public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
-        {
-            subChunk2Id = br.ReadBytes(4);
-            if (subChunk2Id[0] != 'd' || subChunk2Id[1] != 'a' || subChunk2Id[2] != 't' || subChunk2Id[3] != 'a') {
-                Console.WriteLine("E: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\"",
-                    (char)subChunk2Id[0], (char)subChunk2Id[1], (char)subChunk2Id[2], (char)subChunk2Id[3]);
+        private bool SkipToDataHeader(BinaryReader br) {
+            while (true) {
+                subChunk2Id = br.ReadBytes(4);
+                if (subChunk2Id[0] != 'd' || subChunk2Id[1] != 'a' || subChunk2Id[2] != 't' || subChunk2Id[3] != 'a') {
+                    Console.WriteLine("D: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\". skipping.",
+                        (char)subChunk2Id[0], (char)subChunk2Id[1], (char)subChunk2Id[2], (char)subChunk2Id[3]);
+                    subChunk2Size = br.ReadUInt32();
+                    if (0x80000000 <= subChunk2Size) {
+                        Console.WriteLine("E: file too large to handle. {0} bytes", subChunk2Size);
+                        return false;
+                    }
+
+                    // skip this header
+                    br.ReadBytes((int)subChunk2Size);
+                } else {
+                    return true;
+                }
+            }
+        }
+
+        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample) {
+            if (!SkipToDataHeader(br)) {
                 return false;
             }
 
@@ -254,7 +282,26 @@ namespace WavRWLib2
                 return false;
             }
 
-            int numSamples = (int)(subChunk2Size / (bitsPerSample / 8) / numChannels);
+            numSamples = (int)(subChunk2Size / (bitsPerSample / 8) / numChannels);
+
+            rawData = br.ReadBytes((int)subChunk2Size);
+            return true;
+        }
+
+        public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
+        {
+            if (!SkipToDataHeader(br)) {
+                return false;
+            }
+
+            subChunk2Size = br.ReadUInt32();
+            Console.WriteLine("D: subChunk2Size={0}", subChunk2Size);
+            if (0x80000000 <= subChunk2Size) {
+                Console.WriteLine("E: file too large to handle. {0} bytes", subChunk2Size);
+                return false;
+            }
+
+            numSamples = (int)(subChunk2Size / (bitsPerSample / 8) / numChannels);
 
             data = new List<PcmSamples1Channel>();
             for (int i=0; i < numChannels; ++i) {
@@ -311,7 +358,7 @@ namespace WavRWLib2
             return true;
         }
 
-        public bool Read(BinaryReader br)
+        private bool Read(BinaryReader br, bool raw=false)
         {
             rcd = new RiffChunkDescriptor();
             if (!rcd.Read(br)) {
@@ -324,10 +371,24 @@ namespace WavRWLib2
             }
 
             dsc = new DataSubChunk();
-            if (!dsc.Read(br, fsc.numChannels, fsc.bitsPerSample)) {
-                return false;
+            if (raw) {
+                if (!dsc.ReadRaw(br, fsc.numChannels, fsc.bitsPerSample)) {
+                    return false;
+                }
+            } else {
+                if (!dsc.Read(br, fsc.numChannels, fsc.bitsPerSample)) {
+                    return false;
+                }
             }
             return true;
+        }
+
+        public bool Read(BinaryReader br) {
+            return Read(br, false);
+        }
+
+        public bool ReadRaw(BinaryReader br) {
+            return Read(br, true);
         }
 
         public void Write(BinaryWriter bw)
@@ -365,6 +426,10 @@ namespace WavRWLib2
         public void Sample16Set(int ch, int pos, short val)
         {
             dsc.Sample16Set(ch, pos, val);
+        }
+
+        public byte[] SampleRawGet() {
+            return dsc.SampleRawGet();
         }
     }
 }
