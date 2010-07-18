@@ -5,13 +5,7 @@
 
 !PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
-Windows 7に対応しております。
-
-間違いなくWindows XPでは動きません。
-
-Windows Vista(SP1以降)では、動かないと思います。
-
-まだ作り中です。
+Windows 7に対応しております。間違いなくWindows XPでは動きません。Windows Vista(SP1以降)では、動かないと思います。
 
 *ビットマッチ出力するために作成したソフトウェアのため、最大音量で出力します。音量の調節機能はありません。音量はプリアンプで絞って下さい。*
 
@@ -26,6 +20,8 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 使用する出力デバイスを選択し、再生ボタンを押します。
 
 アンインストールは、プログラムの追加と削除で行うか、もう一度Setup.exeを実行して削除を選びます。
+
+http://bitspersampleconv2.googlecode.com/files/wasapiexss.png
 
 =ソースコード=
 
