@@ -32,7 +32,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/WavRWLib2
 
 ビルドしたい場合は、Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
-VS2010で開いてビルド。
+PlayPcmWin/PlayPcmWin.slnをVS2010で開いてビルド。
 
 =更新履歴=
 
