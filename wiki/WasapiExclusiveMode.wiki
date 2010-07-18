@@ -21,8 +21,11 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin101.zip
 
 =使用方法=
 
-インストールし、!PlayPcmWinを開き、再生するWAVファイルを指定して、
+zipを展開して、中のSetup.exeを実行してインストールし、
+!PlayPcmWinを開き、再生するWAVファイルを指定して、
 使用する出力デバイスを選択し、再生ボタンを押します。
+
+アンインストールは、プログラムの追加と削除で行うか、もう一度Setup.exeを実行して削除を選びます。
 
 =ソースコード=
 
