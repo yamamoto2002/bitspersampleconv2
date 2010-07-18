@@ -50,6 +50,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -129,7 +132,21 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
+      <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>
+      <Name>WasapiCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WavRWLib2\WavRWLib2.csproj">
+      <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
+      <Name>WavRWLib2</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
