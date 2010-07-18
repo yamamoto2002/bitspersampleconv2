@@ -17,21 +17,12 @@ Windows Vista(SP1以降)では、動かないと思います。
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcm101.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin101.zip
 
 =使用方法=
 
-CMDを開いてzipを展開したディレクトリにcdして
-{{{
-playpcm
-}}}
-
-でデバイス一覧が出ます。
-0番のデバイスにc:\data\001.wavを出力(再生)する場合は
-{{{
-playpcm -d 0 C:\data\001.wav
-}}}
-と入力します。
+インストールし、PlayPcmWinを開き、再生するWAVファイルを指定して、
+使用する出力デバイスを選択し、再生ボタンを押します。
 
 =ソースコード=
 
@@ -42,6 +33,12 @@ http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcm
 VS2010で開いてビルド。
 
 =更新履歴=
+
+===PlayPcmWin 1.0.1 ==
+  * ウィンドウが出るようにした。
+
+===バージョン1.2 ===
+  * ビットマッチ再生
 
 ===バージョン1.1===
   * 最終フレームのサイズが中途半端になって失敗する問題を修正。
