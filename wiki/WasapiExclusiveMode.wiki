@@ -3,7 +3,7 @@
 
 = WASAPI排他モードでWAVファイルを再生 =
 
-!PlayPcmはWASAPI排他モードでWAVファイルを再生するプログラムです。
+!PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
 Windows 7に対応しております。間違いなくWindows XPでは動きません。Windows Vista(SP1以降)では、動かないと思います。
 
