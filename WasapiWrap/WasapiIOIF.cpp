@@ -6,7 +6,7 @@ static WasapiWrap* g_pWasapiWrap = 0;
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOInit(void)
+WasapiIO_Init(void)
 {
     HRESULT hr = S_OK;
 
@@ -20,7 +20,7 @@ WasapiIOInit(void)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOTerm(void)
+WasapiIO_Term(void)
 {
     if (g_pWasapiWrap) {
         g_pWasapiWrap->Term();
@@ -31,7 +31,7 @@ WasapiIOTerm(void)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIODoDeviceEnumeration(void)
+WasapiIO_DoDeviceEnumeration(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->DoDeviceEnumeration();
@@ -39,7 +39,7 @@ WasapiIODoDeviceEnumeration(void)
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetDeviceCount(void)
+WasapiIO_GetDeviceCount(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->GetDeviceCount();
@@ -47,7 +47,7 @@ WasapiIOGetDeviceCount(void)
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIOGetDeviceName(int id, LPWSTR name, int nameBytes)
+WasapiIO_GetDeviceName(int id, LPWSTR name, int nameBytes)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->GetDeviceName(id, name, nameBytes);
@@ -55,7 +55,7 @@ WasapiIOGetDeviceName(int id, LPWSTR name, int nameBytes)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOChooseDevice(int id)
+WasapiIO_ChooseDevice(int id)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->ChooseDevice(id);
@@ -63,7 +63,7 @@ WasapiIOChooseDevice(int id)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOSetup(int sampleRate, int latencyMillisec)
+WasapiIO_Setup(int sampleRate, int latencyMillisec)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->Setup(sampleRate, latencyMillisec);
@@ -71,7 +71,7 @@ WasapiIOSetup(int sampleRate, int latencyMillisec)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOUnsetup(void)
+WasapiIO_Unsetup(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->Unsetup();
@@ -79,15 +79,23 @@ WasapiIOUnsetup(void)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOSetOutputData(unsigned char *data, int bytes)
+WasapiIO_SetOutputData(unsigned char *data, int bytes)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->SetOutputData(data, bytes);
 }
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_ClearOutputData(void)
+{
+    assert(g_pWasapiWrap);
+    g_pWasapiWrap->ClearOutputData();
+}
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOStart(void)
+WasapiIO_Start(void)
 {
     assert(g_pWasapiWrap);
 
@@ -96,7 +104,7 @@ WasapiIOStart(void)
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIORun(int millisec)
+WasapiIO_Run(int millisec)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->Run(millisec);
@@ -104,7 +112,7 @@ WasapiIORun(int millisec)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOStop(void)
+WasapiIO_Stop(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->Stop();
@@ -112,7 +120,7 @@ WasapiIOStop(void)
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetPosFrame(void)
+WasapiIO_GetPosFrame(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->GetPosFrame();
@@ -120,8 +128,16 @@ WasapiIOGetPosFrame(void)
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetTotalFrameNum(void)
+WasapiIO_GetTotalFrameNum(void)
 {
     assert(g_pWasapiWrap);
     return g_pWasapiWrap->GetTotalFrameNum();
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+WasapiIO_SetPosFrame(int v)
+{
+    assert(g_pWasapiWrap);
+    return g_pWasapiWrap->SetPosFrame(v);
 }

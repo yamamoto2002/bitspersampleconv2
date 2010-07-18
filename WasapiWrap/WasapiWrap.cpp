@@ -75,6 +75,7 @@ WasapiWrap::WasapiWrap(void)
     m_pcmData          = NULL;
     m_mutex            = NULL;
     m_footerCount      = 0;
+    m_coInitializeSuccess = false;
 }
 
 
@@ -93,7 +94,13 @@ WasapiWrap::Init(void)
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
 
-    HRR(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+    hr = CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    if (S_OK == hr) {
+        m_coInitializeSuccess = true;
+    } else {
+        printf("WasapiWrap::Init() CoInitializeEx() failed %08x\n", hr);
+        hr = S_OK;
+    }
 
     assert(!m_mutex);
     m_mutex = CreateMutex(
@@ -114,7 +121,9 @@ WasapiWrap::Term(void)
         m_mutex = NULL;
     }
 
-    CoUninitialize();
+    if (m_coInitializeSuccess) {
+        CoUninitialize();
+    }
 }
 
 
@@ -265,9 +274,6 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
     HRESULT hr = 0;
     UINT32  renderBufferBytes;
 
-    m_shutdownEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
-    CHK(m_shutdownEvent);
-
     m_audioSamplesReadyEvent =
         CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
     CHK(m_audioSamplesReadyEvent);
@@ -350,17 +356,6 @@ end:
 void
 WasapiWrap::Unsetup(void)
 {
-    if (m_renderThread) {
-        SetEvent(m_renderThread);
-        WaitForSingleObject(m_renderThread, INFINITE);
-        CloseHandle(m_renderThread);
-        m_renderThread = NULL;
-    }
-
-    if (m_shutdownEvent) {
-        CloseHandle(m_shutdownEvent);
-        m_shutdownEvent = NULL;
-    }
     if (m_audioSamplesReadyEvent) {
         CloseHandle(m_audioSamplesReadyEvent);
         m_audioSamplesReadyEvent = NULL;
@@ -407,6 +402,10 @@ WasapiWrap::Start()
 
     assert(m_pcmData);
 
+    assert(!m_shutdownEvent);
+    m_shutdownEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    CHK(m_shutdownEvent);
+
     m_renderThread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
     assert(m_renderThread);
 
@@ -435,6 +434,18 @@ WasapiWrap::Stop(void)
         SetEvent(m_shutdownEvent);
     }
 
+    if (m_renderThread) {
+        SetEvent(m_renderThread);
+        WaitForSingleObject(m_renderThread, INFINITE);
+        CloseHandle(m_renderThread);
+        m_renderThread = NULL;
+    }
+
+    if (m_shutdownEvent) {
+        CloseHandle(m_shutdownEvent);
+        m_shutdownEvent = NULL;
+    }
+
     if (m_audioClient) {
         m_audioClient->Stop();
     }
@@ -450,10 +461,13 @@ WasapiWrap::Stop(void)
 bool
 WasapiWrap::Run(int millisec)
 {
+    //printf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
     DWORD rv = WaitForSingleObject(m_renderThread, millisec);
     if (rv == WAIT_TIMEOUT) {
+        printf(".\n");
         return false;
     }
+    printf("%s rv=%08x return true\n", __FUNCTION__, rv);
     return true;
 }
 
@@ -491,6 +505,24 @@ WasapiWrap::GetPosFrame(void)
     ReleaseMutex(m_mutex);
 
     return result;
+}
+
+bool
+WasapiWrap::SetPosFrame(int v)
+{
+    if (v < 0 || GetTotalFrameNum() <= v) {
+        return false;
+    }
+
+    assert(m_mutex);
+
+    WaitForSingleObject(m_mutex, INFINITE);
+    if (m_pcmData) {
+        m_pcmData->posFrame = v;
+    }
+    ReleaseMutex(m_mutex);
+
+    return true;
 }
 
 bool
