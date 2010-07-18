@@ -17,7 +17,7 @@
         <GroupBox Header="出力デバイス" Margin="12,141,12,0" Name="groupBox1" Height="163" VerticalAlignment="Top">
             <Grid>
                 <ListBox Margin="6,6,6,37" Name="listBoxDevices" />
-                <Button Content="選択(_C)" Height="23" HorizontalAlignment="Left" Margin="6,109,0,0" Name="buttonDeviceSelect" VerticalAlignment="Top" Width="135" />
+                <Button Content="選択(_C)" Height="23" HorizontalAlignment="Left" Margin="6,109,0,0" Name="buttonDeviceSelect" VerticalAlignment="Top" Width="135" IsEnabled="False" Click="buttonDeviceSelect_Click" />
             </Grid>
         </GroupBox>
         <GroupBox Header="再生するWAVファイル" Height="95" Margin="12,29,12,0" Name="groupBox2" VerticalAlignment="Top">
@@ -26,10 +26,10 @@
                 <TextBox Height="24" Margin="6,6,6,0" Name="textBoxPlayFile" VerticalAlignment="Top" IsReadOnly="True" />
             </Grid>
         </GroupBox>
-        <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="14,310,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="75" />
-        <Slider Margin="14,344,10,0" Name="slider1" Height="23" VerticalAlignment="Top" />
-        <Label Content="Label" Margin="179,310,10,0" Name="label1" Height="28" VerticalAlignment="Top" />
-        <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="98,310,0,0" Name="buttonStop" VerticalAlignment="Top" Width="75" />
+        <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="14,310,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="buttonPlay_Click" />
+        <Slider Margin="14,344,10,0" Name="slider1" Height="23" VerticalAlignment="Top" MouseMove="slider1_MouseMove" />
+        <Label Content="0/0" Margin="179,310,10,0" Name="label1" Height="28" VerticalAlignment="Top" HorizontalContentAlignment="Right" />
+        <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="98,310,0,0" Name="buttonStop" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="buttonStop_Click" />
         <GroupBox Header="ログ" Margin="12,373,14,0" Name="groupBoxLog">
             <Grid>
                 <TextBox Name="textBoxLog" Margin="0,0,0,0" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" />
