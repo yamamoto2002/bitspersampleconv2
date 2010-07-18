@@ -5,62 +5,62 @@
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOInit(void);
+WasapiIO_Init(void);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOTerm(void);
+WasapiIO_Term(void);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIODoDeviceEnumeration(void);
+WasapiIO_DoDeviceEnumeration(void);
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetDeviceCount(void);
+WasapiIO_GetDeviceCount(void);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIOGetDeviceName(int id, LPWSTR name, int nameBytes);
+WasapiIO_GetDeviceName(int id, LPWSTR name, int nameBytes);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOChooseDevice(int id);
+WasapiIO_ChooseDevice(int id);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOSetup(int sampleRate, int latencyMillisec);
+WasapiIO_Setup(int sampleRate, int latencyMillisec);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOUnsetup(void);
+WasapiIO_Unsetup(void);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOSetOutputData(unsigned char *data, int bytes);
+WasapiIO_SetOutputData(unsigned char *data, int bytes);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOClearOutputData(void);
+WasapiIO_ClearOutputData(void);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIOStart(void);
+WasapiIO_Start(void);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIORun(int millisec);
+WasapiIO_Run(int millisec);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIOStop(void);
+WasapiIO_Stop(void);
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetPosFrame(void);
+WasapiIO_GetPosFrame(void);
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WasapiIOGetTotalFrameNum(void);
+WasapiIO_GetTotalFrameNum(void);
 
 #endif /* WasapiIOIF_H */

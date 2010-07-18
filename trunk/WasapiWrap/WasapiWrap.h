@@ -67,6 +67,7 @@ public:
 
     int GetPosFrame(void);
     int GetTotalFrameNum(void);
+    bool SetPosFrame(int v);
 
 private:
     std::vector<WWDeviceInfo> m_deviceInfo;
@@ -86,6 +87,7 @@ private:
     WWPcmData    *m_pcmData;
     HANDLE       m_mutex;
     int          m_footerCount;
+    bool         m_coInitializeSuccess;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
 
