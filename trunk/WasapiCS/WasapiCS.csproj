@@ -8,7 +8,7 @@
     <ProjectGuid>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WasapiCS</RootNamespace>
+    <RootNamespace>Wasapiex</RootNamespace>
     <AssemblyName>WasapiCS</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
