@@ -1,0 +1,5 @@
+LIBRARY WasapiIODLL
+
+EXPORTS
+    WasapiIOInit
+    WasapiIOTerm
