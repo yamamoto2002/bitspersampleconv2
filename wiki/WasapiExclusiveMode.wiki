@@ -21,7 +21,15 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 
 アンインストールは、プログラムの追加と削除で行うか、もう一度Setup.exeを実行して削除を選びます。
 
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin104.jpg
+
+!PlayPcmWin 1.0.4
+
+
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
+
+!PlayPcmWin 1.0.1
+
 
 =ソースコード=
 
