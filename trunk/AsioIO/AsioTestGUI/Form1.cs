@@ -117,7 +117,7 @@ namespace AsioTestGUI
                     percent = 100;
                 }
 
-                bw.ReportProgress(percent);
+                    
             }
             int[] recordedData = asio.RecordedDataGet(m_inputChannelNum, m_seconds * SAMPLE_RATE);
             PcmSamples1Channel ch0 = new PcmSamples1Channel(m_seconds * SAMPLE_RATE, 16);
