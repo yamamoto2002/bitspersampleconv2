@@ -11,7 +11,7 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin104.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin105.zip
 
 =使用方法=
 
@@ -43,6 +43,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
 !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
 =更新履歴=
+===!PlayPcmWin 1.0.5 ==
+  * バージョン番号の上げ忘れを修正。
+
 ===!PlayPcmWin 1.0.4 ==
   * 出力レイテンシーをデフォルトの10ミリ秒以外に設定できるようにした。
 
