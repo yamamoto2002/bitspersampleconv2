@@ -5,7 +5,7 @@
     <Grid>
         <Menu Height="23" HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="503">
             <MenuItem Header="ファイル(_F)">
-                <MenuItem Header="WAVEファイルを読み込む(_O)" Click="buttonRefer_Click" />
+                <MenuItem Header="WAVEファイルを読み込む(_O)" Click="buttonRefer_Click" Name="menuItemFileOpen" />
                 <Separator />
                 <MenuItem Header="終了(_X)" Click="MenuItemFileExit_Click" />
             </MenuItem>

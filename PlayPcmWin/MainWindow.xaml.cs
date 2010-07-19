@@ -84,6 +84,8 @@ namespace PlayPcmWin
 
                     buttonRefer.IsEnabled = false;
                     buttonDeviceSelect.IsEnabled = true;
+                    menuItemFileOpen.IsEnabled = false;
+
                 } else {
                     textBoxLog.Text += string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
                 }
