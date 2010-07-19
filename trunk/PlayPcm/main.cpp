@@ -36,7 +36,7 @@ GetIntValueFromConsole(const char *prompt, int from, int to, int *value_return)
 }
 
 static HRESULT
-Run(int deviceId, WWPcmData *pcm)
+Run(int deviceId, int latencyInMillisec, WWPcmData *pcm)
 {
     HRESULT hr;
     WasapiWrap ww;
@@ -58,7 +58,7 @@ Run(int deviceId, WWPcmData *pcm)
         goto end;
     }
 
-    HRG(ww.Setup(pcm->nSamplesPerSec, pcm->bitsPerSample, 10));
+    HRG(ww.Setup(pcm->nSamplesPerSec, pcm->bitsPerSample, latencyInMillisec));
 
     ww.Start(pcm);
 
@@ -80,7 +80,7 @@ PrintUsage(void)
         "Usage:\n"
         "    PlayPcm\n"
         "        Enumerate all available devices\n"
-        "    PlayPcm -d [deviceId] input_wave_file_name\n"
+        "    PlayPcm -d [deviceId] (-l [latencyInMillisec]) input_wave_file_name\n"
         "        Play wav file on deviceId device\n"
         "        Example:\n"
         "            PlayPcm -d 1 C:\\wav\\music.wav\n\n"
@@ -248,15 +248,30 @@ main(int argc, char *argv[])
 {
     WWPcmData *pcmData = NULL;
     int deviceId = -1;
+    int latencyInMillisec = 10;
 
-    if (argc == 4) {
+    char *filePath = 0;
+
+    if (argc == 4 || argc == 6) {
         if (0 != strcmp("-d", argv[1])) {
             PrintUsage();
             return 1;
         }
         deviceId = atoi(argv[2]);
 
-        pcmData = LoadAndCreatePcmData(argv[3]);
+        if (argc == 4) {
+            filePath = argv[3];
+        }
+        if (argc == 6) {
+            if (0 != strcmp("-l", argv[3])) {
+                return 1;
+            }
+            latencyInMillisec = atoi(argv[4]);
+            filePath = argv[5];
+        }
+
+
+        pcmData = LoadAndCreatePcmData(filePath);
         if (NULL == pcmData) {
             printf("E: read error %s\n",
                 argv[3]);
@@ -266,7 +281,7 @@ main(int argc, char *argv[])
         PrintUsage();
     }
 
-    HRESULT hr = Run(deviceId, pcmData);
+    HRESULT hr = Run(deviceId, latencyInMillisec, pcmData);
     if (FAILED(hr)) {
         printf("Run failed (%08x)\n", hr);
     }
