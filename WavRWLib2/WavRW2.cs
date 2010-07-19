@@ -91,7 +91,6 @@ namespace WavRWLib2
             this.byteRate = sampleRate * numChannels * bitsPerSample / 8;
             this.blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
-            System.Diagnostics.Debug.Assert(16 == bitsPerSample);
             this.bitsPerSample = bitsPerSample;
 
             return true;
@@ -193,6 +192,8 @@ namespace WavRWLib2
 
         private List<PcmSamples1Channel> data;
 
+        // rawDataモードの場合、numSamplesにサンプル数が入っている。
+        // 通常モードの場合、data[0].NumSamples
         private byte[] rawData;
         int            numSamples;
 
