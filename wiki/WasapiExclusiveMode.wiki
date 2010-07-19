@@ -11,7 +11,7 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin101.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin103.zip
 
 =使用方法=
 
