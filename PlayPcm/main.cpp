@@ -250,9 +250,9 @@ main(int argc, char *argv[])
     int deviceId = -1;
     int latencyInMillisec = 10;
 
-    char *filePath = 0;
-
     if (argc == 4 || argc == 6) {
+        char *filePath = 0;
+
         if (0 != strcmp("-d", argv[1])) {
             PrintUsage();
             return 1;
