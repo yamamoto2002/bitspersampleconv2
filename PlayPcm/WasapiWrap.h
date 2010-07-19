@@ -53,7 +53,7 @@ public:
     // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
 
-    HRESULT Setup(int sampleRate, int latencyMillisec);
+    HRESULT Setup(int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);
 
     HRESULT Start(WWPcmData *data);

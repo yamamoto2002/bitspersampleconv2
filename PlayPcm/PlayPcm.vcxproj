@@ -78,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="WasapiWrap.cpp" />
+    <ClCompile Include="WWUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiWrap.h" />
