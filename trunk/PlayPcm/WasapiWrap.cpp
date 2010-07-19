@@ -256,13 +256,10 @@ WFEXDebug(WAVEFORMATEXTENSIBLE *v)
 }
 
 HRESULT
-WasapiWrap::Setup(int sampleRate, int latencyMillisec)
+WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 {
     HRESULT hr = 0;
     UINT32  renderBufferBytes;
-
-    m_shutdownEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
-    CHK(m_shutdownEvent);
 
     m_audioSamplesReadyEvent =
         CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -276,7 +273,7 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
     assert(!m_mixFormat);
     HRG(m_audioClient->GetMixFormat(&m_mixFormat));
     assert(m_mixFormat);
-
+    
     if (m_mixFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
         printf("E: unsupported device ! mixformat == 0x%08x\n", m_mixFormat->wFormatTag);
         hr = E_FAIL;
@@ -284,14 +281,20 @@ WasapiWrap::Setup(int sampleRate, int latencyMillisec)
     }
 
     WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)m_mixFormat;
+
+    printf("original mixformat:\n");
+    MixFormatDebug(m_mixFormat);
+    WFEXDebug(wfex);
+
     wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-    wfex->Format.wBitsPerSample = 16;
+    wfex->Format.wBitsPerSample = bitsPerSample;
     wfex->Format.nSamplesPerSec = sampleRate;
 
-    wfex->Format.nBlockAlign = (m_mixFormat->wBitsPerSample / 8) * m_mixFormat->nChannels;
+    wfex->Format.nBlockAlign = (bitsPerSample / 8) * m_mixFormat->nChannels;
     wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-    wfex->Samples.wValidBitsPerSample = 16;
+    wfex->Samples.wValidBitsPerSample = bitsPerSample;
 
+    printf("preferred format:\n");
     MixFormatDebug(m_mixFormat);
     WFEXDebug(wfex);
     
@@ -378,6 +381,11 @@ WasapiWrap::Start(WWPcmData *pcm)
     BYTE *pData = NULL;
     HRESULT hr = 0;
 
+    assert(!m_shutdownEvent);
+    m_shutdownEvent = CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
+    CHK(m_shutdownEvent);
+
+
     m_renderThread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
     assert(m_renderThread);
 
@@ -409,6 +417,18 @@ WasapiWrap::Stop(void)
         SetEvent(m_shutdownEvent);
     }
 
+    if (m_renderThread) {
+        SetEvent(m_renderThread);
+        WaitForSingleObject(m_renderThread, INFINITE);
+        CloseHandle(m_renderThread);
+        m_renderThread = NULL;
+    }
+
+    if (m_shutdownEvent) {
+        CloseHandle(m_shutdownEvent);
+        m_shutdownEvent = NULL;
+    }
+
     if (m_audioClient) {
         m_audioClient->Stop();
     }
@@ -418,10 +438,6 @@ WasapiWrap::Stop(void)
 
         CloseHandle(m_renderThread);
         m_renderThread = NULL;
-    }
-
-    if (m_pcmData) {
-        m_pcmData = NULL;
     }
 }
 

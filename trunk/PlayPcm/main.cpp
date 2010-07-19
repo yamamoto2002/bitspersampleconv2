@@ -58,7 +58,7 @@ Run(int deviceId, WWPcmData *pcm)
         goto end;
     }
 
-    HRG(ww.Setup(pcm->nSamplesPerSec,10));
+    HRG(ww.Setup(pcm->nSamplesPerSec, pcm->bitsPerSample, 10));
 
     ww.Start(pcm);
 
@@ -175,10 +175,6 @@ ReadWaveChunk(FILE *fp, WaveFormatInfo &wfi)
         wfi.bitsPerSample = *((short*)(&buff[14]));
         if (wfi.nChannels != 2) {
             printf("E: nChannels=%d is not supported\n", wfi.nChannels);
-            goto end;
-        }
-        if (wfi.bitsPerSample != 16) {
-            printf("E: bitsPerSample=%d is not supported\n", wfi.bitsPerSample);
             goto end;
         }
     } else if (0 == strncmp("data", (const char*)header, 4)) {
