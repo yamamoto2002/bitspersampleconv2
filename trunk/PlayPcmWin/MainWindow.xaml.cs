@@ -34,6 +34,16 @@ namespace PlayPcmWin
             hr = wasapi.Init();
             textBoxLog.Text += string.Format("wasapi.Init() {0:X8}\r\n", hr);
 
+            Closed += new EventHandler(MainWindow_Closed);
+
+            CreateDeviceList();
+        }
+
+        private void CreateDeviceList() {
+            int hr;
+
+            listBoxDevices.Items.Clear();
+
             hr = wasapi.DoDeviceEnumeration();
             textBoxLog.Text += string.Format("wasapi.DoDeviceEnumeration() {0:X8}\r\n", hr);
 
@@ -43,10 +53,8 @@ namespace PlayPcmWin
             }
             if (0 < nDevices) {
                 listBoxDevices.SelectedIndex = 0;
-                buttonDeviceSelect.IsEnabled = true;
+                //buttonDeviceSelect.IsEnabled = true;
             }
-
-            Closed += new EventHandler(MainWindow_Closed);
         }
 
         void MainWindow_Closed(object sender, EventArgs e) {
@@ -82,12 +90,13 @@ namespace PlayPcmWin
                 if (readSuccess) {
                     textBoxPlayFile.Text = m_wavFilePath;
 
-                    buttonRefer.IsEnabled = false;
                     buttonDeviceSelect.IsEnabled = true;
                     menuItemFileOpen.IsEnabled = false;
 
                 } else {
-                    textBoxLog.Text += string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
+                    string s = string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
+                    textBoxLog.Text += s;
+                    MessageBox.Show(s);
                 }
             }
         }
@@ -116,9 +125,15 @@ namespace PlayPcmWin
                 return;
             }
 
-            hr = wasapi.Setup(m_wavData.SampleRate, 10);
-            textBoxLog.Text += string.Format("wasapi.Setup({0}) {1:X8}\r\n", m_wavData.SampleRate, hr);
+            hr = wasapi.Setup(m_wavData.SampleRate, m_wavData.BitsPerSample, 10);
+            textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}) {2:X8}\r\n",
+                m_wavData.SampleRate, m_wavData.BitsPerSample, hr);
             if (hr < 0) {
+                wasapi.Unsetup();
+                CreateDeviceList();
+                string s = string.Format("エラー: wasapi.Setup({0}, {1})失敗。{2:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bitに対応していないのか、どちらかです。",
+                    m_wavData.SampleRate, m_wavData.BitsPerSample, hr);
+                MessageBox.Show(s);
                 return;
             }
 
@@ -127,7 +142,22 @@ namespace PlayPcmWin
             textBoxLog.Text += string.Format("wasapi.SetOutputData({0})\r\n", m_wavData.SampleRawGet().Length);
 
             buttonDeviceSelect.IsEnabled = false;
+            buttonDeselect.IsEnabled = true;
             buttonPlay.IsEnabled = true;
+            buttonRefer.IsEnabled = false;
+        }
+
+        private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
+            wasapi.Stop();
+            wasapi.Unsetup();
+            CreateDeviceList();
+
+            buttonDeviceSelect.IsEnabled = true;
+            buttonDeselect.IsEnabled = false;
+            buttonPlay.IsEnabled = false;
+            buttonStop.IsEnabled = false;
+            buttonRefer.IsEnabled = true;
+            menuItemFileOpen.IsEnabled = true;
         }
 
         BackgroundWorker bw;

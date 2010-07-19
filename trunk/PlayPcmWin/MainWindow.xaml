@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PlayPcmWin" Height="516" Width="539">
     <Grid>
-        <Menu Height="23" HorizontalAlignment="Left" Name="menu1" VerticalAlignment="Top" Width="503">
+        <Menu Height="23" Name="menu1" VerticalAlignment="Top">
             <MenuItem Header="ファイル(_F)">
                 <MenuItem Header="WAVEファイルを読み込む(_O)" Click="buttonRefer_Click" Name="menuItemFileOpen" />
                 <Separator />
@@ -18,6 +18,7 @@
             <Grid>
                 <ListBox Margin="6,6,6,37" Name="listBoxDevices" />
                 <Button Content="選択(_C)" Height="23" HorizontalAlignment="Left" Margin="6,109,0,0" Name="buttonDeviceSelect" VerticalAlignment="Top" Width="135" IsEnabled="False" Click="buttonDeviceSelect_Click" />
+                <Button Content="選択解除(_D)" Height="23" HorizontalAlignment="Left" Margin="147,109,0,0" Name="buttonDeselect" VerticalAlignment="Top" Width="138" Click="buttonDeviceDeselect_Click" IsEnabled="False" />
             </Grid>
         </GroupBox>
         <GroupBox Header="再生するWAVファイル" Height="95" Margin="12,29,12,0" Name="groupBox2" VerticalAlignment="Top">
@@ -32,7 +33,7 @@
         <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="98,310,0,0" Name="buttonStop" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="buttonStop_Click" />
         <GroupBox Header="ログ" Margin="12,373,14,0" Name="groupBoxLog">
             <Grid>
-                <TextBox Name="textBoxLog" Margin="0,0,0,0" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" />
+                <TextBox Name="textBoxLog" Margin="0,0,0,0" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" />
             </Grid>
         </GroupBox>
     </Grid>
