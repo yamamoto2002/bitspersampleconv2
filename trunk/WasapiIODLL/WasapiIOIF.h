@@ -24,6 +24,10 @@ bool __stdcall
 WasapiIO_GetDeviceName(int id, LPWSTR name, int nameBytes);
 
 extern "C" __declspec(dllexport)
+bool __stdcall
+WasapiIO_InspectDevice(int id, LPWSTR result, int resultBytes);
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_ChooseDevice(int id);
 

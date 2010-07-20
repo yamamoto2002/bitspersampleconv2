@@ -6,6 +6,7 @@ EXPORTS
 	WasapiIO_DoDeviceEnumeration
 	WasapiIO_GetDeviceCount
 	WasapiIO_GetDeviceName
+	WasapiIO_InspectDevice
 	WasapiIO_ChooseDevice
 	WasapiIO_Setup
 	WasapiIO_Unsetup

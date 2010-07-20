@@ -49,6 +49,7 @@ public:
     HRESULT DoDeviceEnumeration(void);
     int GetDeviceCount(void);
     bool GetDeviceName(int id, LPWSTR name, size_t nameBytes);
+    bool InspectDevice(int id, LPWSTR result, size_t resultBytes);
 
     // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
@@ -78,9 +79,11 @@ private:
     HANDLE       m_audioSamplesReadyEvent;
 
     IAudioClient *m_audioClient;
-    WAVEFORMATEX *m_mixFormat;
     int          m_frameBytes;
     UINT32       m_bufferSamples;
+    int          m_deviceBitsPerSample;
+    int          m_dataBitsPerSample;
+    int          m_sampleRate;
 
     IAudioRenderClient *m_renderClient;
     HANDLE       m_renderThread;
