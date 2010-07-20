@@ -80,7 +80,7 @@ private:
 
     IAudioClient *m_audioClient;
     int          m_frameBytes;
-    UINT32       m_bufferSamples;
+    UINT32       m_bufferFrameNum;
     int          m_deviceBitsPerSample;
     int          m_dataBitsPerSample;
     int          m_sampleRate;
