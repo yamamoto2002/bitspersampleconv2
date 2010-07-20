@@ -40,6 +40,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 ===!PlayPcmWin 1.0.7 ==
   * バージョン番号の上げ忘れを修正。
   * 量子化ビット数24ビットに対応した。量子化ビット数24ビットでビットマッチ出力しているかどうかについては未調査。
+  * デフォルトの出力レイテンシーを100msに設定。
 
 ===!PlayPcmWin 1.0.5 ==
   * バージョン番号の上げ忘れを修正。
