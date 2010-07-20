@@ -23,7 +23,7 @@ namespace PlayPcmWin
         private WasapiCS wasapi;
 
         string m_wavFilePath;
-        WavData m_wavData;
+        WavData m_wavData = null;
 
         const int DEFAULT_OUTPUT_LATENCY_MS = 100;
 
@@ -60,13 +60,15 @@ namespace PlayPcmWin
                 listBoxDevices.Items.Add(wasapi.GetDeviceName(i));
             }
 
+            buttonDeviceSelect.IsEnabled = false;
             buttonDeselect.IsEnabled = false;
             buttonPlay.IsEnabled = false;
             buttonStop.IsEnabled = false;
             buttonRefer.IsEnabled = true;
             menuItemFileOpen.IsEnabled = true;
             textBoxLatency.IsEnabled = true;
-            
+            buttonInspectDevice.IsEnabled = false;
+
             if (0 < nDevices) {
                 if (0 <= selectedIndex && selectedIndex < listBoxDevices.Items.Count) {
                     listBoxDevices.SelectedIndex = selectedIndex;
@@ -74,11 +76,10 @@ namespace PlayPcmWin
                     listBoxDevices.SelectedIndex = 0;
                 }
 
-                buttonDeviceSelect.IsEnabled = true;
+                if (m_wavData != null) {
+                    buttonDeviceSelect.IsEnabled = true;
+                }
                 buttonInspectDevice.IsEnabled = true;
-            } else {
-                buttonDeviceSelect.IsEnabled = false;
-                buttonInspectDevice.IsEnabled = false;
             }
         }
 

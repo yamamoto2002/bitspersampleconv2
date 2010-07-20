@@ -1,7 +1,5 @@
 // 日本語 UTF-8
 
-#define _CRTDBG_MAP_ALLOC
-
 #include "WasapiWrap.h"
 #include "WWUtil.h"
 #include <avrt.h>
@@ -102,7 +100,7 @@ WasapiWrap::WasapiWrap(void)
     m_audioSamplesReadyEvent = NULL;
     m_audioClient      = NULL;
     m_frameBytes       = 0;
-    m_bufferSamples    = 0;
+    m_bufferFrameNum    = 0;
     m_renderClient     = NULL;
     m_renderThread     = NULL;
     m_pcmData          = NULL;
@@ -418,14 +416,14 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
         AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
         bufferDuration, bufferDuration, waveFormat, NULL);
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
-        HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
+        HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
 
         SafeRelease(&m_audioClient);
 
         bufferDuration = (REFERENCE_TIME)(
             10000.0 *                         // (REFERENCE_TIME / ms) *
             1000 *                            // (ms / s) *
-            m_bufferSamples /                 // frames /
+            m_bufferFrameNum /                 // frames /
             waveFormat->nSamplesPerSec +     // (frames / s)
             0.5);
 
@@ -445,7 +443,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
         goto end;
     }
 
-    HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
+    HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
     HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
     HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
 
@@ -493,14 +491,15 @@ WasapiWrap::SetOutputData(BYTE *data, int bytes)
         int fromPos = 0;
         int toPos = 0;
         for (int i=0; i<nData; ++i) {
-            p[toPos++] = data[fromPos++];
-            p[toPos++] = data[fromPos++];
-            p[toPos++] = data[fromPos++];
             p[toPos++] = 0;
+            p[toPos++] = data[fromPos++];
+            p[toPos++] = data[fromPos++];
+            p[toPos++] = data[fromPos++];
         }
         m_pcmData->stream = p;
-        //free(data);
-        //data = NULL;
+
+        m_frameBytes = 8;
+        m_pcmData->nFrames = nData / 2; // 2==stereo
     } else {
         BYTE *p = (BYTE *)malloc(bytes);
         memcpy(p, data, bytes);
@@ -534,11 +533,11 @@ WasapiWrap::Start()
     assert(m_renderThread);
 
     assert(m_renderClient);
-    HRG(m_renderClient->GetBuffer(m_bufferSamples, &pData));
+    HRG(m_renderClient->GetBuffer(m_bufferFrameNum, &pData));
 
-    memset(pData, 0, m_bufferSamples * m_frameBytes);
+    memset(pData, 0, m_bufferFrameNum * m_frameBytes);
 
-    HRG(m_renderClient->ReleaseBuffer(m_bufferSamples, 0));
+    HRG(m_renderClient->ReleaseBuffer(m_bufferFrameNum, 0));
 
     m_footerCount = 0;
 
@@ -588,8 +587,8 @@ WasapiWrap::Run(int millisec)
     //printf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
     DWORD rv = WaitForSingleObject(m_renderThread, millisec);
     if (rv == WAIT_TIMEOUT) {
+        Sleep(10);
         //printf(".\n");
-        Sleep(100);
         return false;
     }
     printf("%s rv=%08x return true\n", __FUNCTION__, rv);
@@ -653,54 +652,54 @@ WasapiWrap::SetPosFrame(int v)
 bool
 WasapiWrap::AudioSamplesReadyProc(void)
 {
-    bool    result    = true;
-    UINT32  *pFrames  = NULL;
-    BYTE    *pData    = NULL;
-    HRESULT hr        = 0;
-    int     copyBytes = 0;
+    bool    result     = true;
+    BYTE    *pFrames   = NULL;
+    BYTE    *pData     = NULL;
+    HRESULT hr         = 0;
+    int     copyFrames = 0;
 
     WaitForSingleObject(m_mutex, INFINITE);
 
-    copyBytes = m_bufferSamples;
-    if (m_pcmData->nFrames < m_pcmData->posFrame + copyBytes) {
-        copyBytes = m_pcmData->nFrames - m_pcmData->posFrame;
+    copyFrames = m_bufferFrameNum;
+    if (m_pcmData->nFrames < m_pcmData->posFrame + copyFrames) {
+        copyFrames = m_pcmData->nFrames - m_pcmData->posFrame;
     }
 
-    if (copyBytes <= 0) {
-        copyBytes = 0;
+    if (copyFrames <= 0) {
+        copyFrames = 0;
     } else {
-        pFrames = (UINT32 *)m_pcmData->stream;
-        pFrames += m_pcmData->posFrame;
+        pFrames = (BYTE *)m_pcmData->stream;
+        pFrames += m_pcmData->posFrame * m_frameBytes;
     }
 
     assert(m_renderClient);
-    hr = m_renderClient->GetBuffer(m_bufferSamples, &pData);
+    hr = m_renderClient->GetBuffer(m_bufferFrameNum, &pData);
     if (FAILED(hr)) {
         result = false;
         goto end;
     }
 
-    if (0 < copyBytes) {
-        CopyMemory(pData, pFrames, copyBytes * m_frameBytes);
+    if (0 < copyFrames) {
+        CopyMemory(pData, pFrames, copyFrames * m_frameBytes);
     }
-    if (0 < m_bufferSamples - copyBytes) {
-        memset(&pData[copyBytes*m_frameBytes], 0,
-            (m_bufferSamples - copyBytes)*m_frameBytes);
+    if (0 < m_bufferFrameNum - copyFrames) {
+        memset(&pData[copyFrames*m_frameBytes], 0,
+            (m_bufferFrameNum - copyFrames)*m_frameBytes);
         /* printf("fc=%d bs=%d cb=%d memset %d bytes\n",
             m_footerCount,
-            m_bufferSamples,
-            copyBytes,
-            (m_bufferSamples - copyBytes)*m_frameBytes);
+            m_bufferFrameNum,
+            copyFrames,
+            (m_bufferFrameNum - copyFrames)*m_frameBytes);
         */
     }
 
-    hr = m_renderClient->ReleaseBuffer(m_bufferSamples, 0);
+    hr = m_renderClient->ReleaseBuffer(m_bufferFrameNum, 0);
     if (FAILED(hr)) {
         result = false;
         goto end;
     }
 
-    m_pcmData->posFrame += copyBytes;
+    m_pcmData->posFrame += copyFrames;
     if (m_pcmData->nFrames <= m_pcmData->posFrame) {
         ++m_footerCount;
         if (FOOTER_SEND_PACKET_NUM < m_footerCount) {
