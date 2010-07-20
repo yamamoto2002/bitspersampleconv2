@@ -1,8 +1,11 @@
+#define _CRTDBG_MAP_ALLOC
 #include "WasapiWrap.h"
 #include "WWUtil.h"
 
 #include <stdio.h>
 #include <Windows.h>
+#include <stdlib.h>
+#include <crtdbg.h>
 
 static HRESULT
 GetIntValueFromConsole(const char *prompt, int from, int to, int *value_return)
@@ -35,6 +38,14 @@ GetIntValueFromConsole(const char *prompt, int from, int to, int *value_return)
     return NOERROR;
 }
 
+struct PcmInfo {
+    int bitsPerSample;
+    int nSamplesPerSec;
+    int nChannels;
+};
+
+static PcmInfo g_pcmInfo;
+
 static HRESULT
 Run(int deviceId, int latencyInMillisec, WWPcmData *pcm)
 {
@@ -53,14 +64,36 @@ Run(int deviceId, int latencyInMillisec, WWPcmData *pcm)
     }
     printf("\n");
 
+#if 0
+    for (int i=0; i<2; ++i) {
+        ww.ChooseDevice(deviceId);
+        if (deviceId < 0) {
+            goto end;
+        }
+
+        HRG(ww.Setup(g_pcmInfo.nSamplesPerSec, g_pcmInfo.bitsPerSample, latencyInMillisec));
+
+        ww.SetOutputData(pcm->stream, pcm->nFrames * (g_pcmInfo.bitsPerSample/8)*g_pcmInfo.nChannels);
+
+        if (i==1) {
+            break;
+        }
+        ww.Stop();
+        ww.Unsetup();
+        ww.DoDeviceEnumeration();
+    }
+#else
     ww.ChooseDevice(deviceId);
     if (deviceId < 0) {
         goto end;
     }
 
-    HRG(ww.Setup(pcm->nSamplesPerSec, pcm->bitsPerSample, latencyInMillisec));
+    HRG(ww.Setup(g_pcmInfo.nSamplesPerSec, g_pcmInfo.bitsPerSample, latencyInMillisec));
 
-    ww.Start(pcm);
+    ww.SetOutputData(pcm->stream, pcm->nFrames * (g_pcmInfo.bitsPerSample/8)*g_pcmInfo.nChannels);
+#endif
+
+    ww.Start();
 
     while (!ww.Run(1000)) {
         printf("%d / %d\n", ww.GetPosFrame(), ww.GetTotalFrameNum());
@@ -230,9 +263,9 @@ LoadAndCreatePcmData(const char *path)
 
     if (wfi.data) {
         result = new WWPcmData();
-        result->bitsPerSample  = wfi.bitsPerSample;
-        result->nChannels      = wfi.nChannels;
-        result->nSamplesPerSec = wfi.nSamplesPerSec;
+        g_pcmInfo.bitsPerSample  = wfi.bitsPerSample;
+        g_pcmInfo.nChannels      = wfi.nChannels;
+        g_pcmInfo.nSamplesPerSec = wfi.nSamplesPerSec;
         result->nFrames        = wfi.nFrames;
         result->posFrame = 0;
         result->stream = wfi.data;
@@ -291,6 +324,7 @@ main(int argc, char *argv[])
         delete pcmData;
     }
 
+    _CrtDumpMemoryLeaks();
     return 0;
 }
 

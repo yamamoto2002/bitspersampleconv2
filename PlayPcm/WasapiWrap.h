@@ -22,9 +22,9 @@ struct WWDeviceInfo {
 };
 
 struct WWPcmData {
-    int  bitsPerSample;
-    int  nChannels;
-    int  nSamplesPerSec;
+    //int  bitsPerSample;
+    //int  nChannels;
+    //int  nSamplesPerSec;
     int  nFrames;
     int  posFrame;
     BYTE *stream;
@@ -49,6 +49,7 @@ public:
     HRESULT DoDeviceEnumeration(void);
     int GetDeviceCount(void);
     bool GetDeviceName(int id, LPWSTR name, size_t nameBytes);
+    bool InspectDevice(int id, LPWSTR result, size_t resultBytes);
 
     // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
@@ -56,7 +57,10 @@ public:
     HRESULT Setup(int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);
 
-    HRESULT Start(WWPcmData *data);
+    void SetOutputData(BYTE *data, int bytes);
+    void ClearOutputData(void);
+
+    HRESULT Start(void);
 
     bool Run(int millisec);
 
@@ -64,6 +68,7 @@ public:
 
     int GetPosFrame(void);
     int GetTotalFrameNum(void);
+    bool SetPosFrame(int v);
 
 private:
     std::vector<WWDeviceInfo> m_deviceInfo;
@@ -74,15 +79,18 @@ private:
     HANDLE       m_audioSamplesReadyEvent;
 
     IAudioClient *m_audioClient;
-    WAVEFORMATEX *m_mixFormat;
     int          m_frameBytes;
     UINT32       m_bufferSamples;
+    int          m_deviceBitsPerSample;
+    int          m_dataBitsPerSample;
+    int          m_sampleRate;
 
     IAudioRenderClient *m_renderClient;
     HANDLE       m_renderThread;
     WWPcmData    *m_pcmData;
     HANDLE       m_mutex;
     int          m_footerCount;
+    bool         m_coInitializeSuccess;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
 
