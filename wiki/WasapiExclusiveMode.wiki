@@ -25,8 +25,6 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 
-!PlayPcmWin 1.0.7
-
 =ソースコード=
 
 閲覧だけなら:
