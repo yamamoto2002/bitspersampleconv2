@@ -11,7 +11,7 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin105.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.zip
 
 =使用方法=
 
@@ -21,15 +21,9 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 
 アンインストールは、プログラムの追加と削除で行うか、もう一度Setup.exeを実行して削除を選びます。
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin104.jpg
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 
-!PlayPcmWin 1.0.4
-
-
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
-
-!PlayPcmWin 1.0.1
-
+!PlayPcmWin 1.0.7
 
 =ソースコード=
 
@@ -43,6 +37,10 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
 !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
 =更新履歴=
+===!PlayPcmWin 1.0.7 ==
+  * バージョン番号の上げ忘れを修正。
+  * 量子化ビット数24ビットに対応した。量子化ビット数24ビットでビットマッチ出力しているかどうかについては未調査。
+
 ===!PlayPcmWin 1.0.5 ==
   * バージョン番号の上げ忘れを修正。
 
@@ -51,7 +49,6 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin.png
 
 ===!PlayPcmWin 1.0.3 ==
   * サンプリング周波数等の設定に失敗したあとに、もう一度設定しようとすると異常終了する不具合を修正。
-  * 量子化ビット数24ビットに対応したつもりだが、量子化ビット数24ビットの設定は一度も成功していない。
 
 ===!PlayPcmWin 1.0.1 ==
   * コンソールプログラムをやめてウィンドウが出るようにした。
