@@ -40,7 +40,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 
 =更新履歴=
 ===!PlayPcmWin 1.0.8 ==
-  * インストーラープログラムを修正。
+  * インストーラープログラムを修正。(avrt.dll)
 
 ===!PlayPcmWin 1.0.7 ==
   * 量子化ビット数24ビット 2チャンネルのWAVファイルにも対応した。量子化ビット数24ビットでビットマッチ出力しているかどうかについては未調査。
