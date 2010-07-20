@@ -24,6 +24,10 @@ namespace Wasapiex {
         private extern static bool 
         WasapiIO_GetDeviceName(int id, System.Text.StringBuilder name, int nameBytes);
 
+        [DllImport("WasapiIODLL.dll", CharSet = CharSet.Auto)]
+        private extern static bool
+        WasapiIO_InspectDevice(int id, System.Text.StringBuilder result, int resultBytes);
+
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_ChooseDevice(int id);
@@ -87,6 +91,12 @@ namespace Wasapiex {
         public string GetDeviceName(int id) {
             StringBuilder buf = new StringBuilder(64);
             WasapiIO_GetDeviceName(id, buf, buf.Capacity*2);
+            return buf.ToString();
+        }
+
+        public string InspectDevice(int id) {
+            StringBuilder buf = new StringBuilder(65536);
+            WasapiIO_InspectDevice(id, buf, buf.Capacity * 2);
             return buf.ToString();
         }
 

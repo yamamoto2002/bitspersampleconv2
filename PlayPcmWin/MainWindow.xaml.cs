@@ -25,6 +25,8 @@ namespace PlayPcmWin
         string m_wavFilePath;
         WavData m_wavData;
 
+        const int DEFAULT_OUTPUT_LATENCY_MS = 100;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -33,6 +35,7 @@ namespace PlayPcmWin
             wasapi = new WasapiCS();
             hr = wasapi.Init();
             textBoxLog.Text += string.Format("wasapi.Init() {0:X8}\r\n", hr);
+            textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
 
             Closed += new EventHandler(MainWindow_Closed);
 
@@ -41,6 +44,11 @@ namespace PlayPcmWin
 
         private void CreateDeviceList() {
             int hr;
+
+            int selectedIndex = -1;
+            if (0 < listBoxDevices.Items.Count) {
+                selectedIndex = listBoxDevices.SelectedIndex;
+            }
 
             listBoxDevices.Items.Clear();
 
@@ -51,9 +59,26 @@ namespace PlayPcmWin
             for (int i = 0; i < nDevices; ++i) {
                 listBoxDevices.Items.Add(wasapi.GetDeviceName(i));
             }
+
+            buttonDeselect.IsEnabled = false;
+            buttonPlay.IsEnabled = false;
+            buttonStop.IsEnabled = false;
+            buttonRefer.IsEnabled = true;
+            menuItemFileOpen.IsEnabled = true;
+            textBoxLatency.IsEnabled = true;
+            
             if (0 < nDevices) {
-                listBoxDevices.SelectedIndex = 0;
-                //buttonDeviceSelect.IsEnabled = true;
+                if (0 <= selectedIndex && selectedIndex < listBoxDevices.Items.Count) {
+                    listBoxDevices.SelectedIndex = selectedIndex;
+                } else {
+                    listBoxDevices.SelectedIndex = 0;
+                }
+
+                buttonDeviceSelect.IsEnabled = true;
+                buttonInspectDevice.IsEnabled = true;
+            } else {
+                buttonDeviceSelect.IsEnabled = false;
+                buttonInspectDevice.IsEnabled = false;
             }
         }
 
@@ -119,20 +144,27 @@ namespace PlayPcmWin
         }
 
         private void buttonDeviceSelect_Click(object sender, RoutedEventArgs e) {
+            int latencyMillisec = Int32.Parse(textBoxLatency.Text);
+            if (latencyMillisec <= 0) {
+                latencyMillisec = DEFAULT_OUTPUT_LATENCY_MS;
+                textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
+            }
+
             int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
             textBoxLog.Text += string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr);
             if (hr < 0) {
                 return;
             }
 
-            hr = wasapi.Setup(m_wavData.SampleRate, m_wavData.BitsPerSample, 10);
-            textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}) {2:X8}\r\n",
-                m_wavData.SampleRate, m_wavData.BitsPerSample, hr);
+            hr = wasapi.Setup(m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec);
+            textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}, {2}) {3:X8}\r\n",
+                m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec, hr);
             if (hr < 0) {
                 wasapi.Unsetup();
+                textBoxLog.Text += string.Format("wasapi.Unsetup()\r\n");
                 CreateDeviceList();
-                string s = string.Format("エラー: wasapi.Setup({0}, {1})失敗。{2:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bitに対応していないのか、どちらかです。",
-                    m_wavData.SampleRate, m_wavData.BitsPerSample, hr);
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2})失敗。{3:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}msに対応していないのか、どちらかです。",
+                    m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec, hr);
                 MessageBox.Show(s);
                 return;
             }
@@ -145,19 +177,14 @@ namespace PlayPcmWin
             buttonDeselect.IsEnabled = true;
             buttonPlay.IsEnabled = true;
             buttonRefer.IsEnabled = false;
+            buttonInspectDevice.IsEnabled = false;
+            textBoxLatency.IsEnabled = false;
         }
 
         private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
             wasapi.Stop();
             wasapi.Unsetup();
             CreateDeviceList();
-
-            buttonDeviceSelect.IsEnabled = true;
-            buttonDeselect.IsEnabled = false;
-            buttonPlay.IsEnabled = false;
-            buttonStop.IsEnabled = false;
-            buttonRefer.IsEnabled = true;
-            menuItemFileOpen.IsEnabled = true;
         }
 
         BackgroundWorker bw;
@@ -174,6 +201,7 @@ namespace PlayPcmWin
             slider1.Maximum = wasapi.GetTotalFrameNum();
             buttonStop.IsEnabled = true;
             buttonPlay.IsEnabled = false;
+            buttonDeselect.IsEnabled = false;
 
             bw = new BackgroundWorker();
             bw.WorkerReportsProgress = true;
@@ -194,6 +222,8 @@ namespace PlayPcmWin
         private void RunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             buttonPlay.IsEnabled = true;
             buttonStop.IsEnabled = false;
+            buttonDeselect.IsEnabled = true;
+
             slider1.Value = 0;
             label1.Content = "0/0";
 
@@ -205,6 +235,7 @@ namespace PlayPcmWin
 
             while (!wasapi.Run(100)) {
                 bw.ReportProgress(0);
+                System.Threading.Thread.Sleep(1);
             }
 
             wasapi.Stop();
@@ -226,6 +257,12 @@ namespace PlayPcmWin
                     wasapi.SetPosFrame((int)slider1.Value);
                 }
             }
+        }
+
+        private void buttonInspectDevice_Click(object sender, RoutedEventArgs e) {
+            string dn = wasapi.GetDeviceName(listBoxDevices.SelectedIndex);
+            string s = wasapi.InspectDevice(listBoxDevices.SelectedIndex);
+            textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
         }
     }
 }

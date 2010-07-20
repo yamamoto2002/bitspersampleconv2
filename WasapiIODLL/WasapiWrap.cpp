@@ -9,6 +9,38 @@
 
 #define FOOTER_SEND_PACKET_NUM (2)
 
+static void
+WaveFormatDebug(WAVEFORMATEX *v)
+{
+    printf(
+        "  cbSize=%d\n"
+        "  nAvgBytesPerSec=%d\n"
+        "  nBlockAlign=%d\n"
+        "  nChannels=%d\n"
+        "  nSamplesPerSec=%d\n"
+        "  wBitsPerSample=%d\n"
+        "  wFormatTag=0x%x\n",
+        v->cbSize,
+        v->nAvgBytesPerSec,
+        v->nBlockAlign,
+        v->nChannels,
+        v->nSamplesPerSec,
+        v->wBitsPerSample,
+        v->wFormatTag);
+}
+
+static void
+WFEXDebug(WAVEFORMATEXTENSIBLE *v)
+{
+    printf(
+        "  dwChannelMask=0x%x\n"
+        "  Samples.wValidBitsPerSample=%d\n"
+        "  SubFormat=0x%x\n",
+        v->dwChannelMask,
+        v->Samples.wValidBitsPerSample,
+        v->SubFormat);
+}
+
 WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
     this->id = id;
@@ -67,7 +99,6 @@ WasapiWrap::WasapiWrap(void)
     m_shutdownEvent    = NULL;
     m_audioSamplesReadyEvent = NULL;
     m_audioClient      = NULL;
-    m_mixFormat        = NULL;
     m_frameBytes       = 0;
     m_bufferSamples    = 0;
     m_renderClient     = NULL;
@@ -217,6 +248,94 @@ WasapiWrap::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
     return true;
 }
 
+bool
+WasapiWrap::InspectDevice(int id, LPWSTR result, size_t resultBytes)
+{
+    HRESULT hr;
+    WAVEFORMATEX *waveFormat = NULL;
+
+    assert(0 <= id && id < (int)m_deviceInfo.size());
+
+    assert(m_deviceCollection);
+    assert(!m_deviceToUse);
+
+    result[0] = 0;
+
+    int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000};
+    int bitsPerSampleList[] = {16, 32};
+
+    HRG(m_deviceCollection->Item(id, &m_deviceToUse));
+
+    HRG(m_deviceToUse->Activate(
+        __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
+
+    for (int j=0; j<sizeof bitsPerSampleList/sizeof bitsPerSampleList[0]; ++j) {
+        for (int i=0; i<sizeof sampleRateList/sizeof sampleRateList[0]; ++i) {
+            int sampleRate    = sampleRateList[i];
+            int bitsPerSample = bitsPerSampleList[j];
+
+            assert(!waveFormat);
+            HRG(m_audioClient->GetMixFormat(&waveFormat));
+            assert(waveFormat);
+
+            WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
+
+            printf("original Mix Format:\n");
+            WaveFormatDebug(waveFormat);
+            WFEXDebug(wfex);
+
+            if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
+                printf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
+                hr = E_FAIL;
+                goto end;
+            }
+
+            wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+            wfex->Format.wBitsPerSample = bitsPerSample;
+            wfex->Format.nSamplesPerSec = sampleRate;
+
+            wfex->Format.nBlockAlign = (bitsPerSample / 8) * waveFormat->nChannels;
+            wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+            wfex->Samples.wValidBitsPerSample = bitsPerSample;
+
+            printf("preferred Format:\n");
+            WaveFormatDebug(waveFormat);
+            WFEXDebug(wfex);
+    
+            hr = m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,waveFormat,NULL);
+            printf("IsFormatSupported=%08x\n", hr);
+            if (S_OK == hr) {
+                wchar_t s[256];
+                StringCbPrintfW(s, sizeof s-1, L"  %6dHz %dbit: ok 0x%08x\r\n",
+                    sampleRate, bitsPerSample, hr);
+                wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+            } else {
+                wchar_t s[256];
+                StringCbPrintfW(s, sizeof s-1, L"  %6dHz %dbit: na 0x%08x\r\n",
+                    sampleRate, bitsPerSample, hr);
+                wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+            }
+
+            if (waveFormat) {
+                CoTaskMemFree(waveFormat);
+                waveFormat = NULL;
+            }
+
+        }
+    }
+
+end:
+    SafeRelease(&m_deviceToUse);
+    SafeRelease(&m_audioClient);
+
+    if (waveFormat) {
+        CoTaskMemFree(waveFormat);
+        waveFormat = NULL;
+    }
+
+    return true;
+}
+
 HRESULT
 WasapiWrap::ChooseDevice(int id)
 {
@@ -236,43 +355,18 @@ end:
     return hr;
 }
 
-static void
-MixFormatDebug(WAVEFORMATEX *v)
-{
-    printf(
-        "  cbSize=%d\n"
-        "  nAvgBytesPerSec=%d\n"
-        "  nBlockAlign=%d\n"
-        "  nChannels=%d\n"
-        "  nSamplesPerSec=%d\n"
-        "  wBitsPerSample=%d\n"
-        "  wFormatTag=0x%x\n",
-        v->cbSize,
-        v->nAvgBytesPerSec,
-        v->nBlockAlign,
-        v->nChannels,
-        v->nSamplesPerSec,
-        v->wBitsPerSample,
-        v->wFormatTag);
-}
-
-static void
-WFEXDebug(WAVEFORMATEXTENSIBLE *v)
-{
-    printf(
-        "  dwChannelMask=0x%x\n"
-        "  Samples.wValidBitsPerSample=%d\n"
-        "  SubFormat=0x%x\n",
-        v->dwChannelMask,
-        v->Samples.wValidBitsPerSample,
-        v->SubFormat);
-}
-
 HRESULT
 WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 {
     HRESULT hr = 0;
-    UINT32  renderBufferBytes;
+    WAVEFORMATEX *waveFormat = NULL;
+
+    m_sampleRate = sampleRate;
+    m_dataBitsPerSample = bitsPerSample;
+    m_deviceBitsPerSample = m_dataBitsPerSample;
+    if (24 == m_deviceBitsPerSample) {
+        m_deviceBitsPerSample = 32;
+    }
 
     m_audioSamplesReadyEvent =
         CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -283,44 +377,44 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
     HRG(m_deviceToUse->Activate(
         __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
 
-    assert(!m_mixFormat);
-    HRG(m_audioClient->GetMixFormat(&m_mixFormat));
-    assert(m_mixFormat);
+    assert(!waveFormat);
+    HRG(m_audioClient->GetMixFormat(&waveFormat));
+    assert(waveFormat);
 
-    WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)m_mixFormat;
+    WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
     printf("original Mix Format:\n");
-    MixFormatDebug(m_mixFormat);
+    WaveFormatDebug(waveFormat);
     WFEXDebug(wfex);
 
-    if (m_mixFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
-        printf("E: unsupported device ! mixformat == 0x%08x\n", m_mixFormat->wFormatTag);
+    if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
+        printf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
         hr = E_FAIL;
         goto end;
     }
 
     wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-    wfex->Format.wBitsPerSample = bitsPerSample;
+    wfex->Format.wBitsPerSample = m_deviceBitsPerSample;
     wfex->Format.nSamplesPerSec = sampleRate;
 
-    wfex->Format.nBlockAlign = (bitsPerSample / 8) * m_mixFormat->nChannels;
+    wfex->Format.nBlockAlign = (m_deviceBitsPerSample / 8) * waveFormat->nChannels;
     wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-    wfex->Samples.wValidBitsPerSample = bitsPerSample;
+    wfex->Samples.wValidBitsPerSample = m_deviceBitsPerSample;
 
-    printf("preferred Mix Format:\n");
-    MixFormatDebug(m_mixFormat);
+    printf("preferred Format:\n");
+    WaveFormatDebug(waveFormat);
     WFEXDebug(wfex);
     
-    HRG(m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,m_mixFormat,NULL));
+    HRG(m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,waveFormat,NULL));
 
-    m_frameBytes = m_mixFormat->nBlockAlign;
+    m_frameBytes = waveFormat->nBlockAlign;
     
     REFERENCE_TIME bufferDuration = latencyMillisec*10000;
 
     hr = m_audioClient->Initialize(
         AUDCLNT_SHAREMODE_EXCLUSIVE,
         AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
-        bufferDuration, bufferDuration, m_mixFormat, NULL);
+        bufferDuration, bufferDuration, waveFormat, NULL);
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         HRG(m_audioClient->GetBufferSize(&m_bufferSamples));
 
@@ -330,7 +424,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
             10000.0 *                         // (REFERENCE_TIME / ms) *
             1000 *                            // (ms / s) *
             m_bufferSamples /                 // frames /
-            m_mixFormat->nSamplesPerSec +     // (frames / s)
+            waveFormat->nSamplesPerSec +     // (frames / s)
             0.5);
 
         HRG(m_deviceToUse->Activate(
@@ -341,7 +435,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
             AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
             bufferDuration, 
             bufferDuration, 
-            m_mixFormat, 
+            waveFormat, 
             NULL);
     }
     if (FAILED(hr)) {
@@ -353,9 +447,13 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
     HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
     HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
 
-    renderBufferBytes = m_bufferSamples * m_frameBytes;
-
 end:
+
+    if (waveFormat) {
+        CoTaskMemFree(waveFormat);
+        waveFormat = NULL;
+    }
+
     return hr;
 }
 
@@ -370,11 +468,6 @@ WasapiWrap::Unsetup(void)
     SafeRelease(&m_deviceToUse);
     SafeRelease(&m_audioClient);
     SafeRelease(&m_renderClient);
-
-    if (m_mixFormat) {
-        CoTaskMemFree(m_mixFormat);
-        m_mixFormat = NULL;
-    }
 }
 
 void
@@ -385,9 +478,32 @@ WasapiWrap::SetOutputData(BYTE *data, int bytes)
     }
 
     m_pcmData = new WWPcmData();
-    m_pcmData->stream = data;
     m_pcmData->nFrames = bytes/m_frameBytes;
     m_pcmData->posFrame = 0;
+
+    // m_pcmData->stream create
+    if (24 == m_dataBitsPerSample) {
+        // 24bit to 32bit
+
+        int nData = bytes / 3; // 3==24bit
+
+        BYTE *p = (BYTE *)malloc(nData * 4);
+        int fromPos = 0;
+        int toPos = 0;
+        for (int i=0; i<nData; ++i) {
+            p[toPos++] = 0;
+            p[toPos++] = data[fromPos++];
+            p[toPos++] = data[fromPos++];
+            p[toPos++] = data[fromPos++];
+        }
+        m_pcmData->stream = p;
+        //free(data);
+        //data = NULL;
+    } else {
+        BYTE *p = (BYTE *)malloc(bytes);
+        memcpy(p, data, bytes);
+        m_pcmData->stream = p;
+    }
 }
 
 void
@@ -470,7 +586,8 @@ WasapiWrap::Run(int millisec)
     //printf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
     DWORD rv = WaitForSingleObject(m_renderThread, millisec);
     if (rv == WAIT_TIMEOUT) {
-        printf(".\n");
+        Sleep(10);
+        //printf(".\n");
         return false;
     }
     printf("%s rv=%08x return true\n", __FUNCTION__, rv);
