@@ -41,7 +41,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
-===!PlayPcmWin 1.0.9 ==
+===!PlayPcmWin 1.0.10 ==
   * 「対応フォーマット」ボタンを押したときにIAudioClient::GetDevicePeriodの値を表示するようにした。
 
 ===!PlayPcmWin 1.0.9 ==
