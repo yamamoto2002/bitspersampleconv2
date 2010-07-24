@@ -33,7 +33,7 @@ WasapiIO_ChooseDevice(int id);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Setup(int sampleRate, int bitsPerSample, int latencyMillisec);
+WasapiIO_Setup(int dataFeedMode, int sampleRate, int bitsPerSample, int latencyMillisec);
 
 extern "C" __declspec(dllexport)
 void __stdcall
