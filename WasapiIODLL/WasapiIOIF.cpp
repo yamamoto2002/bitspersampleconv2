@@ -1,8 +1,8 @@
 #include "WasapiIOIF.h"
-#include "WasapiWrap.h"
+#include "WasapiUser.h"
 #include <assert.h>
 
-static WasapiWrap* g_pWasapiWrap = 0;
+static WasapiUser* g_pWasapiWrap = 0;
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
@@ -11,7 +11,7 @@ WasapiIO_Init(void)
     HRESULT hr = S_OK;
 
     if(!g_pWasapiWrap) {
-        g_pWasapiWrap = new WasapiWrap();
+        g_pWasapiWrap = new WasapiUser();
         hr = g_pWasapiWrap->Init();
     }
 
