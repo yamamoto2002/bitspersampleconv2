@@ -91,13 +91,11 @@ WasapiWrap::WasapiWrap(void)
     m_coInitializeSuccess = false;
 }
 
-
 WasapiWrap::~WasapiWrap(void)
 {
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
 }
-
 
 HRESULT
 WasapiWrap::Init(void)
@@ -139,7 +137,6 @@ WasapiWrap::Term(void)
     }
 }
 
-
 static HRESULT
 DeviceNameGet(
     IMMDeviceCollection *dc, UINT id, wchar_t *name, size_t nameBytes)
@@ -175,7 +172,6 @@ end:
     SafeRelease(&ps);
     return hr;
 }
-
 
 HRESULT
 WasapiWrap::DoDeviceEnumeration(void)
