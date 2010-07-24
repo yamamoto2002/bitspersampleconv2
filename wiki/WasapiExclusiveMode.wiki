@@ -37,6 +37,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
 =更新履歴=
+===!PlayPcmWin 1.0.9 ==
+  * 従来のイベント駆動モードに加えてタイマー駆動モードを追加。
+
 ===!PlayPcmWin 1.0.8 ==
   * インストーラープログラムを修正。
 
