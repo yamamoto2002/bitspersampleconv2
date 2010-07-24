@@ -421,7 +421,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
         SafeRelease(&m_audioClient);
 
         bufferDuration = (REFERENCE_TIME)(
-            10000.0 *                         // (REFERENCE_TIME / ms) *
+            10000.0 *                         // (REFERENCE_TIME(100ns) / ms) *
             1000 *                            // (ms / s) *
             m_bufferFrameNum /                 // frames /
             waveFormat->nSamplesPerSec +     // (frames / s)
@@ -470,6 +470,24 @@ WasapiWrap::Unsetup(void)
     SafeRelease(&m_renderClient);
 }
 
+static BYTE*
+Stereo24ToStereo32(BYTE *data, int bytes)
+{
+    int nData = bytes / 3; // 3==24bit
+
+    BYTE *p = (BYTE *)malloc(nData * 4);
+    int fromPos = 0;
+    int toPos = 0;
+    for (int i=0; i<nData; ++i) {
+        p[toPos++] = 0;
+        p[toPos++] = data[fromPos++];
+        p[toPos++] = data[fromPos++];
+        p[toPos++] = data[fromPos++];
+    }
+
+    return p;
+}
+
 void
 WasapiWrap::SetOutputData(BYTE *data, int bytes)
 {
@@ -483,23 +501,9 @@ WasapiWrap::SetOutputData(BYTE *data, int bytes)
 
     // m_pcmData->stream create
     if (24 == m_dataBitsPerSample) {
-        // 24bit to 32bit
-
-        int nData = bytes / 3; // 3==24bit
-
-        BYTE *p = (BYTE *)malloc(nData * 4);
-        int fromPos = 0;
-        int toPos = 0;
-        for (int i=0; i<nData; ++i) {
-            p[toPos++] = 0;
-            p[toPos++] = data[fromPos++];
-            p[toPos++] = data[fromPos++];
-            p[toPos++] = data[fromPos++];
-        }
+        BYTE *p = Stereo24ToStereo32(data, bytes);
         m_pcmData->stream = p;
-
-        m_frameBytes = 8;
-        m_pcmData->nFrames = nData / 2; // 2==stereo
+        m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
     } else {
         BYTE *p = (BYTE *)malloc(bytes);
         memcpy(p, data, bytes);
