@@ -13,7 +13,8 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin110.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin111.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin111x64.zip
 
 =使用方法=
 
@@ -41,6 +42,10 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin110_2.jpg
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
+===!PlayPcmWin 1.0.11 ==
+  * !PlayPcmWin 1.0.10でイベント駆動モードがバグッたので修正。
+  * 64ビット版を作成。
+
 ===!PlayPcmWin 1.0.10 ==
   * 「対応フォーマット」ボタンを押したときにIAudioClient::GetDevicePeriodの値を表示するようにした。
 
