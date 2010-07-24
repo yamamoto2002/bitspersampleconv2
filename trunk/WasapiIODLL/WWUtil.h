@@ -28,7 +28,6 @@
 #define CHK(x)                          \
 {   if (!x) {                           \
         dprintf("E: %s is NULL\n", #x); \
-        assert(0);                      \
         return E_FAIL;                  \
     }                                   \
 }                                       \
