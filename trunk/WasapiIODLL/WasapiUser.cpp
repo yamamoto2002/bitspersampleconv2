@@ -1,4 +1,4 @@
-// 日本語 UTF-8
+// 京 UTF-8
 
 #include "WasapiUser.h"
 #include "WWUtil.h"
@@ -6,6 +6,7 @@
 #include <assert.h>
 #include <functiondiscoverykeys.h>
 #include <strsafe.h>
+#include <mmsystem.h>
 
 #define FOOTER_SEND_FRAME_NUM (2)
 #define PERIODS_PER_BUFFER_OF_TIMER_DRIVEN_MODE (4)
@@ -233,6 +234,8 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 {
     HRESULT hr;
     WAVEFORMATEX *waveFormat = NULL;
+    REFERENCE_TIME hnsDefaultDevicePeriod;
+    REFERENCE_TIME hnsMinimumDevicePeriod;
 
     assert(0 <= id && id < (int)m_deviceInfo.size());
 
@@ -308,6 +311,19 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             }
 
         }
+    }
+
+    {
+        wchar_t s[256];
+
+        HRG(m_audioClient->GetDevicePeriod(
+            &hnsDefaultDevicePeriod, &hnsMinimumDevicePeriod));
+        StringCbPrintfW(s, sizeof s-1,
+            L"  Default scheduling period for a shared-mode stream:    %f ms\n"
+            L"  Minimum scheduling period for a exclusive-mode stream: %f ms\n",
+            ((double)hnsDefaultDevicePeriod)*0.0001,
+            ((double)hnsMinimumDevicePeriod)*0.0001);
+        wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
     }
 
 end:
@@ -553,7 +569,7 @@ WasapiUser::Start()
 
     writableFrames = m_bufferFrameNum;
     if (WWDFMTimerDriven == m_dataFeedMode) {
-        UINT32  padding    = 0; //< 使用中のフレーム数。
+        UINT32  padding    = 0; //< frame now now using
         HRG(m_audioClient->GetCurrentPadding(&padding));
         writableFrames = m_bufferFrameNum - padding;
     }
@@ -688,7 +704,7 @@ WasapiUser::AudioSamplesSendProc(void)
 
     writableFrames      = m_bufferFrameNum;
     if (WWDFMTimerDriven == m_dataFeedMode) {
-        UINT32  padding    = 0; //< 使用中のフレーム数。
+        UINT32  padding    = 0; //< frame num now using
         HRG(m_audioClient->GetCurrentPadding(&padding));
         writableFrames = m_bufferFrameNum - padding;
     }
@@ -748,14 +764,17 @@ end:
 DWORD
 WasapiUser::RenderMain(void)
 {
-    bool stillPlaying = true;
-    HANDLE waitArray[2] = {m_shutdownEvent, m_audioSamplesReadyEvent};
-    HANDLE mmcssHandle = NULL;
-    DWORD mmcssTaskIndex = 0;
-    DWORD waitResult;
-    HRESULT hr = 0;
+    bool    stillPlaying   = true;
+    HANDLE  waitArray[2]   = {m_shutdownEvent, m_audioSamplesReadyEvent};
+    int     waitArrayCount;
+    HANDLE  mmcssHandle    = NULL;
+    DWORD   mmcssTaskIndex = 0;
+    DWORD   waitResult;
+    HRESULT hr             = 0;
     
     HRG(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+
+    timeBeginPeriod(1);
 
     mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
     if (NULL == mmcssHandle) {
@@ -763,16 +782,18 @@ WasapiUser::RenderMain(void)
             GetLastError());
     }
 
+    waitArrayCount = 2;
     m_footerNeedSendCount = FOOTER_SEND_FRAME_NUM;
     DWORD timeoutMillisec = INFINITE;
     if (m_dataFeedMode == WWDFMTimerDriven) {
+        waitArrayCount = 1;
         m_footerNeedSendCount = FOOTER_SEND_FRAME_NUM * 2;
-        timeoutMillisec       = m_latencyMillisec / 2;
+        timeoutMillisec       = m_latencyMillisec     / 2;
     }
 
     while (stillPlaying) {
         waitResult = WaitForMultipleObjects(
-            2, waitArray, FALSE, timeoutMillisec);
+            1, waitArray, FALSE, timeoutMillisec);
         switch (waitResult) {
         case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
             stillPlaying = false;
@@ -795,6 +816,8 @@ end:
         AvRevertMmThreadCharacteristics(mmcssHandle);
         mmcssHandle = NULL;
     }
+
+    timeEndPeriod(1);
 
     CoUninitialize();
     return hr;
