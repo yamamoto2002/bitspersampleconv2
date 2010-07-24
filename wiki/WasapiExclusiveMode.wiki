@@ -43,7 +43,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
 ===!PlayPcmWin 1.0.11 ==
-  * !PlayPcmWin 1.0.10でイベント駆動モードがバグッたので修正。
+  * !PlayPcmWin 1.0.10でイベント駆動モードがバグッたのを修正。
   * 64ビット版を作成。
 
 ===!PlayPcmWin 1.0.10 ==
