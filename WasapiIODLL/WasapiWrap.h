@@ -22,9 +22,6 @@ struct WWDeviceInfo {
 };
 
 struct WWPcmData {
-    //int  bitsPerSample;
-    //int  nChannels;
-    //int  nSamplesPerSec;
     int  nFrames;
     int  posFrame;
     BYTE *stream;
