@@ -34,10 +34,10 @@ struct WWPcmData {
     void CopyFrom(WWPcmData *rhs);
 };
 
-class WasapiWrap {
+class WasapiUser {
 public:
-    WasapiWrap(void);
-    ~WasapiWrap(void);
+    WasapiUser(void);
+    ~WasapiUser(void);
 
     HRESULT Init(void);
     void Term(void);

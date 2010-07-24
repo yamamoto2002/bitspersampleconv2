@@ -4,7 +4,7 @@
     <ClCompile Include="WasapiIOIF.cpp">
       <Filter>source files</Filter>
     </ClCompile>
-    <ClCompile Include="WasapiWrap.cpp">
+    <ClCompile Include="WasapiUser.cpp">
       <Filter>source files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -12,10 +12,10 @@
     <ClInclude Include="WasapiIOIF.h">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="WasapiWrap.h">
+    <ClInclude Include="WWUtil.h">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="WWUtil.h">
+    <ClInclude Include="WasapiUser.h">
       <Filter>header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -80,12 +80,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h" />
-    <ClInclude Include="WasapiWrap.h" />
+    <ClInclude Include="WasapiUser.h" />
     <ClInclude Include="WWUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WasapiIOIF.cpp" />
-    <ClCompile Include="WasapiWrap.cpp" />
+    <ClCompile Include="WasapiUser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="WasapiIODLL.def" />

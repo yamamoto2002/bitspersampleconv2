@@ -1,6 +1,6 @@
 // 日本語 UTF-8
 
-#include "WasapiWrap.h"
+#include "WasapiUser.h"
 #include "WWUtil.h"
 #include <avrt.h>
 #include <assert.h>
@@ -72,9 +72,9 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
 }
 
 ///////////////////////////////////////////////////////////////////////
-// WasapiWrap class
+// WasapiUser class
 
-WasapiWrap::WasapiWrap(void)
+WasapiUser::WasapiUser(void)
 {
     m_deviceCollection = NULL;
     m_deviceToUse      = NULL;
@@ -91,14 +91,14 @@ WasapiWrap::WasapiWrap(void)
     m_coInitializeSuccess = false;
 }
 
-WasapiWrap::~WasapiWrap(void)
+WasapiUser::~WasapiUser(void)
 {
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
 }
 
 HRESULT
-WasapiWrap::Init(void)
+WasapiUser::Init(void)
 {
     HRESULT hr = S_OK;
     
@@ -109,7 +109,7 @@ WasapiWrap::Init(void)
     if (S_OK == hr) {
         m_coInitializeSuccess = true;
     } else {
-        dprintf("WasapiWrap::Init() CoInitializeEx() failed %08x\n", hr);
+        dprintf("WasapiUser::Init() CoInitializeEx() failed %08x\n", hr);
         hr = S_OK;
     }
 
@@ -121,7 +121,7 @@ WasapiWrap::Init(void)
 }
 
 void
-WasapiWrap::Term(void)
+WasapiUser::Term(void)
 {
     SafeRelease(&m_deviceCollection);
 
@@ -174,7 +174,7 @@ end:
 }
 
 HRESULT
-WasapiWrap::DoDeviceEnumeration(void)
+WasapiUser::DoDeviceEnumeration(void)
 {
     HRESULT hr = 0;
     IMMDeviceEnumerator *deviceEnumerator = NULL;
@@ -211,14 +211,14 @@ end:
 }
 
 int
-WasapiWrap::GetDeviceCount(void)
+WasapiUser::GetDeviceCount(void)
 {
     assert(m_deviceCollection);
     return (int)m_deviceInfo.size();
 }
 
 bool
-WasapiWrap::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
+WasapiUser::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
 {
     assert(0 <= id && id < (int)m_deviceInfo.size());
 
@@ -227,7 +227,7 @@ WasapiWrap::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
 }
 
 bool
-WasapiWrap::InspectDevice(int id, LPWSTR result, size_t resultBytes)
+WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 {
     HRESULT hr;
     WAVEFORMATEX *waveFormat = NULL;
@@ -315,7 +315,7 @@ end:
 }
 
 HRESULT
-WasapiWrap::ChooseDevice(int id)
+WasapiUser::ChooseDevice(int id)
 {
     HRESULT hr = 0;
 
@@ -334,7 +334,7 @@ end:
 }
 
 HRESULT
-WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
+WasapiUser::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 {
     HRESULT hr = 0;
     WAVEFORMATEX *waveFormat = NULL;
@@ -436,7 +436,7 @@ end:
 }
 
 void
-WasapiWrap::Unsetup(void)
+WasapiUser::Unsetup(void)
 {
     if (m_audioSamplesReadyEvent) {
         CloseHandle(m_audioSamplesReadyEvent);
@@ -467,7 +467,7 @@ Stereo24ToStereo32(BYTE *data, int bytes)
 }
 
 void
-WasapiWrap::SetOutputData(BYTE *data, int bytes)
+WasapiUser::SetOutputData(BYTE *data, int bytes)
 {
     if (m_pcmData) {
         ClearOutputData();
@@ -490,7 +490,7 @@ WasapiWrap::SetOutputData(BYTE *data, int bytes)
 }
 
 void
-WasapiWrap::ClearOutputData(void)
+WasapiUser::ClearOutputData(void)
 {
     if (m_pcmData) {
         m_pcmData->Term();
@@ -500,7 +500,7 @@ WasapiWrap::ClearOutputData(void)
 }
 
 HRESULT
-WasapiWrap::Start()
+WasapiUser::Start()
 {
     BYTE *pData = NULL;
     HRESULT hr = 0;
@@ -531,7 +531,7 @@ end:
 }
 
 void
-WasapiWrap::Stop(void)
+WasapiUser::Stop(void)
 {
     HRESULT hr = 0;
 
@@ -564,7 +564,7 @@ WasapiWrap::Stop(void)
 }
 
 bool
-WasapiWrap::Run(int millisec)
+WasapiUser::Run(int millisec)
 {
     //dprintf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
     DWORD rv = WaitForSingleObject(m_renderThread, millisec);
@@ -581,14 +581,14 @@ WasapiWrap::Run(int millisec)
 // callbacks
 
 DWORD
-WasapiWrap::RenderEntry(LPVOID lpThreadParameter)
+WasapiUser::RenderEntry(LPVOID lpThreadParameter)
 {
-    WasapiWrap* self = (WasapiWrap*)lpThreadParameter;
+    WasapiUser* self = (WasapiUser*)lpThreadParameter;
     return self->RenderMain();
 }
 
 int
-WasapiWrap::GetTotalFrameNum(void)
+WasapiUser::GetTotalFrameNum(void)
 {
     if (!m_pcmData) {
         return 0;
@@ -598,7 +598,7 @@ WasapiWrap::GetTotalFrameNum(void)
 }
 
 int
-WasapiWrap::GetPosFrame(void)
+WasapiUser::GetPosFrame(void)
 {
     int result = 0;
 
@@ -614,7 +614,7 @@ WasapiWrap::GetPosFrame(void)
 }
 
 bool
-WasapiWrap::SetPosFrame(int v)
+WasapiUser::SetPosFrame(int v)
 {
     if (v < 0 || GetTotalFrameNum() <= v) {
         return false;
@@ -632,7 +632,7 @@ WasapiWrap::SetPosFrame(int v)
 }
 
 bool
-WasapiWrap::AudioSamplesReadyProc(void)
+WasapiUser::AudioSamplesReadyProc(void)
 {
     bool    result     = true;
     BYTE    *pFrames   = NULL;
@@ -693,7 +693,7 @@ end:
 }
 
 DWORD
-WasapiWrap::RenderMain(void)
+WasapiUser::RenderMain(void)
 {
     bool stillPlaying = true;
     HANDLE waitArray[2] = {m_shutdownEvent, m_audioSamplesReadyEvent};
