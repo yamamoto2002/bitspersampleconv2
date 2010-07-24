@@ -13,7 +13,7 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin108.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin109.zip
 
 =使用方法=
 
