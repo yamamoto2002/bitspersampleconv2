@@ -66,7 +66,7 @@ namespace PlayPcmWin
             buttonStop.IsEnabled = false;
             buttonRefer.IsEnabled = true;
             menuItemFileOpen.IsEnabled = true;
-            textBoxLatency.IsEnabled = true;
+            groupBoxWasapiSettings.IsEnabled = true;
             buttonInspectDevice.IsEnabled = false;
 
             if (0 < nDevices) {
@@ -179,7 +179,7 @@ namespace PlayPcmWin
             buttonPlay.IsEnabled = true;
             buttonRefer.IsEnabled = false;
             buttonInspectDevice.IsEnabled = false;
-            textBoxLatency.IsEnabled = false;
+            groupBoxWasapiSettings.IsEnabled = false;
         }
 
         private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
@@ -264,6 +264,14 @@ namespace PlayPcmWin
             string dn = wasapi.GetDeviceName(listBoxDevices.SelectedIndex);
             string s = wasapi.InspectDevice(listBoxDevices.SelectedIndex);
             textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
+        }
+
+        private void radioButtonEventDriven_Checked(object sender, RoutedEventArgs e) {
+
+        }
+
+        private void radioButtonTimerDriven_Checked(object sender, RoutedEventArgs e) {
+
         }
     }
 }

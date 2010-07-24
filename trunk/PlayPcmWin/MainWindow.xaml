@@ -37,12 +37,12 @@
                 <TextBox Name="textBoxLog" Margin="0,0,0,0" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" />
             </Grid>
         </GroupBox>
-        <GroupBox Header="WASAPI設定" Height="118" Margin="12,130,12,0" Name="groupBox4" VerticalAlignment="Top">
+        <GroupBox Header="WASAPI設定" Height="118" Margin="12,130,12,0" Name="groupBoxWasapiSettings" VerticalAlignment="Top">
             <Grid>
                 <GroupBox Header="動作モード" Height="79" HorizontalAlignment="Left" Name="groupBox5" VerticalAlignment="Top" Width="199" Margin="6,6,0,0">
                     <Grid>
-                        <RadioButton Content="イベント駆動(_E)" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="radioButton1" VerticalAlignment="Top" IsChecked="True" />
-                        <RadioButton Content="タイマー駆動(_T)" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButton2" VerticalAlignment="Top" />
+                        <RadioButton Content="イベント駆動(_E)" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="radioButtonEventDriven" VerticalAlignment="Top" IsChecked="True" Checked="radioButtonEventDriven_Checked" />
+                        <RadioButton Content="タイマー駆動(_T)" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTimerDriven" VerticalAlignment="Top" Checked="radioButtonTimerDriven_Checked" />
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="出力レイテンシー" Height="63" HorizontalAlignment="Left" Margin="211,6,0,0" Name="groupBox3" VerticalAlignment="Top" Width="236">
