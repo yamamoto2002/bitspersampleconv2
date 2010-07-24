@@ -5,7 +5,7 @@
 
 !PlayPcmWinはWASAPI排他モードのイベント駆動モデルでWAVファイルを再生するプログラムです。
 
-Windows 7に対応しております。間違いなくWindows XPでは動きません。Windows Vistaでは、動かないと思います。
+Windows 7とWindows Vistaに対応しております。間違いなくWindows XPでは動きません。
 
 !PlayPcmWinは実験プログラムです。使いやすいとは言えません。WASAPI排他モードで音楽を聴きたい場合は、Foobar2000のfoo_out_wasapiプラグインを使うのが便利です。
 
