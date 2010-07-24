@@ -9,10 +9,12 @@
 
 #define FOOTER_SEND_PACKET_NUM (2)
 
+
+
 static void
 WaveFormatDebug(WAVEFORMATEX *v)
 {
-    printf(
+    dprintf(
         "  cbSize=%d\n"
         "  nAvgBytesPerSec=%d\n"
         "  nBlockAlign=%d\n"
@@ -32,7 +34,7 @@ WaveFormatDebug(WAVEFORMATEX *v)
 static void
 WFEXDebug(WAVEFORMATEXTENSIBLE *v)
 {
-    printf(
+    dprintf(
         "  dwChannelMask=0x%x\n"
         "  Samples.wValidBitsPerSample=%d\n"
         "  SubFormat=0x%x\n",
@@ -129,7 +131,7 @@ WasapiWrap::Init(void)
     if (S_OK == hr) {
         m_coInitializeSuccess = true;
     } else {
-        printf("WasapiWrap::Init() CoInitializeEx() failed %08x\n", hr);
+        dprintf("WasapiWrap::Init() CoInitializeEx() failed %08x\n", hr);
         hr = S_OK;
     }
 
@@ -280,12 +282,12 @@ WasapiWrap::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
             WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
-            printf("original Mix Format:\n");
+            dprintf("original Mix Format:\n");
             WaveFormatDebug(waveFormat);
             WFEXDebug(wfex);
 
             if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
-                printf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
+                dprintf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
                 hr = E_FAIL;
                 goto end;
             }
@@ -298,12 +300,12 @@ WasapiWrap::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
             wfex->Samples.wValidBitsPerSample = bitsPerSample;
 
-            printf("preferred Format:\n");
+            dprintf("preferred Format:\n");
             WaveFormatDebug(waveFormat);
             WFEXDebug(wfex);
     
             hr = m_audioClient->IsFormatSupported(AUDCLNT_SHAREMODE_EXCLUSIVE,waveFormat,NULL);
-            printf("IsFormatSupported=%08x\n", hr);
+            dprintf("IsFormatSupported=%08x\n", hr);
             if (S_OK == hr) {
                 wchar_t s[256];
                 StringCbPrintfW(s, sizeof s-1, L"  %6dHz %dbit: ok 0x%08x\r\n",
@@ -383,12 +385,12 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 
     WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
-    printf("original Mix Format:\n");
+    dprintf("original Mix Format:\n");
     WaveFormatDebug(waveFormat);
     WFEXDebug(wfex);
 
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
-        printf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
+        dprintf("E: unsupported device ! mixformat == 0x%08x\n", waveFormat->wFormatTag);
         hr = E_FAIL;
         goto end;
     }
@@ -401,7 +403,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
     wfex->Format.nAvgBytesPerSec = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
     wfex->Samples.wValidBitsPerSample = m_deviceBitsPerSample;
 
-    printf("preferred Format:\n");
+    dprintf("preferred Format:\n");
     WaveFormatDebug(waveFormat);
     WFEXDebug(wfex);
     
@@ -439,7 +441,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
             NULL);
     }
     if (FAILED(hr)) {
-        printf("E: audioClient->Initialize failed 0x%08x\n", hr);
+        dprintf("E: audioClient->Initialize failed 0x%08x\n", hr);
         goto end;
     }
 
@@ -588,14 +590,14 @@ WasapiWrap::Stop(void)
 bool
 WasapiWrap::Run(int millisec)
 {
-    //printf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
+    //dprintf("%s WaitForSingleObject(%p, %d)\n", __FUNCTION__, m_renderThread, millisec);
     DWORD rv = WaitForSingleObject(m_renderThread, millisec);
     if (rv == WAIT_TIMEOUT) {
         Sleep(10);
-        //printf(".\n");
+        //dprintf(".\n");
         return false;
     }
-    printf("%s rv=%08x return true\n", __FUNCTION__, rv);
+    dprintf("%s rv=0x%08x return true\n", __FUNCTION__, rv);
     return true;
 }
 
@@ -689,10 +691,8 @@ WasapiWrap::AudioSamplesReadyProc(void)
     if (0 < m_bufferFrameNum - copyFrames) {
         memset(&pData[copyFrames*m_frameBytes], 0,
             (m_bufferFrameNum - copyFrames)*m_frameBytes);
-        /* printf("fc=%d bs=%d cb=%d memset %d bytes\n",
-            m_footerCount,
-            m_bufferFrameNum,
-            copyFrames,
+        /* dprintf("fc=%d bs=%d cb=%d memset %d bytes\n",
+            m_footerCount, m_bufferFrameNum, copyFrames,
             (m_bufferFrameNum - copyFrames)*m_frameBytes);
         */
     }
@@ -730,7 +730,7 @@ WasapiWrap::RenderMain(void)
 
     mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
     if (NULL == mmcssHandle) {
-        printf("Unable to enable MMCSS on render thread: %d\n", GetLastError());
+        dprintf("Unable to enable MMCSS on render thread: 0x%08x\n", GetLastError());
     }
 
     while (stillPlaying) {
