@@ -34,6 +34,13 @@ struct WWPcmData {
     void CopyFrom(WWPcmData *rhs);
 };
 
+enum WWDataFeedMode {
+    WWDFMEventDriven,
+    WWDFMTimerDriven,
+
+    WWDFMNum
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -51,7 +58,7 @@ public:
     // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
 
-    HRESULT Setup(int sampleRate, int bitsPerSample, int latencyMillisec);
+    HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);
 
     void SetOutputData(BYTE *data, int bytes);
@@ -78,9 +85,11 @@ private:
     IAudioClient *m_audioClient;
     int          m_frameBytes;
     UINT32       m_bufferFrameNum;
+
     int          m_deviceBitsPerSample;
     int          m_dataBitsPerSample;
     int          m_sampleRate;
+    DWORD        m_latencyMillisec;
 
     IAudioRenderClient *m_renderClient;
     HANDLE       m_renderThread;
@@ -88,11 +97,13 @@ private:
     HANDLE       m_mutex;
     int          m_footerCount;
     bool         m_coInitializeSuccess;
+    WWDataFeedMode m_dataFeedMode;
+    int          m_footerNeedSendCount;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
 
     DWORD RenderMain(void);
 
-    bool AudioSamplesReadyProc(void);
+    bool AudioSamplesSendProc(void);
 };
 

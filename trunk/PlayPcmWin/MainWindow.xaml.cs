@@ -157,7 +157,12 @@ namespace PlayPcmWin
                 return;
             }
 
-            hr = wasapi.Setup(m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec);
+            WasapiCS.DataFeedMode dfm = WasapiCS.DataFeedMode.EventDriven;
+            if (true == radioButtonTimerDriven.IsChecked) {
+                dfm = WasapiCS.DataFeedMode.TimerDriven;
+            }
+
+            hr = wasapi.Setup(dfm, m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec);
             textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}, {2}) {3:X8}\r\n",
                 m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec, hr);
             if (hr < 0) {

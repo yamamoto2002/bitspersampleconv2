@@ -34,7 +34,7 @@ namespace Wasapiex {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Setup(int sampleRate, int bitsPerSample, int latencyMillisec);
+        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int latencyMillisec);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
@@ -104,8 +104,13 @@ namespace Wasapiex {
             return WasapiIO_ChooseDevice(id);
         }
 
-        public int Setup(int sampleRate, int bitsPerSample, int latencyMillisec) {
-            return WasapiIO_Setup(sampleRate, bitsPerSample, latencyMillisec);
+        public enum DataFeedMode {
+            EventDriven,
+            TimerDriven,
+        };
+
+        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec) {
+            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample, latencyMillisec);
         }
 
         public void Unsetup() {
