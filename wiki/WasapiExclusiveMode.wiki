@@ -13,7 +13,7 @@ Windows 7に対応しております。間違いなくWindows XPでは動きま�
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin109.zip
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin110.zip
 
 =使用方法=
 
@@ -36,7 +36,14 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin107.jpg
 ビルドしたい場合は、Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
 !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
+=参考文献=
+
+http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
+
 =更新履歴=
+===!PlayPcmWin 1.0.9 ==
+  * 「対応フォーマット」ボタンを押したときにIAudioClient::GetDevicePeriodの値を表示するようにした。
+
 ===!PlayPcmWin 1.0.9 ==
   * 従来のイベント駆動モードに加えてタイマー駆動モードを追加。
 
