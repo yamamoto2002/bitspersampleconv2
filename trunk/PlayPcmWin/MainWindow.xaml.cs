@@ -25,7 +25,7 @@ namespace PlayPcmWin
         string m_wavFilePath;
         WavData m_wavData = null;
 
-        const int DEFAULT_OUTPUT_LATENCY_MS = 100;
+        const int DEFAULT_OUTPUT_LATENCY_MS = 200;
 
         public MainWindow()
         {

@@ -33,11 +33,11 @@ static void
 WFEXDebug(WAVEFORMATEXTENSIBLE *v)
 {
     printf(
-        "  dwChannelMask=0x%x\n"
         "  Samples.wValidBitsPerSample=%d\n"
+        "  dwChannelMask=0x%x\n"
         "  SubFormat=0x%x\n",
-        v->dwChannelMask,
         v->Samples.wValidBitsPerSample,
+        v->dwChannelMask,
         v->SubFormat);
 }
 
@@ -216,13 +216,11 @@ WasapiWrap::DoDeviceEnumeration(void)
         wchar_t name[WW_DEVICE_NAME_COUNT];
         HRG(DeviceNameGet(m_deviceCollection, i, name, sizeof name));
 
-        /*
         for (int j=0; j<wcslen(name); ++j) {
             if (name[j] < 0x20 || 127 <= name[j]) {
                 name[j] = L'?';
             }
         }
-        */
 
         m_deviceInfo.push_back(WWDeviceInfo(i, name));
     }
@@ -413,7 +411,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 
     hr = m_audioClient->Initialize(
         AUDCLNT_SHAREMODE_EXCLUSIVE,
-        AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
+        AUDCLNT_STREAMFLAGS_EVENTCALLBACK , 
         bufferDuration, bufferDuration, waveFormat, NULL);
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
@@ -421,7 +419,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
         SafeRelease(&m_audioClient);
 
         bufferDuration = (REFERENCE_TIME)(
-            10000.0 *                         // (REFERENCE_TIME / ms) *
+            10000.0 *                         // (REFERENCE_TIME(100ns) / ms) *
             1000 *                            // (ms / s) *
             m_bufferFrameNum /                 // frames /
             waveFormat->nSamplesPerSec +     // (frames / s)
@@ -432,7 +430,7 @@ WasapiWrap::Setup(int sampleRate, int bitsPerSample, int latencyMillisec)
 
         hr = m_audioClient->Initialize(
             AUDCLNT_SHAREMODE_EXCLUSIVE, 
-            AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST, 
+            AUDCLNT_STREAMFLAGS_EVENTCALLBACK | AUDCLNT_STREAMFLAGS_NOPERSIST | AUDCLNT_STREAMFLAGS_RATEADJUST, 
             bufferDuration, 
             bufferDuration, 
             waveFormat, 

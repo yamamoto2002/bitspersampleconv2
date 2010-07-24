@@ -97,6 +97,7 @@ Run(int deviceId, int latencyInMillisec, WWPcmData *pcm)
 
     while (!ww.Run(1000)) {
         printf("%d / %d\n", ww.GetPosFrame(), ww.GetTotalFrameNum());
+        Sleep(100);
     }
 
 end:
@@ -281,7 +282,7 @@ main(int argc, char *argv[])
 {
     WWPcmData *pcmData = NULL;
     int deviceId = -1;
-    int latencyInMillisec = 10;
+    int latencyInMillisec = 200;
 
     if (argc == 4 || argc == 6) {
         char *filePath = 0;
