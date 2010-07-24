@@ -9,6 +9,7 @@
 
 #define HRG(x)                                    \
 {                                                 \
+    dprintf("D: %s\n", #x);                       \
     hr = x;                                       \
     if (FAILED(hr)) {                             \
         dprintf("E: %s:%d %s failed (%08x)\n",    \
@@ -19,6 +20,7 @@
 
 #define HRR(x)                                    \
 {                                                 \
+    dprintf("D: %s\n", #x);                       \
     hr = x;                                       \
     if (FAILED(hr)) {                             \
         dprintf("E: %s:%d %s failed (%08x)\n",    \

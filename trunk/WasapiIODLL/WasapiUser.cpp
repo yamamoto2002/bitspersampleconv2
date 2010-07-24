@@ -569,7 +569,7 @@ WasapiUser::Start()
 
     writableFrames = m_bufferFrameNum;
     if (WWDFMTimerDriven == m_dataFeedMode) {
-        UINT32  padding    = 0; //< frame now now using
+        UINT32 padding = 0; //< frame now now using
         HRG(m_audioClient->GetCurrentPadding(&padding));
         writableFrames = m_bufferFrameNum - padding;
     }
@@ -702,9 +702,9 @@ WasapiUser::AudioSamplesSendProc(void)
 
     WaitForSingleObject(m_mutex, INFINITE);
 
-    writableFrames      = m_bufferFrameNum;
+    writableFrames = m_bufferFrameNum;
     if (WWDFMTimerDriven == m_dataFeedMode) {
-        UINT32  padding    = 0; //< frame num now using
+        UINT32 padding = 0; //< frame num now using
         HRG(m_audioClient->GetCurrentPadding(&padding));
         writableFrames = m_bufferFrameNum - padding;
     }
@@ -793,7 +793,7 @@ WasapiUser::RenderMain(void)
 
     while (stillPlaying) {
         waitResult = WaitForMultipleObjects(
-            1, waitArray, FALSE, timeoutMillisec);
+            waitArrayCount, waitArray, FALSE, timeoutMillisec);
         switch (waitResult) {
         case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
             stillPlaying = false;
