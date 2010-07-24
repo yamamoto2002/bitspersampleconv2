@@ -10,7 +10,6 @@
 #define FOOTER_SEND_PACKET_NUM (2)
 
 
-
 static void
 WaveFormatDebug(WAVEFORMATEX *v)
 {
@@ -48,25 +47,6 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
     this->id = id;
     wcsncpy_s(this->name, name, WW_DEVICE_NAME_COUNT-1);
 }
-
-/*
-void
-WWPcmData::Init(int samples)
-{
-    bitsPerSample = 16;
-    nChannels = 2;
-    int nSamplesPerSec = 96000;
-    nFrames = samples;
-    posFrame = 0;
-    
-    stream = (BYTE*)malloc(samples * 4);
-    for (int i=0; i<samples*4; ++i) {
-        // このrand()の使い方は悪い見本。
-        // よい子は真似をしない事。
-        stream[i] = rand();
-    }
-}
-*/
 
 void
 WWPcmData::Term(void)
