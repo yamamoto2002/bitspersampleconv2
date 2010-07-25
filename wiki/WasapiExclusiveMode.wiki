@@ -16,16 +16,16 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin111.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin111x64.zip
 
-32ビット版のWindowsの場合は32ビット版のPlayPcmWinを、
-64ビット版のWindowsの場合は64ビット版のPlayPcmWinを使用してください。
-32ビット版のWindowsで64ビット版のPlayPcmWinを動かすことはできません
-64ビット版のWindowsで32ビット版のPlayPcmWinを実行することはできますが、性能や機能が低下するかも。
-
 || Windows  || !PlayPcmWin || 結果 ||
-|| 32ビット || 32ビット   || ○ ||
-|| 32ビット || 64ビット   || × ||
-|| 64ビット || 32ビット   || △ ||
-|| 64ビット || 64ビット   || ○ ||
+|| 32ビット版 || 32ビット版   || ○ ||
+|| 32ビット版 || 64ビット版   || × ||
+|| 64ビット版 || 32ビット版   || △ ||
+|| 64ビット版 || 64ビット版   || ○ ||
+
+32ビット版のWindowsの場合は32ビット版の!PlayPcmWinを、
+64ビット版のWindowsの場合は64ビット版の!PlayPcmWinを使用してください。
+32ビット版のWindowsで64ビット版の!PlayPcmWinを動かすことはできません。
+64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、性能や機能が低下するかも。
 
 =使用方法=
 
