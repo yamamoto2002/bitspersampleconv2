@@ -21,7 +21,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 32ビット版のWindowsで64ビット版のPlayPcmWinを動かすことはできません
 64ビット版のWindowsで32ビット版のPlayPcmWinを実行することはできますが、性能や機能が低下するかも。
 
-|| Windows  || PlayPcmWin || 結果 ||
+|| Windows  || !PlayPcmWin || 結果 ||
 || 32ビット || 32ビット   || ○ ||
 || 32ビット || 64ビット   || × ||
 || 64ビット || 32ビット   || △ ||
