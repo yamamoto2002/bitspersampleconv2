@@ -46,6 +46,10 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin110_2.jpg
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/WasapiIODLL
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/WavRWLib2
 
+WASAPIの関数を呼び出しているところは、WasapiUser.cppにあります。
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp
+
+
 ビルドしたい場合は、Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
 !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
