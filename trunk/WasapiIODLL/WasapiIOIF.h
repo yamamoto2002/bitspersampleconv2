@@ -13,7 +13,7 @@ WasapiIO_Term(void);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_DoDeviceEnumeration(void);
+WasapiIO_DoDeviceEnumeration(int deviceType);
 
 extern "C" __declspec(dllexport)
 int __stdcall

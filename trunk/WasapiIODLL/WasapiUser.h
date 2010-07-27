@@ -41,6 +41,13 @@ enum WWDataFeedMode {
     WWDFMNum
 };
 
+enum WWDeviceType {
+    WWDTPlay,
+    WWDTRec,
+
+    WWDTNum
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -50,7 +57,7 @@ public:
     void Term(void);
 
     // device enumeration
-    HRESULT DoDeviceEnumeration(void);
+    HRESULT DoDeviceEnumeration(WWDeviceType t);
     int GetDeviceCount(void);
     bool GetDeviceName(int id, LPWSTR name, size_t nameBytes);
     bool InspectDevice(int id, LPWSTR result, size_t resultBytes);

@@ -52,7 +52,7 @@ namespace PlayPcmWin
 
             listBoxDevices.Items.Clear();
 
-            hr = wasapi.DoDeviceEnumeration();
+            hr = wasapi.DoDeviceEnumeration(WasapiCS.DeviceType.Play);
             textBoxLog.Text += string.Format("wasapi.DoDeviceEnumeration() {0:X8}\r\n", hr);
 
             int nDevices = wasapi.GetDeviceCount();

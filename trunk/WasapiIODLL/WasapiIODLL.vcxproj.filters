@@ -7,6 +7,9 @@
     <ClCompile Include="WasapiUser.cpp">
       <Filter>source files</Filter>
     </ClCompile>
+    <ClCompile Include="WWUtil.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h">
