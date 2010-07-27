@@ -31,10 +31,11 @@ WasapiIO_Term(void)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_DoDeviceEnumeration(void)
+WasapiIO_DoDeviceEnumeration(int deviceType)
 {
     assert(g_pWasapi);
-    return g_pWasapi->DoDeviceEnumeration();
+    WWDeviceType t = (WWDeviceType)deviceType;
+    return g_pWasapi->DoDeviceEnumeration(t);
 }
 
 extern "C" __declspec(dllexport)

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <Windows.h>
+#include <mmsystem.h>
+#include <MMReg.h>
+
 #ifdef _DEBUG
 #  include <stdio.h>
 #  define dprintf(x, ...) printf(x, __VA_ARGS__)
@@ -46,3 +50,12 @@ template <class T> void SafeRelease(T **ppT)
     }
 }
 
+// malloc memory and copy-create 32bitWAV from 24bitWAV data
+BYTE*
+WWStereo24ToStereo32(BYTE *data, int bytes);
+
+void
+WWWaveFormatDebug(WAVEFORMATEX *v);
+
+void
+WWWFEXDebug(WAVEFORMATEXTENSIBLE *v);

@@ -11,39 +11,6 @@
 #define FOOTER_SEND_FRAME_NUM (2)
 #define PERIODS_PER_BUFFER_OF_TIMER_DRIVEN_MODE (4)
 
-
-static void
-WaveFormatDebug(WAVEFORMATEX *v)
-{
-    dprintf(
-        "  cbSize=%d\n"
-        "  nAvgBytesPerSec=%d\n"
-        "  nBlockAlign=%d\n"
-        "  nChannels=%d\n"
-        "  nSamplesPerSec=%d\n"
-        "  wBitsPerSample=%d\n"
-        "  wFormatTag=0x%x\n",
-        v->cbSize,
-        v->nAvgBytesPerSec,
-        v->nBlockAlign,
-        v->nChannels,
-        v->nSamplesPerSec,
-        v->wBitsPerSample,
-        v->wFormatTag);
-}
-
-static void
-WFEXDebug(WAVEFORMATEXTENSIBLE *v)
-{
-    dprintf(
-        "  dwChannelMask=0x%x\n"
-        "  Samples.wValidBitsPerSample=%d\n"
-        "  SubFormat=0x%x\n",
-        v->dwChannelMask,
-        v->Samples.wValidBitsPerSample,
-        v->SubFormat);
-}
-
 WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
     this->id = id;
@@ -177,10 +144,19 @@ end:
 }
 
 HRESULT
-WasapiUser::DoDeviceEnumeration(void)
+WasapiUser::DoDeviceEnumeration(WWDeviceType t)
 {
     HRESULT hr = 0;
     IMMDeviceEnumerator *deviceEnumerator = NULL;
+
+    EDataFlow dataFlow;
+    switch (t) {
+    case WWDTPlay: dataFlow = eRender;  break;
+    case WWDTRec:  dataFlow = eCapture; break;
+    default:
+        assert(0);
+        return E_FAIL;
+    }
 
     m_deviceInfo.clear();
 
@@ -188,7 +164,7 @@ WasapiUser::DoDeviceEnumeration(void)
         NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
     
     HRR(deviceEnumerator->EnumAudioEndpoints(
-        eRender, DEVICE_STATE_ACTIVE, &m_deviceCollection));
+        dataFlow, DEVICE_STATE_ACTIVE, &m_deviceCollection));
 
     UINT nDevices = 0;
     HRG(m_deviceCollection->GetCount(&nDevices));
@@ -264,8 +240,8 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
             dprintf("original Mix Format:\n");
-            WaveFormatDebug(waveFormat);
-            WFEXDebug(wfex);
+            WWWaveFormatDebug(waveFormat);
+            WWWFEXDebug(wfex);
 
             if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
                 dprintf("E: unsupported device ! mixformat == 0x%08x\n",
@@ -285,8 +261,8 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             wfex->Samples.wValidBitsPerSample = bitsPerSample;
 
             dprintf("preferred Format:\n");
-            WaveFormatDebug(waveFormat);
-            WFEXDebug(wfex);
+            WWWaveFormatDebug(waveFormat);
+            WWWFEXDebug(wfex);
 
             hr = m_audioClient->IsFormatSupported(
                 AUDCLNT_SHAREMODE_EXCLUSIVE,waveFormat,NULL);
@@ -393,8 +369,8 @@ WasapiUser::Setup(
     WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
     dprintf("original Mix Format:\n");
-    WaveFormatDebug(waveFormat);
-    WFEXDebug(wfex);
+    WWWaveFormatDebug(waveFormat);
+    WWWFEXDebug(wfex);
 
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
         dprintf("E: unsupported device ! mixformat == 0x%08x\n",
@@ -414,8 +390,8 @@ WasapiUser::Setup(
     wfex->Samples.wValidBitsPerSample = m_deviceBitsPerSample;
 
     dprintf("preferred Format:\n");
-    WaveFormatDebug(waveFormat);
-    WFEXDebug(wfex);
+    WWWaveFormatDebug(waveFormat);
+    WWWFEXDebug(wfex);
     
     HRG(m_audioClient->IsFormatSupported(
         AUDCLNT_SHAREMODE_EXCLUSIVE,waveFormat,NULL));
@@ -499,24 +475,6 @@ WasapiUser::Unsetup(void)
     SafeRelease(&m_renderClient);
 }
 
-static BYTE*
-Stereo24ToStereo32(BYTE *data, int bytes)
-{
-    int nData = bytes / 3; // 3==24bit
-
-    BYTE *p = (BYTE *)malloc(nData * 4);
-    int fromPos = 0;
-    int toPos = 0;
-    for (int i=0; i<nData; ++i) {
-        p[toPos++] = 0;
-        p[toPos++] = data[fromPos++];
-        p[toPos++] = data[fromPos++];
-        p[toPos++] = data[fromPos++];
-    }
-
-    return p;
-}
-
 void
 WasapiUser::SetOutputData(BYTE *data, int bytes)
 {
@@ -530,7 +488,7 @@ WasapiUser::SetOutputData(BYTE *data, int bytes)
 
     // m_pcmData->stream create
     if (24 == m_dataBitsPerSample) {
-        BYTE *p = Stereo24ToStereo32(data, bytes);
+        BYTE *p = WWStereo24ToStereo32(data, bytes);
         m_pcmData->stream = p;
         m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
     } else {
@@ -758,8 +716,6 @@ end:
     ReleaseMutex(m_mutex);
     return result;
 }
-
-
 
 DWORD
 WasapiUser::RenderMain(void)

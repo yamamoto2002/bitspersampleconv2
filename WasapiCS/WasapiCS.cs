@@ -14,7 +14,7 @@ namespace Wasapiex {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_DoDeviceEnumeration();
+        WasapiIO_DoDeviceEnumeration(int deviceType);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
@@ -80,8 +80,13 @@ namespace Wasapiex {
             WasapiIO_Term();
         }
 
-        public int DoDeviceEnumeration() {
-            return WasapiIO_DoDeviceEnumeration();
+        public enum DeviceType {
+            Play,
+            Rec
+        };
+
+        public int DoDeviceEnumeration(DeviceType t) {
+            return WasapiIO_DoDeviceEnumeration((int)t);
         }
 
         public int GetDeviceCount() {
