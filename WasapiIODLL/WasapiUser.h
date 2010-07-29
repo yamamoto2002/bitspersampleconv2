@@ -98,14 +98,17 @@ private:
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
 
-    IAudioRenderClient *m_renderClient;
-    HANDLE       m_renderThread;
+    IAudioRenderClient  *m_renderClient;
+    IAudioCaptureClient *m_captureClient;
+    HANDLE       m_thread;
     WWPcmData    *m_pcmData;
     HANDLE       m_mutex;
     int          m_footerCount;
     bool         m_coInitializeSuccess;
     WWDataFeedMode m_dataFeedMode;
     int          m_footerNeedSendCount;
+
+    EDataFlow    m_dataFlow;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
 

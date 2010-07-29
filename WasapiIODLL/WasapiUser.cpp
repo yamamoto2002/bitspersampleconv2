@@ -9,7 +9,7 @@
 #include <mmsystem.h>
 
 #define FOOTER_SEND_FRAME_NUM (2)
-#define PERIODS_PER_BUFFER_OF_TIMER_DRIVEN_MODE (4)
+#define PERIODS_PER_BUFFER_ON_TIMER_DRIVEN_MODE (4)
 
 WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
@@ -54,7 +54,9 @@ WasapiUser::WasapiUser(void)
     m_audioClient      = NULL;
 
     m_renderClient     = NULL;
-    m_renderThread     = NULL;
+    m_captureClient    = NULL;
+
+    m_thread           = NULL;
     m_pcmData          = NULL;
     m_mutex            = NULL;
     m_coInitializeSuccess = false;
@@ -149,10 +151,9 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
     HRESULT hr = 0;
     IMMDeviceEnumerator *deviceEnumerator = NULL;
 
-    EDataFlow dataFlow;
     switch (t) {
-    case WWDTPlay: dataFlow = eRender;  break;
-    case WWDTRec:  dataFlow = eCapture; break;
+    case WWDTPlay: m_dataFlow = eRender;  break;
+    case WWDTRec:  m_dataFlow = eCapture; break;
     default:
         assert(0);
         return E_FAIL;
@@ -164,7 +165,7 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
         NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
     
     HRR(deviceEnumerator->EnumAudioEndpoints(
-        dataFlow, DEVICE_STATE_ACTIVE, &m_deviceCollection));
+        m_dataFlow, DEVICE_STATE_ACTIVE, &m_deviceCollection));
 
     UINT nDevices = 0;
     HRG(m_deviceCollection->GetCount(&nDevices));
@@ -403,7 +404,7 @@ WasapiUser::Setup(
     switch (m_dataFeedMode) {
     case WWDFMTimerDriven:
         streamFlags      = AUDCLNT_STREAMFLAGS_NOPERSIST;
-        periodsPerBuffer = PERIODS_PER_BUFFER_OF_TIMER_DRIVEN_MODE;
+        periodsPerBuffer = PERIODS_PER_BUFFER_ON_TIMER_DRIVEN_MODE;
         break;
     case WWDFMEventDriven:
         streamFlags      =
@@ -522,8 +523,8 @@ WasapiUser::Start()
         EVENT_MODIFY_STATE | SYNCHRONIZE);
     CHK(m_shutdownEvent);
 
-    m_renderThread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
-    assert(m_renderThread);
+    m_thread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
+    assert(m_thread);
 
     writableFrames = m_bufferFrameNum;
     if (WWDFMTimerDriven == m_dataFeedMode) {
@@ -555,11 +556,11 @@ WasapiUser::Stop(void)
         SetEvent(m_shutdownEvent);
     }
 
-    if (m_renderThread) {
-        SetEvent(m_renderThread);
-        WaitForSingleObject(m_renderThread, INFINITE);
-        CloseHandle(m_renderThread);
-        m_renderThread = NULL;
+    if (m_thread) {
+        SetEvent(m_thread);
+        WaitForSingleObject(m_thread, INFINITE);
+        CloseHandle(m_thread);
+        m_thread = NULL;
     }
 
     if (m_shutdownEvent) {
@@ -571,11 +572,11 @@ WasapiUser::Stop(void)
         m_audioClient->Stop();
     }
 
-    if (m_renderThread) {
-        WaitForSingleObject(m_renderThread, INFINITE);
+    if (m_thread) {
+        WaitForSingleObject(m_thread, INFINITE);
 
-        CloseHandle(m_renderThread);
-        m_renderThread = NULL;
+        CloseHandle(m_thread);
+        m_thread = NULL;
     }
 }
 
@@ -583,8 +584,8 @@ bool
 WasapiUser::Run(int millisec)
 {
     // dprintf("%s WaitForSingleObject(%p, %d)\n",
-    // __FUNCTION__, m_renderThread, millisec);
-    DWORD rv = WaitForSingleObject(m_renderThread, millisec);
+    // __FUNCTION__, m_thread, millisec);
+    DWORD rv = WaitForSingleObject(m_thread, millisec);
     if (rv == WAIT_TIMEOUT) {
         Sleep(10);
         //dprintf(".\n");
