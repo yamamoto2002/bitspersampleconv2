@@ -1,6 +1,8 @@
 #summary WASAPI排他モード
 #labels Featured
 
-PlayPcmWin
+WASAPI排他モードの実験プログラム
 
-RecPcmWin
+PlayPcmWin  再生プログラム
+
+RecPcmWin   録音プログラム
