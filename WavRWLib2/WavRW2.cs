@@ -161,27 +161,65 @@ namespace WavRWLib2
 
     public class PcmSamples1Channel
     {
-        private short[] data;
+        private int m_bitsPerSample;
+
+        private short[] m_data16;
+        private int[]   m_data32;
 
         public PcmSamples1Channel(int numSamples, int bitsPerSample)
         {
-            System.Diagnostics.Debug.Assert(16 == bitsPerSample);
-            data = new short[numSamples];
+            m_bitsPerSample = bitsPerSample;
+            switch (bitsPerSample) {
+            case 16:
+                m_data16 = new short[numSamples];
+                m_data32 = null;
+                break;
+            case 32:
+                m_data16 = null;
+                m_data32 = new int[numSamples];
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
         }
 
         public void Set16(int pos, short val)
         {
-            data[pos] = val;
+            m_data16[pos] = val;
         }
 
         public short Get16(int pos)
         {
-            return data[pos];
+            return m_data16[pos];
+        }
+
+        public void Set32(int pos, int val) {
+            m_data32[pos] = val;
+        }
+
+        public int Get32(int pos) {
+            return m_data32[pos];
         }
 
         public int NumSamples
         {
-            get { return data.Length; }
+            get {
+                if (m_data16 != null) {
+                    return m_data16.Length;
+                }
+                if (m_data32 != null) {
+                    return m_data32.Length;
+                }
+                System.Diagnostics.Debug.Assert(false);
+                return 0;
+            }
+        }
+
+        public int BitsPerSample {
+            get {
+                return m_bitsPerSample;
+            }
         }
     }
 
@@ -193,7 +231,7 @@ namespace WavRWLib2
         private List<PcmSamples1Channel> data;
 
         // rawDataモードの場合、numSamplesにサンプル数が入っている。
-        // 通常モードの場合、data[0].NumSamples
+        // 通常モードの場合、data??[0].NumSamples
         private byte[] rawData;
         int            numSamples;
 
@@ -214,7 +252,7 @@ namespace WavRWLib2
         public int NumSamples
         {
             get {
-                if (0 < data.Count) {
+                if (data != null && 0 < data.Count) {
                     return data[0].NumSamples;
                 }
                 return numSamples;
@@ -273,6 +311,8 @@ namespace WavRWLib2
 
         public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
         {
+            System.Diagnostics.Debug.Assert(16 == bitsPerSample);
+
             if (!SkipToDataHeader(br)) {
                 return false;
             }
@@ -306,11 +346,35 @@ namespace WavRWLib2
             bw.Write(subChunk2Id);
             bw.Write(subChunk2Size);
 
+            switch (data[0].BitsPerSample) {
+            case 16:
+                Write16(bw);
+                break;
+            case 32:
+                Write32(bw);
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+        }
+
+        private void Write16(BinaryWriter bw) {
             int numSamples = data[0].NumSamples;
             int numChannels = data.Count;
-            for (int pos=0; pos < numSamples; ++pos) {
-                for (int ch=0; ch < numChannels; ++ch) {
+            for (int pos = 0; pos < numSamples; ++pos) {
+                for (int ch = 0; ch < numChannels; ++ch) {
                     bw.Write(data[ch].Get16(pos));
+                }
+            }
+        }
+
+        private void Write32(BinaryWriter bw) {
+            int numSamples = data[0].NumSamples;
+            int numChannels = data.Count;
+            for (int pos = 0; pos < numSamples; ++pos) {
+                for (int ch = 0; ch < numChannels; ++ch) {
+                    bw.Write(data[ch].Get32(pos));
                 }
             }
         }

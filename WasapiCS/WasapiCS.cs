@@ -49,6 +49,18 @@ namespace Wasapiex {
         WasapiIO_ClearOutputData();
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetupCaptureBuffer(int bytes);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetCapturedData(byte[] data, int bytes);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetCaptureGlitchCount();
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_Start();
 
@@ -128,6 +140,18 @@ namespace Wasapiex {
 
         public void ClearOutputData() {
             WasapiIO_ClearOutputData();
+        }
+
+        public void SetupCaptureBuffer(int bytes) {
+            WasapiIO_SetupCaptureBuffer(bytes);
+        }
+
+        public int GetCapturedData(byte[] data) {
+            return WasapiIO_GetCapturedData(data, data.Length);
+        }
+
+        public int GetCaptureGlitchCount() {
+            return WasapiIO_GetCaptureGlitchCount();
         }
 
         public int Start() {

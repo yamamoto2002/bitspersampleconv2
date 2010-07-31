@@ -12,6 +12,9 @@ EXPORTS
 	WasapiIO_Unsetup
 	WasapiIO_SetOutputData
 	WasapiIO_ClearOutputData
+	WasapiIO_SetupCaptureBuffer
+	WasapiIO_GetCapturedData
+	WasapiIO_GetCaptureGlitchCount
 	WasapiIO_Start
 	WasapiIO_Run
 	WasapiIO_Stop

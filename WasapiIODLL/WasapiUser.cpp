@@ -60,6 +60,7 @@ WasapiUser::WasapiUser(void)
     m_pcmData          = NULL;
     m_mutex            = NULL;
     m_coInitializeSuccess = false;
+    m_glitchCount      = 0;
 
 }
 
@@ -451,7 +452,18 @@ WasapiUser::Setup(
     if (WWDFMEventDriven == m_dataFeedMode) {
         HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
     }
-    HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
+
+    switch (m_dataFlow) {
+    case eRender:
+        HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
+        break;
+    case eCapture:
+        HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_captureClient)));
+        break;
+    default:
+        assert(0);
+        break;
+    }
 
 end:
 
@@ -471,50 +483,19 @@ WasapiUser::Unsetup(void)
         m_audioSamplesReadyEvent = NULL;
     }
 
-    SafeRelease(&m_deviceToUse);
-    SafeRelease(&m_audioClient);
+    SafeRelease(&m_captureClient);
     SafeRelease(&m_renderClient);
-}
-
-void
-WasapiUser::SetOutputData(BYTE *data, int bytes)
-{
-    if (m_pcmData) {
-        ClearOutputData();
-    }
-
-    m_pcmData = new WWPcmData();
-    m_pcmData->nFrames = bytes/m_frameBytes;
-    m_pcmData->posFrame = 0;
-
-    // m_pcmData->stream create
-    if (24 == m_dataBitsPerSample) {
-        BYTE *p = WWStereo24ToStereo32(data, bytes);
-        m_pcmData->stream = p;
-        m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
-    } else {
-        BYTE *p = (BYTE *)malloc(bytes);
-        memcpy(p, data, bytes);
-        m_pcmData->stream = p;
-    }
-}
-
-void
-WasapiUser::ClearOutputData(void)
-{
-    if (m_pcmData) {
-        m_pcmData->Term();
-        delete m_pcmData;
-        m_pcmData = NULL;
-    }
+    SafeRelease(&m_audioClient);
+    SafeRelease(&m_deviceToUse);
 }
 
 HRESULT
 WasapiUser::Start()
 {
-    HRESULT hr     = 0;
-    BYTE    *pData = NULL;
-    int     writableFrames;
+    HRESULT hr      = 0;
+    BYTE    *pData  = NULL;
+    UINT32  nFrames = 0;
+    DWORD   flags   = 0;
 
     assert(m_pcmData);
 
@@ -523,24 +504,47 @@ WasapiUser::Start()
         EVENT_MODIFY_STATE | SYNCHRONIZE);
     CHK(m_shutdownEvent);
 
-    m_thread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
-    assert(m_thread);
+    switch (m_dataFlow) {
+    case eRender:
+        m_thread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
+        assert(m_thread);
 
-    writableFrames = m_bufferFrameNum;
-    if (WWDFMTimerDriven == m_dataFeedMode) {
-        UINT32 padding = 0; //< frame now now using
-        HRG(m_audioClient->GetCurrentPadding(&padding));
-        writableFrames = m_bufferFrameNum - padding;
+        nFrames = m_bufferFrameNum;
+        if (WWDFMTimerDriven == m_dataFeedMode) {
+            UINT32 padding = 0; //< frame now now using
+            HRG(m_audioClient->GetCurrentPadding(&padding));
+            nFrames = m_bufferFrameNum - padding;
+        }
+
+        assert(m_renderClient);
+        HRG(m_renderClient->GetBuffer(nFrames, &pData));
+
+        memset(pData, 0, nFrames * m_frameBytes);
+
+        HRG(m_renderClient->ReleaseBuffer(nFrames, 0));
+
+        m_footerCount = 0;
+
+        break;
+
+    case eCapture:
+        m_thread = CreateThread(NULL, 0, CaptureEntry, this, 0, NULL);
+        assert(m_thread);
+
+        hr = m_captureClient->GetBuffer(
+            &pData, &nFrames,&flags, NULL, NULL);
+        if (SUCCEEDED(hr)) {
+            m_captureClient->ReleaseBuffer(nFrames);
+        } else {
+            hr = S_OK;
+        }
+        m_glitchCount = 0;
+        break;
+
+    default:
+        assert(0);
+        break;
     }
-
-    assert(m_renderClient);
-    HRG(m_renderClient->GetBuffer(writableFrames, &pData));
-
-    memset(pData, 0, writableFrames * m_frameBytes);
-
-    HRG(m_renderClient->ReleaseBuffer(writableFrames, 0));
-
-    m_footerCount = 0;
 
     assert(m_audioClient);
     HRG(m_audioClient->Start());
@@ -595,14 +599,46 @@ WasapiUser::Run(int millisec)
     return true;
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// callbacks
+////////////////////////////////////////////////////////////////////////////
+// PCM data buffer management
 
-DWORD
-WasapiUser::RenderEntry(LPVOID lpThreadParameter)
+void
+WasapiUser::SetOutputData(BYTE *data, int bytes)
 {
-    WasapiUser* self = (WasapiUser*)lpThreadParameter;
-    return self->RenderMain();
+    if (m_pcmData) {
+        ClearPcmData();
+    }
+
+    m_pcmData = new WWPcmData();
+    m_pcmData->nFrames = bytes/m_frameBytes;
+    m_pcmData->posFrame = 0;
+
+    // m_pcmData->stream create
+    if (24 == m_dataBitsPerSample) {
+        BYTE *p = WWStereo24ToStereo32(data, bytes);
+        m_pcmData->stream = p;
+        m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
+    } else {
+        BYTE *p = (BYTE *)malloc(bytes);
+        memcpy(p, data, bytes);
+        m_pcmData->stream = p;
+    }
+}
+
+void
+WasapiUser::ClearOutputData(void)
+{
+    ClearPcmData();
+}
+
+void
+WasapiUser::ClearPcmData(void)
+{
+    if (m_pcmData) {
+        m_pcmData->Term();
+        delete m_pcmData;
+        m_pcmData = NULL;
+    }
 }
 
 int
@@ -622,11 +658,11 @@ WasapiUser::GetPosFrame(void)
 
     assert(m_mutex);
 
-    WaitForSingleObject(m_mutex, INFINITE);
+    //WaitForSingleObject(m_mutex, INFINITE);
     if (m_pcmData) {
         result = m_pcmData->posFrame;
     }
-    ReleaseMutex(m_mutex);
+    //ReleaseMutex(m_mutex);
 
     return result;
 }
@@ -634,6 +670,11 @@ WasapiUser::GetPosFrame(void)
 bool
 WasapiUser::SetPosFrame(int v)
 {
+    if (m_dataFlow != eRender) {
+        assert(0);
+        return false;
+    }
+
     if (v < 0 || GetTotalFrameNum() <= v) {
         return false;
     }
@@ -647,6 +688,62 @@ WasapiUser::SetPosFrame(int v)
     ReleaseMutex(m_mutex);
 
     return true;
+}
+
+void
+WasapiUser::SetupCaptureBuffer(int bytes)
+{
+    if (m_dataFlow != eCapture) {
+        assert(0);
+        return;
+    }
+
+    if (m_pcmData) {
+        ClearPcmData();
+    }
+
+    /* 録音時は
+     *   pcmData->posFrame: 有効な録音データのフレーム数
+     *   pcmData->nFrames: 録音可能総フレーム数
+     */
+    m_pcmData = new WWPcmData();
+    m_pcmData->posFrame = 0;
+    m_pcmData->nFrames = bytes/m_frameBytes;
+    m_pcmData->stream = (BYTE*)malloc(bytes);
+}
+
+int
+WasapiUser::GetCapturedData(BYTE *data, int bytes)
+{
+    if (m_dataFlow != eCapture) {
+        assert(0);
+        return 0;
+    }
+
+    assert(m_pcmData);
+
+    if (m_pcmData->posFrame * m_frameBytes < bytes) {
+        bytes = m_pcmData->posFrame * m_frameBytes;
+    }
+    memcpy(data, m_pcmData->stream, bytes);
+
+    return bytes;
+}
+
+int
+WasapiUser::GetCaptureGlitchCount(void)
+{
+    return m_glitchCount;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// render thread
+
+DWORD
+WasapiUser::RenderEntry(LPVOID lpThreadParameter)
+{
+    WasapiUser* self = (WasapiUser*)lpThreadParameter;
+    return self->RenderMain();
 }
 
 bool
@@ -724,6 +821,7 @@ WasapiUser::RenderMain(void)
     bool    stillPlaying   = true;
     HANDLE  waitArray[2]   = {m_shutdownEvent, m_audioSamplesReadyEvent};
     int     waitArrayCount;
+    DWORD   timeoutMillisec;
     HANDLE  mmcssHandle    = NULL;
     DWORD   mmcssTaskIndex = 0;
     DWORD   waitResult;
@@ -739,13 +837,14 @@ WasapiUser::RenderMain(void)
             GetLastError());
     }
 
-    waitArrayCount = 2;
-    m_footerNeedSendCount = FOOTER_SEND_FRAME_NUM;
-    DWORD timeoutMillisec = INFINITE;
     if (m_dataFeedMode == WWDFMTimerDriven) {
-        waitArrayCount = 1;
+        waitArrayCount        = 1;
         m_footerNeedSendCount = FOOTER_SEND_FRAME_NUM * 2;
         timeoutMillisec       = m_latencyMillisec     / 2;
+    } else {
+        waitArrayCount        = 2;
+        m_footerNeedSendCount = FOOTER_SEND_FRAME_NUM;
+        timeoutMillisec       = INFINITE;
     }
 
     while (stillPlaying) {
@@ -780,5 +879,148 @@ end:
     return hr;
 }
 
+///////////////////////////////////////////////////////////////////////////////////
+// capture thread
 
+DWORD
+WasapiUser::CaptureEntry(LPVOID lpThreadParameter)
+{
+    WasapiUser* self = (WasapiUser*)lpThreadParameter;
+    return self->CaptureMain();
+}
+
+DWORD
+WasapiUser::CaptureMain(void)
+{
+    bool    stillRecording   = true;
+    HANDLE  waitArray[2]   = {m_shutdownEvent, m_audioSamplesReadyEvent};
+    int     waitArrayCount;
+    DWORD   timeoutMillisec;
+    HANDLE  mmcssHandle    = NULL;
+    DWORD   mmcssTaskIndex = 0;
+    DWORD   waitResult;
+    HRESULT hr             = 0;
+    
+    HRG(CoInitializeEx(NULL, COINIT_MULTITHREADED));
+
+    timeBeginPeriod(1);
+
+    mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
+    if (NULL == mmcssHandle) {
+        dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
+            GetLastError());
+    }
+
+    if (m_dataFeedMode == WWDFMTimerDriven) {
+        waitArrayCount  = 1;
+        timeoutMillisec = m_latencyMillisec / 2;
+    } else {
+        waitArrayCount  = 2;
+        timeoutMillisec = INFINITE;
+    }
+
+    while (stillRecording) {
+        waitResult = WaitForMultipleObjects(
+            waitArrayCount, waitArray, FALSE, timeoutMillisec);
+        switch (waitResult) {
+        case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
+            stillRecording = false;
+            break;
+        case WAIT_OBJECT_0 + 1:     // m_audioSamplesReadyEvent
+            // only in EventDriven mode
+            stillRecording = AudioSamplesRecvProc();
+            break;
+        case WAIT_TIMEOUT:
+            // only in TimerDriven mode
+            stillRecording = AudioSamplesRecvProc();
+            break;
+        default:
+            break;
+        }
+    }
+
+end:
+    if (NULL != mmcssHandle) {
+        AvRevertMmThreadCharacteristics(mmcssHandle);
+        mmcssHandle = NULL;
+    }
+
+    timeEndPeriod(1);
+
+    CoUninitialize();
+    return hr;
+}
+
+bool
+WasapiUser::AudioSamplesRecvProc(void)
+{
+    bool    result     = true;
+    UINT32  packetLength = 0;
+    UINT32  numFramesAvailable = 0;
+    DWORD   flags      = 0;
+    BYTE    *pFrames   = NULL;
+    BYTE    *pData     = NULL;
+    HRESULT hr         = 0;
+    UINT64  devicePosition = 0;
+    int     writeFrames = 0;
+
+    WaitForSingleObject(m_mutex, INFINITE);
+
+    {
+        HRG(m_captureClient->GetNextPacketSize(&packetLength));
+
+        if (packetLength == 0) {
+            goto end;
+        }
+        
+        numFramesAvailable = packetLength;
+        flags = 0;
+
+        HRG(m_captureClient->GetBuffer(&pData,
+            &numFramesAvailable, &flags, &devicePosition, NULL));
+
+        if ((m_pcmData->nFrames - m_pcmData->posFrame) < (int)numFramesAvailable) {
+            HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
+            result = false;
+            goto end;
+        }
+
+        if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
+            ++m_glitchCount;
+        }
+        
+        if (flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) {
+            ++m_glitchCount;
+        }
+
+        writeFrames = (int)(numFramesAvailable);
+
+        if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
+            // record silence
+            dprintf("flags & AUDCLNT_BUFFERFLAGS_SILENT\n");
+            memset(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+                0, writeFrames * m_frameBytes);
+        } else {
+            m_pcmData->posFrame,
+                devicePosition;
+
+            dprintf("numFramesAvailable=%d fb=%d pos=%d devPos=%lld nextPos=%d te=%d\n",
+                numFramesAvailable, m_frameBytes,
+                m_pcmData->posFrame,
+                devicePosition,
+                (m_pcmData->posFrame + numFramesAvailable),
+                !!(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR));
+
+            memcpy(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+                pData, writeFrames * m_frameBytes);
+        }
+        m_pcmData->posFrame += writeFrames;
+
+        HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
+    }
+
+end:
+    ReleaseMutex(m_mutex);
+    return result;
+}
 

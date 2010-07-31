@@ -104,6 +104,30 @@ WasapiIO_ClearOutputData(void)
 }
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetupCaptureBuffer(int bytes)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetupCaptureBuffer(bytes);
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetCapturedData(unsigned char *data, int bytes)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetCapturedData(data, bytes);
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetCaptureGlitchCount(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetCaptureGlitchCount();
+}
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Start(void)
 {
