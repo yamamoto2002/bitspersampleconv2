@@ -53,7 +53,7 @@ namespace PlayPcmWin
             listBoxDevices.Items.Clear();
 
             hr = wasapi.DoDeviceEnumeration(WasapiCS.DeviceType.Play);
-            textBoxLog.Text += string.Format("wasapi.DoDeviceEnumeration() {0:X8}\r\n", hr);
+            textBoxLog.Text += string.Format("wasapi.DoDeviceEnumeration(Play) {0:X8}\r\n", hr);
 
             int nDevices = wasapi.GetDeviceCount();
             for (int i = 0; i < nDevices; ++i) {
@@ -182,9 +182,10 @@ namespace PlayPcmWin
                 textBoxLog.Text += string.Format("wasapi.Unsetup()\r\n");
                 CreateDeviceList();
                 string sDfm = DfmToStr(dfm);
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3}に対応していないのか、どちらかです。",
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3}に対応していないのか、どちらかです。\r\n",
                     m_wavData.SampleRate, m_wavData.BitsPerSample,
                     latencyMillisec, sDfm, hr);
+                textBoxLog.Text += s;
                 MessageBox.Show(s);
                 return;
             }
@@ -285,12 +286,5 @@ namespace PlayPcmWin
             textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
         }
 
-        private void radioButtonEventDriven_Checked(object sender, RoutedEventArgs e) {
-
-        }
-
-        private void radioButtonTimerDriven_Checked(object sender, RoutedEventArgs e) {
-
-        }
     }
 }

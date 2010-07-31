@@ -48,6 +48,18 @@ void __stdcall
 WasapiIO_ClearOutputData(void);
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetupCaptureBuffer(int bytes);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetCapturedData(unsigned char *data, int bytes);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetCaptureGlitchCount(void);
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Start(void);
 

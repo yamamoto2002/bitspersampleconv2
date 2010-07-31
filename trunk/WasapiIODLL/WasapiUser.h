@@ -1,5 +1,7 @@
 #pragma once
 
+// 京 UTF-8
+
 #include <Windows.h>
 #include <MMDeviceAPI.h>
 #include <AudioClient.h>
@@ -21,6 +23,14 @@ struct WWDeviceInfo {
     WWDeviceInfo(int id, const wchar_t * name);
 };
 
+/*
+ * play
+ *   pcmData->posFrame: playing position
+ *   pcmData->nFrames: total frames to play
+ * record
+ *   pcmData->posFrame: available recorded frame num
+ *   pcmData->nFrames: recording buffer size
+ */
 struct WWPcmData {
     int  nFrames;
     int  posFrame;
@@ -68,8 +78,14 @@ public:
     HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);
 
+    // before play start
     void SetOutputData(BYTE *data, int bytes);
     void ClearOutputData(void);
+
+    // recording
+    void SetupCaptureBuffer(int bytes);
+    int GetCapturedData(BYTE *data, int bytes);
+    int GetCaptureGlitchCount(void);
 
     HRESULT Start(void);
 
@@ -109,11 +125,17 @@ private:
     int          m_footerNeedSendCount;
 
     EDataFlow    m_dataFlow;
+    int          m_glitchCount;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
+    static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
 
     DWORD RenderMain(void);
+    DWORD CaptureMain(void);
 
     bool AudioSamplesSendProc(void);
+    bool AudioSamplesRecvProc(void);
+
+    void ClearPcmData(void);
 };
 
