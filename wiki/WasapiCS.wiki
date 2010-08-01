@@ -1,7 +1,7 @@
-#summary C#からWASAPIを使うためのクラス!WasapiCSについて
+#summary C#からWASAPIを使うためのクラスWasapiCSについて
 #labels Featured
 
-!WasapiCSはC#からWASAPIを使うためのクラスです。
+WasapiCSはC#からWASAPIを使うためのクラスです。
 
 C#のクラスファイルWasapiCS.csとC++で書かれたWasapiIODLL.DLLから構成されます。
 
@@ -13,13 +13,13 @@ svnでチェックアウトします。
 
 =サンプルプログラム=
 
-  * PlayPcmWin !WasapiCSを使用してWAVファイルを再生するサンプル
-  * RecPcmWin !WasapiCSを使用してWAVファイルを録音するサンプル
+  * PlayPcmWin WasapiCSを使用してWAVファイルを再生するサンプル
+  * RecPcmWin WasapiCSを使用してWAVファイルを録音するサンプル
 
 = 使い方 =
 
 Visual Studio 2010でC#プログラムの新規ソリューションを作成し
-!WasapiCS.csprojと!WasapiIODLL.vcxprojを追加します。
+WasapiCS.csprojとWasapiIODLL.vcxprojを追加します。
 その後、以下のようにするとWASAPI排他モードのイベント駆動モードでPCMデータを再生できます。
 
 {{{
