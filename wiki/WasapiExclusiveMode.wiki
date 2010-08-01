@@ -21,3 +21,15 @@ http://msdn.microsoft.com/en-us/library/dd370800%28v=VS.85%29.aspx
 
 排他モードについての資料
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
+
+サンプルプログラム、バグ情報等
+http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
+
+
+=Windows 7で追加された(Windows Vistaで使えない)機能について=
+
+  * 録音時に、音切れが発生したかどうかを知る機能 AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY
+
+  * S/PDIFのコピー禁止フラグを立てる機能
+  * HDMIのHDCPを有効にする機能
+  * デジタル出力を無効にする機能
