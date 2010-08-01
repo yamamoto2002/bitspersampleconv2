@@ -6,12 +6,11 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
 
 =WASAPI排他モードの実験プログラム=
 
-PlayPcmWin  再生プログラム
+再生プログラム PlayPcmWin
 
-RecPcmWin   録音プログラム
+録音プログラム RecPcmWin
 
 =資料=
-
 
 共有モードの再生
 http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
