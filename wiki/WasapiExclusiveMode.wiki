@@ -44,7 +44,8 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
 例:
   * Realtekの光デジタル出力は 192kHz 16bitがOKになるが、実際のところうまく出力できない。
   * Creative XFiTiHDの44.1kHz 16bit出力は、イベント駆動モードで動作できない。タイマー駆動モードならば動作する。
-
+  * RME Fireface400とM-AUDIO ProFire2626は、初期化する際に設定されているマスターサンプリングレートのみ使用できる。
+  * RME Fireface400は、ASIOでは量子化ビット数24ビットが使用できるがWASAPIでは選択できない。
 
 {{{
 スピーカー (Realtek High Definition Audio)
