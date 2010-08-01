@@ -33,3 +33,87 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
   * S/PDIFのコピー禁止フラグを立てる機能
   * HDMIのHDCPを有効にする機能
   * デジタル出力を無効にする機能
+
+=使用可能なフォーマット一覧=
+
+使用可能なフォーマット(サンプリング周波数と量子化ビット数の組み合わせ)は
+デバイスごとに異なる。
+
+以下の表でOKと書いてあっても、使えなかったり機能に制限がある場合がある。
+
+例:
+  * Realtekの光デジタル出力は 192kHz 16bitがOKになるが、実際のところうまく出力できない。
+  * Creative XFiTiHDの44.1kHz 16bit出力は、イベント駆動モードで動作できない。タイマー駆動モードならば動作する。
+
+
+{{{
+スピーカー (Realtek High Definition Audio)
+44100Hz 16bit: ok 0x00000000
+48000Hz 16bit: ok 0x00000000
+88200Hz 16bit: na 0x88890008
+96000Hz 16bit: ok 0x00000000
+176400Hz 16bit: na 0x88890008
+192000Hz 16bit: ok 0x00000000
+44100Hz 32bit: na 0x88890008
+48000Hz 32bit: na 0x88890008
+88200Hz 32bit: na 0x88890008
+96000Hz 32bit: na 0x88890008
+176400Hz 32bit: na 0x88890008
+192000Hz 32bit: na 0x88890008
+
+スピーカー (Creative SB X-Fi)
+44100Hz 16bit: ok 0x00000000
+48000Hz 16bit: ok 0x00000000
+88200Hz 16bit: ok 0x00000000
+96000Hz 16bit: ok 0x00000000
+176400Hz 16bit: ok 0x00000000
+192000Hz 16bit: ok 0x00000000
+44100Hz 32bit: ok 0x00000000
+48000Hz 32bit: ok 0x00000000
+88200Hz 32bit: ok 0x00000000
+96000Hz 32bit: ok 0x00000000
+176400Hz 32bit: ok 0x00000000
+192000Hz 32bit: ok 0x00000000
+
+スピーカー (Prodigy HD2 Audio)
+44100Hz 16bit: ok 0x00000000
+48000Hz 16bit: ok 0x00000000
+88200Hz 16bit: ok 0x00000000
+96000Hz 16bit: ok 0x00000000
+176400Hz 16bit: ok 0x00000000
+192000Hz 16bit: ok 0x00000000
+44100Hz 32bit: ok 0x00000000
+48000Hz 32bit: ok 0x00000000
+88200Hz 32bit: ok 0x00000000
+96000Hz 32bit: ok 0x00000000
+176400Hz 32bit: ok 0x00000000
+192000Hz 32bit: ok 0x00000000
+
+Multichannel (M-Audio ProFire 2626)
+44100Hz 16bit: ok 0x00000000
+48000Hz 16bit: na 0x88890008
+88200Hz 16bit: na 0x88890008
+96000Hz 16bit: na 0x88890008
+176400Hz 16bit: na 0x88890008
+192000Hz 16bit: na 0x88890008
+44100Hz 32bit: ok 0x00000000
+48000Hz 32bit: na 0x88890008
+88200Hz 32bit: na 0x88890008
+96000Hz 32bit: na 0x88890008
+176400Hz 32bit: na 0x88890008
+192000Hz 32bit: na 0x88890008
+
+スピーカー (RME Fireface 400)
+44100Hz 16bit: ok 0x00000000
+48000Hz 16bit: na 0x88890008
+88200Hz 16bit: na 0x88890008
+96000Hz 16bit: na 0x88890008
+176400Hz 16bit: na 0x88890008
+192000Hz 16bit: na 0x88890008
+44100Hz 32bit: na 0x88890008
+48000Hz 32bit: na 0x88890008
+88200Hz 32bit: na 0x88890008
+96000Hz 32bit: na 0x88890008
+176400Hz 32bit: na 0x88890008
+192000Hz 32bit: na 0x88890008 
+}}}
