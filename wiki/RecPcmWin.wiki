@@ -16,7 +16,7 @@ Windows 7に対応しております。
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin101.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin101x64.zip
 
-|| Windows  || !PlayPcmWin || 結果 ||
+|| Windows  || !RecPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
 || 64ビット版 || 64ビット版   || ○ ||
 || 32ビット版 || 64ビット版   || × ||
