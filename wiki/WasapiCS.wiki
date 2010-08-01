@@ -42,7 +42,7 @@ hr = wasapi.Setup(WasapiCS.DataFeedMode.EventDriven,
         44100, 16, 200);
 
 // 出力するPCMデータをセット
-byte[] outputPcm = new byte[44100 * 2 * 2 * 10];
+byte[] outputPcm = new byte[44100 * 2 * 2 * 10]; // 44100Hz 16bit 2ch 10秒
 wasapi.SetOutputData(outputPcm);
 
 // 再生開始
