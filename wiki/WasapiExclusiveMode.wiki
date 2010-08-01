@@ -1,8 +1,23 @@
 #summary WASAPI排他モード
 #labels Featured
 
-WASAPI排他モードの実験プログラム
+WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
+高音質低レイテンシのPCM音声再生・録音APIです。
+
+=WASAPI排他モードの実験プログラム=
 
 PlayPcmWin  再生プログラム
 
 RecPcmWin   録音プログラム
+
+=資料=
+
+
+共有モードの再生
+http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
+
+共有モードの録音
+http://msdn.microsoft.com/en-us/library/dd370800%28v=VS.85%29.aspx
+
+排他モードについての資料
+http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
