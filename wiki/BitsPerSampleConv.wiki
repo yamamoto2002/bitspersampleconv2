@@ -4,31 +4,19 @@
 BPSConvWinは16bit PCM WAVファイルを読み込み、
 音量を変えずに量子化ビット数を減らし、別ファイルに保存するWindows用アプリケーションです。
 
-=Version 1.1.3 [ディザを加える]機能=
-
-量子化ビット数を減らす前にディザを加える機能をつけました。
-暗号通信に使えるほど乱雑さ(randomness)が高い乱数をディザに使用しました。
-(オーオタが喜びそうなキャッチーな説明文ですが、
-実際には.Net Frameworkに備わっているCryptographyクラスの
-乱数生成器の関数を呼び出しているだけです。このあたりで呼んでいます↓
-
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/BpsConvWin/BpsConvWin/BpsConv.cs#171
-
-http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
-
-ディザを加えるとビット数を減らしても音がだいぶ滑らかになります。
-
 =使い方=
 
-まず16bit PCM WAVファイルをCDからripするなどして用意します。
+以下のZIPファイルをダウンロードして中に入っているSetup.exeを実行するとインストールします。
 
-セットアッププログラムはこのページの上のほうのDownloadsに置いてあります。
-これをダウンロードして実行するとセットアップが始まります。
-(.NET Framework 3.5SP1を追加でインストールする必要があるかもしれません。この場合は画面の指示に従ってダウンロードしてきてインストールしてください。)
+(アンインストールは、コントロールパネルの[プログラムの追加と削除]でBpsConvWinを削除します。)
+
+http://bitspersampleconv2.googlecode.com/files/BpsConvWin40114.zip
+
+16bit PCM WAVファイルをCDからripするなどして用意します。
 
 正常にセットアップが終わるとデスクトップにBPSConvWinというショートカットが出来ますので、
 これをダブルクリックして実行してください。
-あとは画面の指示に従うと、読み出すWAVファイルと同じフォルダに
+画面の指示に従うと、読み出すWAVファイルと同じフォルダに
 量子化ビット数が1～15ビットに減らされた15個のWAVファイルが作られます。
 
 読み込むWAVファイル自体は読み出しに使用するだけで、書き換えません。
@@ -72,7 +60,7 @@ http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
 
 開発環境はマイクロソフトが無料で配っている
 http://www.microsoft.com/eXPress/download/
-のVisual C# 2008 Express Edition Japaneseをダウンロードしてきてインストールします。
+のVisual C# 2010 Express Edition Japaneseをダウンロードしてきてインストールします。
 
 BitsPerSampleConvのソースコードはTortoiseSVNなどを利用してこのページの上のほうの
 Sourceタブのあたりからチェックアウトしてください。
