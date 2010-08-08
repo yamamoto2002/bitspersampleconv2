@@ -7,8 +7,7 @@ BPSConvWinは16bit PCM WAVファイルを読み込み、
 =使い方=
 
 以下のZIPファイルをダウンロードして中に入っているSetup.exeを実行するとインストールします。
-
-(アンインストールは、コントロールパネルの[プログラムの追加と削除]でBpsConvWinを削除します。)
+(アンインストールは、コントロールパネルの[プログラムの追加と削除]で!BpsConvWinを削除します。)
 
 http://bitspersampleconv2.googlecode.com/files/BpsConvWin40114.zip
 
