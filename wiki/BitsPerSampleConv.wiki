@@ -11,7 +11,6 @@ http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
 16bit PCM WAVファイルをCDからripするなどして用意します。
 
 以下のZIPファイルをダウンロードして中に入っているSetup.exeを実行するとインストールします。
-(アンインストールは、コントロールパネルの[プログラムの追加と削除]で!BpsConvWinを削除します。)
 
 http://bitspersampleconv2.googlecode.com/files/BpsConvWin40114.zip
 
