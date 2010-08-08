@@ -4,6 +4,8 @@
 BPSConvWinは16bit PCM WAVファイルを読み込み、
 音量を変えずに量子化ビット数を減らし、別ファイルに保存するWindows用アプリケーションです。
 
+http://code.google.com/p/bitspersampleconv2/files/bpsconvwin113.jpg
+
 =使い方=
 
 以下のZIPファイルをダウンロードして中に入っているSetup.exeを実行するとインストールします。
