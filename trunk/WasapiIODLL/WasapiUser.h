@@ -58,6 +58,11 @@ enum WWDeviceType {
     WWDTNum
 };
 
+enum WWSchedulerTaskType {
+    WWSTTAudio,
+    WWSTTProAudio,
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -65,6 +70,8 @@ public:
 
     HRESULT Init(void);
     void Term(void);
+
+    void SetSchedulerTaskType(WWSchedulerTaskType t);
 
     // device enumeration
     HRESULT DoDeviceEnumeration(WWDeviceType t);
@@ -126,6 +133,8 @@ private:
 
     EDataFlow    m_dataFlow;
     int          m_glitchCount;
+
+    WWSchedulerTaskType m_schedulerTaskType;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);

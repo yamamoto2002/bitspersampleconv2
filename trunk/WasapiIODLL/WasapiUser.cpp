@@ -40,6 +40,16 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
     CopyMemory(stream, rhs->stream, bytes);
 }
 
+static wchar_t*
+WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
+{
+    switch (t) {
+    case WWSTTAudio: return L"Audio";
+    case WWSTTProAudio: return L"Pro Audio";
+    default: assert(0); return L"";
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////
 // WasapiUser class
 
@@ -61,7 +71,7 @@ WasapiUser::WasapiUser(void)
     m_mutex            = NULL;
     m_coInitializeSuccess = false;
     m_glitchCount      = 0;
-
+    m_schedulerTaskType = WWSTTAudio;
 }
 
 WasapiUser::~WasapiUser(void)
@@ -108,6 +118,14 @@ WasapiUser::Term(void)
     if (m_coInitializeSuccess) {
         CoUninitialize();
     }
+}
+
+void
+WasapiUser::SetSchedulerTaskType(WWSchedulerTaskType t)
+{
+    assert(0 <= t&& t <= WWSTTProAudio);
+
+    m_schedulerTaskType = t;
 }
 
 static HRESULT
@@ -490,7 +508,7 @@ WasapiUser::Unsetup(void)
 }
 
 HRESULT
-WasapiUser::Start()
+WasapiUser::Start(void)
 {
     HRESULT hr      = 0;
     BYTE    *pData  = NULL;
@@ -556,8 +574,17 @@ end:
 void
 WasapiUser::Stop(void)
 {
+    HRESULT hr;
+
     if (m_shutdownEvent) {
         SetEvent(m_shutdownEvent);
+    }
+
+    if (m_audioClient) {
+        hr = m_audioClient->Stop();
+        if (FAILED(hr)) {
+            dprintf("E: %s m_audioClient->Stop() failed 0x%x\n", __FUNCTION__, hr);
+        }
     }
 
     if (m_thread) {
@@ -570,17 +597,6 @@ WasapiUser::Stop(void)
     if (m_shutdownEvent) {
         CloseHandle(m_shutdownEvent);
         m_shutdownEvent = NULL;
-    }
-
-    if (m_audioClient) {
-        m_audioClient->Stop();
-    }
-
-    if (m_thread) {
-        WaitForSingleObject(m_thread, INFINITE);
-
-        CloseHandle(m_thread);
-        m_thread = NULL;
     }
 }
 
@@ -831,7 +847,9 @@ WasapiUser::RenderMain(void)
 
     timeBeginPeriod(1);
 
-    mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
+    mmcssHandle = AvSetMmThreadCharacteristics(
+        WWSchedulerTaskTypeToStr(m_schedulerTaskType),
+        &mmcssTaskIndex);
     if (NULL == mmcssHandle) {
         dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
             GetLastError());
@@ -905,7 +923,9 @@ WasapiUser::CaptureMain(void)
 
     timeBeginPeriod(1);
 
-    mmcssHandle = AvSetMmThreadCharacteristics(L"Audio", &mmcssTaskIndex);
+    mmcssHandle = AvSetMmThreadCharacteristics(
+        WWSchedulerTaskTypeToStr(m_schedulerTaskType),
+        &mmcssTaskIndex);
     if (NULL == mmcssHandle) {
         dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
             GetLastError());
@@ -966,61 +986,116 @@ WasapiUser::AudioSamplesRecvProc(void)
 
     WaitForSingleObject(m_mutex, INFINITE);
 
-    {
-        HRG(m_captureClient->GetNextPacketSize(&packetLength));
+    HRG(m_captureClient->GetNextPacketSize(&packetLength));
 
-        if (packetLength == 0) {
-            goto end;
-        }
-        
-        numFramesAvailable = packetLength;
-        flags = 0;
-
-        HRG(m_captureClient->GetBuffer(&pData,
-            &numFramesAvailable, &flags, &devicePosition, NULL));
-
-        if ((m_pcmData->nFrames - m_pcmData->posFrame) < (int)numFramesAvailable) {
-            HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
-            result = false;
-            goto end;
-        }
-
-        if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
-            ++m_glitchCount;
-        }
-        
-        if (flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR) {
-            ++m_glitchCount;
-        }
-
-        writeFrames = (int)(numFramesAvailable);
-
-        if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
-            // record silence
-            dprintf("flags & AUDCLNT_BUFFERFLAGS_SILENT\n");
-            memset(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
-                0, writeFrames * m_frameBytes);
-        } else {
-            m_pcmData->posFrame,
-                devicePosition;
-
-            dprintf("numFramesAvailable=%d fb=%d pos=%d devPos=%lld nextPos=%d te=%d\n",
-                numFramesAvailable, m_frameBytes,
-                m_pcmData->posFrame,
-                devicePosition,
-                (m_pcmData->posFrame + numFramesAvailable),
-                !!(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR));
-
-            memcpy(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
-                pData, writeFrames * m_frameBytes);
-        }
-        m_pcmData->posFrame += writeFrames;
-
-        HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
+    if (packetLength == 0) {
+        goto end;
     }
+        
+    numFramesAvailable = packetLength;
+    flags = 0;
+
+    HRG(m_captureClient->GetBuffer(&pData,
+        &numFramesAvailable, &flags, &devicePosition, NULL));
+
+    if ((m_pcmData->nFrames - m_pcmData->posFrame) < (int)numFramesAvailable) {
+        HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
+        result = false;
+        goto end;
+    }
+
+    if (flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) {
+        ++m_glitchCount;
+    }
+
+    writeFrames = (int)(numFramesAvailable);
+
+    if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
+        // record silence
+        dprintf("flags & AUDCLNT_BUFFERFLAGS_SILENT\n");
+        memset(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+            0, writeFrames * m_frameBytes);
+    } else {
+        m_pcmData->posFrame,
+            devicePosition;
+
+        dprintf("numFramesAvailable=%d fb=%d pos=%d devPos=%lld nextPos=%d te=%d\n",
+            numFramesAvailable, m_frameBytes,
+            m_pcmData->posFrame,
+            devicePosition,
+            (m_pcmData->posFrame + numFramesAvailable),
+            !!(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR));
+
+        memcpy(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+            pData, writeFrames * m_frameBytes);
+    }
+    m_pcmData->posFrame += writeFrames;
+
+    HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
 
 end:
     ReleaseMutex(m_mutex);
     return result;
 }
+
+/////////////////////////////////////////////////////////////////////////
+// new features of Windows 7 
+
+/*
+HRESULT
+WasapiUser::SetDeviceSampleRate(int id, int sampleRate)
+{
+    HRESULT              hr;
+    WAVEFORMATEX         *waveFormat = NULL;
+    WAVEFORMATEXTENSIBLE *wfex       = NULL;
+    REFERENCE_TIME       hnsDefaultDevicePeriod;
+    REFERENCE_TIME       hnsMinimumDevicePeriod;
+    IAudioClockAdjustment *audioClockAdjustment = NULL;
+
+    assert(0 <= id && id < (int)m_deviceInfo.size());
+
+    assert(m_deviceCollection);
+    assert(!m_deviceToUse);
+
+    HRG(m_deviceCollection->Item(id, &m_deviceToUse));
+
+    HRG(m_deviceToUse->Activate(
+        __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
+
+    assert(!waveFormat);
+    HRG(m_audioClient->GetMixFormat(&waveFormat));
+    assert(waveFormat);
+
+    wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
+    dprintf("original Mix Format:\n");
+    WWWaveFormatDebug(waveFormat);
+    WWWFEXDebug(wfex);
+
+    HRG(m_audioClient->Initialize(
+        AUDCLNT_SHAREMODE_SHARED,
+        AUDCLNT_STREAMFLAGS_RATEADJUST,
+        100 * 10000,
+        0,
+        waveFormat,
+        NULL));
+    dprintf("IsFormatSupported=%08x\n", hr);
+
+    HRG(m_audioClient->GetService(IID_PPV_ARGS(&audioClockAdjustment)));
+
+    HRG(audioClockAdjustment->SetSampleRate((float)sampleRate));
+    dprintf("IAudioClockAdjustment::SetSampleRate(%d) %08x\n", sampleRate, hr);
+
+end:
+    SafeRelease(&audioClockAdjustment);
+    SafeRelease(&m_deviceToUse);
+    SafeRelease(&m_audioClient);
+
+    if (waveFormat) {
+        CoTaskMemFree(waveFormat);
+        waveFormat = NULL;
+    }
+
+    return hr;
+}
+*/
 
