@@ -847,6 +847,10 @@ WasapiUser::RenderMain(void)
 
     timeBeginPeriod(1);
 
+    dprintf("D: %s() AvSetMmThreadCharacteristics(%S)\n",
+        __FUNCTION__,
+        WWSchedulerTaskTypeToStr(m_schedulerTaskType));
+
     mmcssHandle = AvSetMmThreadCharacteristics(
         WWSchedulerTaskTypeToStr(m_schedulerTaskType),
         &mmcssTaskIndex);
@@ -922,6 +926,10 @@ WasapiUser::CaptureMain(void)
     HRG(CoInitializeEx(NULL, COINIT_MULTITHREADED));
 
     timeBeginPeriod(1);
+
+    dprintf("D: %s AvSetMmThreadCharacteristics(%S)\n",
+        __FUNCTION__,
+        WWSchedulerTaskTypeToStr(m_schedulerTaskType));
 
     mmcssHandle = AvSetMmThreadCharacteristics(
         WWSchedulerTaskTypeToStr(m_schedulerTaskType),
