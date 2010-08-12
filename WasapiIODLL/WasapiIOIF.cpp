@@ -30,6 +30,14 @@ WasapiIO_Term(void)
 }
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetSchedulerTaskType(int t)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetSchedulerTaskType((WWSchedulerTaskType)t);
+}
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_DoDeviceEnumeration(int deviceType)
 {
