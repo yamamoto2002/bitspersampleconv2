@@ -13,6 +13,10 @@ namespace Wasapiex {
         WasapiIO_Term();
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetSchedulerTaskType(int t);
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_DoDeviceEnumeration(int deviceType);
 
@@ -90,6 +94,15 @@ namespace Wasapiex {
 
         public void Term() {
             WasapiIO_Term();
+        }
+
+        public enum SchedulerTaskType {
+            Audio,
+            ProAudio
+        };
+
+        public void SetSchedulerTaskType(SchedulerTaskType t) {
+            WasapiIO_SetSchedulerTaskType((int)t);
         }
 
         public enum DeviceType {
