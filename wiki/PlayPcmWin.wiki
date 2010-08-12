@@ -14,8 +14,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin112.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin112x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin113.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin113x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -58,6 +58,9 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
+===!PlayPcmWin 1.0.13 ==
+  * 再生中の描画負荷を下げた。
+
 ===!PlayPcmWin 1.0.12 ==
   * バッファ詰めスレッドの優先度タイプ設定「Pro Audio」が選択できるようになった。
 
