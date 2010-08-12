@@ -98,6 +98,53 @@ namespace PlayPcmWin
             Application.Current.Shutdown();
         }
 
+        private void LoadWaveFileFromPath(string path)
+        {
+            m_wavFilePath = path;
+            m_wavData = new WavData();
+
+            bool readSuccess = false;
+            using (BinaryReader br = new BinaryReader(File.Open(m_wavFilePath, FileMode.Open))) {
+                readSuccess = m_wavData.ReadRaw(br);
+            }
+            if (readSuccess) {
+                textBoxPlayFile.Text = m_wavFilePath;
+
+                buttonDeviceSelect.IsEnabled = true;
+                menuItemFileOpen.IsEnabled   = false;
+
+            } else {
+                string s = string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
+                textBoxLog.Text += s;
+                MessageBox.Show(s);
+            }
+        }
+
+        private void MainWindowDragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+                e.Effects = DragDropEffects.Copy;
+            } else {
+                e.Effects = DragDropEffects.None;
+            }
+        }
+
+        private void MainWindowDragDrop(object sender, DragEventArgs e)
+        {
+            string[] paths = e.Data.GetData(DataFormats.FileDrop) as string[];
+            Console.WriteLine("D: Form1_DragDrop() {0}", paths.Length);
+            for (int i = 0; i < paths.Length; ++i) {
+                Console.WriteLine("   {0}", paths[i]);
+            }
+
+            if (!textBoxPlayFile.IsEnabled) {
+                return;
+            }
+
+            LoadWaveFileFromPath(paths[0]);
+        }
+
+
         private void buttonRefer_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
@@ -107,24 +154,7 @@ namespace PlayPcmWin
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                m_wavFilePath = dlg.FileName;
-                m_wavData = new WavData();
-
-                bool readSuccess = false;
-                using (BinaryReader br = new BinaryReader(File.Open(m_wavFilePath, FileMode.Open))) {
-                    readSuccess = m_wavData.ReadRaw(br);
-                }
-                if (readSuccess) {
-                    textBoxPlayFile.Text = m_wavFilePath;
-
-                    buttonDeviceSelect.IsEnabled = true;
-                    menuItemFileOpen.IsEnabled   = false;
-
-                } else {
-                    string s = string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
-                    textBoxLog.Text += s;
-                    MessageBox.Show(s);
-                }
+                LoadWaveFileFromPath(dlg.FileName);
             }
         }
         
@@ -259,25 +289,15 @@ namespace PlayPcmWin
 
         private void DoWork(object o, DoWorkEventArgs args) {
             //Console.WriteLine("DoWork started");
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
 
-            bw.ReportProgress(0);
-            long prevReport =sw.ElapsedMilliseconds;
-
-            while (!wasapi.Run(100)) {
-                if (PROGRESS_REPORT_INTERVAL_MS < sw.ElapsedMilliseconds - prevReport) {
-                    bw.ReportProgress(0);
-                    prevReport =sw.ElapsedMilliseconds;
-                }
+            do {
+                bw.ReportProgress(0);
                 System.Threading.Thread.Sleep(1);
-            }
+            } while (!wasapi.Run(PROGRESS_REPORT_INTERVAL_MS));
 
             wasapi.Stop();
 
-            sw.Stop();
-
-            //Console.WriteLine("DoWork end");
+            Console.WriteLine("DoWork end");
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e) {
