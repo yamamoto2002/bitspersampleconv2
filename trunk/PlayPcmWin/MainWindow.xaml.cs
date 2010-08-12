@@ -26,6 +26,7 @@ namespace PlayPcmWin
         WavData m_wavData = null;
 
         const int DEFAULT_OUTPUT_LATENCY_MS = 200;
+        const int PROGRESS_REPORT_INTERVAL_MS = 500;
 
         public MainWindow()
         {
@@ -240,7 +241,9 @@ namespace PlayPcmWin
                 return;
             }
             slider1.Value = wasapi.GetPosFrame();
-            label1.Content = string.Format("{0}/{1}", slider1.Value, slider1.Maximum);
+
+            label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}",
+                slider1.Value / m_wavData.SampleRate, slider1.Maximum/m_wavData.SampleRate);
         }
         
         private void RunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
@@ -255,16 +258,26 @@ namespace PlayPcmWin
         }
 
         private void DoWork(object o, DoWorkEventArgs args) {
-            Console.WriteLine("DoWork started");
+            //Console.WriteLine("DoWork started");
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            bw.ReportProgress(0);
+            long prevReport =sw.ElapsedMilliseconds;
 
             while (!wasapi.Run(100)) {
-                bw.ReportProgress(0);
+                if (PROGRESS_REPORT_INTERVAL_MS < sw.ElapsedMilliseconds - prevReport) {
+                    bw.ReportProgress(0);
+                    prevReport =sw.ElapsedMilliseconds;
+                }
                 System.Threading.Thread.Sleep(1);
             }
 
             wasapi.Stop();
 
-            Console.WriteLine("DoWork end");
+            sw.Stop();
+
+            //Console.WriteLine("DoWork end");
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e) {
