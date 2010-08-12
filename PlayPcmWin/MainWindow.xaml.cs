@@ -163,6 +163,9 @@ namespace PlayPcmWin
                 textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
             }
 
+            wasapi.SetSchedulerTaskType(m_schedulerTaskType);
+            textBoxLog.Text += string.Format("wasapi.SetSchedulerTaskType({0})\r\n", m_schedulerTaskType);
+
             int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
             textBoxLog.Text += string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr);
             if (hr < 0) {
@@ -284,6 +287,18 @@ namespace PlayPcmWin
             string dn = wasapi.GetDeviceName(listBoxDevices.SelectedIndex);
             string s = wasapi.InspectDevice(listBoxDevices.SelectedIndex);
             textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
+        }
+
+        WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
+
+        private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e)
+        {
+            m_schedulerTaskType = WasapiCS.SchedulerTaskType.Audio;
+        }
+
+        private void radioButtonTaskProAudio_Checked(object sender, RoutedEventArgs e)
+        {
+            m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
         }
 
     }
