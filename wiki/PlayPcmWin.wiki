@@ -50,8 +50,6 @@ ASIOからは出来るのですが……。
 
 タスクトレイの「Fireface Settings」を起動し、Fireface(1)タブのBuffer Size(Latency)を小さい値にします。
 
-「Fireface Settings」で、この設定をいじくっていると、よくBSODが発生しますがデバドラの不具合であり私のせいではありません。
-
 || Fireface Settings の Buffer Size(Latency) || PlayPcmWinの出力レイテンシー設定 || PCが低負荷状態での音切れ有無 ||
 || 1024 Samples || 13 ミリ秒 || 無 ||
 || 1024 Samples || 12 ミリ秒 || 有 ||
@@ -61,6 +59,8 @@ ASIOからは出来るのですが……。
 || 64 Samples || 3 ミリ秒 || 有 ||
 || 48 Samples || 3 ミリ秒 || 無 ||
 || 48 Samples || 2 ミリ秒 || 設定不可 ||
+
+「Fireface Settings」で、この設定をいじくっていると、よくBSODが発生しますがデバドラの不具合であり私のせいではありません。
 
 出力レイテンシーを短く設定するのは、音切れの可能性が上がるので、おすすめしません。
 
