@@ -3,8 +3,7 @@
 
 = WASAPI排他モードでWAVファイルを再生 =
 
-!PlayPcmWinはWASAPI排他モードのイベント駆動モードでWAVファイルを再生するプログラムです。
-バージョン1.0.9で、おまけ的にWASAPI排他モードのタイマー駆動モードにも対応しました。
+!PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin112.png
 
