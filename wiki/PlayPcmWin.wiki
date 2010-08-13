@@ -52,7 +52,7 @@ ASIOからは出来るのですが……。
 
 「Fireface Settings」で、この設定をいじくっていると、よくBSODが発生しますがデバドラの不具合であり私のせいではありません。
 
-|| Fireface Settings の Buffer Size(Latency) || PlayPcmWinの出力レイテンシー設定 || 音切れ有無 ||
+|| Fireface Settings の Buffer Size(Latency) || PlayPcmWinの出力レイテンシー設定 || PCが低負荷状態での音切れ有無 ||
 || 1024 Samples || 13 ミリ秒 || 無 ||
 || 1024 Samples || 12 ミリ秒 || 有 ||
 || 256 Samples || 13 ミリ秒 || 無 ||
