@@ -52,7 +52,7 @@ M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの
 
 タスクトレイの「Fireface Settings」を起動し、Fireface(1)タブのBuffer Size(Latency)を小さい値にします。
 
-レイテンシー設定の組み合わせと音切れの有無(44.1kHz 16bit stereo時)
+レイテンシー設定の組み合わせと音切れの有無(44.1kHz 16bit stereo イベント駆動)
 
 || Fireface Settings の Buffer Size(Latency) || PlayPcmWinの出力レイテンシー設定 || IAudioClient::GetBufferSize()の戻り値||PCが低負荷状態での音切れ有無 ||
 || 1024 Samples || 13 ミリ秒||573サンプル || 無 ||
