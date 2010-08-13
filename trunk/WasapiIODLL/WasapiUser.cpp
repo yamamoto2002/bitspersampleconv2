@@ -467,6 +467,8 @@ WasapiUser::Setup(
     }
 
     HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
+    dprintf("m_audioClient->GetBufferSize() rv=%u\n", m_bufferFrameNum);
+
     if (WWDFMEventDriven == m_dataFeedMode) {
         HRG(m_audioClient->SetEventHandle(m_audioSamplesReadyEvent));
     }
