@@ -46,6 +46,17 @@ WASAPIからデバイスのマスターサンプリングレートの変更が�
 さらに、RME FF400はWASAPI排他モードから量子化ビット数24ビットの再生をすることができません。
 ASIOからは出来るのですが……。
 
+=RME FF400で出力レイテンシーを短く設定したい場合=
+
+タスクトレイの「Fireface Settings」を起動し、Fireface(1)タブのBuffer Size(Latency)を小さい値にします。
+
+|| Fireface Settings の Buffer Size(Latency) || PlayPcmWinの出力レイテンシー設定 || 音切れ有無 ||
+|| 1024 Samples || 15 ミリ秒 || 無 ||
+|| 1024 Samples || 10 ミリ秒 || 有 ||
+|| 64 Samples || 4 ミリ秒 || 無 ||
+|| 64 Samples || 3 ミリ秒 || 有 ||
+|| 48 Samples || 3 ミリ秒 || 無 ||
+
 =Creative X-FiTiHDで44.1kHzのイベント駆動再生ができない問題=
 
 Creative X-FiTiHDは、44.1kHzサンプリングでイベント駆動モードが使えません。
