@@ -5,9 +5,9 @@
 
 !PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin112.png
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin115.jpg
 
-Windows 7に対応しております。Windows XPでは動きません。Vistaは、もしかしたら動くかも。
+Windows 7に対応しております。Windows XPでは動きません。Vistaは、排他モードは、もしかしたら動くかも。WASAPI共有モードは動きません。
 
 !PlayPcmWinは実験プログラムです。使いやすいとは言えません。WASAPI排他モードで音楽を聴きたい場合は、Foobar2000のfoo_out_wasapiプラグインを使うのが便利です。
 
@@ -15,8 +15,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin114.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin114x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin115.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin115x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -109,6 +109,11 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.15 ==
+  * 共有モードに対応し始めた。タイマー駆動は奇跡的に動作する。
+  * WASAPI排他モード タイマー駆動モードに長らくあった、バッファーオーバーランの不具合を修正。
+
 ===!PlayPcmWin 1.0.14 ==
   * WAVファイルのドラッグアンドドロップに対応。ただし、1ファイルしかドロップできず、ドロップできる場所も変である。
 
