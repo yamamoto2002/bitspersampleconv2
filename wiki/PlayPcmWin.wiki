@@ -46,6 +46,8 @@ WASAPIからデバイスのマスターサンプリングレートの変更が�
 さらに、RME FF400はWASAPI排他モードから量子化ビット数24ビットの再生をすることができません。
 ASIOからは出来るのですが……。
 
+M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの再生が可能です。
+
 =RME FF400で出力レイテンシーを短く設定したい場合=
 
 タスクトレイの「Fireface Settings」を起動し、Fireface(1)タブのBuffer Size(Latency)を小さい値にします。
