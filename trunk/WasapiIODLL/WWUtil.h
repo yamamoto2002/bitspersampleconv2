@@ -54,6 +54,12 @@ template <class T> void SafeRelease(T **ppT)
 BYTE*
 WWStereo24ToStereo32(BYTE *data, int bytes);
 
+BYTE*
+WWStereo24ToStereoFloat32(BYTE *data, int bytes);
+
+BYTE*
+WWStereo16ToStereoFloat32(BYTE *data, int bytes);
+
 void
 WWWaveFormatDebug(WAVEFORMATEX *v);
 

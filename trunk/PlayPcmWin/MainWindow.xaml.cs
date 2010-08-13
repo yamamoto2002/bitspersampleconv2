@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Wasapiex;
+using Wasapi;
 using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
@@ -20,13 +20,16 @@ namespace PlayPcmWin
 {
     public partial class MainWindow : Window
     {
+        const int DEFAULT_OUTPUT_LATENCY_MS   = 200;
+        const int PROGRESS_REPORT_INTERVAL_MS = 500;
+
         private WasapiCS wasapi;
 
-        string m_wavFilePath;
-        WavData m_wavData = null;
+        private string m_wavFilePath;
+        private WavData m_wavData = null;
 
-        const int DEFAULT_OUTPUT_LATENCY_MS = 200;
-        const int PROGRESS_REPORT_INTERVAL_MS = 500;
+        private WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
+        private WasapiCS.ShareMode m_shareMode = WasapiCS.ShareMode.Exclusive;
 
         public MainWindow()
         {
@@ -187,12 +190,27 @@ namespace PlayPcmWin
             }
         }
 
+        private static string ShareModeToStr(WasapiCS.ShareMode sm) {
+            switch (sm) {
+            case WasapiCS.ShareMode.Exclusive:
+                return "WASAPI排他モード";
+            case WasapiCS.ShareMode.Shared:
+                return "WASAPI共有モード";
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return "unknown";
+            }
+        }
+
         private void buttonDeviceSelect_Click(object sender, RoutedEventArgs e) {
             int latencyMillisec = Int32.Parse(textBoxLatency.Text);
             if (latencyMillisec <= 0) {
                 latencyMillisec = DEFAULT_OUTPUT_LATENCY_MS;
                 textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
             }
+
+            wasapi.SetShareMode(m_shareMode);
+            textBoxLog.Text += string.Format("wasapi.SetShareMode({0})\r\n", m_shareMode);
 
             wasapi.SetSchedulerTaskType(m_schedulerTaskType);
             textBoxLog.Text += string.Format("wasapi.SetSchedulerTaskType({0})\r\n", m_schedulerTaskType);
@@ -215,10 +233,10 @@ namespace PlayPcmWin
                 wasapi.Unsetup();
                 textBoxLog.Text += string.Format("wasapi.Unsetup()\r\n");
                 CreateDeviceList();
-                string sDfm = DfmToStr(dfm);
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3}に対応していないのか、どちらかです。\r\n",
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
                     m_wavData.SampleRate, m_wavData.BitsPerSample,
-                    latencyMillisec, sDfm, hr);
+                    latencyMillisec, DfmToStr(dfm), hr,
+                    ShareModeToStr(m_shareMode));
                 textBoxLog.Text += s;
                 MessageBox.Show(s);
                 return;
@@ -322,8 +340,6 @@ namespace PlayPcmWin
             textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
         }
 
-        WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
-
         private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e)
         {
             m_schedulerTaskType = WasapiCS.SchedulerTaskType.Audio;
@@ -333,6 +349,15 @@ namespace PlayPcmWin
         {
             m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
         }
+
+        private void radioButtonExclusive_Checked(object sender, RoutedEventArgs e) {
+            m_shareMode = WasapiCS.ShareMode.Exclusive;
+        }
+
+        private void radioButtonShared_Checked(object sender, RoutedEventArgs e) {
+            m_shareMode = WasapiCS.ShareMode.Shared;
+        }
+
 
     }
 }

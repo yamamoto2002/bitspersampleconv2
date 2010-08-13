@@ -18,6 +18,49 @@ WWStereo24ToStereo32(BYTE *data, int bytes)
     return p;
 }
 
+BYTE*
+WWStereo24ToStereoFloat32(BYTE *data, int bytes)
+{
+    int nData = bytes / 3; // 3==24bit
+
+    float *p = (float *)malloc(nData * 4);
+    int fromPos = 0;
+    int toPos = 0;
+    for (int i=0; i<nData; ++i) {
+        int v = (data[fromPos]<<8)
+            + (data[fromPos+1]<<16)
+            + (data[fromPos+2]<<24);
+
+        float r = (float)(v * (1.0 / 2147483648.0));
+        p[toPos++] = r;
+
+        fromPos += 3;
+    }
+
+    return (BYTE*)p;
+}
+
+BYTE*
+WWStereo16ToStereoFloat32(BYTE *data, int bytes)
+{
+    int nData = bytes / 2; // 2==16bit
+
+    float *p = (float *)malloc(nData * 4);
+    int fromPos = 0;
+    int toPos = 0;
+    for (int i=0; i<nData; ++i) {
+        int v = (data[fromPos]<<16)
+            + (data[fromPos+1]<<24);
+
+        float r = (float)(v * (1.0 / 2147483648.0));
+        p[toPos++] = r;
+
+        fromPos += 2;
+    }
+
+    return (BYTE*)p;
+}
+
 void
 WWWaveFormatDebug(WAVEFORMATEX *v)
 {

@@ -63,6 +63,11 @@ enum WWSchedulerTaskType {
     WWSTTProAudio,
 };
 
+enum WWShareMode {
+    WWSMShared,
+    WWSMExclusive,
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -72,6 +77,7 @@ public:
     void Term(void);
 
     void SetSchedulerTaskType(WWSchedulerTaskType t);
+    void SetShareMode(WWShareMode sm);
 
     // device enumeration
     HRESULT DoDeviceEnumeration(WWDeviceType t);
@@ -135,6 +141,10 @@ private:
     int          m_glitchCount;
 
     WWSchedulerTaskType m_schedulerTaskType;
+
+    AUDCLNT_SHAREMODE m_shareMode;
+
+    IAudioClockAdjustment *m_audioClockAdjustment;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
