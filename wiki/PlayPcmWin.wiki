@@ -75,7 +75,7 @@ M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの
 Creative X-FiTiHDは、44.1kHzサンプリングでWASAPI排他イベント駆動モードが使えません。
 WASAPI排他タイマー駆動モードにすれば動きます。
 
-理由はわかりません。
+理由はわかりません。PlayPcmWinのバグの可能性もあります。
 
 =メモリが足りない(OutOfMemory例外が発生する)場合=
 
