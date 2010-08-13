@@ -16,6 +16,10 @@ void __stdcall
 WasapiIO_SetSchedulerTaskType(int type);
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetShareMode(int sm);
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_DoDeviceEnumeration(int deviceType);
 

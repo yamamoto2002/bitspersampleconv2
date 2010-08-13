@@ -2,7 +2,7 @@
 using System.Text;
 using System.Runtime.InteropServices;
 
-namespace Wasapiex {
+namespace Wasapi {
     public class WasapiCS {
         [DllImport("WasapiIODLL.dll")]
         private extern static int
@@ -15,6 +15,10 @@ namespace Wasapiex {
         [DllImport("WasapiIODLL.dll")]
         private extern static void
         WasapiIO_SetSchedulerTaskType(int t);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetShareMode(int sm);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
@@ -103,6 +107,15 @@ namespace Wasapiex {
 
         public void SetSchedulerTaskType(SchedulerTaskType t) {
             WasapiIO_SetSchedulerTaskType((int)t);
+        }
+
+        public enum ShareMode {
+            Shared,
+            Exclusive
+        };
+
+        public void SetShareMode(ShareMode t) {
+            WasapiIO_SetShareMode((int)t);
         }
 
         public enum DeviceType {
