@@ -60,6 +60,7 @@ ASIOからは出来るのですが……。
 || 64 Samples || 4 ミリ秒 || 無 ||
 || 64 Samples || 3 ミリ秒 || 有 ||
 || 48 Samples || 3 ミリ秒 || 無 ||
+|| 48 Samples || 2 ミリ秒 || 設定不可 ||
 
 =Creative X-FiTiHDで44.1kHzのイベント駆動再生ができない問題=
 
