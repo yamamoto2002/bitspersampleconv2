@@ -29,7 +29,7 @@
         <GroupBox Header="再生するWAVファイル" Height="95" Margin="12,29,0,0" Name="groupBox2" VerticalAlignment="Top" HorizontalAlignment="Left" Width="472">
             <Grid>
                 <Button Content="参照...(_R)" Height="23" HorizontalAlignment="Left" Margin="6,40,0,0" Name="buttonRefer" VerticalAlignment="Top" Width="105" Click="buttonRefer_Click" />
-                <TextBox Height="24" Margin="6,6,6,0" Name="textBoxPlayFile" VerticalAlignment="Top" IsReadOnly="True" />
+                <TextBox Height="24" Margin="6,6,6,0" Name="textBoxPlayFile" VerticalAlignment="Top" IsReadOnly="True" DragEnter="MainWindowDragEnter" Drop="MainWindowDragDrop" />
             </Grid>
         </GroupBox>
         <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="8,0,0,42" Name="buttonPlay" VerticalAlignment="Bottom" Width="75" IsEnabled="False" Click="buttonPlay_Click" />
