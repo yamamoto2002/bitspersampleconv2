@@ -459,12 +459,26 @@ WasapiUser::Setup(
         break;
     }
 
-    if (WWSMShared == m_shareMode) {
-        streamFlags |= AUDCLNT_STREAMFLAGS_RATEADJUST;
-    }
-
     REFERENCE_TIME bufferPeriodicity = latencyMillisec * 10000;
     REFERENCE_TIME bufferDuration    = bufferPeriodicity * periodsPerBuffer;
+
+    bool needClockAdjustmentOnSharedMode = false;
+
+    if (WWSMShared == m_shareMode) {
+        // 共有モードでデバイスサンプルレートとWAVファイルのサンプルレートが異なる場合、
+        // 入力サンプリング周波数調整を行う。
+        // 共有モード イベント駆動の場合、bufferPeriodicityに0をセットする。
+
+        if (waveFormat->nSamplesPerSec != sampleRate) {
+            // 共有モードのサンプルレート変更。
+            needClockAdjustmentOnSharedMode = true;
+            streamFlags |= AUDCLNT_STREAMFLAGS_RATEADJUST;
+        }
+
+        if (WWDFMEventDriven == m_dataFeedMode) {
+            bufferPeriodicity = 0;
+        }
+    }
 
     hr = m_audioClient->Initialize(
         m_shareMode, streamFlags, 
@@ -495,7 +509,7 @@ WasapiUser::Setup(
         goto end;
     }
 
-    if (WWSMShared == m_shareMode) {
+    if (needClockAdjustmentOnSharedMode) {
         assert(!m_audioClockAdjustment);
         HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_audioClockAdjustment)));
 
@@ -503,6 +517,8 @@ WasapiUser::Setup(
         HRG(m_audioClockAdjustment->SetSampleRate((float)sampleRate));
         dprintf("IAudioClockAdjustment::SetSampleRate(%d) %08x\n", sampleRate, hr);
     }
+
+    // サンプルレート変更後にGetBufferSizeする。なんとなく。
 
     HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
     dprintf("m_audioClient->GetBufferSize() rv=%u\n", m_bufferFrameNum);
@@ -569,18 +585,24 @@ WasapiUser::Start(void)
         assert(m_thread);
 
         nFrames = m_bufferFrameNum;
-        if (WWDFMTimerDriven == m_dataFeedMode) {
+        if (WWDFMTimerDriven == m_dataFeedMode || WWSMShared == m_shareMode) {
+            // タイマー駆動の場合、パッド計算必要。
+            // 共有モードの場合イベント駆動でもパッドが必要になる。
+            // RenderSharedEventDrivenのWASAPIRenderer.cpp参照。
+
             UINT32 padding = 0; //< frame now using
             HRG(m_audioClient->GetCurrentPadding(&padding));
             nFrames = m_bufferFrameNum - padding;
         }
 
-        assert(m_renderClient);
-        HRG(m_renderClient->GetBuffer(nFrames, &pData));
+        if (0 <= nFrames) {
+            assert(m_renderClient);
+            HRG(m_renderClient->GetBuffer(nFrames, &pData));
 
-        memset(pData, 0, nFrames * m_frameBytes);
+            memset(pData, 0, nFrames * m_frameBytes);
 
-        HRG(m_renderClient->ReleaseBuffer(nFrames, 0));
+            HRG(m_renderClient->ReleaseBuffer(nFrames, 0));
+        }
 
         m_footerCount = 0;
 
@@ -617,25 +639,27 @@ WasapiUser::Stop(void)
 {
     HRESULT hr;
 
-    if (m_shutdownEvent) {
+    if (NULL != m_shutdownEvent) {
         SetEvent(m_shutdownEvent);
     }
 
-    if (m_audioClient) {
+    if (NULL != m_audioClient) {
         hr = m_audioClient->Stop();
         if (FAILED(hr)) {
             dprintf("E: %s m_audioClient->Stop() failed 0x%x\n", __FUNCTION__, hr);
         }
     }
 
-    if (m_thread) {
+    if (NULL != m_thread) {
         SetEvent(m_thread);
         WaitForSingleObject(m_thread, INFINITE);
+        dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_thread);
         CloseHandle(m_thread);
         m_thread = NULL;
     }
 
-    if (m_shutdownEvent) {
+    if (NULL != m_shutdownEvent) {
+        dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_shutdownEvent);
         CloseHandle(m_shutdownEvent);
         m_shutdownEvent = NULL;
     }
@@ -835,14 +859,23 @@ WasapiUser::AudioSamplesSendProc(void)
     int     copyFrames = 0;
     int     writableFrames = 0;
 
+    /// @todo これは再生位置のミューテックスなので、もっと狭くする。
     WaitForSingleObject(m_mutex, INFINITE);
 
     writableFrames = m_bufferFrameNum;
-    if (WWDFMTimerDriven == m_dataFeedMode) {
+    if (WWDFMTimerDriven == m_dataFeedMode || WWSMShared == m_shareMode) {
+        // 共有モードの場合イベント駆動でもパッドが必要になる。
+        // RenderSharedEventDrivenのWASAPIRenderer.cpp参照。
+
         UINT32 padding = 0; //< frame num now using
         assert(m_audioClient);
-        HRG(m_audioClient->GetCurrentPadding(&padding));
+        HRGR(m_audioClient->GetCurrentPadding(&padding));
+
         writableFrames = m_bufferFrameNum - padding;
+        // dprintf("m_bufferFrameNum=%d padding=%d writableFrames=%d\n", m_bufferFrameNum, padding, writableFrames);
+        if (writableFrames <= 0) {
+            goto end;
+        }
     }
 
     copyFrames = writableFrames;
@@ -859,11 +892,7 @@ WasapiUser::AudioSamplesSendProc(void)
     }
 
     assert(m_renderClient);
-    hr = m_renderClient->GetBuffer(writableFrames, &pData);
-    if (FAILED(hr)) {
-        result = false;
-        goto end;
-    }
+    HRGR(m_renderClient->GetBuffer(writableFrames, &pData));
 
     assert(pData);
     if (0 < copyFrames) {
@@ -878,11 +907,7 @@ WasapiUser::AudioSamplesSendProc(void)
         */
     }
 
-    hr = m_renderClient->ReleaseBuffer(writableFrames, 0);
-    if (FAILED(hr)) {
-        result = false;
-        goto end;
-    }
+    HRGR(m_renderClient->ReleaseBuffer(writableFrames, 0));
 
     m_pcmData->posFrame += copyFrames;
     if (m_pcmData->nFrames <= m_pcmData->posFrame) {
@@ -935,18 +960,24 @@ WasapiUser::RenderMain(void)
         timeoutMillisec       = INFINITE;
     }
 
+    dprintf("D: %s() waitArrayCount=%d m_shutdownEvent=%p m_audioSamplesReadyEvent=%p\n",
+        __FUNCTION__, waitArrayCount, m_shutdownEvent, m_audioSamplesReadyEvent);
+
     while (stillPlaying) {
         waitResult = WaitForMultipleObjects(
             waitArrayCount, waitArray, FALSE, timeoutMillisec);
         switch (waitResult) {
         case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
+            dprintf("D: %s() shutdown event flagged\n", __FUNCTION__);
             stillPlaying = false;
             break;
         case WAIT_OBJECT_0 + 1:     // m_audioSamplesReadyEvent
+            //dprintf("D: %s() samples ready event flagged\n", __FUNCTION__);
             // only in EventDriven mode
             stillPlaying = AudioSamplesSendProc();
             break;
         case WAIT_TIMEOUT:
+            //dprintf("D: %s() timeout event flagged\n", __FUNCTION__);
             // only in TimerDriven mode
             stillPlaying = AudioSamplesSendProc();
             break;

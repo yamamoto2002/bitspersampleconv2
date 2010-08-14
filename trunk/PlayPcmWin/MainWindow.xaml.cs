@@ -30,6 +30,9 @@ namespace PlayPcmWin
 
         private WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
         private WasapiCS.ShareMode m_shareMode = WasapiCS.ShareMode.Exclusive;
+        private BackgroundWorker m_playWorker;
+        private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
+
 
         public MainWindow()
         {
@@ -260,8 +263,6 @@ namespace PlayPcmWin
             CreateDeviceList();
         }
 
-        BackgroundWorker bw;
-
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
             int hr = wasapi.Start();
             textBoxLog.Text += string.Format("wasapi.Start() {0:X8}\r\n", hr);
@@ -276,12 +277,15 @@ namespace PlayPcmWin
             buttonPlay.IsEnabled     = false;
             buttonDeselect.IsEnabled = false;
 
-            bw = new BackgroundWorker();
-            bw.WorkerReportsProgress = true;
-            bw.DoWork += new DoWorkEventHandler(DoWork);
-            bw.ProgressChanged += new ProgressChangedEventHandler(ProgressChanged);
-            bw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompleted);
-            bw.RunWorkerAsync();
+            m_playWorker = new BackgroundWorker();
+            m_playWorker.WorkerReportsProgress = true;
+            m_playWorker.DoWork += new DoWorkEventHandler(DoWork);
+            m_playWorker.ProgressChanged += new ProgressChangedEventHandler(ProgressChanged);
+            m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompleted);
+            m_playWorker.RunWorkerAsync();
+
+            m_sw.Reset();
+            m_sw.Start();
         }
 
         private void ProgressChanged(object o, ProgressChangedEventArgs args) {
@@ -302,14 +306,16 @@ namespace PlayPcmWin
             slider1.Value = 0;
             label1.Content = "0/0";
 
-            textBoxLog.Text += string.Format("Play completed.\r\n");
+            m_sw.Stop();
+
+            textBoxLog.Text += string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed);
         }
 
         private void DoWork(object o, DoWorkEventArgs args) {
             //Console.WriteLine("DoWork started");
 
             do {
-                bw.ReportProgress(0);
+                m_playWorker.ReportProgress(0);
                 System.Threading.Thread.Sleep(1);
             } while (!wasapi.Run(PROGRESS_REPORT_INTERVAL_MS));
 
