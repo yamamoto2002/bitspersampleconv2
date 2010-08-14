@@ -15,8 +15,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin116.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin116x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin117.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin117x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -109,6 +109,9 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.17 ==
+  * バージョン番号のあげ忘れを修正。
 
 ===!PlayPcmWin 1.0.16 ==
   * 共有モードイベント駆動が、動くようになった。
