@@ -99,14 +99,22 @@ namespace WavRWLib2
         public bool Read(BinaryReader br)
         {
             subChunk1Id = br.ReadBytes(4);
-            if (subChunk1Id[0] != 'f' || subChunk1Id[1] != 'm' || subChunk1Id[2] != 't' || subChunk1Id[3] != ' ') {
-                Console.WriteLine("E: FmtSubChunk.subChunk1Id mismatch. \"{0}{1}{2}{3}\" should be \"fmt \"",
+            while (subChunk1Id[0] != 'f' || subChunk1Id[1] != 'm' || subChunk1Id[2] != 't' || subChunk1Id[3] != ' ') {
+                // Windows Media Playerで取り込んだWAV。"LIST"のあとに、チャンクサイズがあるので、スキップする。
+                Console.WriteLine("D: FmtSubChunk skip \"{0}{1}{2}{3}\"",
                     (char)subChunk1Id[0], (char)subChunk1Id[1], (char)subChunk1Id[2], (char)subChunk1Id[3]);
-                return false;
+
+                int waveChunkSize = br.ReadInt32();
+                if (waveChunkSize <= 0) {
+                    Console.WriteLine("E: FmtSubChunk chunk corrupted");
+                    return false;
+                }
+                br.ReadBytes(waveChunkSize);
+                subChunk1Id = br.ReadBytes(4);
             }
 
             subChunk1Size = br.ReadUInt32();
-            if (16 != subChunk1Size) {
+            if (16 != subChunk1Size && 18 != subChunk1Size) {
                 Console.WriteLine("E: FmtSubChunk.subChunk1Size != 16 {0} this file type is not supported", subChunk1Size);
                 return false;
             }
@@ -131,6 +139,10 @@ namespace WavRWLib2
 
             bitsPerSample = br.ReadUInt16();
             Console.WriteLine("D: bitsPerSample={0}", bitsPerSample);
+
+            if (16 < subChunk1Size) {
+                br.ReadBytes((int)(subChunk1Size - 16));
+            }
 
             if (byteRate != sampleRate * numChannels * bitsPerSample / 8) {
                 Console.WriteLine("E: byteRate is wrong value. corrupted file?");
