@@ -15,8 +15,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin118.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin118x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin119.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin119x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -109,6 +109,9 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.19 ==
+  * Windows Media PlayerでリッピングしたWAVEファイルが読み込めない問題を修正。
 
 ===!PlayPcmWin 1.0.18 ==
   * 複数ファイルの読み込みと連続再生に対応。
