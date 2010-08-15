@@ -15,8 +15,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin121.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin121x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin123.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin123x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -108,11 +108,11 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
-=既知の不具合=
-
-  * デバイス選択以降にリピートチェックボックスの状態を変更しても反映しません
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.23 ==
+  * デバイス選択以降にリピートチェックボックスの状態を変更しても反映しない問題を修正。
 
 ===!PlayPcmWin 1.0.21 ==
   * 再生リストへのファイルの追加が都合により出来なかった場合のメッセージ表示。
