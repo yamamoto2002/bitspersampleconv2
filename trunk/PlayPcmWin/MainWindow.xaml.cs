@@ -126,18 +126,24 @@ namespace PlayPcmWin
                 if (wavData.NumChannels != 2) {
                     string s = string.Format("2チャンネルステレオ以外のWAVファイルの再生には対応していません: {0} {1}ch\r\n",
                         path, wavData.NumChannels);
+                    MessageBox.Show(s);
+                    textBoxLog.Text += s;
                     return false;
                 }
                 if (wavData.BitsPerSample != 16
                  && wavData.BitsPerSample != 24) {
                     string s = string.Format("量子化ビット数が16でも24でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
                         path, wavData.BitsPerSample);
+                    MessageBox.Show(s);
+                    textBoxLog.Text += s;
                     return false;
                 }
 
                 if (0 < m_wavDataList.Count
                     && !m_wavDataList[0].IsSameFormat(wavData)) {
                     string s = string.Format("再生リストの先頭のファイルとデータフォーマットが異なるため追加できませんでした: {0}\r\n", path);
+                    MessageBox.Show(s);
+                    textBoxLog.Text += s;
                     return false;
                 }
 
