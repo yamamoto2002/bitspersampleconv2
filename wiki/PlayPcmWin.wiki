@@ -108,6 +108,10 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
+=既知の不具合=
+
+  * デバイス選択以降にリピートチェックボックスの状態を変更しても反映しません
+
 =更新履歴=
 
 ===!PlayPcmWin 1.0.21 ==
