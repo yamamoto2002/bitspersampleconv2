@@ -50,11 +50,23 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
-        WasapiIO_SetOutputData(byte[] data, int bytes);
+        WasapiIO_AddPlayPcmData(int id, byte[] data, int bytes);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
-        WasapiIO_ClearOutputData();
+        WasapiIO_ClearPlayList();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetPlayRepeat(bool repeat);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetNowPlayingPcmDataId();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetNowPlayingPcmDataId(int id);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void
@@ -160,12 +172,24 @@ namespace Wasapi {
             WasapiIO_Unsetup();
         }
 
-        public void SetOutputData(byte[] data) {
-            WasapiIO_SetOutputData(data, data.Length);
+        public void AddPlayPcmData(int id, byte[] data) {
+            WasapiIO_AddPlayPcmData(id, data, data.Length);
         }
 
-        public void ClearOutputData() {
-            WasapiIO_ClearOutputData();
+        public void ClearPlayList() {
+            WasapiIO_ClearPlayList();
+        }
+
+        public void SetPlayRepeat(bool repeat) {
+            WasapiIO_SetPlayRepeat(repeat);
+        }
+
+        public int GetNowPlayingPcmDataId() {
+            return WasapiIO_GetNowPlayingPcmDataId();
+        }
+
+        public void SetNowPlayingPcmDataId(int id) {
+            WasapiIO_SetNowPlayingPcmDataId(id);
         }
 
         public void SetupCaptureBuffer(int bytes) {

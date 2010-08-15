@@ -32,14 +32,24 @@ struct WWDeviceInfo {
  *   pcmData->nFrames: recording buffer size
  */
 struct WWPcmData {
-    int  nFrames;
-    int  posFrame;
-    BYTE *stream;
+    int       id;
+    WWPcmData *next;
+    int       nFrames;
+    int       posFrame;
+    BYTE      *stream;
+
+    WWPcmData(void) {
+        id       = 0;
+        next     = NULL;
+        nFrames  = 0;
+        posFrame = 0;
+        stream   = NULL;
+    }
+    ~WWPcmData(void);
 
     void Init(int samples);
     void Term(void);
 
-    ~WWPcmData(void);
 
     void CopyFrom(WWPcmData *rhs);
 };
@@ -92,8 +102,13 @@ public:
     void Unsetup(void);
 
     // before play start
-    void SetOutputData(BYTE *data, int bytes);
-    void ClearOutputData(void);
+    void ClearPlayList(void);
+    void AddPlayPcmData(int id, BYTE *data, int bytes);
+    void SetPlayRepeat(bool b);
+
+    /// -1: not playing
+    int GetNowPlayingPcmDataId(void);
+    bool SetNowPlayingPcmDataId(int id);
 
     // recording
     void SetupCaptureBuffer(int bytes);
@@ -130,7 +145,8 @@ private:
     IAudioRenderClient  *m_renderClient;
     IAudioCaptureClient *m_captureClient;
     HANDLE       m_thread;
-    WWPcmData    *m_pcmData;
+    WWPcmData    *m_capturedPcmData;
+    std::vector<WWPcmData> m_playPcmDataList;
     HANDLE       m_mutex;
     int          m_footerCount;
     bool         m_coInitializeSuccess;
@@ -146,6 +162,8 @@ private:
 
     IAudioClockAdjustment *m_audioClockAdjustment;
 
+    WWPcmData    *m_nowPlayingPcmData;
+
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
 
@@ -155,6 +173,10 @@ private:
     bool AudioSamplesSendProc(void);
     bool AudioSamplesRecvProc(void);
 
-    void ClearPcmData(void);
+    void ClearCapturedPcmData(void);
+    void ClearPlayPcmData(void);
+    void ClearAllPcmData(void);
+
+    int CreateWritableFrames(BYTE *pData_return, int wantFrames);
 };
 

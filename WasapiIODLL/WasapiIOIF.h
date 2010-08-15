@@ -49,11 +49,23 @@ WasapiIO_Unsetup(void);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIO_SetOutputData(unsigned char *data, int bytes);
+WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIO_ClearOutputData(void);
+WasapiIO_ClearPlayList(void);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetPlayRepeat(bool b);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetNowPlayingPcmDataId(void);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetNowPlayingPcmDataId(int id);
 
 extern "C" __declspec(dllexport)
 void __stdcall
