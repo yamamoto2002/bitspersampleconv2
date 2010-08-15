@@ -12,8 +12,11 @@ EXPORTS
 	WasapiIO_ChooseDevice
 	WasapiIO_Setup
 	WasapiIO_Unsetup
-	WasapiIO_SetOutputData
-	WasapiIO_ClearOutputData
+	WasapiIO_AddPlayPcmData
+	WasapiIO_ClearPlayList
+	WasapiIO_SetPlayRepeat
+	WasapiIO_GetNowPlayingPcmDataId
+	WasapiIO_SetNowPlayingPcmDataId
 	WasapiIO_SetupCaptureBuffer
 	WasapiIO_GetCapturedData
 	WasapiIO_GetCaptureGlitchCount

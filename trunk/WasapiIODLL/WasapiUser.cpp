@@ -7,6 +7,7 @@
 #include <functiondiscoverykeys.h>
 #include <strsafe.h>
 #include <mmsystem.h>
+#include <malloc.h>
 
 #define FOOTER_SEND_FRAME_NUM (2)
 #define PERIODS_PER_BUFFER_ON_TIMER_DRIVEN_MODE (4)
@@ -26,13 +27,14 @@ WWPcmData::Term(void)
 
 WWPcmData::~WWPcmData(void)
 {
-    assert(!stream);
 }
 
 void
 WWPcmData::CopyFrom(WWPcmData *rhs)
 {
     *this = *rhs;
+
+    next = NULL;
 
     int bytes = nFrames * 4;
 
@@ -67,7 +69,7 @@ WasapiUser::WasapiUser(void)
     m_captureClient    = NULL;
 
     m_thread           = NULL;
-    m_pcmData          = NULL;
+    m_capturedPcmData  = NULL;
     m_mutex            = NULL;
     m_coInitializeSuccess = false;
     m_glitchCount      = 0;
@@ -75,6 +77,7 @@ WasapiUser::WasapiUser(void)
     m_shareMode         = AUDCLNT_SHAREMODE_EXCLUSIVE;
 
     m_audioClockAdjustment = NULL;
+    m_nowPlayingPcmData = NULL;
 }
 
 WasapiUser::~WasapiUser(void)
@@ -572,7 +575,13 @@ WasapiUser::Start(void)
     UINT32  nFrames = 0;
     DWORD   flags   = 0;
 
-    assert(m_pcmData);
+    assert(m_playPcmDataList.size());
+
+    if (NULL == m_nowPlayingPcmData) {
+        m_nowPlayingPcmData = &m_playPcmDataList[0];
+    }
+
+    HRG(m_audioClient->Reset());
 
     assert(!m_shutdownEvent);
     m_shutdownEvent = CreateEventEx(NULL, NULL, 0,
@@ -654,7 +663,11 @@ WasapiUser::Stop(void)
         SetEvent(m_thread);
         WaitForSingleObject(m_thread, INFINITE);
         dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_thread);
-        CloseHandle(m_thread);
+        if (m_thread) {
+            // ここでなぜかNULLになることがある。
+            // 暇なときに原因を調べましょう
+            CloseHandle(m_thread);
+        }
         m_thread = NULL;
     }
 
@@ -684,74 +697,139 @@ WasapiUser::Run(int millisec)
 // PCM data buffer management
 
 void
-WasapiUser::SetOutputData(BYTE *data, int bytes)
+WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
-    if (m_pcmData) {
-        ClearPcmData();
-    }
+    WWPcmData *pcmData = new WWPcmData();
+    pcmData->id       = id;
+    pcmData->next     = NULL;
+    pcmData->posFrame = 0;
 
-    m_pcmData = new WWPcmData();
-    m_pcmData->posFrame = 0;
-
-    // m_pcmData->stream create
+    // pcmData->stream create
 
     if (WWSMShared == m_shareMode) {
-        // shared mode
         BYTE *p = NULL;
         if (24 == m_dataBitsPerSample) {
-            m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
+            // 共有モード 24ビット
+            pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
             p = WWStereo24ToStereoFloat32(data, bytes);
         } else if (16 == m_dataBitsPerSample) {
-            m_pcmData->nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
+            // 共有モード 16ビット
+            pcmData->nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
             p = WWStereo16ToStereoFloat32(data, bytes);
         } else {
             assert(0);
         }
-        m_pcmData->stream = p;
-        return;
-    }
-
-    if (24 == m_dataBitsPerSample) {
-        // exclulsive mode 24bit
+        pcmData->stream = p;
+    } else if (24 == m_dataBitsPerSample) {
+        // 排他モード 24bit
         BYTE *p = WWStereo24ToStereo32(data, bytes);
-        m_pcmData->stream = p;
-        m_pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
-        return;
+        pcmData->stream = p;
+        pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
     } else if (16 == m_dataBitsPerSample) {
-        // exclusive mode 16bit
+        // 排他モード 16bit
         BYTE *p = (BYTE *)malloc(bytes);
         memcpy(p, data, bytes);
-        m_pcmData->nFrames = bytes/m_frameBytes;
-        m_pcmData->stream = p;
+        pcmData->nFrames = bytes/m_frameBytes;
+        pcmData->stream = p;
     } else {
         assert(0);
     }
+
+    m_playPcmDataList.push_back(*pcmData);
 }
 
 void
-WasapiUser::ClearOutputData(void)
+WasapiUser::ClearPlayList(void)
 {
-    ClearPcmData();
+    ClearPlayPcmData();
 }
 
 void
-WasapiUser::ClearPcmData(void)
+WasapiUser::ClearPlayPcmData(void)
 {
-    if (m_pcmData) {
-        m_pcmData->Term();
-        delete m_pcmData;
-        m_pcmData = NULL;
+    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+        m_playPcmDataList[i].Term();
     }
+    m_playPcmDataList.clear();
+
+    m_nowPlayingPcmData = NULL;
+}
+
+void
+WasapiUser::ClearCapturedPcmData(void)
+{
+    if (m_capturedPcmData) {
+        m_capturedPcmData->Term();
+        delete m_capturedPcmData;
+        m_capturedPcmData = NULL;
+    }
+}
+
+void
+WasapiUser::SetPlayRepeat(bool repeat)
+{
+    // 最初のpcmDataから、最後のpcmDataまでnextでつなげる。
+    // リピートフラグが立っていたら最後のpcmDataのnextを最初のpcmDataにする。
+
+    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+        if (i == m_playPcmDataList.size()-1) {
+            // 最後の項目。
+            if (repeat) {
+                m_playPcmDataList[i].next = 
+                    &m_playPcmDataList[0];
+            } else {
+                m_playPcmDataList[i].next = NULL;
+            }
+        } else {
+            // 最後の項目以外は、連続にnextをつなげる。
+            m_playPcmDataList[i].next = 
+                &m_playPcmDataList[i+1];
+        }
+    }
+}
+
+int
+WasapiUser::GetNowPlayingPcmDataId(void)
+{
+    WWPcmData *nowPlaying = m_nowPlayingPcmData;
+
+    if (!nowPlaying) {
+        return -1;
+    }
+    return nowPlaying->id;
+}
+
+bool
+WasapiUser::SetNowPlayingPcmDataId(int id)
+{
+    if (id < 0 || m_playPcmDataList.size() <= id) {
+        return false;
+    }
+
+    assert(m_mutex);
+    WaitForSingleObject(m_mutex, INFINITE);
+    {
+        WWPcmData *nowPlaying = m_nowPlayingPcmData;
+
+        if (nowPlaying) {
+            nowPlaying->posFrame = 0;
+            m_nowPlayingPcmData = &m_playPcmDataList[id];
+        }
+    }
+    ReleaseMutex(m_mutex);
+
+    return true;
 }
 
 int
 WasapiUser::GetTotalFrameNum(void)
 {
-    if (!m_pcmData) {
+    WWPcmData *nowPlaying = m_nowPlayingPcmData;
+
+    if (!nowPlaying) {
         return 0;
     }
-
-    return m_pcmData->nFrames;
+    return nowPlaying->nFrames;
 }
 
 int
@@ -759,11 +837,12 @@ WasapiUser::GetPosFrame(void)
 {
     int result = 0;
 
-    assert(m_mutex);
+    WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
-    //WaitForSingleObject(m_mutex, INFINITE);
-    if (m_pcmData) {
-        result = m_pcmData->posFrame;
+    // assert(m_mutex);
+    // WaitForSingleObject(m_mutex, INFINITE);
+    if (nowPlaying) {
+        result = nowPlaying->posFrame;
     }
     //ReleaseMutex(m_mutex);
 
@@ -783,10 +862,13 @@ WasapiUser::SetPosFrame(int v)
     }
 
     assert(m_mutex);
-
     WaitForSingleObject(m_mutex, INFINITE);
-    if (m_pcmData) {
-        m_pcmData->posFrame = v;
+    {
+        WWPcmData *nowPlaying = m_nowPlayingPcmData;
+
+        if (nowPlaying) {
+            nowPlaying->posFrame = v;
+        }
     }
     ReleaseMutex(m_mutex);
 
@@ -801,18 +883,16 @@ WasapiUser::SetupCaptureBuffer(int bytes)
         return;
     }
 
-    if (m_pcmData) {
-        ClearPcmData();
-    }
+    ClearCapturedPcmData();
 
     /* 録音時は
      *   pcmData->posFrame: 有効な録音データのフレーム数
      *   pcmData->nFrames: 録音可能総フレーム数
      */
-    m_pcmData = new WWPcmData();
-    m_pcmData->posFrame = 0;
-    m_pcmData->nFrames = bytes/m_frameBytes;
-    m_pcmData->stream = (BYTE*)malloc(bytes);
+    m_capturedPcmData = new WWPcmData();
+    m_capturedPcmData->posFrame = 0;
+    m_capturedPcmData->nFrames = bytes/m_frameBytes;
+    m_capturedPcmData->stream = (BYTE*)malloc(bytes);
 }
 
 int
@@ -823,12 +903,12 @@ WasapiUser::GetCapturedData(BYTE *data, int bytes)
         return 0;
     }
 
-    assert(m_pcmData);
+    assert(m_capturedPcmData);
 
-    if (m_pcmData->posFrame * m_frameBytes < bytes) {
-        bytes = m_pcmData->posFrame * m_frameBytes;
+    if (m_capturedPcmData->posFrame * m_frameBytes < bytes) {
+        bytes = m_capturedPcmData->posFrame * m_frameBytes;
     }
-    memcpy(data, m_pcmData->stream, bytes);
+    memcpy(data, m_capturedPcmData->stream, bytes);
 
     return bytes;
 }
@@ -849,17 +929,48 @@ WasapiUser::RenderEntry(LPVOID lpThreadParameter)
     return self->RenderMain();
 }
 
+int
+WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
+{
+    int pos = 0;
+
+    WWPcmData *pcmData = m_nowPlayingPcmData;
+    while (NULL != pcmData && 0 < wantFrames) {
+        int copyFrames = wantFrames;
+        if (pcmData->nFrames <= pcmData->posFrame + wantFrames) {
+            // pcmDataが持っているフレーム数よりも要求フレーム数が多い。
+            copyFrames = pcmData->nFrames - pcmData->posFrame;
+        }
+
+        CopyMemory(&pData_return[pos*m_frameBytes],
+            &pcmData->stream[pcmData->posFrame * m_frameBytes],
+            copyFrames * m_frameBytes);
+        pos += copyFrames;
+        pcmData->posFrame += copyFrames;
+        wantFrames -= copyFrames;
+
+        if (pcmData->nFrames <= pcmData->posFrame) {
+            // pcmDataの最後まで来た。
+            // このpcmDataの再生位置は巻き戻して、次のpcmDataの先頭をポイントする。
+            pcmData->posFrame = 0;
+            pcmData = pcmData->next;
+        }
+    }
+
+    m_nowPlayingPcmData = pcmData;
+    return pos;
+}
+
 bool
 WasapiUser::AudioSamplesSendProc(void)
 {
     bool    result     = true;
-    BYTE    *pFrames   = NULL;
-    BYTE    *pData     = NULL;
+    BYTE    *from      = NULL;
+    BYTE    *to        = NULL;
     HRESULT hr         = 0;
     int     copyFrames = 0;
     int     writableFrames = 0;
 
-    /// @todo これは再生位置のミューテックスなので、もっと狭くする。
     WaitForSingleObject(m_mutex, INFINITE);
 
     writableFrames = m_bufferFrameNum;
@@ -878,28 +989,18 @@ WasapiUser::AudioSamplesSendProc(void)
         }
     }
 
-    copyFrames = writableFrames;
-    assert(m_pcmData);
-    if (m_pcmData->nFrames < m_pcmData->posFrame + copyFrames) {
-        copyFrames = m_pcmData->nFrames - m_pcmData->posFrame;
-    }
-
-    if (copyFrames <= 0) {
-        copyFrames = 0;
-    } else {
-        pFrames = (BYTE *)m_pcmData->stream;
-        pFrames += m_pcmData->posFrame * m_frameBytes;
-    }
+    from = (BYTE*)_alloca(writableFrames * m_frameBytes);
+    copyFrames = CreateWritableFrames(from, writableFrames);
 
     assert(m_renderClient);
-    HRGR(m_renderClient->GetBuffer(writableFrames, &pData));
+    HRGR(m_renderClient->GetBuffer(writableFrames, &to));
 
-    assert(pData);
+    assert(to);
     if (0 < copyFrames) {
-        CopyMemory(pData, pFrames, copyFrames * m_frameBytes);
+        CopyMemory(to, from, copyFrames * m_frameBytes);
     }
     if (0 < writableFrames - copyFrames) {
-        memset(&pData[copyFrames*m_frameBytes], 0,
+        memset(&to[copyFrames*m_frameBytes], 0,
             (writableFrames - copyFrames)*m_frameBytes);
         /* dprintf("fc=%d bs=%d cb=%d memset %d bytes\n",
             m_footerCount, m_bufferFrameNum, copyFrames,
@@ -908,9 +1009,9 @@ WasapiUser::AudioSamplesSendProc(void)
     }
 
     HRGR(m_renderClient->ReleaseBuffer(writableFrames, 0));
+    to = NULL;
 
-    m_pcmData->posFrame += copyFrames;
-    if (m_pcmData->nFrames <= m_pcmData->posFrame) {
+    if (NULL == m_nowPlayingPcmData) {
         ++m_footerCount;
         if (m_footerNeedSendCount < m_footerCount) {
             result = false;
@@ -1103,7 +1204,7 @@ WasapiUser::AudioSamplesRecvProc(void)
     HRG(m_captureClient->GetBuffer(&pData,
         &numFramesAvailable, &flags, &devicePosition, NULL));
 
-    if ((m_pcmData->nFrames - m_pcmData->posFrame) < (int)numFramesAvailable) {
+    if ((m_capturedPcmData->nFrames - m_capturedPcmData->posFrame) < (int)numFramesAvailable) {
         HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
         result = false;
         goto end;
@@ -1118,23 +1219,23 @@ WasapiUser::AudioSamplesRecvProc(void)
     if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
         // record silence
         dprintf("flags & AUDCLNT_BUFFERFLAGS_SILENT\n");
-        memset(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+        memset(&m_capturedPcmData->stream[m_capturedPcmData->posFrame * m_frameBytes],
             0, writeFrames * m_frameBytes);
     } else {
-        m_pcmData->posFrame,
+        m_capturedPcmData->posFrame,
             devicePosition;
 
         dprintf("numFramesAvailable=%d fb=%d pos=%d devPos=%lld nextPos=%d te=%d\n",
             numFramesAvailable, m_frameBytes,
-            m_pcmData->posFrame,
+            m_capturedPcmData->posFrame,
             devicePosition,
-            (m_pcmData->posFrame + numFramesAvailable),
+            (m_capturedPcmData->posFrame + numFramesAvailable),
             !!(flags & AUDCLNT_BUFFERFLAGS_TIMESTAMP_ERROR));
 
-        memcpy(&m_pcmData->stream[m_pcmData->posFrame * m_frameBytes],
+        memcpy(&m_capturedPcmData->stream[m_capturedPcmData->posFrame * m_frameBytes],
             pData, writeFrames * m_frameBytes);
     }
-    m_pcmData->posFrame += writeFrames;
+    m_capturedPcmData->posFrame += writeFrames;
 
     HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
 

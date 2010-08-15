@@ -105,18 +105,42 @@ WasapiIO_Unsetup(void)
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIO_SetOutputData(unsigned char *data, int bytes)
+WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes)
 {
     assert(g_pWasapi);
-    return g_pWasapi->SetOutputData(data, bytes);
+    return g_pWasapi->AddPlayPcmData(id, data, bytes);
 }
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIO_ClearOutputData(void)
+WasapiIO_ClearPlayList(void)
 {
     assert(g_pWasapi);
-    g_pWasapi->ClearOutputData();
+    g_pWasapi->ClearPlayList();
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetPlayRepeat(bool b)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetPlayRepeat(b);
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetNowPlayingPcmDataId(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetNowPlayingPcmDataId();
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetNowPlayingPcmDataId(int id)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetNowPlayingPcmDataId(id);
 }
 
 extern "C" __declspec(dllexport)

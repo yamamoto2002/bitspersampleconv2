@@ -386,6 +386,17 @@ namespace WavRWLib2
         private FmtSubChunk         fsc;
         private DataSubChunk        dsc;
 
+        public int Id { get; set; }
+        public string Path { get; set; }
+
+        /// <summary>
+        /// サンプリング周波数と量子化ビット数が同じならtrue
+        /// </summary>
+        public bool IsSameFormat(WavData other) {
+            return fsc.bitsPerSample == other.fsc.bitsPerSample
+                && fsc.sampleRate    == other.fsc.sampleRate;
+        }
+
         public bool Create(int sampleRate, int bitsPerSample, List<PcmSamples1Channel> samples)
         {
             int subChunk2Size = samples[0].NumSamples * (bitsPerSample / 8) * samples.Count;

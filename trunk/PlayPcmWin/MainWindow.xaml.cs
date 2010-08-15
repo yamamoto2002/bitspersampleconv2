@@ -25,8 +25,7 @@ namespace PlayPcmWin
 
         private WasapiCS wasapi;
 
-        private string m_wavFilePath;
-        private WavData m_wavData = null;
+        private List<WavData> m_wavDataList = new List<WavData>();
 
         private WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
         private WasapiCS.ShareMode m_shareMode = WasapiCS.ShareMode.Exclusive;
@@ -71,7 +70,9 @@ namespace PlayPcmWin
             buttonDeselect.IsEnabled         = false;
             buttonPlay.IsEnabled             = false;
             buttonStop.IsEnabled             = false;
-            buttonRefer.IsEnabled            = true;
+            buttonNext.IsEnabled             = false;
+            buttonPrev.IsEnabled             = false;
+            buttonClearPlayList.IsEnabled    = true;
             menuItemFileOpen.IsEnabled       = true;
             groupBoxWasapiSettings.IsEnabled = true;
             buttonInspectDevice.IsEnabled    = false;
@@ -83,7 +84,7 @@ namespace PlayPcmWin
                     listBoxDevices.SelectedIndex = 0;
                 }
 
-                if (m_wavData != null) {
+                if (m_wavDataList.Count != 0) {
                     buttonDeviceSelect.IsEnabled = true;
                 }
                 buttonInspectDevice.IsEnabled = true;
@@ -104,26 +105,56 @@ namespace PlayPcmWin
             Application.Current.Shutdown();
         }
 
-        private void LoadWaveFileFromPath(string path)
+        private void ClearPlayList() {
+            m_wavDataList.Clear();
+            listBoxPlayFiles.Items.Clear();
+            wasapi.ClearPlayList();
+
+            buttonDeviceSelect.IsEnabled = false;
+            menuItemFileOpen.IsEnabled = true;
+        }
+
+        private bool LoadWaveFileFromPath(string path)
         {
-            m_wavFilePath = path;
-            m_wavData = new WavData();
+            WavData wavData = new WavData();
 
             bool readSuccess = false;
-            using (BinaryReader br = new BinaryReader(File.Open(m_wavFilePath, FileMode.Open))) {
-                readSuccess = m_wavData.ReadRaw(br);
+            using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                readSuccess = wavData.ReadRaw(br);
             }
             if (readSuccess) {
-                textBoxPlayFile.Text = m_wavFilePath;
+                if (wavData.NumChannels != 2) {
+                    string s = string.Format("2チャンネルステレオ以外のWAVファイルの再生には対応していません: {0} {1}ch\r\n",
+                        path, wavData.NumChannels);
+                    return false;
+                }
+                if (wavData.BitsPerSample != 16
+                 && wavData.BitsPerSample != 24) {
+                    string s = string.Format("量子化ビット数が16でも24でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
+                        path, wavData.BitsPerSample);
+                    return false;
+                }
 
+                if (0 < m_wavDataList.Count
+                    && !m_wavDataList[0].IsSameFormat(wavData)) {
+                    string s = string.Format("再生リストの先頭のファイルとデータフォーマットが異なるため追加できませんでした: {0}\r\n", path);
+                    return false;
+                }
+
+                wavData.Path = System.IO.Path.GetFileName(path);
+                wavData.Id = m_wavDataList.Count();
+                m_wavDataList.Add(wavData);
+                listBoxPlayFiles.Items.Add(wavData.Path);
+
+                // メニュー状態の更新。デバイス選択を押せるようにする。
                 buttonDeviceSelect.IsEnabled = true;
-                menuItemFileOpen.IsEnabled   = false;
-
             } else {
-                string s = string.Format("読み込み失敗: {0}\r\n", m_wavFilePath);
+                string s = string.Format("読み込み失敗: {0}\r\n", path);
                 textBoxLog.Text += s;
                 MessageBox.Show(s);
+                return false;
             }
+            return true;
         }
 
         private void MainWindowDragEnter(object sender, DragEventArgs e)
@@ -143,16 +174,25 @@ namespace PlayPcmWin
                 Console.WriteLine("   {0}", paths[i]);
             }
 
-            if (!textBoxPlayFile.IsEnabled) {
+            if (buttonStop.IsEnabled) {
+                // 再生中は追加不可。
+                MessageBox.Show("再生中なのでプレイリストに追加できませんでした。");
                 return;
             }
 
-            LoadWaveFileFromPath(paths[0]);
+            for (int i = 0; i < paths.Length; ++i) {
+                LoadWaveFileFromPath(paths[i]);
+            }
         }
 
-
-        private void buttonRefer_Click(object sender, RoutedEventArgs e)
+        private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
         {
+            if (buttonStop.IsEnabled) {
+                // 再生中は追加不可。
+                MessageBox.Show("再生中なのでプレイリストに追加できませんでした。");
+                return;
+            }
+
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
             dlg.Filter = "WAVEファイル (.wav)|*.wav";
@@ -229,15 +269,17 @@ namespace PlayPcmWin
                 dfm = WasapiCS.DataFeedMode.TimerDriven;
             }
 
-            hr = wasapi.Setup(dfm, m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec);
+            WavData wavData0 = m_wavDataList[0];
+
+            hr = wasapi.Setup(dfm, wavData0.SampleRate, wavData0.BitsPerSample, latencyMillisec);
             textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                m_wavData.SampleRate, m_wavData.BitsPerSample, latencyMillisec, dfm, hr);
+                wavData0.SampleRate, wavData0.BitsPerSample, latencyMillisec, dfm, hr);
             if (hr < 0) {
                 wasapi.Unsetup();
                 textBoxLog.Text += string.Format("wasapi.Unsetup()\r\n");
                 CreateDeviceList();
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
-                    m_wavData.SampleRate, m_wavData.BitsPerSample,
+                    wavData0.SampleRate, wavData0.BitsPerSample,
                     latencyMillisec, DfmToStr(dfm), hr,
                     ShareModeToStr(m_shareMode));
                 textBoxLog.Text += s;
@@ -245,14 +287,19 @@ namespace PlayPcmWin
                 return;
             }
 
-            System.Diagnostics.Debug.Assert(0 < m_wavFilePath.Length);
-            wasapi.SetOutputData(m_wavData.SampleRawGet());
-            textBoxLog.Text += string.Format("wasapi.SetOutputData({0})\r\n", m_wavData.SampleRawGet().Length);
+            wasapi.ClearPlayList();
+            for (int i = 0; i < m_wavDataList.Count; ++i) {
+                WavData wd = m_wavDataList[i];
+                wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet());
+                textBoxLog.Text += string.Format("wasapi.AddOutputData({0})\r\n", wd.SampleRawGet().Length);
+            }
+            wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);
 
+            menuItemFileOpen.IsEnabled       = false;
             buttonDeviceSelect.IsEnabled     = false;
             buttonDeselect.IsEnabled         = true;
             buttonPlay.IsEnabled             = true;
-            buttonRefer.IsEnabled            = false;
+            buttonClearPlayList.IsEnabled    = false;
             buttonInspectDevice.IsEnabled    = false;
             groupBoxWasapiSettings.IsEnabled = false;
         }
@@ -270,11 +317,13 @@ namespace PlayPcmWin
                 return;
             }
 
-            wasapi.SetPosFrame(0);
+            //wasapi.SetPosFrame(0);
             slider1.Value = 0;
             slider1.Maximum = wasapi.GetTotalFrameNum();
-            buttonStop.IsEnabled     = true;
-            buttonPlay.IsEnabled     = false;
+            buttonStop.IsEnabled = true;
+            buttonNext.IsEnabled = true;
+            buttonPrev.IsEnabled = true;
+            buttonPlay.IsEnabled = false;
             buttonDeselect.IsEnabled = false;
 
             m_playWorker = new BackgroundWorker();
@@ -292,15 +341,31 @@ namespace PlayPcmWin
             if (null == wasapi) {
                 return;
             }
-            slider1.Value = wasapi.GetPosFrame();
 
-            label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}",
-                slider1.Value / m_wavData.SampleRate, slider1.Maximum/m_wavData.SampleRate);
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            int maximum = wasapi.GetNowPlayingPcmDataId();
+
+            if (playingId < 0) {
+                labelFileName.Content = "";
+                label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
+            } else {
+                listBoxPlayFiles.SelectedIndex = playingId;
+                slider1.Value =wasapi.GetPosFrame();
+                WavData wavData = m_wavDataList[playingId];
+                labelFileName.Content = wavData.Path;
+
+                slider1.Maximum = wavData.NumSamples;
+
+                label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}",
+                    slider1.Value / wavData.SampleRate, wavData.NumSamples / wavData.SampleRate);
+            }
         }
         
         private void RunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
-            buttonPlay.IsEnabled     = true;
-            buttonStop.IsEnabled     = false;
+            buttonPlay.IsEnabled = true;
+            buttonStop.IsEnabled = false;
+            buttonNext.IsEnabled = false;
+            buttonPrev.IsEnabled = false;
             buttonDeselect.IsEnabled = true;
 
             slider1.Value = 0;
@@ -326,6 +391,8 @@ namespace PlayPcmWin
 
         private void buttonStop_Click(object sender, RoutedEventArgs e) {
             buttonStop.IsEnabled = false;
+            buttonNext.IsEnabled = false;
+            buttonPrev.IsEnabled = false;
 
             wasapi.Stop();
             textBoxLog.Text += string.Format("wasapi.Stop()\r\n");
@@ -362,6 +429,31 @@ namespace PlayPcmWin
 
         private void radioButtonShared_Checked(object sender, RoutedEventArgs e) {
             m_shareMode = WasapiCS.ShareMode.Shared;
+        }
+
+        private void buttonClearPlayList_Click(object sender, RoutedEventArgs e) {
+            ClearPlayList();
+        }
+
+        private void buttonPrev_Click(object sender, RoutedEventArgs e) {
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            --playingId;
+            if (playingId < 0) {
+                playingId = 0;
+            }
+            wasapi.SetNowPlayingPcmDataId(playingId);
+        }
+
+        private void buttonNext_Click(object sender, RoutedEventArgs e) {
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            ++playingId;
+            if (playingId < 0) {
+                playingId = 0;
+            }
+            if (m_wavDataList.Count <= playingId) {
+                playingId = 0;
+            }
+            wasapi.SetNowPlayingPcmDataId(playingId);
         }
 
 
