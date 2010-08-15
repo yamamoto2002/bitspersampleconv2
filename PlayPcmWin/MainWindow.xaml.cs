@@ -352,13 +352,13 @@ namespace PlayPcmWin
             int maximum = wasapi.GetNowPlayingPcmDataId();
 
             if (playingId < 0) {
-                labelFileName.Content = "";
+                textBoxFileName.Text = "";
                 label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
             } else {
                 listBoxPlayFiles.SelectedIndex = playingId;
                 slider1.Value =wasapi.GetPosFrame();
                 WavData wavData = m_wavDataList[playingId];
-                labelFileName.Content = wavData.Path;
+                textBoxFileName.Text = wavData.Path;
 
                 slider1.Maximum = wavData.NumSamples;
 
@@ -462,6 +462,11 @@ namespace PlayPcmWin
             wasapi.SetNowPlayingPcmDataId(playingId);
         }
 
-
+        private void checkBoxContinuous_CheckedChanged(object sender, RoutedEventArgs e) {
+            if (buttonStop.IsEnabled) {
+                // 再生中に連続再生かどうかが変更された。
+                wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);
+            }
+        }
     }
 }

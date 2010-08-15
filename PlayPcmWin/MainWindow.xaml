@@ -71,10 +71,10 @@
                 <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="87,0,0,79" Name="buttonStop" VerticalAlignment="Bottom" Width="75" IsEnabled="False" Click="buttonStop_Click" />
                 <Label Content="0/0" Margin="0,0,6,76" Name="label1" Height="28" VerticalAlignment="Bottom" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="142" />
                 <Slider Margin="6,0,7,0" Name="slider1" MouseMove="slider1_MouseMove" Height="23" VerticalAlignment="Bottom" />
-                <Label Height="28" Margin="6,51,6,0" Name="labelFileName" VerticalAlignment="Top" />
-                <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" />
+                <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
                 <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="168,0,0,79" Name="buttonPrev" VerticalAlignment="Bottom" Width="75" Click="buttonPrev_Click" />
                 <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="249,0,0,79" Name="buttonNext" VerticalAlignment="Bottom" Width="75" Click="buttonNext_Click" />
+                <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" />
             </Grid>
         </GroupBox>
     </Grid>
