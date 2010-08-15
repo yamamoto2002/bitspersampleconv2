@@ -660,7 +660,6 @@ WasapiUser::Stop(void)
     }
 
     if (NULL != m_thread) {
-        SetEvent(m_thread);
         WaitForSingleObject(m_thread, INFINITE);
         dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_thread);
         if (m_thread) {
