@@ -7,7 +7,7 @@
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin118.jpg
 
-Windows 7に対応しております。Windows XPでは動きません。Vistaは、排他モードは、もしかしたら動くかも。WASAPI共有モードはWindows7の機能を使用しているため動きません。
+Windows 7に対応しております。Windows XPでは動きません。Vistaは、排他モードは、もしかしたら動くかも。WASAPI共有モードはWindows7の機能を使用しているためVistaでは動きません。
 
 !PlayPcmWinは実験プログラムです。使いやすいとは言えません。WASAPI排他モードで音楽を聴きたい場合は、Foobar2000のfoo_out_wasapiプラグインを使うのが便利です。
 
