@@ -48,6 +48,18 @@ ASIOからは出来るのですが……。
 
 M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの再生が可能です。
 
+=レンダースレッドタスクタイプ"Audio"と"Pro Audio"の違いに付いて=
+
+これは、
+AvSetMmThreadCharacteristics()関数の第1引数です。
+
+この引数の説明はMultimedia Class Scheduler Serviceの解説にあります
+
+http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
+
+Pro Audioにすると、出力レイテンシーを10ミリ秒よりも短く設定した場合に
+音切れの可能性が減るらしいです。
+
 =RME FF400で出力レイテンシーをすごく短く設定したい場合=
 
 WASAPI排他モードを使用します(共有モードでは30ミリ秒よりも短くできません)。
