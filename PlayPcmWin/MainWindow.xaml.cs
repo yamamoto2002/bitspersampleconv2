@@ -91,13 +91,17 @@ namespace PlayPcmWin
             }
         }
 
-        void MainWindow_Closed(object sender, EventArgs e) {
+        void Exit() {
             wasapi.Stop();
             wasapi.Unsetup();
             wasapi.Term();
             wasapi = null;
 
             Application.Current.Shutdown(0);
+        }
+
+        void MainWindow_Closed(object sender, EventArgs e) {
+            Exit();
         }
 
         private void MenuItemFileExit_Click(object sender, RoutedEventArgs e)
@@ -295,10 +299,18 @@ namespace PlayPcmWin
                 return;
             }
 
+            // おまじない的だが…
+            GC.Collect();
+
             wasapi.ClearPlayList();
             for (int i = 0; i < m_wavDataList.Count; ++i) {
                 WavData wd = m_wavDataList[i];
-                wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet());
+                if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
+                    wasapi.ClearPlayList();
+                    MessageBox.Show("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                    Exit();
+                    return;
+                }
                 textBoxLog.Text += string.Format("wasapi.AddOutputData({0})\r\n", wd.SampleRawGet().Length);
             }
             wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);

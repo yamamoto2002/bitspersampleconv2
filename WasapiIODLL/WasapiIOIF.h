@@ -48,7 +48,7 @@ void __stdcall
 WasapiIO_Unsetup(void);
 
 extern "C" __declspec(dllexport)
-void __stdcall
+bool __stdcall
 WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes);
 
 extern "C" __declspec(dllexport)

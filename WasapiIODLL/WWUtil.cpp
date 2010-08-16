@@ -6,6 +6,10 @@ WWStereo24ToStereo32(BYTE *data, int bytes)
     int nData = bytes / 3; // 3==24bit
 
     BYTE *p = (BYTE *)malloc(nData * 4);
+    if (NULL == p) {
+        return NULL;
+    }
+
     int fromPos = 0;
     int toPos = 0;
     for (int i=0; i<nData; ++i) {
@@ -24,6 +28,9 @@ WWStereo24ToStereoFloat32(BYTE *data, int bytes)
     int nData = bytes / 3; // 3==24bit
 
     float *p = (float *)malloc(nData * 4);
+    if (NULL == p) {
+        return NULL;
+    }
     int fromPos = 0;
     int toPos = 0;
     for (int i=0; i<nData; ++i) {
@@ -46,6 +53,9 @@ WWStereo16ToStereoFloat32(BYTE *data, int bytes)
     int nData = bytes / 2; // 2==16bit
 
     float *p = (float *)malloc(nData * 4);
+    if (NULL == p) {
+        return NULL;
+    }
     int fromPos = 0;
     int toPos = 0;
     for (int i=0; i<nData; ++i) {
