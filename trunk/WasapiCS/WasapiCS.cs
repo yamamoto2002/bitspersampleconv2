@@ -49,7 +49,7 @@ namespace Wasapi {
         WasapiIO_Unsetup();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void 
+        private extern static bool 
         WasapiIO_AddPlayPcmData(int id, byte[] data, int bytes);
 
         [DllImport("WasapiIODLL.dll")]
@@ -172,8 +172,8 @@ namespace Wasapi {
             WasapiIO_Unsetup();
         }
 
-        public void AddPlayPcmData(int id, byte[] data) {
-            WasapiIO_AddPlayPcmData(id, data, data.Length);
+        public bool AddPlayPcmData(int id, byte[] data) {
+            return WasapiIO_AddPlayPcmData(id, data, data.Length);
         }
 
         public void ClearPlayList() {

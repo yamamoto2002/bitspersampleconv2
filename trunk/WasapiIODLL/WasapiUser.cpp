@@ -695,10 +695,14 @@ WasapiUser::Run(int millisec)
 ////////////////////////////////////////////////////////////////////////////
 // PCM data buffer management
 
-void
+bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
     WWPcmData *pcmData = new WWPcmData();
+    if (NULL == pcmData) {
+        return false;
+    }
+
     pcmData->id       = id;
     pcmData->next     = NULL;
     pcmData->posFrame = 0;
@@ -727,14 +731,21 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     } else if (16 == m_dataBitsPerSample) {
         // 排他モード 16bit
         BYTE *p = (BYTE *)malloc(bytes);
-        memcpy(p, data, bytes);
-        pcmData->nFrames = bytes/m_frameBytes;
+        if (NULL != p) {
+            memcpy(p, data, bytes);
+            pcmData->nFrames = bytes/m_frameBytes;
+        }
         pcmData->stream = p;
     } else {
         assert(0);
     }
 
+    if (NULL == pcmData->stream) {
+        return false;
+    }
+
     m_playPcmDataList.push_back(*pcmData);
+    return true;
 }
 
 void

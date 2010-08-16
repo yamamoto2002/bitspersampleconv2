@@ -103,7 +103,7 @@ public:
 
     // before play start
     void ClearPlayList(void);
-    void AddPlayPcmData(int id, BYTE *data, int bytes);
+    bool AddPlayPcmData(int id, BYTE *data, int bytes);
     void SetPlayRepeat(bool b);
 
     /// -1: not playing
