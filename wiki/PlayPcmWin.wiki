@@ -27,7 +27,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 32ビット版のWindowsの場合は32ビット版の!PlayPcmWinを、
 64ビット版のWindowsの場合は64ビット版の!PlayPcmWinを使用してください。
 32ビット版のWindowsで64ビット版の!PlayPcmWinを動かすことはできません。
-64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、再生リストに貯められるファイル数が減ります。
+64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、使用可能なメモリ量が制限されるため、再生リストに貯められるWAVデータ数が減ります。
 
 =使用方法=
 
