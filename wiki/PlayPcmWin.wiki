@@ -16,7 +16,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 =ダウンロード=
 
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin126.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin126x64.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -140,7 +140,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 =更新履歴=
 
 ===!PlayPcmWin 1.0.26 ==
-  * メモリ不足発生時に、メッセージを表示するように修正したつもり。
+  * 32ビット版で、メモリ不足発生時に、メッセージを表示するように修正したつもり。
 
 ===!PlayPcmWin 1.0.24 ==
   * 再生リスト一覧のクリアー時にGarbage Collectするように修正。
