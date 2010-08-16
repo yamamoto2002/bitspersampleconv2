@@ -15,8 +15,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin123.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin123x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -27,7 +27,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 32ビット版のWindowsの場合は32ビット版の!PlayPcmWinを、
 64ビット版のWindowsの場合は64ビット版の!PlayPcmWinを使用してください。
 32ビット版のWindowsで64ビット版の!PlayPcmWinを動かすことはできません。
-64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、性能や機能が低下するかも。
+64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、再生リストに貯められるファイル数が減ります。
 
 =使用方法=
 
@@ -133,6 +133,9 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.24 ==
+  * 再生リスト一覧のクリアー時にGarbage Collectするように修正。
 
 ===!PlayPcmWin 1.0.23 ==
   * デバイス選択以降にリピートチェックボックスの状態を変更しても反映しない問題を修正。
