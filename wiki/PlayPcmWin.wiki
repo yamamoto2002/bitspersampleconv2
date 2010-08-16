@@ -140,7 +140,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 =更新履歴=
 
 ===!PlayPcmWin 1.0.25 ==
-  * メモリ不足発生時に、メッセージを表示するように修正。
+  * メモリ不足発生時に、メッセージを表示するように修正したつもりが、うまく働いていない。
 
 ===!PlayPcmWin 1.0.24 ==
   * 再生リスト一覧のクリアー時にGarbage Collectするように修正。
