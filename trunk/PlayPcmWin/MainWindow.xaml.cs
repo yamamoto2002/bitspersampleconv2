@@ -110,6 +110,8 @@ namespace PlayPcmWin
             listBoxPlayFiles.Items.Clear();
             wasapi.ClearPlayList();
 
+            GC.Collect();
+
             buttonDeviceSelect.IsEnabled = false;
             menuItemFileOpen.IsEnabled = true;
         }

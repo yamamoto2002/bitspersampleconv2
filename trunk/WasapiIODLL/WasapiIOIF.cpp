@@ -108,7 +108,7 @@ void __stdcall
 WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes)
 {
     assert(g_pWasapi);
-    return g_pWasapi->AddPlayPcmData(id, data, bytes);
+    g_pWasapi->AddPlayPcmData(id, data, bytes);
 }
 
 extern "C" __declspec(dllexport)
