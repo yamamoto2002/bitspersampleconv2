@@ -1,7 +1,7 @@
 #summary WASAPI排他モードでWAVファイルを再生するプログラムPlayPcmWinのページ
 #labels Featured
 
-= PlayPcmWinのページ =
+= !PlayPcmWinのページ =
 
 !PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
