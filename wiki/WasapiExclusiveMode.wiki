@@ -49,7 +49,7 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
 
 表1: 使用可能なフォーマット一覧
 {{{
-スピーカー (Realtek High Definition Audio) (Realtek ALC889A)
+スピーカー (Realtek High Definition Audio) (Realtek ALC889A Realtekドライバ)
 44100Hz 16bit: ok 0x00000000
 48000Hz 16bit: ok 0x00000000
 88200Hz 16bit: na 0x88890008
