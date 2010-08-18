@@ -49,7 +49,7 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
 
 表1: 使用可能なフォーマット一覧
 {{{
-スピーカー (Realtek High Definition Audio)
+スピーカー (Realtek High Definition Audio) (Realtek ALC889A)
 44100Hz 16bit: ok 0x00000000
 48000Hz 16bit: ok 0x00000000
 88200Hz 16bit: na 0x88890008
@@ -63,7 +63,7 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
 176400Hz 32bit: na 0x88890008
 192000Hz 32bit: na 0x88890008
 
-スピーカー (Creative SB X-Fi)
+スピーカー (Creative SB X-Fi) (Creative X-Fi Ti HD)
 44100Hz 16bit: ok 0x00000000
 48000Hz 16bit: ok 0x00000000
 88200Hz 16bit: ok 0x00000000
