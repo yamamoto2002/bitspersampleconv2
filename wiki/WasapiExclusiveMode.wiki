@@ -44,6 +44,7 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
   * Creative XFiTiHDの44.1kHz 16bit出力は、イベント駆動モードで動作できない。タイマー駆動モードならば動作する。
   * Creative X-FiTiHDはS/PDIF出力から量子化ビット数24ビット出力が可能です。
   * RME Fireface400とM-AUDIO !ProFire2626は、機器に設定されているマスターサンプリングレートのみ使用できる。マスターサンプリングレートはコントロールパネルで変更できる。ASIOではマスターサンプリングレート以外のサンプリング周波数に設定可能。
+  * M-AUDIO ProFire 2626のS/PDIF出力は、量子化ビット数24ビット出力の場合にコピープロテクトがかかるようです。
   * RME Fireface400は、ASIOでは量子化ビット数24ビットが使用できるがWASAPIでは選択できない。
   * Prodigy HD2はS/PDIF出力に量子化ビット数24ビットのデータを入れると出力に量子化ビット数16ビットのデータが出てきます。
 
