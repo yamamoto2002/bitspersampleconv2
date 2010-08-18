@@ -45,6 +45,8 @@ http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
   * RME Fireface400とM-AUDIO !ProFire2626は、機器に設定されているマスターサンプリングレートのみ使用できる。マスターサンプリングレートはコントロールパネルで変更できる。ASIOではマスターサンプリングレート以外のサンプリング周波数に設定可能。
   * RME Fireface400は、ASIOでは量子化ビット数24ビットが使用できるがWASAPIでは選択できない。
   * Realtekは、Realtekドライバをアンインストールして、Windows標準ドライバを入れると、使えるフォーマットが増えるらしいです。
+  * Creative X-FiTiHDはS/PDIF出力から量子化ビット数24ビット出力が可能です。
+  * Prodigy HD2はS/PDIF出力に量子化ビット数24ビットのデータを入れると出力に量子化ビット数16ビットのデータが出てきます。
 
 表1: 使用可能なフォーマット一覧
 {{{
