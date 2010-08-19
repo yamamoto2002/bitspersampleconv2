@@ -14,7 +14,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin126.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin127.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
@@ -44,9 +44,9 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 メモリが足りない場合、64ビット版OSを入れて、メモリを増設して下さい。メモリは安いです。
 
 目安としては、64ビット版Windowsで、メモリ6GBぐらいあると、!PlayPcmWinはそこそこ使える状態になります。
-(プログラムの作りが大雑把なので、WAVファイルのサイズの3倍ぐらいメモリを使います)
+(プログラムの作りが大雑把なので、WAVファイルのサイズの2倍ぐらいメモリを使います)
 
-32ビット版で、メモリ3GB以下の場合、!PlayPcmWinはCD1枚分のプレイリストも扱えず、
+32ビット版で、メモリ2GB以下の場合、!PlayPcmWinはCD1枚分のプレイリストも扱えず、
 あまり使い勝手がよくないと思います。
 
 =RME FF400やM-AUDIO ProFireでWASAPI排他モードを使うときのコツ=
@@ -137,6 +137,9 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.26 ==
+  * 32ビット版の、メモリ消費量削減。メモリ消費量がWAVファイルサイズの2倍ぐらいになった。
 
 ===!PlayPcmWin 1.0.26 ==
   * 32ビット版で、メモリ不足発生時に、メッセージを表示するように修正したつもり。
