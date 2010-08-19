@@ -648,10 +648,6 @@ WasapiUser::Stop(void)
 {
     HRESULT hr;
 
-    if (NULL != m_shutdownEvent) {
-        SetEvent(m_shutdownEvent);
-    }
-
     if (NULL != m_audioClient) {
         hr = m_audioClient->Stop();
         if (FAILED(hr)) {
@@ -659,6 +655,9 @@ WasapiUser::Stop(void)
         }
     }
 
+    if (NULL != m_shutdownEvent) {
+        SetEvent(m_shutdownEvent);
+    }
     if (NULL != m_thread) {
         WaitForSingleObject(m_thread, INFINITE);
         dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_thread);
@@ -698,53 +697,50 @@ WasapiUser::Run(int millisec)
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
-    WWPcmData *pcmData = new WWPcmData();
-    if (NULL == pcmData) {
-        return false;
-    }
+    WWPcmData pcmData;
 
-    pcmData->id       = id;
-    pcmData->next     = NULL;
-    pcmData->posFrame = 0;
+    pcmData.id       = id;
+    pcmData.next     = NULL;
+    pcmData.posFrame = 0;
 
-    // pcmData->stream create
+    // pcmData.stream create
 
     if (WWSMShared == m_shareMode) {
         BYTE *p = NULL;
         if (24 == m_dataBitsPerSample) {
             // 共有モード 24ビット
-            pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
+            pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
             p = WWStereo24ToStereoFloat32(data, bytes);
         } else if (16 == m_dataBitsPerSample) {
             // 共有モード 16ビット
-            pcmData->nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
+            pcmData.nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
             p = WWStereo16ToStereoFloat32(data, bytes);
         } else {
             assert(0);
         }
-        pcmData->stream = p;
+        pcmData.stream = p;
     } else if (24 == m_dataBitsPerSample) {
         // 排他モード 24bit
         BYTE *p = WWStereo24ToStereo32(data, bytes);
-        pcmData->stream = p;
-        pcmData->nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
+        pcmData.stream = p;
+        pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
     } else if (16 == m_dataBitsPerSample) {
         // 排他モード 16bit
         BYTE *p = (BYTE *)malloc(bytes);
         if (NULL != p) {
             memcpy(p, data, bytes);
-            pcmData->nFrames = bytes/m_frameBytes;
+            pcmData.nFrames = bytes/m_frameBytes;
         }
-        pcmData->stream = p;
+        pcmData.stream = p;
     } else {
         assert(0);
     }
 
-    if (NULL == pcmData->stream) {
+    if (NULL == pcmData.stream) {
         return false;
     }
 
-    m_playPcmDataList.push_back(*pcmData);
+    m_playPcmDataList.push_back(pcmData);
     return true;
 }
 

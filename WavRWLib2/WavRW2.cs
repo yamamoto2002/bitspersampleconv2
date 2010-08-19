@@ -6,46 +6,46 @@ namespace WavRWLib2
 {
     class RiffChunkDescriptor
     {
-        public byte[] chunkId;
-        public uint   chunkSize;
-        public byte[] format;
+        private byte[] m_chunkId;
+        private uint   m_chunkSize;
+        private byte[] m_format;
 
         public void Create(int chunkSize)
         {
-            chunkId = new byte[4];
-            chunkId[0] = (byte)'R';
-            chunkId[1] = (byte)'I';
-            chunkId[2] = (byte)'F';
-            chunkId[3] = (byte)'F';
+            m_chunkId = new byte[4];
+            m_chunkId[0] = (byte)'R';
+            m_chunkId[1] = (byte)'I';
+            m_chunkId[2] = (byte)'F';
+            m_chunkId[3] = (byte)'F';
 
-            this.chunkSize = (uint)chunkSize;
+            m_chunkSize = (uint)chunkSize;
 
-            format = new byte[4];
-            format[0] = (byte)'W';
-            format[1] = (byte)'A';
-            format[2] = (byte)'V';
-            format[3] = (byte)'E';
+            m_format = new byte[4];
+            m_format[0] = (byte)'W';
+            m_format[1] = (byte)'A';
+            m_format[2] = (byte)'V';
+            m_format[3] = (byte)'E';
         }
 
         public bool Read(BinaryReader br)
         {
-            chunkId = br.ReadBytes(4);
-            if (chunkId[0] != 'R' || chunkId[1] != 'I' || chunkId[2] != 'F' || chunkId[3] != 'F') {
+            m_chunkId = br.ReadBytes(4);
+            if (m_chunkId[0] != 'R' || m_chunkId[1] != 'I' || m_chunkId[2] != 'F' || m_chunkId[3] != 'F') {
                 Console.WriteLine("E: RiffChunkDescriptor.chunkId mismatch. \"{0}{1}{2}{3}\" should be \"RIFF\"",
-                    (char)chunkId[0], (char)chunkId[1], (char)chunkId[2], (char)chunkId[3]);
+                    (char)m_chunkId[0], (char)m_chunkId[1], (char)m_chunkId[2], (char)m_chunkId[3]);
                 return false;
             }
 
-            chunkSize = br.ReadUInt32();
-            if (chunkSize < 36) {
-                Console.WriteLine("E: chunkSize is too small {0}", chunkSize);
+            m_chunkSize = br.ReadUInt32();
+            if (m_chunkSize < 36) {
+                Console.WriteLine("E: chunkSize is too small {0}", m_chunkSize);
                 return false;
             }
 
-            format = br.ReadBytes(4);
-            if (format[0] != 'W' || format[1] != 'A' || format[2] != 'V' || format[3] != 'E') {
+            m_format = br.ReadBytes(4);
+            if (m_format[0] != 'W' || m_format[1] != 'A' || m_format[2] != 'V' || m_format[3] != 'E') {
                 Console.WriteLine("E: RiffChunkDescriptor.format mismatch. \"{0}{1}{2}{3}\" should be \"WAVE\"",
-                    (char)format[0], (char)format[1], (char)format[2], (char)format[3]);
+                    (char)m_format[0], (char)m_format[1], (char)m_format[2], (char)m_format[3]);
                 return false;
             }
 
@@ -54,55 +54,55 @@ namespace WavRWLib2
 
         public void Write(BinaryWriter bw)
         {
-            bw.Write(chunkId);
-            bw.Write(chunkSize);
-            bw.Write(format);
+            bw.Write(m_chunkId);
+            bw.Write(m_chunkSize);
+            bw.Write(m_format);
         }
     }
 
     class FmtSubChunk
     {
-        public byte[] subChunk1Id;
-        public uint   subChunk1Size;
-        public ushort audioFormat;
-        public ushort numChannels;
-        public uint   sampleRate;
+        private byte[] m_subChunk1Id;
+        private uint m_subChunk1Size;
+        private ushort m_audioFormat;
+        public ushort NumChannels { get; set; }
+        public uint SampleRate { get; set; }
 
-        public uint   byteRate;
-        public ushort blockAlign;
-        public ushort bitsPerSample;
+        private uint   m_byteRate;
+        private ushort m_blockAlign;
+        public ushort BitsPerSample { get; set; }
 
         public bool Create(ushort numChannels, uint sampleRate, ushort bitsPerSample)
         {
-            subChunk1Id = new byte[4];
-            subChunk1Id[0] = (byte)'f';
-            subChunk1Id[1] = (byte)'m';
-            subChunk1Id[2] = (byte)'t';
-            subChunk1Id[3] = (byte)' ';
+            m_subChunk1Id = new byte[4];
+            m_subChunk1Id[0] = (byte)'f';
+            m_subChunk1Id[1] = (byte)'m';
+            m_subChunk1Id[2] = (byte)'t';
+            m_subChunk1Id[3] = (byte)' ';
 
-            subChunk1Size = 16;
+            m_subChunk1Size = 16;
 
-            audioFormat = 1;
+            m_audioFormat = 1;
 
             System.Diagnostics.Debug.Assert(0 < numChannels);
-            this.numChannels = numChannels;
+            NumChannels = numChannels;
 
-            this.sampleRate = sampleRate;
-            this.byteRate = sampleRate * numChannels * bitsPerSample / 8;
-            this.blockAlign = (ushort)(numChannels * bitsPerSample / 8);
+            SampleRate = sampleRate;
+            m_byteRate = sampleRate * numChannels * bitsPerSample / 8;
+            m_blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
-            this.bitsPerSample = bitsPerSample;
+            BitsPerSample = bitsPerSample;
 
             return true;
         }
 
         public bool Read(BinaryReader br)
         {
-            subChunk1Id = br.ReadBytes(4);
-            while (subChunk1Id[0] != 'f' || subChunk1Id[1] != 'm' || subChunk1Id[2] != 't' || subChunk1Id[3] != ' ') {
+            m_subChunk1Id = br.ReadBytes(4);
+            while (m_subChunk1Id[0] != 'f' || m_subChunk1Id[1] != 'm' || m_subChunk1Id[2] != 't' || m_subChunk1Id[3] != ' ') {
                 // Windows Media Playerで取り込んだWAV。"LIST"のあとに、チャンクサイズがあるので、スキップする。
                 Console.WriteLine("D: FmtSubChunk skip \"{0}{1}{2}{3}\"",
-                    (char)subChunk1Id[0], (char)subChunk1Id[1], (char)subChunk1Id[2], (char)subChunk1Id[3]);
+                    (char)m_subChunk1Id[0], (char)m_subChunk1Id[1], (char)m_subChunk1Id[2], (char)m_subChunk1Id[3]);
 
                 int waveChunkSize = br.ReadInt32();
                 if (waveChunkSize <= 0) {
@@ -110,46 +110,46 @@ namespace WavRWLib2
                     return false;
                 }
                 br.ReadBytes(waveChunkSize);
-                subChunk1Id = br.ReadBytes(4);
+                m_subChunk1Id = br.ReadBytes(4);
             }
 
-            subChunk1Size = br.ReadUInt32();
-            if (16 != subChunk1Size && 18 != subChunk1Size) {
-                Console.WriteLine("E: FmtSubChunk.subChunk1Size != 16 {0} this file type is not supported", subChunk1Size);
+            m_subChunk1Size = br.ReadUInt32();
+            if (16 != m_subChunk1Size && 18 != m_subChunk1Size) {
+                Console.WriteLine("E: FmtSubChunk.subChunk1Size != 16 {0} this file type is not supported", m_subChunk1Size);
                 return false;
             }
 
-            audioFormat = br.ReadUInt16();
-            if (1 != audioFormat) {
-                Console.WriteLine("E: this wave file is not PCM format {0}. Cannot read this file", audioFormat);
+            m_audioFormat = br.ReadUInt16();
+            if (1 != m_audioFormat) {
+                Console.WriteLine("E: this wave file is not PCM format {0}. Cannot read this file", m_audioFormat);
                 return false;
             }
 
-            numChannels = br.ReadUInt16();
-            Console.WriteLine("D: numChannels={0}", numChannels);
+            NumChannels = br.ReadUInt16();
+            Console.WriteLine("D: numChannels={0}", NumChannels);
 
-            sampleRate = br.ReadUInt32();
-            Console.WriteLine("D: sampleRate={0}", sampleRate);
+            SampleRate = br.ReadUInt32();
+            Console.WriteLine("D: sampleRate={0}", SampleRate);
 
-            byteRate = br.ReadUInt32();
-            Console.WriteLine("D: byteRate={0}", byteRate);
+            m_byteRate = br.ReadUInt32();
+            Console.WriteLine("D: byteRate={0}", m_byteRate);
 
-            blockAlign = br.ReadUInt16();
-            Console.WriteLine("D: blockAlign={0}", blockAlign);
+            m_blockAlign = br.ReadUInt16();
+            Console.WriteLine("D: blockAlign={0}", m_blockAlign);
 
-            bitsPerSample = br.ReadUInt16();
-            Console.WriteLine("D: bitsPerSample={0}", bitsPerSample);
+            BitsPerSample = br.ReadUInt16();
+            Console.WriteLine("D: bitsPerSample={0}", BitsPerSample);
 
-            if (16 < subChunk1Size) {
-                br.ReadBytes((int)(subChunk1Size - 16));
+            if (16 < m_subChunk1Size) {
+                br.ReadBytes((int)(m_subChunk1Size - 16));
             }
 
-            if (byteRate != sampleRate * numChannels * bitsPerSample / 8) {
+            if (m_byteRate != SampleRate * NumChannels * BitsPerSample / 8) {
                 Console.WriteLine("E: byteRate is wrong value. corrupted file?");
                 return false;
             }
 
-            if (blockAlign != numChannels * bitsPerSample / 8) {
+            if (m_blockAlign != NumChannels * BitsPerSample / 8) {
                 Console.WriteLine("E: blockAlign is wrong value. corrupted file?");
                 return false;
             }
@@ -159,21 +159,21 @@ namespace WavRWLib2
 
         public void Write(BinaryWriter bw)
         {
-            bw.Write(subChunk1Id);
-            bw.Write(subChunk1Size);
-            bw.Write(audioFormat);
-            bw.Write(numChannels);
-            bw.Write(sampleRate);
+            bw.Write(m_subChunk1Id);
+            bw.Write(m_subChunk1Size);
+            bw.Write(m_audioFormat);
+            bw.Write(NumChannels);
+            bw.Write(SampleRate);
 
-            bw.Write(byteRate);
-            bw.Write(blockAlign);
-            bw.Write(bitsPerSample);
+            bw.Write(m_byteRate);
+            bw.Write(m_blockAlign);
+            bw.Write(BitsPerSample);
         }
     }
 
     public class PcmSamples1Channel
     {
-        private int m_bitsPerSample;
+        private int     m_bitsPerSample;
 
         private short[] m_data16;
         private int[]   m_data32;
@@ -237,114 +237,122 @@ namespace WavRWLib2
 
     class DataSubChunk
     {
-        public byte[] subChunk2Id;
-        public uint   subChunk2Size;
+        private byte[] m_subChunk2Id;
+        private uint   m_subChunk2Size;
 
-        private List<PcmSamples1Channel> data;
+        private List<PcmSamples1Channel> m_data;
 
         // rawDataモードの場合、numSamplesにサンプル数が入っている。
         // 通常モードの場合、data??[0].NumSamples
-        private byte[] rawData;
-        int            numSamples;
+        private byte[] m_rawData;
+        private int    m_numSamples;
 
         public byte[] SampleRawGet() {
-            return rawData;
+            return m_rawData;
         }
 
         public short Sample16Get(int ch, int pos)
         {
-            return data[ch].Get16(pos);
+            return m_data[ch].Get16(pos);
         }
 
         public void Sample16Set(int ch, int pos, short val)
         {
-            data[ch].Set16(pos, val);
+            m_data[ch].Set16(pos, val);
         }
 
         public int NumSamples
         {
             get {
-                if (data != null && 0 < data.Count) {
-                    return data[0].NumSamples;
+                if (m_data != null && 0 < m_data.Count) {
+                    return m_data[0].NumSamples;
                 }
-                return numSamples;
+                return m_numSamples;
             }
         }
 
         public void Create(uint subChunk2Size, List<PcmSamples1Channel> allChannelSamples)
         {
-            subChunk2Id = new byte[4];
-            subChunk2Id[0] = (byte)'d';
-            subChunk2Id[1] = (byte)'a';
-            subChunk2Id[2] = (byte)'t';
-            subChunk2Id[3] = (byte)'a';
+            m_subChunk2Id = new byte[4];
+            m_subChunk2Id[0] = (byte)'d';
+            m_subChunk2Id[1] = (byte)'a';
+            m_subChunk2Id[2] = (byte)'t';
+            m_subChunk2Id[3] = (byte)'a';
 
-            this.subChunk2Size = subChunk2Size;
-            this.data = allChannelSamples;
+            this.m_subChunk2Size = subChunk2Size;
+            this.m_data = allChannelSamples;
         }
 
         private bool SkipToDataHeader(BinaryReader br) {
             while (true) {
-                subChunk2Id = br.ReadBytes(4);
-                if (subChunk2Id[0] != 'd' || subChunk2Id[1] != 'a' || subChunk2Id[2] != 't' || subChunk2Id[3] != 'a') {
+                m_subChunk2Id = br.ReadBytes(4);
+                if (m_subChunk2Id[0] != 'd' || m_subChunk2Id[1] != 'a' || m_subChunk2Id[2] != 't' || m_subChunk2Id[3] != 'a') {
                     Console.WriteLine("D: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\". skipping.",
-                        (char)subChunk2Id[0], (char)subChunk2Id[1], (char)subChunk2Id[2], (char)subChunk2Id[3]);
-                    subChunk2Size = br.ReadUInt32();
-                    if (0x80000000 <= subChunk2Size) {
-                        Console.WriteLine("E: file too large to handle. {0} bytes", subChunk2Size);
+                        (char)m_subChunk2Id[0], (char)m_subChunk2Id[1], (char)m_subChunk2Id[2], (char)m_subChunk2Id[3]);
+                    m_subChunk2Size = br.ReadUInt32();
+                    if (0x80000000 <= m_subChunk2Size) {
+                        Console.WriteLine("E: file too large to handle. {0} bytes", m_subChunk2Size);
                         return false;
                     }
 
                     // skip this header
-                    br.ReadBytes((int)subChunk2Size);
+                    br.ReadBytes((int)m_subChunk2Size);
                 } else {
                     return true;
                 }
             }
         }
 
-        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample) {
+        /// <summary>
+        /// forget data part.
+        /// </summary>
+        public void ForgetDataPart() {
+            m_data = null;
+            m_rawData = null;
+        }
+
+        public bool ReadHeader(BinaryReader br, int numChannels, int bitsPerSample) {
             if (!SkipToDataHeader(br)) {
                 return false;
             }
 
-            subChunk2Size = br.ReadUInt32();
-            Console.WriteLine("D: subChunk2Size={0}", subChunk2Size);
-            if (0x80000000 <= subChunk2Size) {
-                Console.WriteLine("E: file too large to handle. {0} bytes", subChunk2Size);
+            m_subChunk2Size = br.ReadUInt32();
+            Console.WriteLine("D: subChunk2Size={0}", m_subChunk2Size);
+            if (0x80000000 <= m_subChunk2Size) {
+                Console.WriteLine("E: file too large to handle. {0} bytes", m_subChunk2Size);
                 return false;
             }
 
-            numSamples = (int)(subChunk2Size / (bitsPerSample / 8) / numChannels);
+            m_numSamples = (int)(m_subChunk2Size / (bitsPerSample / 8) / numChannels);
 
-            rawData = br.ReadBytes((int)subChunk2Size);
+            m_data    = null;
+            m_rawData = null;
+            return true;
+        }
+
+        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample) {
+            if (!ReadHeader(br, numChannels, bitsPerSample)) {
+                return false;
+            }
+
+            m_rawData = br.ReadBytes((int)m_subChunk2Size);
             return true;
         }
 
         public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
         {
             System.Diagnostics.Debug.Assert(16 == bitsPerSample);
-
-            if (!SkipToDataHeader(br)) {
+            if (!ReadHeader(br, numChannels, bitsPerSample)) {
                 return false;
             }
 
-            subChunk2Size = br.ReadUInt32();
-            Console.WriteLine("D: subChunk2Size={0}", subChunk2Size);
-            if (0x80000000 <= subChunk2Size) {
-                Console.WriteLine("E: file too large to handle. {0} bytes", subChunk2Size);
-                return false;
-            }
-
-            numSamples = (int)(subChunk2Size / (bitsPerSample / 8) / numChannels);
-
-            data = new List<PcmSamples1Channel>();
+            m_data = new List<PcmSamples1Channel>();
             for (int i=0; i < numChannels; ++i) {
-                PcmSamples1Channel ps1 = new PcmSamples1Channel(numSamples, bitsPerSample);
-                data.Add(ps1);
+                PcmSamples1Channel ps1 = new PcmSamples1Channel(m_numSamples, bitsPerSample);
+                m_data.Add(ps1);
             }
 
-            for (int pos=0; pos < numSamples; ++pos) {
+            for (int pos=0; pos < m_numSamples; ++pos) {
                 for (int ch=0; ch < numChannels; ++ch) {
                     Sample16Set(ch, pos, br.ReadInt16());
                 }
@@ -355,10 +363,10 @@ namespace WavRWLib2
 
         public void Write(BinaryWriter bw)
         {
-            bw.Write(subChunk2Id);
-            bw.Write(subChunk2Size);
+            bw.Write(m_subChunk2Id);
+            bw.Write(m_subChunk2Size);
 
-            switch (data[0].BitsPerSample) {
+            switch (m_data[0].BitsPerSample) {
             case 16:
                 Write16(bw);
                 break;
@@ -372,21 +380,21 @@ namespace WavRWLib2
         }
 
         private void Write16(BinaryWriter bw) {
-            int numSamples = data[0].NumSamples;
-            int numChannels = data.Count;
+            int numSamples = m_data[0].NumSamples;
+            int numChannels = m_data.Count;
             for (int pos = 0; pos < numSamples; ++pos) {
                 for (int ch = 0; ch < numChannels; ++ch) {
-                    bw.Write(data[ch].Get16(pos));
+                    bw.Write(m_data[ch].Get16(pos));
                 }
             }
         }
 
         private void Write32(BinaryWriter bw) {
-            int numSamples = data[0].NumSamples;
-            int numChannels = data.Count;
+            int numSamples = m_data[0].NumSamples;
+            int numChannels = m_data.Count;
             for (int pos = 0; pos < numSamples; ++pos) {
                 for (int ch = 0; ch < numChannels; ++ch) {
-                    bw.Write(data[ch].Get32(pos));
+                    bw.Write(m_data[ch].Get32(pos));
                 }
             }
         }
@@ -394,19 +402,20 @@ namespace WavRWLib2
 
     public class WavData
     {
-        private RiffChunkDescriptor rcd;
-        private FmtSubChunk         fsc;
-        private DataSubChunk        dsc;
+        private RiffChunkDescriptor m_rcd;
+        private FmtSubChunk         m_fsc;
+        private DataSubChunk        m_dsc;
 
         public int Id { get; set; }
-        public string Path { get; set; }
+        public string FileName { get; set; }
+        public string FullPath { get; set; }
 
         /// <summary>
         /// サンプリング周波数と量子化ビット数が同じならtrue
         /// </summary>
         public bool IsSameFormat(WavData other) {
-            return fsc.bitsPerSample == other.fsc.bitsPerSample
-                && fsc.sampleRate    == other.fsc.sampleRate;
+            return m_fsc.BitsPerSample == other.m_fsc.BitsPerSample
+                && m_fsc.SampleRate    == other.m_fsc.SampleRate;
         }
 
         public bool Create(int sampleRate, int bitsPerSample, List<PcmSamples1Channel> samples)
@@ -414,92 +423,127 @@ namespace WavRWLib2
             int subChunk2Size = samples[0].NumSamples * (bitsPerSample / 8) * samples.Count;
             int chunkSize     = subChunk2Size + 36;
 
-            rcd = new RiffChunkDescriptor();
-            rcd.Create(chunkSize);
+            m_rcd = new RiffChunkDescriptor();
+            m_rcd.Create(chunkSize);
 
-            fsc = new FmtSubChunk();
-            if (!fsc.Create((ushort)samples.Count, (uint)sampleRate, (ushort)bitsPerSample)) {
+            m_fsc = new FmtSubChunk();
+            if (!m_fsc.Create((ushort)samples.Count, (uint)sampleRate, (ushort)bitsPerSample)) {
                 return false;
             }
 
-            dsc = new DataSubChunk();
-            dsc.Create((uint)subChunk2Size, samples);
+            m_dsc = new DataSubChunk();
+            m_dsc.Create((uint)subChunk2Size, samples);
 
             return true;
         }
 
-        private bool Read(BinaryReader br, bool raw=false)
+        private enum ReadMode {
+            ChannelList,
+            RawData,
+            OnlyHeader
+        }
+
+        private bool Read(BinaryReader br, ReadMode mode)
         {
-            rcd = new RiffChunkDescriptor();
-            if (!rcd.Read(br)) {
+            m_rcd = new RiffChunkDescriptor();
+            if (!m_rcd.Read(br)) {
                 return false;
             }
 
-            fsc = new FmtSubChunk();
-            if (!fsc.Read(br)) {
+            m_fsc = new FmtSubChunk();
+            if (!m_fsc.Read(br)) {
                 return false;
             }
 
-            dsc = new DataSubChunk();
-            if (raw) {
-                if (!dsc.ReadRaw(br, fsc.numChannels, fsc.bitsPerSample)) {
+            m_dsc = new DataSubChunk();
+            switch (mode) {
+            case ReadMode.ChannelList:
+                if (!m_dsc.Read(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
                     return false;
                 }
-            } else {
-                if (!dsc.Read(br, fsc.numChannels, fsc.bitsPerSample)) {
+                break;
+            case ReadMode.RawData:
+                if (!m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
                     return false;
                 }
+                break;
+            case ReadMode.OnlyHeader:
+                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
+                    return false;
+                }
+                break;
             }
+
             return true;
+        }
+
+        /// <summary>
+        /// read only header part.
+        /// NumChannels
+        /// BitsPerSample
+        /// SampleRate
+        /// NumSamples
+        /// </summary>
+        public bool ReadHeader(BinaryReader br) {
+            return Read(br, ReadMode.OnlyHeader);
+        }
+
+        /// <summary>
+        /// forget data part
+        /// Raw Data
+        /// Channel List
+        /// </summary>
+        public void ForgetDataPart() {
+            m_dsc.ForgetDataPart();
         }
 
         public bool Read(BinaryReader br) {
-            return Read(br, false);
+            return Read(br, ReadMode.ChannelList);
         }
 
         public bool ReadRaw(BinaryReader br) {
-            return Read(br, true);
+            return Read(br, ReadMode.RawData);
         }
 
         public void Write(BinaryWriter bw)
         {
-            rcd.Write(bw);
-            fsc.Write(bw);
-            dsc.Write(bw);
+            m_rcd.Write(bw);
+            m_fsc.Write(bw);
+            m_dsc.Write(bw);
         }
 
         public int NumChannels
         {
-            get { return fsc.numChannels; }
+            get { return m_fsc.NumChannels; }
         }
 
         public int BitsPerSample
         {
-            get { return fsc.bitsPerSample; }
+            get { return m_fsc.BitsPerSample; }
         }
 
         public int NumSamples
         {
-            get { return dsc.NumSamples; }
+            get { return m_dsc.NumSamples; }
         }
 
         public int SampleRate
         {
-            get { return (int)fsc.sampleRate; }
+            get { return (int)m_fsc.SampleRate; }
         }
 
         public short Sample16Get(int ch, int pos)
         {
-            return dsc.Sample16Get(ch, pos);
+            return m_dsc.Sample16Get(ch, pos);
         }
 
         public void Sample16Set(int ch, int pos, short val)
         {
-            dsc.Sample16Set(ch, pos, val);
+            m_dsc.Sample16Set(ch, pos, val);
         }
 
         public byte[] SampleRawGet() {
-            return dsc.SampleRawGet();
+            return m_dsc.SampleRawGet();
         }
     }
 }
