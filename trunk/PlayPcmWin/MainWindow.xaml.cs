@@ -32,6 +32,7 @@ namespace PlayPcmWin
         private BackgroundWorker m_playWorker;
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
 
+        BackgroundWorker m_readFileWorker;
 
         public MainWindow()
         {
@@ -113,6 +114,7 @@ namespace PlayPcmWin
             m_wavDataList.Clear();
             listBoxPlayFiles.Items.Clear();
             wasapi.ClearPlayList();
+            progressBar1.Value = 0;
 
             GC.Collect();
 
@@ -126,7 +128,7 @@ namespace PlayPcmWin
 
             bool readSuccess = false;
             using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
-                readSuccess = wavData.ReadRaw(br);
+                readSuccess = wavData.ReadHeader(br);
             }
             if (readSuccess) {
                 if (wavData.NumChannels != 2) {
@@ -153,10 +155,11 @@ namespace PlayPcmWin
                     return false;
                 }
 
-                wavData.Path = System.IO.Path.GetFileName(path);
+                wavData.FullPath = path;
+                wavData.FileName = System.IO.Path.GetFileName(path);
                 wavData.Id = m_wavDataList.Count();
                 m_wavDataList.Add(wavData);
-                listBoxPlayFiles.Items.Add(wavData.Path);
+                listBoxPlayFiles.Items.Add(wavData.FileName);
 
                 // メニュー状態の更新。デバイス選択を押せるようにする。
                 buttonDeviceSelect.IsEnabled = true;
@@ -257,6 +260,86 @@ namespace PlayPcmWin
             }
         }
 
+        struct ReadFileRunWorkerCompletedArgs {
+            public string message;
+            public int hr;
+        }
+
+        private void ReadFileRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
+            ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
+            textBoxLog.Text += r.message;
+
+            if (r.hr < 0) {
+                MessageBox.Show(r.message);
+                Exit();
+                return;
+            }
+
+            wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);
+
+            // 成功
+            menuItemFileOpen.IsEnabled = false;
+            buttonDeviceSelect.IsEnabled = false;
+            buttonDeselect.IsEnabled = true;
+            buttonPlay.IsEnabled = true;
+            buttonClearPlayList.IsEnabled = false;
+            buttonInspectDevice.IsEnabled = false;
+            groupBoxWasapiSettings.IsEnabled = false;
+            progressBar1.Visibility = System.Windows.Visibility.Collapsed;
+        }
+
+        void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
+            textBoxLog.Text += (string)e.UserState;
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void ReadFileDoWork(object o, DoWorkEventArgs args) {
+            ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
+            try {
+                r.hr = -1;
+
+                wasapi.ClearPlayList();
+                for (int i = 0; i < m_wavDataList.Count; ++i) {
+                    GC.Collect();
+
+                    WavData wd = m_wavDataList[i];
+
+                    bool readSuccess = false;
+                    using (BinaryReader br = new BinaryReader(File.Open(wd.FullPath, FileMode.Open))) {
+                        readSuccess = wd.ReadRaw(br);
+                    }
+                    if (!readSuccess) {
+                        r.message = string.Format("エラー。再生リスト追加時には存在していたファイルが、今見たら消えていました。{0}", wd.FullPath);
+                        args.Result = r;
+                        return;
+                    }
+
+                    int wavDataLength = wd.SampleRawGet().Length;
+
+                    if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
+                        ClearPlayList(); // メモリを空ける：効果があるか怪しいが
+                        r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                        args.Result = r;
+                        return;
+                    }
+                    wd.ForgetDataPart();
+
+                    m_readFileWorker.ReportProgress(100 * (i + 1) / m_wavDataList.Count,
+                        string.Format("wasapi.AddOutputData({0})\r\n", wavDataLength));
+                }
+                GC.Collect();
+
+                // 成功。
+                r.message = "全ファイル読み込み完了。\r\n";
+                r.hr = 0;
+                args.Result = r;
+
+            } catch (Exception ex) {
+                r.message = ex.ToString();
+                args.Result = r;
+            }
+        }
+
         private void buttonDeviceSelect_Click(object sender, RoutedEventArgs e) {
             int latencyMillisec = Int32.Parse(textBoxLatency.Text);
             if (latencyMillisec <= 0) {
@@ -276,7 +359,8 @@ namespace PlayPcmWin
                 return;
             }
 
-            WasapiCS.DataFeedMode dfm = WasapiCS.DataFeedMode.EventDriven;
+            WasapiCS.DataFeedMode dfm;
+            dfm = WasapiCS.DataFeedMode.EventDriven;
             if (true == radioButtonTimerDriven.IsChecked) {
                 dfm = WasapiCS.DataFeedMode.TimerDriven;
             }
@@ -288,7 +372,8 @@ namespace PlayPcmWin
                 wavData0.SampleRate, wavData0.BitsPerSample, latencyMillisec, dfm, hr);
             if (hr < 0) {
                 wasapi.Unsetup();
-                textBoxLog.Text += string.Format("wasapi.Unsetup()\r\n");
+                textBoxLog.Text += "wasapi.Unsetup()\r\n";
+
                 CreateDeviceList();
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
                     wavData0.SampleRate, wavData0.BitsPerSample,
@@ -299,29 +384,21 @@ namespace PlayPcmWin
                 return;
             }
 
-            // おまじない的だが…
-            GC.Collect();
+            // 一覧のクリアーとデバイスの選択を押せなくする。
+            menuItemFileOpen.IsEnabled = false;
+            buttonDeviceSelect.IsEnabled = false;
+            buttonClearPlayList.IsEnabled = false;
 
-            wasapi.ClearPlayList();
-            for (int i = 0; i < m_wavDataList.Count; ++i) {
-                WavData wd = m_wavDataList[i];
-                if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
-                    wasapi.ClearPlayList();
-                    MessageBox.Show("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
-                    Exit();
-                    return;
-                }
-                textBoxLog.Text += string.Format("wasapi.AddOutputData({0})\r\n", wd.SampleRawGet().Length);
-            }
-            wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);
+            progressBar1.Visibility = System.Windows.Visibility.Visible;
+            progressBar1.Value = 0;
 
-            menuItemFileOpen.IsEnabled       = false;
-            buttonDeviceSelect.IsEnabled     = false;
-            buttonDeselect.IsEnabled         = true;
-            buttonPlay.IsEnabled             = true;
-            buttonClearPlayList.IsEnabled    = false;
-            buttonInspectDevice.IsEnabled    = false;
-            groupBoxWasapiSettings.IsEnabled = false;
+            // ファイルを読み込んでセットする。
+            m_readFileWorker = new BackgroundWorker();
+            m_readFileWorker.DoWork += new DoWorkEventHandler(ReadFileDoWork);
+            m_readFileWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(ReadFileRunWorkerCompleted);
+            m_readFileWorker.WorkerReportsProgress = true;
+            m_readFileWorker.ProgressChanged += new ProgressChangedEventHandler(ReadFileWorkerProgressChanged);
+            m_readFileWorker.RunWorkerAsync();
         }
 
         private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
@@ -348,16 +425,16 @@ namespace PlayPcmWin
 
             m_playWorker = new BackgroundWorker();
             m_playWorker.WorkerReportsProgress = true;
-            m_playWorker.DoWork += new DoWorkEventHandler(DoWork);
-            m_playWorker.ProgressChanged += new ProgressChangedEventHandler(ProgressChanged);
-            m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(RunWorkerCompleted);
+            m_playWorker.DoWork += new DoWorkEventHandler(PlayDoWork);
+            m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
+            m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
             m_playWorker.RunWorkerAsync();
 
             m_sw.Reset();
             m_sw.Start();
         }
 
-        private void ProgressChanged(object o, ProgressChangedEventArgs args) {
+        private void PlayProgressChanged(object o, ProgressChangedEventArgs args) {
             if (null == wasapi) {
                 return;
             }
@@ -372,7 +449,7 @@ namespace PlayPcmWin
                 listBoxPlayFiles.SelectedIndex = playingId;
                 slider1.Value =wasapi.GetPosFrame();
                 WavData wavData = m_wavDataList[playingId];
-                textBoxFileName.Text = wavData.Path;
+                textBoxFileName.Text = wavData.FileName;
 
                 slider1.Maximum = wavData.NumSamples;
 
@@ -381,7 +458,7 @@ namespace PlayPcmWin
             }
         }
         
-        private void RunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
+        private void PlayRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             buttonPlay.IsEnabled = true;
             buttonStop.IsEnabled = false;
             buttonNext.IsEnabled = false;
@@ -396,7 +473,7 @@ namespace PlayPcmWin
             textBoxLog.Text += string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed);
         }
 
-        private void DoWork(object o, DoWorkEventArgs args) {
+        private void PlayDoWork(object o, DoWorkEventArgs args) {
             //Console.WriteLine("DoWork started");
 
             do {
