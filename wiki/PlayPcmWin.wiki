@@ -15,7 +15,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 =ダウンロード=
 
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin130.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin130x64.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -150,7 +150,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 ===!PlayPcmWin 1.0.28 ==
   * ステータスバーに使用方法ガイドを表示。
-  * 64ビット版の謎のバグを修正し、動作するようになった。
+  * 64ビット版の謎のバグを修正し、動作するようになったと思ったが、まだバグっていて再生ができない。
 
 ===!PlayPcmWin 1.0.27 ==
   * 32ビット版の、メモリ消費量削減。メモリ消費量がWAVファイルサイズの1倍～2倍ぐらいになった。
