@@ -14,8 +14,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin129.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin129x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin130.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin130x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -141,6 +141,9 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.30 ==
+  * バージョン番号表示。
 
 ===!PlayPcmWin 1.0.29 ==
   * 再生リストを編集できるステートの判定が、実際よりも緩かったのを修正。
