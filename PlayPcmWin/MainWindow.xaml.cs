@@ -38,6 +38,10 @@ namespace PlayPcmWin
         {
             InitializeComponent();
 
+            textBoxLog.Text += string.Format("PlayPcmWin {0} {1}\r\n",
+                    AssemblyVersion,
+                    IntPtr.Size == 8 ? "64bit" : "32bit");
+
             int hr = 0;
             wasapi = new WasapiCS();
             hr = wasapi.Init();
@@ -111,6 +115,10 @@ namespace PlayPcmWin
         private void MenuItemFileExit_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Shutdown();
+        }
+
+        private static string AssemblyVersion {
+            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
 
         private void ClearPlayList() {
@@ -222,10 +230,6 @@ namespace PlayPcmWin
             }
         }
         
-        private static string AssemblyVersion {
-            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
-        }
-
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
                 string.Format("PlayPcmWin バージョン {0}",
