@@ -14,8 +14,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin129.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin129x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -116,6 +116,10 @@ WASAPIイベント駆動モードを使用します(タイマー駆動モード�
 
 出力レイテンシーを長く設定すると、再生スレッドのCPU負荷が軽くなります。
 
+=実行中のPlayPcmWinのバージョン番号を知る方法=
+
+PlayPcmWinのメニューバーの[ヘルプ][バージョン情報]を選びます。
+
 =ソースコード=
 
 閲覧だけなら:
@@ -137,6 +141,9 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.29 ==
+  * 再生リストを編集できるステートの判定が、実際よりも緩かったのを修正。
 
 ===!PlayPcmWin 1.0.28 ==
   * ステータスバーに使用方法ガイドを表示。
