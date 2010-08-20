@@ -5,7 +5,7 @@
 
 !PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin118.jpg
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
 
 Windows 7に対応しております。Windows XPでは動きません。Vistaは、排他モードは、もしかしたら動くかも。WASAPI共有モードはWindows7の機能を使用しているためVistaでは動きません。
 
@@ -138,7 +138,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
 
-===!PlayPcmWin 1.0.27 ==
+===!PlayPcmWin 1.0.28 ==
   * ステータスバーに使用方法ガイドを表示。
   * 64ビット版の謎のバグを修正し、動作するようになった。
 
