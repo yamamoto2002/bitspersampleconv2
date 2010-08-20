@@ -90,6 +90,9 @@ namespace PlayPcmWin
                 }
                 buttonInspectDevice.IsEnabled = true;
             }
+
+            statusBarText.Content = "再生リストを作り、出力デバイスを選択して下さい。";
+
         }
 
         void Exit() {
@@ -286,6 +289,9 @@ namespace PlayPcmWin
             buttonInspectDevice.IsEnabled = false;
             groupBoxWasapiSettings.IsEnabled = false;
             progressBar1.Visibility = System.Windows.Visibility.Collapsed;
+
+            statusBarText.Content = "ファイル読み込み完了。再生できます。";
+
         }
 
         void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -392,6 +398,8 @@ namespace PlayPcmWin
             progressBar1.Visibility = System.Windows.Visibility.Visible;
             progressBar1.Value = 0;
 
+            statusBarText.Content = "ファイル読み込み中……";
+
             // ファイルを読み込んでセットする。
             m_readFileWorker = new BackgroundWorker();
             m_readFileWorker.DoWork += new DoWorkEventHandler(ReadFileDoWork);
@@ -422,6 +430,8 @@ namespace PlayPcmWin
             buttonPrev.IsEnabled = true;
             buttonPlay.IsEnabled = false;
             buttonDeselect.IsEnabled = false;
+
+            statusBarText.Content = "再生中";
 
             m_playWorker = new BackgroundWorker();
             m_playWorker.WorkerReportsProgress = true;
@@ -471,6 +481,8 @@ namespace PlayPcmWin
             m_sw.Stop();
 
             textBoxLog.Text += string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed);
+            statusBarText.Content = "ファイル読み込み完了";
+
         }
 
         private void PlayDoWork(object o, DoWorkEventArgs args) {
