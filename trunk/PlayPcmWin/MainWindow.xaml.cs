@@ -192,9 +192,9 @@ namespace PlayPcmWin
                 Console.WriteLine("   {0}", paths[i]);
             }
 
-            if (buttonStop.IsEnabled) {
-                // 再生中は追加不可。
-                MessageBox.Show("再生中なのでプレイリストに追加できませんでした。");
+            if (!menuItemFileOpen.IsEnabled) {
+                // 追加不可。
+                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん出力デバイス選択解除してから追加していただけますようお願い致します。");
                 return;
             }
 
@@ -205,9 +205,9 @@ namespace PlayPcmWin
 
         private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
         {
-            if (buttonStop.IsEnabled) {
-                // 再生中は追加不可。
-                MessageBox.Show("再生中なのでプレイリストに追加できませんでした。");
+            if (!menuItemFileOpen.IsEnabled) {
+                // 追加不可。
+                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん出力デバイス選択解除してから追加していただけますようお願い致します。");
                 return;
             }
 
