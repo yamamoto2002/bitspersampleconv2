@@ -14,8 +14,8 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin127.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -43,8 +43,8 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 
 メモリが足りない場合、64ビット版OSを入れて、メモリを増設して下さい。メモリは安いです。
 
-目安としては、64ビット版Windowsで、メモリ6GBぐらいあると、!PlayPcmWinはそこそこ使える状態になります。
-(プログラムの作りが大雑把なので、WAVファイルのサイズの2倍ぐらいメモリを使います)
+目安としては、
+32ビット版Windowsでメモリ3GB、64ビット版Windowsでメモリ4GBぐらいあると、!PlayPcmWinはそこそこ使える状態になります。
 
 32ビット版で、メモリ2GB以下の場合、!PlayPcmWinはCD1枚分のプレイリストも扱えず、
 あまり使い勝手がよくないと思います。
@@ -137,6 +137,10 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.27 ==
+  * ステータスバーに使用方法ガイドを表示。
+  * 64ビット版の謎のバグを修正し、動作するようになった。
 
 ===!PlayPcmWin 1.0.27 ==
   * 32ビット版の、メモリ消費量削減。メモリ消費量がWAVファイルサイズの1倍～2倍ぐらいになった。
