@@ -69,6 +69,7 @@ enum WWDeviceType {
 };
 
 enum WWSchedulerTaskType {
+    WWSTTNone,
     WWSTTAudio,
     WWSTTProAudio,
 };

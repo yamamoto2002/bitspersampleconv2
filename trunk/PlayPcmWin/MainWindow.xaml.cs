@@ -30,9 +30,9 @@ namespace PlayPcmWin
         private WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
         private WasapiCS.ShareMode m_shareMode = WasapiCS.ShareMode.Exclusive;
         private BackgroundWorker m_playWorker;
+        private BackgroundWorker m_readFileWorker;
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
-
-        BackgroundWorker m_readFileWorker;
+        private bool m_playListMouseDown = false;
 
         public MainWindow()
         {
@@ -420,13 +420,17 @@ namespace PlayPcmWin
         }
 
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
+            //wasapi.SetPosFrame(0);
             int hr = wasapi.Start();
             textBoxLog.Text += string.Format("wasapi.Start() {0:X8}\r\n", hr);
             if (hr < 0) {
                 return;
             }
 
-            //wasapi.SetPosFrame(0);
+            if (0 < listBoxPlayFiles.SelectedIndex) {
+                wasapi.SetNowPlayingPcmDataId(listBoxPlayFiles.SelectedIndex);
+            }
+
             slider1.Value = 0;
             slider1.Maximum = wasapi.GetTotalFrameNum();
             buttonStop.IsEnabled = true;
@@ -499,7 +503,7 @@ namespace PlayPcmWin
 
             wasapi.Stop();
 
-            Console.WriteLine("DoWork end");
+            //Console.WriteLine("DoWork end");
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e) {
@@ -526,14 +530,16 @@ namespace PlayPcmWin
             textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
         }
 
-        private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e)
-        {
+        private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e) {
             m_schedulerTaskType = WasapiCS.SchedulerTaskType.Audio;
         }
 
-        private void radioButtonTaskProAudio_Checked(object sender, RoutedEventArgs e)
-        {
+        private void radioButtonTaskProAudio_Checked(object sender, RoutedEventArgs e) {
             m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
+        }
+
+        private void radioButtonTaskNone_Checked(object sender, RoutedEventArgs e) {
+            m_schedulerTaskType = WasapiCS.SchedulerTaskType.None;
         }
 
         private void radioButtonExclusive_Checked(object sender, RoutedEventArgs e) {
@@ -575,5 +581,30 @@ namespace PlayPcmWin
                 wasapi.SetPlayRepeat(checkBoxContinuous.IsChecked == true);
             }
         }
+
+        private void listBoxPlayFiles_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (!buttonStop.IsEnabled || !m_playListMouseDown ||
+                listBoxPlayFiles.SelectedIndex < 0) {
+                return;
+            }
+            
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+
+            // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
+            // しかも、この曲を再生していない場合、この曲を再生する。
+            if (playingId != listBoxPlayFiles.SelectedIndex) {
+                wasapi.SetNowPlayingPcmDataId(listBoxPlayFiles.SelectedIndex);
+            }
+        }
+
+        private void listBoxPlayFiles_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = true;
+
+        }
+
+        private void listBoxPlayFiles_PreviewMouseUp(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = false;
+        }
+
     }
 }
