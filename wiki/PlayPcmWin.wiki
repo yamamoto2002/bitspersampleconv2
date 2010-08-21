@@ -14,7 +14,7 @@ Windows 7に対応しております。Windows XPでは動きません。Vista�
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin131.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin124x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
@@ -141,6 +141,9 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.32 ==
+  * ビルド構成が1.0.31で間違っていたのを修正。
 
 ===!PlayPcmWin 1.0.31 ==
   * 再生中にマウスで再生リストの項目を選択すると選択された曲を再生するように修正。
