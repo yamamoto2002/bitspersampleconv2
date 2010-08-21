@@ -113,6 +113,7 @@ namespace Wasapi {
         }
 
         public enum SchedulerTaskType {
+            None,
             Audio,
             ProAudio
         };

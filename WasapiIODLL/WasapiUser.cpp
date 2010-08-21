@@ -1,4 +1,4 @@
-// 京 UTF-8
+// 日本語 UTF-8
 
 #include "WasapiUser.h"
 #include "WWUtil.h"
@@ -46,6 +46,7 @@ static wchar_t*
 WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
 {
     switch (t) {
+    case WWSTTNone: return L"None";
     case WWSTTAudio: return L"Audio";
     case WWSTTProAudio: return L"Pro Audio";
     default: assert(0); return L"";
@@ -292,14 +293,14 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             }
 
             wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-            wfex->Format.wBitsPerSample = bitsPerSample;
+            wfex->Format.wBitsPerSample = (WORD)bitsPerSample;
             wfex->Format.nSamplesPerSec = sampleRate;
 
-            wfex->Format.nBlockAlign =
-                (bitsPerSample / 8) * waveFormat->nChannels;
+            wfex->Format.nBlockAlign = (WORD)(
+                (bitsPerSample / 8) * waveFormat->nChannels);
             wfex->Format.nAvgBytesPerSec =
                 wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-            wfex->Samples.wValidBitsPerSample = bitsPerSample;
+            wfex->Samples.wValidBitsPerSample = (WORD)bitsPerSample;
 
             dprintf("preferred Format:\n");
             WWWaveFormatDebug(waveFormat);
@@ -426,14 +427,14 @@ WasapiUser::Setup(
 
     if (WWSMExclusive == m_shareMode) {
         wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-        wfex->Format.wBitsPerSample = m_deviceBitsPerSample;
+        wfex->Format.wBitsPerSample = (WORD)m_deviceBitsPerSample;
         wfex->Format.nSamplesPerSec = sampleRate;
 
-        wfex->Format.nBlockAlign =
-            (m_deviceBitsPerSample / 8) * waveFormat->nChannels;
+        wfex->Format.nBlockAlign = (WORD)(
+            (m_deviceBitsPerSample / 8) * waveFormat->nChannels);
         wfex->Format.nAvgBytesPerSec =
             wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-        wfex->Samples.wValidBitsPerSample = m_deviceBitsPerSample;
+        wfex->Samples.wValidBitsPerSample = (WORD)m_deviceBitsPerSample;
 
         dprintf("preferred Format:\n");
         WWWaveFormatDebug(waveFormat);
@@ -472,7 +473,7 @@ WasapiUser::Setup(
         // 入力サンプリング周波数調整を行う。
         // 共有モード イベント駆動の場合、bufferPeriodicityに0をセットする。
 
-        if (waveFormat->nSamplesPerSec != sampleRate) {
+        if (waveFormat->nSamplesPerSec != (DWORD)sampleRate) {
             // 共有モードのサンプルレート変更。
             needClockAdjustmentOnSharedMode = true;
             streamFlags |= AUDCLNT_STREAMFLAGS_RATEADJUST;
@@ -1045,16 +1046,18 @@ WasapiUser::RenderMain(void)
 
     timeBeginPeriod(1);
 
-    dprintf("D: %s() AvSetMmThreadCharacteristics(%S)\n",
-        __FUNCTION__,
-        WWSchedulerTaskTypeToStr(m_schedulerTaskType));
+    if (WWSTTNone != m_schedulerTaskType) {
+        dprintf("D: %s() AvSetMmThreadCharacteristics(%S)\n",
+            __FUNCTION__,
+            WWSchedulerTaskTypeToStr(m_schedulerTaskType));
 
-    mmcssHandle = AvSetMmThreadCharacteristics(
-        WWSchedulerTaskTypeToStr(m_schedulerTaskType),
-        &mmcssTaskIndex);
-    if (NULL == mmcssHandle) {
-        dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
-            GetLastError());
+        mmcssHandle = AvSetMmThreadCharacteristics(
+            WWSchedulerTaskTypeToStr(m_schedulerTaskType),
+            &mmcssTaskIndex);
+        if (NULL == mmcssHandle) {
+            dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
+                GetLastError());
+        }
     }
 
     if (m_dataFeedMode == WWDFMTimerDriven) {
@@ -1190,7 +1193,6 @@ WasapiUser::AudioSamplesRecvProc(void)
     UINT32  packetLength = 0;
     UINT32  numFramesAvailable = 0;
     DWORD   flags      = 0;
-    BYTE    *pFrames   = NULL;
     BYTE    *pData     = NULL;
     HRESULT hr         = 0;
     UINT64  devicePosition = 0;

@@ -29,7 +29,7 @@
         <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="0,29,0,151" Name="groupBox2">
             <Grid>
                 <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
-                <ListBox Margin="6,6,6,37" Name="listBoxPlayFiles" />
+                <ListBox Margin="6,6,6,37" Name="listBoxPlayFiles" SelectionChanged="listBoxPlayFiles_SelectionChanged" PreviewMouseDown="listBoxPlayFiles_PreviewMouseDown" PreviewMouseUp="listBoxPlayFiles_PreviewMouseUp" />
             </Grid>
         </GroupBox>
         <GroupBox Header="ログ" Name="groupBoxLog" Height="115" VerticalAlignment="Bottom" Margin="6,0,0,30">
@@ -45,16 +45,17 @@
                         <RadioButton Content="共有モード" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonShared" VerticalAlignment="Top" Checked="radioButtonShared_Checked" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="出力レイテンシー" Height="63" HorizontalAlignment="Left" Margin="211,85,0,0" Name="groupBox3" VerticalAlignment="Top" Width="212">
+                <GroupBox Header="出力レイテンシー" Height="59" HorizontalAlignment="Left" Margin="211,104,0,0" Name="groupBox3" VerticalAlignment="Top" Width="212">
                     <Grid>
                         <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxLatency" VerticalAlignment="Top" Width="120" Text="latency" HorizontalContentAlignment="Right" />
                         <Label Content="ミリ秒" Height="28" HorizontalAlignment="Left" Margin="132,4,0,0" Name="label2" VerticalAlignment="Top" Width="55" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="レンダースレッドタスクタイプ" Height="79" HorizontalAlignment="Left" Margin="211,6,0,0" Name="groupBox4" VerticalAlignment="Top" Width="212">
+                <GroupBox Header="レンダースレッドタスクタイプ" Height="92" HorizontalAlignment="Left" Margin="211,6,0,0" Name="groupBox4" VerticalAlignment="Top" Width="212">
                     <Grid>
-                        <RadioButton Content="Audio" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,6,0,0" Name="radioButtonTaskAudio" VerticalAlignment="Top" Checked="radioButtonTaskAudio_Checked" />
+                        <RadioButton Content="Audio" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,0,0" Name="radioButtonTaskAudio" VerticalAlignment="Top" Checked="radioButtonTaskAudio_Checked" />
                         <RadioButton Content="Pro Audio" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTaskProAudio" VerticalAlignment="Top" Checked="radioButtonTaskProAudio_Checked" IsChecked="True" />
+                        <RadioButton Content="設定なし" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="96,6,0,0" Name="radioButtonTaskNone" VerticalAlignment="Top" Width="98" Checked="radioButtonTaskNone_Checked" />
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="データ供給モード" Height="78" HorizontalAlignment="Left" Margin="6,85,0,0" Name="groupBox6" VerticalAlignment="Top" Width="199">
@@ -77,9 +78,9 @@
                 <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" />
             </Grid>
         </GroupBox>
-        <StatusBar Height="23" Margin="0,578,0,0" Name="statusBar1" VerticalAlignment="Top" Grid.ColumnSpan="2">
+        <StatusBar Height="23" Name="statusBar1" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
             <StatusBarItem Content="abcde" Name="statusBarText" />
         </StatusBar>
-        <ProgressBar Height="23" Margin="0,578,0,0" Name="progressBar1" VerticalAlignment="Top" Grid.Column="1" Visibility="Collapsed" />
+        <ProgressBar Height="23" Name="progressBar1" VerticalAlignment="Bottom" Grid.Column="1" Visibility="Collapsed" />
     </Grid>
 </Window>
