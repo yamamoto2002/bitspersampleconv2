@@ -139,8 +139,8 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 
 ソースコードをコンパイルしてexeを作りたい場合
 
--Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
--!PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
+  * Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
+  * !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
 =参考文献=
 
