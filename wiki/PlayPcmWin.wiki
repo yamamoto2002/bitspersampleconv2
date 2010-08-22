@@ -134,9 +134,13 @@ WASAPIイベント駆動モードを使用します(タイマー駆動モード�
 WASAPIの関数を呼び出しているところは、WasapiUser.cppにあります。
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp
 
+ユーザーインターフェースのコードは、MainWindow.xaml.csです。
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainWindow.xaml.cs
 
-ビルドしたい場合は、Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
-!PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
+ソースコードをコンパイルしてexeを作りたい場合
+
+-Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
+-!PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
 
 =参考文献=
 
