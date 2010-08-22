@@ -9,7 +9,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
 
 =特徴=
   * 量子化ビット数16ビットと24ビットの2チャンネルステレオWAVファイル再生に対応。
-  * PCM音声データを無加工でWASAPIに渡します。bit perfect再生可能。
+  * bit perfect再生可能。
   * 再生スレッドはネイティブC++(Unmanaged C++)で書かれており、音声データを全てメモリに読み込んでから再生するため、CPU負荷が低い。低レイテンシ設定で音切れの可能性が減ります。
   * 再生リスト。ギャップレス再生。
   * WASAPI排他 タイマー駆動モードとイベント駆動モードの切り替え機能。再生スレッドの優先度設定機能。
