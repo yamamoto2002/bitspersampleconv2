@@ -44,10 +44,11 @@ namespace PlayPcmWin
 
     public partial class MainWindow : Window
     {
-        const int DEFAULT_OUTPUT_LATENCY_MS   = 200;
         const int PROGRESS_REPORT_INTERVAL_MS = 500;
 
         private WasapiCS wasapi;
+
+        private Preference m_preference = new Preference();
 
         /// <summary>
         /// WavDataのリスト。
@@ -59,8 +60,6 @@ namespace PlayPcmWin
         /// </summary>
         private List<PlayListItemInfo> m_playListItems = new List<PlayListItemInfo>();
 
-        private WasapiCS.SchedulerTaskType m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
-        private WasapiCS.ShareMode m_shareMode = WasapiCS.ShareMode.Exclusive;
         private BackgroundWorker m_playWorker;
         private BackgroundWorker m_readFileWorker;
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
@@ -160,17 +159,62 @@ namespace PlayPcmWin
         {
             InitializeComponent();
 
+            // InitializeComponent()によって、チェックボックスのチェックイベントが発生し
+            // m_preferenceの内容が変わるので、InitializeComponent()の後にロードする。
+
+            m_preference = PreferenceStore.Load();
+
             textBoxLog.Text += string.Format("PlayPcmWin {0} {1}\r\n",
                     AssemblyVersion,
                     IntPtr.Size == 8 ? "64bit" : "32bit");
+
+            m_readGroupId = 0;
 
             int hr = 0;
             wasapi = new WasapiCS();
             hr = wasapi.Init();
             textBoxLog.Text += string.Format("wasapi.Init() {0:X8}\r\n", hr);
-            textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
 
-            m_readGroupId = 0;
+            textBoxLatency.Text = string.Format("{0}", m_preference.LatencyMillisec);
+
+            switch (m_preference.wasapiSharedOrExclusive) {
+            case WasapiSharedOrExclusive.Exclusive:
+                radioButtonExclusive.IsChecked = true;
+                break;
+            case WasapiSharedOrExclusive.Shared:
+                radioButtonShared.IsChecked = true;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+
+            switch (m_preference.wasapiDataFeedMode) {
+            case WasapiDataFeedMode.EventDriven:
+                radioButtonEventDriven.IsChecked = true;
+                break;
+            case WasapiDataFeedMode.TimerDriven:
+                radioButtonTimerDriven.IsChecked = true;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+
+            switch (m_preference.renderThreadTaskType) {
+            case RenderThreadTaskType.None:
+                radioButtonTaskNone.IsChecked = true;
+                break;
+            case RenderThreadTaskType.Audio:
+                radioButtonTaskAudio.IsChecked = true;
+                break;
+            case RenderThreadTaskType.ProAudio:
+                radioButtonTaskProAudio.IsChecked = true;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
 
             Closed += new EventHandler(MainWindow_Closed);
 
@@ -332,7 +376,15 @@ namespace PlayPcmWin
 
             int nDevices = wasapi.GetDeviceCount();
             for (int i = 0; i < nDevices; ++i) {
-                listBoxDevices.Items.Add(wasapi.GetDeviceName(i));
+                string deviceName = wasapi.GetDeviceName(i);
+                listBoxDevices.Items.Add(deviceName);
+                if (selectedIndex < 0
+                    && 0 < m_preference.PreferredDeviceName.Length
+                    && 0 == m_preference.PreferredDeviceName.CompareTo(deviceName)) {
+                    // まだユーザーが選択していない場合は
+                    // お気に入りデバイスを選択状態にする。
+                    selectedIndex = i;
+                }
             }
 
             if (0 < nDevices) {
@@ -353,37 +405,9 @@ namespace PlayPcmWin
             } else {
                 ChangeState(State.初期化完了);
             }
+
+
             UpdateUIStatus();
-        }
-
-        void Exit() {
-            Stop(TaskAfterStop.None);
-            m_readFileWorker.CancelAsync();
-
-            // バックグラウンドスレッドにjoinして、完全に止まるまで待ち合わせする。
-            // そうしないと、バックグラウンドスレッドによって使用中のオブジェクトが
-            // この後のUnsetupの呼出によって開放されてしまい問題が起きる。
-
-            while (m_playWorker.IsBusy) {
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
-                    System.Windows.Threading.DispatcherPriority.Background,
-                    new System.Threading.ThreadStart(delegate { }));
-
-                System.Threading.Thread.Sleep(100);
-            }
-
-            while (m_readFileWorker.IsBusy) {
-                System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
-                    System.Windows.Threading.DispatcherPriority.Background,
-                    new System.Threading.ThreadStart(delegate { }));
-                System.Threading.Thread.Sleep(100);
-            }
-
-            wasapi.Unsetup();
-            wasapi.Term();
-            wasapi = null;
-
-            Application.Current.Shutdown(0);
         }
 
         void Stop(TaskAfterStop taskAfterStop) {
@@ -395,8 +419,42 @@ namespace PlayPcmWin
             Exit();
         }
 
-        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e)
-        {
+        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
+            Exit();
+        }
+
+        private void Exit() {
+            if (wasapi != null) {
+                Stop(TaskAfterStop.None);
+                m_readFileWorker.CancelAsync();
+
+                // バックグラウンドスレッドにjoinして、完全に止まるまで待ち合わせする。
+                // そうしないと、バックグラウンドスレッドによって使用中のオブジェクトが
+                // この後のUnsetupの呼出によって開放されてしまい問題が起きる。
+
+                while (m_playWorker.IsBusy) {
+                    System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
+                        System.Windows.Threading.DispatcherPriority.Background,
+                        new System.Threading.ThreadStart(delegate { }));
+
+                    System.Threading.Thread.Sleep(100);
+                }
+
+                while (m_readFileWorker.IsBusy) {
+                    System.Windows.Threading.Dispatcher.CurrentDispatcher.Invoke(
+                        System.Windows.Threading.DispatcherPriority.Background,
+                        new System.Threading.ThreadStart(delegate { }));
+                    System.Threading.Thread.Sleep(100);
+                }
+
+                wasapi.Unsetup();
+                wasapi.Term();
+                wasapi = null;
+
+                // 設定ファイルを書き出す。
+                PreferenceStore.Save(m_preference);
+            }
+
             Application.Current.Shutdown();
         }
 
@@ -549,11 +607,11 @@ namespace PlayPcmWin
             }
         }
 
-        private static string DfmToStr(WasapiCS.DataFeedMode dfm) {
+        private static string DfmToStr(WasapiDataFeedMode dfm) {
             switch (dfm) {
-            case WasapiCS.DataFeedMode.EventDriven:
+            case WasapiDataFeedMode.EventDriven:
                 return "イベント駆動モード";
-            case WasapiCS.DataFeedMode.TimerDriven:
+            case WasapiDataFeedMode.TimerDriven:
                 return "タイマー駆動モード";
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -561,11 +619,11 @@ namespace PlayPcmWin
             }
         }
 
-        private static string ShareModeToStr(WasapiCS.ShareMode sm) {
-            switch (sm) {
-            case WasapiCS.ShareMode.Exclusive:
+        private static string ShareModeToStr(WasapiSharedOrExclusive t) {
+            switch (t) {
+            case WasapiSharedOrExclusive.Exclusive:
                 return "WASAPI排他モード";
-            case WasapiCS.ShareMode.Shared:
+            case WasapiSharedOrExclusive.Shared:
                 return "WASAPI共有モード";
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -692,6 +750,10 @@ namespace PlayPcmWin
                 return;
             }
 
+            // 通常使用するデバイスとする。
+            string selectedItemName = (string)listBoxDevices.SelectedItem;
+            m_preference.PreferredDeviceName = selectedItemName;
+
             SetupAndStartReadFiles(loadGroupId);
         }
 
@@ -703,30 +765,32 @@ namespace PlayPcmWin
 
             int latencyMillisec = Int32.Parse(textBoxLatency.Text);
             if (latencyMillisec <= 0) {
-                latencyMillisec = DEFAULT_OUTPUT_LATENCY_MS;
-                textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
+                latencyMillisec = Preference.DefaultLatencyMilliseconds;
+                textBoxLatency.Text = string.Format("{0}", latencyMillisec);
             }
+            m_preference.LatencyMillisec = latencyMillisec;
 
-            wasapi.SetShareMode(m_shareMode);
-            textBoxLog.Text += string.Format("wasapi.SetShareMode({0})\r\n", m_shareMode);
+            wasapi.SetShareMode(
+                PreferenceShareModeToWasapiCSShareMode(m_preference.wasapiSharedOrExclusive));
+            textBoxLog.Text += string.Format("wasapi.SetShareMode({0})\r\n",
+                m_preference.wasapiSharedOrExclusive);
 
-            wasapi.SetSchedulerTaskType(m_schedulerTaskType);
-            textBoxLog.Text += string.Format("wasapi.SetSchedulerTaskType({0})\r\n", m_schedulerTaskType);
-
-            WasapiCS.DataFeedMode dfm;
-            dfm = WasapiCS.DataFeedMode.EventDriven;
-            if (true == radioButtonTimerDriven.IsChecked) {
-                dfm = WasapiCS.DataFeedMode.TimerDriven;
-            }
+            wasapi.SetSchedulerTaskType(
+                PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(m_preference.renderThreadTaskType));
+            textBoxLog.Text += string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
+                m_preference.renderThreadTaskType);
 
             int startWavDataId = GetFirstWavDataIdOnGroup(loadGroupId);
             System.Diagnostics.Debug.Assert(0 <= startWavDataId);
 
             WavData startWavData = m_wavDataList[startWavDataId];
 
-            int hr = wasapi.Setup(dfm, startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
+            int hr = wasapi.Setup(
+                PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
+                startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
             textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec, dfm, hr);
+                startWavData.SampleRate, startWavData.BitsPerSample,
+                latencyMillisec, m_preference.wasapiDataFeedMode, hr);
             if (hr < 0) {
                 wasapi.Unsetup();
                 textBoxLog.Text += "wasapi.Unsetup()\r\n";
@@ -734,8 +798,8 @@ namespace PlayPcmWin
                 CreateDeviceList();
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
                     startWavData.SampleRate, startWavData.BitsPerSample,
-                    latencyMillisec, DfmToStr(dfm), hr,
-                    ShareModeToStr(m_shareMode));
+                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
+                    ShareModeToStr(m_preference.wasapiSharedOrExclusive));
                 textBoxLog.Text += s;
                 MessageBox.Show(s);
                 return;
@@ -979,23 +1043,31 @@ namespace PlayPcmWin
         }
 
         private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e) {
-            m_schedulerTaskType = WasapiCS.SchedulerTaskType.Audio;
+            m_preference.renderThreadTaskType = RenderThreadTaskType.Audio;
         }
 
         private void radioButtonTaskProAudio_Checked(object sender, RoutedEventArgs e) {
-            m_schedulerTaskType = WasapiCS.SchedulerTaskType.ProAudio;
+            m_preference.renderThreadTaskType = RenderThreadTaskType.ProAudio;
         }
 
         private void radioButtonTaskNone_Checked(object sender, RoutedEventArgs e) {
-            m_schedulerTaskType = WasapiCS.SchedulerTaskType.None;
+            m_preference.renderThreadTaskType = RenderThreadTaskType.None;
         }
 
         private void radioButtonExclusive_Checked(object sender, RoutedEventArgs e) {
-            m_shareMode = WasapiCS.ShareMode.Exclusive;
+            m_preference.wasapiSharedOrExclusive = WasapiSharedOrExclusive.Exclusive;
         }
 
         private void radioButtonShared_Checked(object sender, RoutedEventArgs e) {
-            m_shareMode = WasapiCS.ShareMode.Shared;
+            m_preference.wasapiSharedOrExclusive = WasapiSharedOrExclusive.Shared;
+        }
+
+        private void radioButtonEventDriven_Checked(object sender, RoutedEventArgs e) {
+            m_preference.wasapiDataFeedMode = WasapiDataFeedMode.EventDriven;
+        }
+
+        private void radioButtonTimerDriven_Checked(object sender, RoutedEventArgs e) {
+            m_preference.wasapiDataFeedMode = WasapiDataFeedMode.TimerDriven;
         }
 
         private void buttonClearPlayList_Click(object sender, RoutedEventArgs e) {
@@ -1077,6 +1149,48 @@ namespace PlayPcmWin
             m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
             ++m_readGroupId;
         }
+        
+        // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
+        private WasapiCS.SchedulerTaskType
+        PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
+            RenderThreadTaskType t) {
+            switch (t) {
+            case RenderThreadTaskType.None:
+                return WasapiCS.SchedulerTaskType.None;
+            case RenderThreadTaskType.Audio:
+                return WasapiCS.SchedulerTaskType.Audio;
+            case RenderThreadTaskType.ProAudio:
+                return WasapiCS.SchedulerTaskType.ProAudio;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.SchedulerTaskType.None; ;
+            }
+        }
 
+        private WasapiCS.ShareMode
+        PreferenceShareModeToWasapiCSShareMode(WasapiSharedOrExclusive t) {
+            switch (t) {
+            case WasapiSharedOrExclusive.Shared:
+                return WasapiCS.ShareMode.Shared;
+            case WasapiSharedOrExclusive.Exclusive:
+                return WasapiCS.ShareMode.Exclusive;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.ShareMode.Exclusive;
+            }
+        }
+
+        private WasapiCS.DataFeedMode
+        PreferenceDataFeedModeToWasapiCS(WasapiDataFeedMode t) {
+            switch (t) {
+            case WasapiDataFeedMode.EventDriven:
+                return WasapiCS.DataFeedMode.EventDriven;
+            case WasapiDataFeedMode.TimerDriven:
+                return WasapiCS.DataFeedMode.TimerDriven;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.DataFeedMode.EventDriven;
+            }
+        }
     }
 }
