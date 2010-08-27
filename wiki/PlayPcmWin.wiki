@@ -21,8 +21,8 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin133.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin133x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
