@@ -21,8 +21,8 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin133.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin133x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
@@ -179,7 +179,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 ===!PlayPcmWin 1.0.33 ==
   * 再生リストの一部をメモリにロードする機能。
   * 設定をIsolatedStorageに保存するようにした。
-  * 作成中。正常に動作しない。
+  * バグが多いかも。
 
 ===!PlayPcmWin 1.0.32 ==
   * ビルド構成が1.0.31で間違っていたのを修正。
