@@ -1,6 +1,6 @@
 #pragma once
 
-// 京 UTF-8
+// 日本語 UTF-8
 
 #include <Windows.h>
 #include <MMDeviceAPI.h>
@@ -9,7 +9,6 @@
 #include <vector>
 
 #define WW_DEVICE_NAME_COUNT (256)
-
 
 struct WWDeviceInfo {
     int id;
@@ -26,7 +25,7 @@ struct WWDeviceInfo {
 /*
  * play
  *   pcmData->posFrame: playing position
- *   pcmData->nFrames: total frames to play
+ *   pcmData->nFrames: total frames to play (frame == sample point)
  * record
  *   pcmData->posFrame: available recorded frame num
  *   pcmData->nFrames: recording buffer size
@@ -34,6 +33,7 @@ struct WWDeviceInfo {
 struct WWPcmData {
     int       id;
     WWPcmData *next;
+    int       pregapFrames; //< pregap from cue sheet
     int       nFrames;
     int       posFrame;
     BYTE      *stream;
@@ -41,10 +41,12 @@ struct WWPcmData {
     WWPcmData(void) {
         id       = 0;
         next     = NULL;
+        pregapFrames = 0;
         nFrames  = 0;
         posFrame = 0;
         stream   = NULL;
     }
+
     ~WWPcmData(void);
 
     void Init(int samples);
@@ -122,8 +124,13 @@ public:
 
     void Stop(void);
 
+    /// negative number returns when playing pregap
     int GetPosFrame(void);
+
+    /// return total frames without pregap frame num
     int GetTotalFrameNum(void);
+
+    /// v must be 0 or greater number
     bool SetPosFrame(int v);
 
 private:
@@ -179,5 +186,7 @@ private:
     void ClearAllPcmData(void);
 
     int CreateWritableFrames(BYTE *pData_return, int wantFrames);
+
+    WWPcmData *FindPlayPcmDataById(int id);
 };
 

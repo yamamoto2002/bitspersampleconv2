@@ -411,6 +411,11 @@ namespace WavRWLib2
         public string FullPath { get; set; }
 
         /// <summary>
+        /// 何でもありの、物置みたいになってきたな…
+        /// </summary>
+        public int GroupId { get; set; }
+
+        /// <summary>
         /// サンプリング周波数と量子化ビット数が同じならtrue
         /// </summary>
         public bool IsSameFormat(WavData other) {

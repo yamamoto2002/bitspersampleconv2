@@ -113,8 +113,7 @@ void
 WasapiUser::Term(void)
 {
     SafeRelease(&m_deviceCollection);
-
-    assert(!m_deviceToUse);
+    SafeRelease(&m_deviceToUse);
 
     if (m_mutex) {
         CloseHandle(m_mutex);
@@ -565,7 +564,6 @@ WasapiUser::Unsetup(void)
     SafeRelease(&m_captureClient);
     SafeRelease(&m_renderClient);
     SafeRelease(&m_audioClient);
-    SafeRelease(&m_deviceToUse);
 }
 
 HRESULT
@@ -806,6 +804,18 @@ WasapiUser::GetNowPlayingPcmDataId(void)
     return nowPlaying->id;
 }
 
+WWPcmData *
+WasapiUser::FindPlayPcmDataById(int id)
+{
+    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+        if (m_playPcmDataList[i].id == id) {
+            return &m_playPcmDataList[i];
+        }
+    }
+
+    return NULL;
+}
+
 bool
 WasapiUser::SetNowPlayingPcmDataId(int id)
 {
@@ -820,7 +830,7 @@ WasapiUser::SetNowPlayingPcmDataId(int id)
 
         if (nowPlaying) {
             nowPlaying->posFrame = 0;
-            m_nowPlayingPcmData = &m_playPcmDataList[id];
+            m_nowPlayingPcmData = FindPlayPcmDataById(id);
         }
     }
     ReleaseMutex(m_mutex);
