@@ -1,5 +1,4 @@
-#ifndef WasapiIOIF_H
-#define WasapiIOIF_H
+#pragma once
 
 #include <Windows.h>
 
@@ -98,5 +97,3 @@ WasapiIO_GetPosFrame(void);
 extern "C" __declspec(dllexport)
 int __stdcall
 WasapiIO_GetTotalFrameNum(void);
-
-#endif /* WasapiIOIF_H */
