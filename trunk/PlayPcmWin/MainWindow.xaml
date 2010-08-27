@@ -61,8 +61,8 @@
                 </GroupBox>
                 <GroupBox Header="データ供給モード" Height="78" HorizontalAlignment="Left" Margin="6,85,0,0" Name="groupBox6" VerticalAlignment="Top" Width="199">
                     <Grid>
-                        <RadioButton Content="イベント駆動(_E)" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,6,0,0" Name="radioButtonEventDriven" VerticalAlignment="Top" />
-                        <RadioButton Content="タイマー駆動(_T)" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTimerDriven" VerticalAlignment="Top" />
+                        <RadioButton Content="イベント駆動" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,6,0,0" Name="radioButtonEventDriven" VerticalAlignment="Top" Checked="radioButtonEventDriven_Checked" />
+                        <RadioButton Content="タイマー駆動" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTimerDriven" VerticalAlignment="Top"  Checked="radioButtonTimerDriven_Checked" />
                     </Grid>
                 </GroupBox>
             </Grid>
