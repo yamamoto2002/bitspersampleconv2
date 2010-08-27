@@ -177,6 +177,10 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 =更新履歴=
 
 ===!PlayPcmWin 1.0.32 ==
+  * 再生リストの一部をメモリにロードする機能。
+  * 設定をIsolatedStorageに保存するようにした。
+
+===!PlayPcmWin 1.0.32 ==
   * ビルド構成が1.0.31で間違っていたのを修正。
   * 64ビット版も、ついに修正された。
 
