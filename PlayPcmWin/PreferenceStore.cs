@@ -13,11 +13,18 @@ namespace PlayPcmWin {
         EventDriven,
         TimerDriven
     };
+    
     public enum RenderThreadTaskType {
         None,
         Audio,
         ProAudio
     };
+
+    public enum BitsPerSampleFixType {
+        Variable,
+        Sint16,
+        Sint32
+    }
 
     public class Preference {
         public const int DefaultLatencyMilliseconds = 200;
@@ -29,6 +36,7 @@ namespace PlayPcmWin {
         public WasapiSharedOrExclusive wasapiSharedOrExclusive { get; set; }
         public WasapiDataFeedMode wasapiDataFeedMode { get; set; }
         public RenderThreadTaskType renderThreadTaskType { get; set; }
+        public BitsPerSampleFixType bitsPerSampleFixType { get; set; }
 
         public string PreferredDeviceName { get; set; }
 
@@ -45,6 +53,7 @@ namespace PlayPcmWin {
             wasapiSharedOrExclusive = WasapiSharedOrExclusive.Exclusive;
             wasapiDataFeedMode = WasapiDataFeedMode.EventDriven;
             renderThreadTaskType = RenderThreadTaskType.ProAudio;
+            bitsPerSampleFixType = BitsPerSampleFixType.Variable;
             PreferredDeviceName = "";
         }
     }

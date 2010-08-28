@@ -339,6 +339,19 @@ namespace WavRWLib2
             return true;
         }
 
+        public void Clear() {
+            m_subChunk2Size = 0;
+            m_data = null;
+            m_rawData = null;
+            m_subChunk2Id = null;
+            m_numSamples = 0;
+        }
+
+        public void SetRawData(int numSamples, byte[] rawData) {
+            m_numSamples = numSamples;
+            m_rawData = rawData;
+        }
+
         public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
         {
             System.Diagnostics.Debug.Assert(16 == bitsPerSample);
@@ -414,6 +427,26 @@ namespace WavRWLib2
         /// 何でもありの、物置みたいになってきたな…
         /// </summary>
         public int GroupId { get; set; }
+
+        /// <summary>
+        /// rhsの内容(チャンネル数、サンプルレート、量子化ビット数の情報)を自分自身にコピーする。
+        /// DSC(PCMデータ)はコピーしない。(空データとなる)
+        /// </summary>
+        /// <param name="rhs">from</param>
+        public void CopyHeaderInfoFrom(WavData rhs) {
+            m_rcd = new RiffChunkDescriptor();
+            m_rcd.Create(36);
+
+            m_fsc = new FmtSubChunk();
+            m_fsc.Create((ushort)rhs.NumChannels, (uint)rhs.SampleRate, (ushort)rhs.BitsPerSample);
+
+            m_dsc = new DataSubChunk();
+
+            Id = rhs.Id;
+            FileName = rhs.FileName;
+            FullPath = rhs.FullPath;
+            GroupId = rhs.GroupId;
+        }
 
         /// <summary>
         /// サンプリング周波数と量子化ビット数が同じならtrue
@@ -549,6 +582,66 @@ namespace WavRWLib2
 
         public byte[] SampleRawGet() {
             return m_dsc.SampleRawGet();
+        }
+
+        /// <summary>
+        /// 量子化ビット数をbitsPerSampleに変更したWavDataを戻す。
+        /// 自分自身の内容は変更しない。
+        /// 
+        /// RawDataモードの場合のみの対応。
+        /// </summary>
+        /// <param name="newBitsPerSample">新しい量子化ビット数</param>
+        /// <returns>量子化ビット数変更後のWavData</returns>
+        public WavData BitsPerSampleConvertTo(int newBitsPerSample) {
+            WavData newWavData = new WavData();
+            newWavData.CopyHeaderInfoFrom(this);
+            newWavData.m_fsc.Create((ushort)NumChannels, (uint)SampleRate, (ushort)newBitsPerSample);
+
+            byte [] rawData = null;
+            if (BitsPerSample == 16 &&
+                newBitsPerSample == 24) {
+                rawData = Conv16to24(SampleRawGet());
+            } else if (BitsPerSample == 24 &&
+                newBitsPerSample == 16) {
+                rawData = Conv24to16(SampleRawGet());
+            } else {
+                System.Diagnostics.Debug.Assert(false);
+                return null;
+            }
+
+            newWavData.m_dsc = new DataSubChunk();
+            newWavData.m_dsc.SetRawData(NumSamples, rawData);
+
+            return newWavData;
+        }
+
+        private byte[] Conv16to24(byte[] from) {
+            int nSample = from.Length/2;
+            byte[] to = new byte[nSample * 3];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットは、0埋めする。
+                to[toPos++] = 0;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+        private byte[] Conv24to16(byte[] from) {
+            int nSample = from.Length / 3;
+            byte[] to = new byte[nSample * 2];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットの情報が失われる瞬間
+                ++fromPos;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
         }
     }
 }
