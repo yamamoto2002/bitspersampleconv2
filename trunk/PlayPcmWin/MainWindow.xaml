@@ -21,6 +21,7 @@
         <GroupBox Header="出力デバイス" Margin="8,221,0,163" Name="groupBox1" HorizontalAlignment="Left" Width="476" Grid.Column="1">
             <Grid>
                 <ListBox Margin="6,6,6,37" Name="listBoxDevices" />
+                <Button Content="詳細設定…(_D)" Height="23" HorizontalAlignment="Left" Margin="136,0,0,6" Name="buttonSettings" VerticalAlignment="Bottom" Width="149" Click="buttonSettings_Click" />
                 <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="291,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
             </Grid>
         </GroupBox>

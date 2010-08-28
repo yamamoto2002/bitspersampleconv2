@@ -523,6 +523,8 @@ namespace PlayPcmWin
 
             wasapi.UnchooseDevice();
             AddLogText("wasapi.UnchooseDevice()\r\n");
+
+            m_loadedGroupId = -1;
         }
 
         private void Exit() {
@@ -593,9 +595,25 @@ namespace PlayPcmWin
 
             WavData startWavData = m_wavDataList[startWavDataId];
 
+            // 量子化ビット数固定設定。
+            int preferedBitsPerSample = startWavData.BitsPerSample;
+            switch (m_preference.bitsPerSampleFixType) {
+            case BitsPerSampleFixType.Variable:
+                break;
+            case BitsPerSampleFixType.Sint16:
+                preferedBitsPerSample = 16;
+                break;
+            case BitsPerSampleFixType.Sint32:
+                preferedBitsPerSample = 24;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+
             if (m_deviceSetupInfo.Is(
                 startWavData.SampleRate,
-                startWavData.BitsPerSample,
+                preferedBitsPerSample,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
                 m_preference.wasapiSharedOrExclusive,
@@ -606,7 +624,7 @@ namespace PlayPcmWin
 
             m_deviceSetupInfo.Set(
                 startWavData.SampleRate,
-                startWavData.BitsPerSample,
+                preferedBitsPerSample,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
                 m_preference.wasapiSharedOrExclusive,
@@ -624,15 +642,15 @@ namespace PlayPcmWin
 
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
+                startWavData.SampleRate, preferedBitsPerSample, latencyMillisec);
             AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                startWavData.SampleRate, startWavData.BitsPerSample,
+                startWavData.SampleRate, preferedBitsPerSample,
                 latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
-                    startWavData.SampleRate, startWavData.BitsPerSample,
+                    startWavData.SampleRate, preferedBitsPerSample,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive));
                 AddLogText(s);
@@ -836,8 +854,6 @@ namespace PlayPcmWin
         ///  バックグラウンド読み込み。
         ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
         /// </summary>
-        /// <param name="o"></param>
-        /// <param name="args"></param>
         private void ReadFileDoWork(object o, DoWorkEventArgs args) {
             BackgroundWorker bw = (BackgroundWorker)o;
             int readGroupId = (int)args.Argument;
@@ -860,6 +876,8 @@ namespace PlayPcmWin
                         return;
                     }
 
+                    // どーなのよ、という感じがするが。
+                    // 効果絶大である。
                     GC.Collect();
 
                     bool readSuccess = false;
@@ -873,6 +891,9 @@ namespace PlayPcmWin
                         return;
                     }
 
+                    // 必要に応じて量子化ビット数の変更を行う。
+                    wd = BitsPerSampleConvAsNeeded(wd);
+
                     int wavDataLength = wd.SampleRawGet().Length;
 
                     if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
@@ -885,8 +906,10 @@ namespace PlayPcmWin
                     wd.ForgetDataPart();
 
                     m_readFileWorker.ReportProgress(100 * (i + 1) / m_wavDataList.Count,
-                        string.Format("wasapi.AddOutputData({0})\r\n", wavDataLength));
+                        string.Format("wasapi.AddOutputData({0}, {0}bytes)\r\n", wd.Id, wavDataLength));
                 }
+
+                // ダメ押し。
                 GC.Collect();
 
                 // 成功。
@@ -902,6 +925,29 @@ namespace PlayPcmWin
                 args.Result = r;
                 Console.WriteLine("D: ReadFileDoWork() {0}", ex.ToString());
             }
+        }
+
+        /// <summary>
+        /// 量子化ビット数を、もし必要なら変更する。
+        /// </summary>
+        /// <param name="wd">入力WavData</param>
+        /// <returns>変更後WavData</returns>
+        private WavData BitsPerSampleConvAsNeeded(WavData wd) {
+            if (wd.BitsPerSample == 16
+                && m_preference.bitsPerSampleFixType == BitsPerSampleFixType.Sint32) {
+                // 16→24に変換する。
+                System.Console.WriteLine("Converting 16bit to 24bit...");
+                wd = wd.BitsPerSampleConvertTo(24);
+            }
+            if (wd.BitsPerSample == 24
+                && m_preference.bitsPerSampleFixType == BitsPerSampleFixType.Sint16) {
+                // 24→16に変換する。
+                // この場合は、切り捨てによって情報が失われる。
+                System.Console.WriteLine("Converting 24bit to 16bit...");
+                wd = wd.BitsPerSampleConvertTo(16);
+            }
+
+            return wd;
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -960,7 +1006,6 @@ namespace PlayPcmWin
         private bool UseDevice(int id, string deviceName) {
             int chosenDeviceId      = wasapi.GetUseDeviceId();
             string chosenDeviceName = wasapi.GetUseDeviceName();
-            
 
             if (id == chosenDeviceId &&
                 0 == deviceName.CompareTo(chosenDeviceName)) {
@@ -976,7 +1021,8 @@ namespace PlayPcmWin
 
             // このデバイスを選択。
             int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
-            AddLogText(string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr));
+            AddLogText(string.Format("wasapi.ChooseDevice({0}) {1:X8}\r\n",
+                deviceName, hr));
             if (hr < 0) {
                 return false;
             }
@@ -1109,7 +1155,8 @@ namespace PlayPcmWin
             m_sw.Start();
 
             int hr = wasapi.Start(wavDataId);
-            AddLogText(string.Format("wasapi.Start() {0:X8}\r\n", hr));
+            AddLogText(string.Format("wasapi.Start({0}) {1:X8}\r\n",
+                wavDataId, hr));
             if (hr < 0) {
                 MessageBox.Show(string.Format("再生開始に失敗！{0:X8}", hr));
                 Exit();
@@ -1208,10 +1255,13 @@ namespace PlayPcmWin
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 UnsetupDevice();
 
-                SetupDevice(m_task.GroupId);
+                if (SetupDevice(m_task.GroupId)) {
+                    StartReadPlayGroupOnTask();
+                    return;
+                }
 
-                StartReadPlayGroupOnTask();
-                return;
+                // デバイスの設定を試みたら、失敗した。
+                // FALL_THROUGHする。
             }
 
             // 再生終了後に行うタスクがない。停止する。先頭の曲を選択状態にする。
@@ -1257,6 +1307,12 @@ namespace PlayPcmWin
             string dn = wasapi.GetDeviceName(listBoxDevices.SelectedIndex);
             string s = wasapi.InspectDevice(listBoxDevices.SelectedIndex);
             AddLogText(string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s));
+        }
+
+        private void buttonSettings_Click(object sender, RoutedEventArgs e) {
+            SettingsWindow sw = new SettingsWindow();
+            sw.SetPreference(m_preference);
+            sw.ShowDialog();
         }
 
         private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e) {
