@@ -622,7 +622,7 @@ WasapiUser::Unsetup(void)
 }
 
 HRESULT
-WasapiUser::Start(void)
+WasapiUser::Start(int wavDataId)
 {
     HRESULT hr      = 0;
     BYTE    *pData  = NULL;
@@ -633,9 +633,8 @@ WasapiUser::Start(void)
 
     assert(m_playPcmDataList.size());
 
-    if (NULL == m_nowPlayingPcmData) {
-        m_nowPlayingPcmData = &m_playPcmDataList[0];
-    }
+    // イベント駆動モードで最初の音が繰り返される問題の修正。
+    m_nowPlayingPcmData = FindPlayPcmDataById(wavDataId);
 
     HRG(m_audioClient->Reset());
 
@@ -880,6 +879,8 @@ WasapiUser::FindPlayPcmDataById(int id)
 bool
 WasapiUser::SetNowPlayingPcmDataId(int id)
 {
+    dprintf("D: %s(%d)\n", __FUNCTION__, id);
+
     assert(m_mutex);
     WaitForSingleObject(m_mutex, INFINITE);
     {
@@ -1022,6 +1023,9 @@ WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
             copyFrames = pcmData->nFrames - pcmData->posFrame;
         }
 
+        dprintf("pcmData->posFrame=%d copyFrames=%d nFrames=%d\n",
+            pcmData->posFrame, copyFrames, pcmData->nFrames);
+
         CopyMemory(&pData_return[pos*m_frameBytes],
             &pcmData->stream[pcmData->posFrame * m_frameBytes],
             copyFrames * m_frameBytes);
@@ -1069,7 +1073,7 @@ WasapiUser::AudioSamplesSendProc(void)
         }
     }
 
-    from = (BYTE*)_alloca(writableFrames * m_frameBytes);
+    from = (BYTE*)_malloca(writableFrames * m_frameBytes);
     copyFrames = CreateWritableFrames(from, writableFrames);
 
     assert(m_renderClient);
@@ -1099,6 +1103,9 @@ WasapiUser::AudioSamplesSendProc(void)
     }
 
 end:
+    _freea(from);
+    from = NULL;
+
     ReleaseMutex(m_mutex);
     return result;
 }

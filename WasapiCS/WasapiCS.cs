@@ -94,7 +94,7 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Start();
+        WasapiIO_Start(int wavDataId);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool 
@@ -237,8 +237,8 @@ namespace Wasapi {
             return WasapiIO_GetCaptureGlitchCount();
         }
 
-        public int Start() {
-            return WasapiIO_Start();
+        public int Start(int wavDataId) {
+            return WasapiIO_Start(wavDataId);
         }
 
         public bool Run(int millisec) {

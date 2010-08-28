@@ -120,7 +120,7 @@ public:
     int GetCapturedData(BYTE *data, int bytes);
     int GetCaptureGlitchCount(void);
 
-    HRESULT Start(void);
+    HRESULT Start(int wavDataId);
 
     bool Run(int millisec);
 

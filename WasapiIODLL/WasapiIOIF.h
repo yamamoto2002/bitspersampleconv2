@@ -92,7 +92,7 @@ WasapiIO_GetCaptureGlitchCount(void);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Start(void);
+WasapiIO_Start(int wavDataId);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
