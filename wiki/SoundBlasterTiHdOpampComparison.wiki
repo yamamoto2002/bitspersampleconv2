@@ -198,8 +198,14 @@ http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 
 波形の形状を観察すると、デジタルフィルターはシャープロールオフ型であり、LPFによる位相回転の影響は見られません。素直な形状です。
 
+左側が下がっているのは、測定ミスです(ACレンジに設定していた!）
+暇なときに測り直す必要ありです。
+
 このグラフを見ながら音楽を聞くと、NJM2114Dは、立ち上がりの速い、瞬発力のある音に聴こえる気がするかもｗ
 
+NJM072Dは明らかにピーク電圧が低いです。
+こういうのは、スルーレートが関係しているんでしょうかね。
+ともかく、この回路には、NJM072Dは向いていないようです。
 
 == 1kHz矩形波(もどき)出力波形 ==
 
@@ -217,6 +223,9 @@ http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 
 || NJM2114D || NJM072D ||
 || http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
+
+左側が上がっているのは、測定ミスです(ACレンジに設定していた!）
+暇なときに測り直す必要ありです。
 
 == 10kHz正弦波出力波形 ==
 
@@ -245,10 +254,6 @@ http://bitspersampleconv2.googlecode.com/files/imdjfet.png
 もし発振があれば、線が縦に太くなります。
 
 発振の兆候は見られませんでした。
-
-インパルス応答波形を見ると、NJM072Dは明らかにピーク電圧が低いです。
-こういうのは、スルーレートが関係しているんでしょうかね。
-ともかく、この回路には、NJM072Dは向いていないようです。
 
 ダールジール等の無帰還アンプの音が好みの方には、NJM072Dを装着するとIMD特性が似るので、NJM072Dへの交換を試してみると良いかもしれません。ダールジールはスルーレートが優れていて、NJM072Dは優れていないので、出てくる音が似るかどうかはわかりませんが
 
