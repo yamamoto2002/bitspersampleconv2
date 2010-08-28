@@ -435,7 +435,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                statusBarText.Content = "再生グループ切り替え中";
+                statusBarText.Content = "再生グループ読み込み中";
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -711,11 +711,12 @@ namespace PlayPcmWin
                 }
 
                 if (0 < m_wavDataList.Count
-                    && !m_wavDataList[0].IsSameFormat(wavData)) {
-                    string s = string.Format("再生リストの先頭のファイルとデータフォーマットが異なるため追加できませんでした: {0}\r\n", path);
-                    MessageBox.Show(s);
-                    AddLogText(s);
-                    return false;
+                    && !m_wavDataList[m_wavDataList.Count-1].IsSameFormat(wavData)) {
+                    // データフォーマットが変わった。
+                    listBoxPlayFiles.Items.Add(
+                        string.Format("----------{0}Hz {1}bitに変更------------", wavData.SampleRate, wavData.BitsPerSample));
+                    m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
+                    ++m_readGroupId;
                 }
 
                 wavData.FullPath = path;
@@ -889,7 +890,7 @@ namespace PlayPcmWin
                 GC.Collect();
 
                 // 成功。
-                r.message = string.Format("ファイルグループ{0}番読み込み完了。\r\n", readGroupId);
+                r.message = string.Format("再生グループ{0}番読み込み完了。\r\n", readGroupId);
                 r.hr = 0;
                 args.Result = r;
 
