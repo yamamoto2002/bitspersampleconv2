@@ -26,8 +26,8 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin132x64.zip
 
 非常にバグっぽい開発版
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin134.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin134x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin135.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin135x64.zip
 
 
 || Windows  || !PlayPcmWin || 結果 ||
@@ -181,6 +181,12 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.35 ==
+バグ取り
+  * 再生グループをまたぐ曲変更ができない問題を修正。
+  * デバイスを選択した後、デバイスを選択解除しもう一度デバイスを選択すると異常終了する問題を修正。
+  * プログラム終了時のバックグラウンドスレッド停止待ち合わせ処理がバグッたのを修正。
 
 ===!PlayPcmWin 1.0.34 ==
   * とりあえず動作するように修正。
