@@ -87,6 +87,14 @@ WasapiIO_ChooseDevice(int id)
 }
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_UnchooseDevice(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->UnchooseDevice();
+}
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Setup(int dataFeedMode, int sampleRate, int bitsPerSample, int latencyMillisec)
 {

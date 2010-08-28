@@ -98,8 +98,8 @@ public:
     bool GetDeviceName(int id, LPWSTR name, size_t nameBytes);
     bool InspectDevice(int id, LPWSTR result, size_t resultBytes);
 
-    // if you choose no device, calll ChooseDevice(-1)
     HRESULT ChooseDevice(int id);
+    void UnchooseDevice(void);
 
     HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);

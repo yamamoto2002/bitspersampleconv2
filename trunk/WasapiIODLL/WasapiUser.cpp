@@ -21,6 +21,8 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 void
 WWPcmData::Term(void)
 {
+    dprintf("D: %s() stream=%p\n", __FUNCTION__, stream);
+
     free(stream);
     stream = NULL;
 }
@@ -92,6 +94,8 @@ WasapiUser::Init(void)
 {
     HRESULT hr = S_OK;
     
+    dprintf("D: %s()\n", __FUNCTION__);
+
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
 
@@ -99,7 +103,7 @@ WasapiUser::Init(void)
     if (S_OK == hr) {
         m_coInitializeSuccess = true;
     } else {
-        dprintf("WasapiUser::Init() CoInitializeEx() failed %08x\n", hr);
+        dprintf("E: WasapiUser::Init() CoInitializeEx() failed %08x\n", hr);
         hr = S_OK;
     }
 
@@ -112,6 +116,9 @@ WasapiUser::Init(void)
 void
 WasapiUser::Term(void)
 {
+    dprintf("D: %s() m_deviceCollection=%p m_deviceToUse=%p m_mutex=%p\n",
+        __FUNCTION__, m_deviceCollection, m_deviceToUse, m_mutex);
+
     SafeRelease(&m_deviceCollection);
     SafeRelease(&m_deviceToUse);
 
@@ -130,12 +137,16 @@ WasapiUser::SetSchedulerTaskType(WWSchedulerTaskType t)
 {
     assert(0 <= t&& t <= WWSTTProAudio);
 
+    dprintf("D: %s() t=%d\n", __FUNCTION__, (int)t);
+
     m_schedulerTaskType = t;
 }
 
 void
 WasapiUser::SetShareMode(WWShareMode sm)
 {
+    dprintf("D: %s() sm=%d\n", __FUNCTION__, (int)sm);
+
     switch (sm) {
     case WWSMShared:
         m_shareMode = AUDCLNT_SHAREMODE_SHARED;
@@ -190,6 +201,8 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
 {
     HRESULT hr = 0;
     IMMDeviceEnumerator *deviceEnumerator = NULL;
+
+    dprintf("D: %s() t=%d\n", __FUNCTION__, (int)t);
 
     switch (t) {
     case WWDTPlay: m_dataFlow = eRender;  break;
@@ -360,6 +373,8 @@ WasapiUser::ChooseDevice(int id)
 {
     HRESULT hr = 0;
 
+    dprintf("D: %s(%d)\n", __FUNCTION__, id);
+
     if (id < 0) {
         goto end;
     }
@@ -374,6 +389,14 @@ end:
     return hr;
 }
 
+void
+WasapiUser::UnchooseDevice(void)
+{
+    dprintf("D: %s()\n", __FUNCTION__);
+
+    SafeRelease(&m_deviceToUse);
+}
+
 HRESULT
 WasapiUser::Setup(
     WWDataFeedMode mode,
@@ -383,6 +406,9 @@ WasapiUser::Setup(
 {
     HRESULT      hr          = 0;
     WAVEFORMATEX *waveFormat = NULL;
+
+    dprintf("D: %s(%d %d %d %d)\n", __FUNCTION__,
+        (int)mode, sampleRate, bitsPerSample, latencyMillisec);
 
     m_dataFeedMode        = mode;
     m_latencyMillisec     = latencyMillisec;
@@ -555,6 +581,10 @@ end:
 void
 WasapiUser::Unsetup(void)
 {
+    dprintf("D: %s() ASRE=%p ACA=%p CC=%p RC=%p AC=%p\n", __FUNCTION__,
+        m_audioSamplesReadyEvent, m_audioClockAdjustment, m_captureClient,
+        m_renderClient, m_audioClient);
+
     if (m_audioSamplesReadyEvent) {
         CloseHandle(m_audioSamplesReadyEvent);
         m_audioSamplesReadyEvent = NULL;
@@ -573,6 +603,8 @@ WasapiUser::Start(void)
     BYTE    *pData  = NULL;
     UINT32  nFrames = 0;
     DWORD   flags   = 0;
+
+    dprintf("D: %s()\n", __FUNCTION__);
 
     assert(m_playPcmDataList.size());
 
@@ -646,6 +678,9 @@ void
 WasapiUser::Stop(void)
 {
     HRESULT hr;
+
+    dprintf("D: %s() AC=%p SE=%p T=%p\n", __FUNCTION__,
+        m_audioClient, m_shutdownEvent, m_thread);
 
     if (NULL != m_audioClient) {
         hr = m_audioClient->Stop();
@@ -775,6 +810,7 @@ WasapiUser::SetPlayRepeat(bool repeat)
 {
     // 最初のpcmDataから、最後のpcmDataまでnextでつなげる。
     // リピートフラグが立っていたら最後のpcmDataのnextを最初のpcmDataにする。
+    dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
 
     for (int i=0; i<m_playPcmDataList.size(); ++i) {
         if (i == m_playPcmDataList.size()-1) {
@@ -819,22 +855,24 @@ WasapiUser::FindPlayPcmDataById(int id)
 bool
 WasapiUser::SetNowPlayingPcmDataId(int id)
 {
-    if (id < 0 || m_playPcmDataList.size() <= id) {
-        return false;
-    }
-
     assert(m_mutex);
     WaitForSingleObject(m_mutex, INFINITE);
     {
+        WWPcmData *p = FindPlayPcmDataById(id);
+        if (NULL == p) {
+            goto end;
+        }
+
         WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
         if (nowPlaying) {
             nowPlaying->posFrame = 0;
-            m_nowPlayingPcmData = FindPlayPcmDataById(id);
+            m_nowPlayingPcmData = p;
         }
     }
-    ReleaseMutex(m_mutex);
 
+end:
+    ReleaseMutex(m_mutex);
     return true;
 }
 
@@ -1080,8 +1118,8 @@ WasapiUser::RenderMain(void)
         timeoutMillisec       = INFINITE;
     }
 
-    dprintf("D: %s() waitArrayCount=%d m_shutdownEvent=%p m_audioSamplesReadyEvent=%p\n",
-        __FUNCTION__, waitArrayCount, m_shutdownEvent, m_audioSamplesReadyEvent);
+    // dprintf("D: %s() waitArrayCount=%d m_shutdownEvent=%p m_audioSamplesReadyEvent=%p\n",
+    //    __FUNCTION__, waitArrayCount, m_shutdownEvent, m_audioSamplesReadyEvent);
 
     while (stillPlaying) {
         waitResult = WaitForMultipleObjects(
