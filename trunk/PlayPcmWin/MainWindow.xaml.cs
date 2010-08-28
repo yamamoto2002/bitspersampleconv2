@@ -344,6 +344,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = true;
+                buttonSettings.IsEnabled = true;
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
@@ -358,6 +359,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = false;
+                buttonSettings.IsEnabled = true;
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
@@ -373,6 +375,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                buttonSettings.IsEnabled = false;
                 statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
                 break;
             case State.ファイル読み込み完了:
@@ -387,6 +390,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                buttonSettings.IsEnabled = false;
                 statusBarText.Content = "ファイル読み込み完了。再生できます。";
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
@@ -405,6 +409,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生中";
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
@@ -421,6 +426,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生停止開始";
                 break;
             case State.再生グループ切り替え中:
@@ -435,6 +441,7 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生グループ読み込み中";
                 break;
             default:
@@ -906,7 +913,7 @@ namespace PlayPcmWin
                     wd.ForgetDataPart();
 
                     m_readFileWorker.ReportProgress(100 * (i + 1) / m_wavDataList.Count,
-                        string.Format("wasapi.AddOutputData({0}, {0}bytes)\r\n", wd.Id, wavDataLength));
+                        string.Format("wasapi.AddOutputData({0}, {1}bytes)\r\n", wd.Id, wavDataLength));
                 }
 
                 // ダメ押し。
