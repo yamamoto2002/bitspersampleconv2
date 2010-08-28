@@ -43,6 +43,14 @@ void __stdcall
 WasapiIO_UnchooseDevice(void);
 
 extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetUseDeviceId(void);
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes);
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Setup(int dataFeedMode, int sampleRate, int bitsPerSample, int latencyMillisec);
 

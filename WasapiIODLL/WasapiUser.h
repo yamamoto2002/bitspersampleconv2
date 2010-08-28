@@ -100,6 +100,8 @@ public:
 
     HRESULT ChooseDevice(int id);
     void UnchooseDevice(void);
+    int  GetUseDeviceId(void);
+    bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
     HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec);
     void Unsetup(void);
@@ -171,6 +173,8 @@ private:
     IAudioClockAdjustment *m_audioClockAdjustment;
 
     WWPcmData    *m_nowPlayingPcmData;
+    int          m_useDeviceId;
+    wchar_t      m_useDeviceName[WW_DEVICE_NAME_COUNT];
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);

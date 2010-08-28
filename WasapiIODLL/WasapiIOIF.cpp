@@ -91,7 +91,23 @@ void __stdcall
 WasapiIO_UnchooseDevice(void)
 {
     assert(g_pWasapi);
-    return g_pWasapi->UnchooseDevice();
+    g_pWasapi->UnchooseDevice();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetUseDeviceId(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetUseDeviceId();
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetUseDeviceName(name, nameBytes);
 }
 
 extern "C" __declspec(dllexport)
@@ -108,7 +124,7 @@ void __stdcall
 WasapiIO_Unsetup(void)
 {
     assert(g_pWasapi);
-    return g_pWasapi->Unsetup();
+    g_pWasapi->Unsetup();
 }
 
 extern "C" __declspec(dllexport)
@@ -197,7 +213,7 @@ void __stdcall
 WasapiIO_Stop(void)
 {
     assert(g_pWasapi);
-    return g_pWasapi->Stop();
+    g_pWasapi->Stop();
 }
 
 extern "C" __declspec(dllexport)

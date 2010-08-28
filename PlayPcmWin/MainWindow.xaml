@@ -21,8 +21,6 @@
         <GroupBox Header="出力デバイス" Margin="8,221,0,163" Name="groupBox1" HorizontalAlignment="Left" Width="476" Grid.Column="1">
             <Grid>
                 <ListBox Margin="6,6,6,37" Name="listBoxDevices" />
-                <Button Content="選択(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonDeviceSelect" Width="135" IsEnabled="False" Click="buttonDeviceSelect_Click" Height="23" VerticalAlignment="Bottom" />
-                <Button Content="選択解除(_D)" Height="23" HorizontalAlignment="Left" Margin="147,0,0,6" Name="buttonDeselect" VerticalAlignment="Bottom" Width="138" Click="buttonDeviceDeselect_Click" IsEnabled="False" />
                 <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="291,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
             </Grid>
         </GroupBox>

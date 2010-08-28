@@ -270,9 +270,7 @@ namespace PlayPcmWin
         private void UpdateUIStatus() {
             switch (m_state) {
             case State.初期化完了:
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled       = true;
-                buttonDeselect.IsEnabled         = false;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
 
@@ -286,10 +284,8 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
-                buttonDeviceSelect.IsEnabled = true;
                 menuItemFileOpen.IsEnabled = true;
-                buttonDeselect.IsEnabled         = false;
-                buttonPlay.IsEnabled             = false;
+                buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
 
                 buttonNext.IsEnabled             = false;
@@ -303,9 +299,7 @@ namespace PlayPcmWin
                 break;
             case State.デバイス選択完了:
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled = false;
-                buttonDeselect.IsEnabled         = true;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
 
@@ -319,9 +313,7 @@ namespace PlayPcmWin
                 statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
                 break;
             case State.ファイル読み込み完了:
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled = false;
-                buttonDeselect.IsEnabled = true;
                 buttonPlay.IsEnabled = true;
                 buttonStop.IsEnabled = false;
 
@@ -339,9 +331,7 @@ namespace PlayPcmWin
                 label1.Content = "0/0";
                 break;
             case State.再生中:
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled = false;
-                buttonDeselect.IsEnabled = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = true;
 
@@ -357,9 +347,7 @@ namespace PlayPcmWin
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 break;
             case State.再生停止開始:
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled = false;
-                buttonDeselect.IsEnabled = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
 
@@ -373,9 +361,7 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生停止開始";
                 break;
             case State.再生グループ切り替え中:
-                buttonDeviceSelect.IsEnabled = false;
                 menuItemFileOpen.IsEnabled = false;
-                buttonDeselect.IsEnabled = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
 
@@ -394,6 +380,10 @@ namespace PlayPcmWin
             }
         }
 
+        /// <summary>
+        /// 起動時に1回だけ呼ぶようにする。
+        /// そうしないと再生中のデバイス番号がずれる。
+        /// </summary>
         private void CreateDeviceList() {
             int hr;
 
@@ -427,9 +417,6 @@ namespace PlayPcmWin
                     listBoxDevices.SelectedIndex = 0;
                 }
 
-                if (m_wavDataList.Count != 0) {
-                    buttonDeviceSelect.IsEnabled = true;
-                }
                 buttonInspectDevice.IsEnabled = true;
             }
 
@@ -439,13 +426,20 @@ namespace PlayPcmWin
                 ChangeState(State.初期化完了);
             }
 
-
             UpdateUIStatus();
         }
 
+        /// <summary>
+        /// 再生中の場合は、停止を開始する。
+        /// (ブロックしないのでこの関数から抜けたときに停止完了していないことがある)
+        /// 
+        /// 再生中でない場合は、再生停止後イベントtaskAfterStopをここで実行する。
+        /// 再生中の場合は、停止完了後にtaskAfterStopを実行する。
+        /// </summary>
+        /// <param name="taskAfterStop"></param>
         void Stop(Task taskAfterStop) {
             m_task = taskAfterStop;
-#if true
+
             if (m_playWorker.IsBusy) {
                 m_playWorker.CancelAsync();
                 // 再生停止したらPlayRunWorkerCompletedでイベントを開始する。
@@ -453,17 +447,16 @@ namespace PlayPcmWin
                 // 再生停止後イベントをここで、いますぐ開始。
                 PerformPlayCompletedTask();
             }
-#else
-            wasapi.Stop();
-#endif
         }
 
-        void MainWindow_Closed(object sender, EventArgs e) {
-            Exit();
-        }
+        /// <summary>
+        /// デバイス選択を解除する。再生停止中に呼ぶ必要あり。
+        /// </summary>
+        private void DeviceDeselect() {
+            System.Diagnostics.Debug.Assert(!m_playWorker.IsBusy);
 
-        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
-            Exit();
+            wasapi.Unsetup();
+            wasapi.UnchooseDevice();
         }
 
         private void Exit() {
@@ -499,6 +492,14 @@ namespace PlayPcmWin
             }
 
             Application.Current.Shutdown();
+        }
+
+        void MainWindow_Closed(object sender, EventArgs e) {
+            Exit();
+        }
+
+        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
+            Exit();
         }
 
         private static string AssemblyVersion {
@@ -756,7 +757,9 @@ namespace PlayPcmWin
             progressBar1.Value = e.ProgressPercentage;
         }
 
-        // WasapiCSに、リピート設定できるかどうかの判定。
+        /// <summary>
+        /// WasapiCSに、リピート設定できるかどうかの判定。
+        /// </summary>
         private void UpdatePlayRepeat() {
             bool repeat = false;
             // GroupIdが0しかない場合、リピート設定が可能。
@@ -795,7 +798,39 @@ namespace PlayPcmWin
             UpdateUIStatus();
         }
 
-        private void buttonDeviceSelect_Click(object sender, RoutedEventArgs e) {
+        /// <summary>
+        /// 使用デバイスを指定する(デバイスIdと名前指定)
+        /// 既に使用中の場合、空振りする。
+        /// 別のデバイスを使用中の場合、そのデバイスを未使用にして、新しいデバイスを使用状態にする。
+        /// </summary>
+        /// <param name="id">デバイスId</param>
+        /// <param name="deviceName">デバイス名</param>
+        private bool UseDevice(int id, string deviceName) {
+            int chosenDeviceId      = wasapi.GetUseDeviceId();
+            string chosenDeviceName = wasapi.GetUseDeviceName();
+
+            if (id == chosenDeviceId &&
+                0 == deviceName.CompareTo(chosenDeviceName)) {
+                // このデバイスが既に指定されている場合は、空振りする。
+                return true;
+            }
+
+            if (0 <= chosenDeviceId) {
+                // 別のデバイスが選択されている場合、Unchooseする。
+                wasapi.UnchooseDevice();
+            }
+
+            // このデバイスを選択。
+            int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
+            textBoxLog.Text += string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr);
+            if (hr < 0) {
+                return false;
+            }
+
+            // 通常使用するデバイスとする。
+            string selectedItemName = (string)listBoxDevices.SelectedItem;
+            m_preference.PreferredDeviceName = selectedItemName;
+
             int loadGroupId = 0;
             if (0 < listBoxPlayFiles.SelectedIndex) {
                 WavData w = m_playListItems[listBoxPlayFiles.SelectedIndex].WavData;
@@ -803,18 +838,7 @@ namespace PlayPcmWin
                     loadGroupId = w.GroupId;
                 }
             }
-
-            int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
-            textBoxLog.Text += string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr);
-            if (hr < 0) {
-                return;
-            }
-
-            // 通常使用するデバイスとする。
-            string selectedItemName = (string)listBoxDevices.SelectedItem;
-            m_preference.PreferredDeviceName = selectedItemName;
-
-            SetupAndStartReadFiles(loadGroupId);
+            return true;
         }
 
         /// <summary>
@@ -855,7 +879,6 @@ namespace PlayPcmWin
                 wasapi.Unsetup();
                 textBoxLog.Text += "wasapi.Unsetup()\r\n";
 
-                CreateDeviceList();
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
                     startWavData.SampleRate, startWavData.BitsPerSample,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
@@ -877,14 +900,11 @@ namespace PlayPcmWin
             m_readFileWorker.RunWorkerAsync(loadGroupId);
         }
 
-        private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
-            Stop(new Task(TaskType.None));
-            wasapi.Unsetup();
-            wasapi.UnchooseDevice();
-            CreateDeviceList();
-        }
-
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
+            if (!UseDevice(listBoxDevices.SelectedIndex, (string)listBoxDevices.SelectedItem)) {
+                return;
+            }
+
             int wavDataId = 0;
             if (0 < listBoxPlayFiles.SelectedIndex) {
                 WavData wavData = m_playListItems[listBoxPlayFiles.SelectedIndex].WavData;
