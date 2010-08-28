@@ -196,16 +196,16 @@ namespace PlayPcmWin
 
             m_preference = PreferenceStore.Load();
 
-            textBoxLog.Text += string.Format("PlayPcmWin {0} {1}\r\n",
+            AddLogText(string.Format("PlayPcmWin {0} {1}\r\n",
                     AssemblyVersion,
-                    IntPtr.Size == 8 ? "64bit" : "32bit");
+                    IntPtr.Size == 8 ? "64bit" : "32bit"));
 
             m_readGroupId = 0;
 
             int hr = 0;
             wasapi = new WasapiCS();
             hr = wasapi.Init();
-            textBoxLog.Text += string.Format("wasapi.Init() {0:X8}\r\n", hr);
+            AddLogText(string.Format("wasapi.Init() {0:X8}\r\n", hr));
 
             textBoxLatency.Text = string.Format("{0}", m_preference.LatencyMillisec);
 
@@ -395,7 +395,7 @@ namespace PlayPcmWin
             listBoxDevices.Items.Clear();
 
             hr = wasapi.DoDeviceEnumeration(WasapiCS.DeviceType.Play);
-            textBoxLog.Text += string.Format("wasapi.DoDeviceEnumeration(Play) {0:X8}\r\n", hr);
+            AddLogText(string.Format("wasapi.DoDeviceEnumeration(Play) {0:X8}\r\n", hr));
 
             int nDevices = wasapi.GetDeviceCount();
             for (int i = 0; i < nDevices; ++i) {
@@ -456,7 +456,9 @@ namespace PlayPcmWin
             System.Diagnostics.Debug.Assert(!m_playWorker.IsBusy);
 
             wasapi.Unsetup();
+            AddLogText("wasapi.Unsetup()\r\n");
             wasapi.UnchooseDevice();
+            AddLogText("wasapi.UnchooseDevice()\r\n");
         }
 
         private void Exit() {
@@ -547,7 +549,7 @@ namespace PlayPcmWin
                     string s = string.Format("2チャンネルステレオ以外のWAVファイルの再生には対応していません: {0} {1}ch\r\n",
                         path, wavData.NumChannels);
                     MessageBox.Show(s);
-                    textBoxLog.Text += s;
+                    AddLogText(s);
                     return false;
                 }
                 if (wavData.BitsPerSample != 16
@@ -555,7 +557,7 @@ namespace PlayPcmWin
                     string s = string.Format("量子化ビット数が16でも24でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
                         path, wavData.BitsPerSample);
                     MessageBox.Show(s);
-                    textBoxLog.Text += s;
+                    AddLogText(s);
                     return false;
                 }
 
@@ -563,7 +565,7 @@ namespace PlayPcmWin
                     && !m_wavDataList[0].IsSameFormat(wavData)) {
                     string s = string.Format("再生リストの先頭のファイルとデータフォーマットが異なるため追加できませんでした: {0}\r\n", path);
                     MessageBox.Show(s);
-                    textBoxLog.Text += s;
+                    AddLogText(s);
                     return false;
                 }
 
@@ -582,7 +584,7 @@ namespace PlayPcmWin
                 ChangeState(State.プレイリストあり);
             } else {
                 string s = string.Format("読み込み失敗: {0}\r\n", path);
-                textBoxLog.Text += s;
+                AddLogText(s);
                 MessageBox.Show(s);
                 return false;
             }
@@ -753,7 +755,7 @@ namespace PlayPcmWin
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
-            textBoxLog.Text += (string)e.UserState;
+            AddLogText((string)e.UserState);
             progressBar1.Value = e.ProgressPercentage;
         }
 
@@ -776,7 +778,7 @@ namespace PlayPcmWin
         /// </summary>
         private void ReadFileRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
-            textBoxLog.Text += r.message;
+            AddLogText(r.message);
 
             if (r.hr < 0) {
                 MessageBox.Show(r.message);
@@ -808,6 +810,7 @@ namespace PlayPcmWin
         private bool UseDevice(int id, string deviceName) {
             int chosenDeviceId      = wasapi.GetUseDeviceId();
             string chosenDeviceName = wasapi.GetUseDeviceName();
+            
 
             if (id == chosenDeviceId &&
                 0 == deviceName.CompareTo(chosenDeviceName)) {
@@ -818,11 +821,12 @@ namespace PlayPcmWin
             if (0 <= chosenDeviceId) {
                 // 別のデバイスが選択されている場合、Unchooseする。
                 wasapi.UnchooseDevice();
+                AddLogText(string.Format("wasapi.UnchooseDevice()\r\n"));
             }
 
             // このデバイスを選択。
             int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
-            textBoxLog.Text += string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr);
+            AddLogText(string.Format("wasapi.ChooseDevice() {0:X8}\r\n", hr));
             if (hr < 0) {
                 return false;
             }
@@ -856,13 +860,13 @@ namespace PlayPcmWin
 
             wasapi.SetShareMode(
                 PreferenceShareModeToWasapiCSShareMode(m_preference.wasapiSharedOrExclusive));
-            textBoxLog.Text += string.Format("wasapi.SetShareMode({0})\r\n",
-                m_preference.wasapiSharedOrExclusive);
+            AddLogText(string.Format("wasapi.SetShareMode({0})\r\n",
+                m_preference.wasapiSharedOrExclusive));
 
             wasapi.SetSchedulerTaskType(
                 PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(m_preference.renderThreadTaskType));
-            textBoxLog.Text += string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
-                m_preference.renderThreadTaskType);
+            AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
+                m_preference.renderThreadTaskType));
 
             int startWavDataId = GetFirstWavDataIdOnGroup(loadGroupId);
             System.Diagnostics.Debug.Assert(0 <= startWavDataId);
@@ -872,18 +876,18 @@ namespace PlayPcmWin
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
                 startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
-            textBoxLog.Text += string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
                 startWavData.SampleRate, startWavData.BitsPerSample,
-                latencyMillisec, m_preference.wasapiDataFeedMode, hr);
+                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 wasapi.Unsetup();
-                textBoxLog.Text += "wasapi.Unsetup()\r\n";
+                AddLogText("wasapi.Unsetup()\r\n");
 
                 string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
                     startWavData.SampleRate, startWavData.BitsPerSample,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive));
-                textBoxLog.Text += s;
+                AddLogText(s);
                 MessageBox.Show(s);
                 return;
             }
@@ -929,6 +933,7 @@ namespace PlayPcmWin
                 // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
                 // 再生するためには、ロードする必要がある。
                 wasapi.Unsetup();
+                AddLogText("wasapi.Unsetup()\r\n");
                 m_task.Set(TaskType.PlaySpecifiedGroup, wavData.GroupId, wavData.Id);
                 SetupAndStartReadPlayGroup();
                 return;
@@ -997,15 +1002,15 @@ namespace PlayPcmWin
 
             //wasapi.SetPosFrame(0);
             int hr = wasapi.Start();
-            // これは、再生開始後に呼ぶ必要あり。
-            wasapi.SetNowPlayingPcmDataId(wavDataId);
-
-            textBoxLog.Text += string.Format("wasapi.Start() {0:X8}\r\n", hr);
+            AddLogText(string.Format("wasapi.Start() {0:X8}\r\n", hr));
             if (hr < 0) {
                 MessageBox.Show(string.Format("再生開始に失敗！{0:X8}", hr));
                 Exit();
                 return false;
             }
+
+            // これは、再生開始後に呼ぶ必要あり。
+            wasapi.SetNowPlayingPcmDataId(wavDataId);
 
             // 再生バックグラウンドタスク開始。PlayDoWorkが実行される。
             // 再生バックグラウンドタスクを止めるには、Stop()を呼ぶ。
@@ -1091,6 +1096,7 @@ namespace PlayPcmWin
             // 再生終了後に行うタスクがある場合、ここで実行する。
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 wasapi.Unsetup();
+                AddLogText("wasapi.Unsetup()\r\n");
                 SetupAndStartReadPlayGroup();
                 return;
             }
@@ -1107,7 +1113,7 @@ namespace PlayPcmWin
         /// </summary>
         private void PlayRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             m_sw.Stop();
-            textBoxLog.Text += string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed);
+            AddLogText(string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed));
 
             PerformPlayCompletedTask();
         }
@@ -1118,7 +1124,7 @@ namespace PlayPcmWin
 
             // 停止ボタンで停止した場合は、停止後何もしない。
             Stop(new Task(TaskType.None));
-            textBoxLog.Text += string.Format("wasapi.Stop()\r\n");
+            AddLogText(string.Format("wasapi.Stop()\r\n"));
         }
 
         private void slider1_MouseMove(object sender, MouseEventArgs e) {
@@ -1133,7 +1139,7 @@ namespace PlayPcmWin
         private void buttonInspectDevice_Click(object sender, RoutedEventArgs e) {
             string dn = wasapi.GetDeviceName(listBoxDevices.SelectedIndex);
             string s = wasapi.InspectDevice(listBoxDevices.SelectedIndex);
-            textBoxLog.Text += string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s);
+            AddLogText(string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s));
         }
 
         private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e) {
@@ -1242,6 +1248,8 @@ namespace PlayPcmWin
             if (m_wavDataList[playingId].GroupId == groupId) {
                 // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
                 wasapi.SetNowPlayingPcmDataId(wavDataId);
+                AddLogText(string.Format("wasapi.SetNowPlayingPcmDataId({0})\r\n",
+                    wavDataId));
             } else {
                 // ファイルグループが違う場合、再生を停止し、グループを読み直し、再生を再開する。
                 Stop(new Task(TaskType.PlaySpecifiedGroup, groupId, wavDataId));
@@ -1271,7 +1279,16 @@ namespace PlayPcmWin
             m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
             ++m_readGroupId;
         }
-        
+
+        /// <summary>
+        /// ログを追加する。
+        /// </summary>
+        /// <param name="s">追加するログ。行末に\r\nを入れる必要あり。</param>
+        private void AddLogText(string s) {
+            textBoxLog.Text += s;
+            textBoxLog.ScrollToEnd();
+        }
+
         // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
 
         private WasapiCS.SchedulerTaskType
