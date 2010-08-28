@@ -81,12 +81,17 @@ WasapiUser::WasapiUser(void)
 
     m_audioClockAdjustment = NULL;
     m_nowPlayingPcmData = NULL;
+    m_useDeviceId    = -1;
+
+    memset(m_useDeviceName, 0, sizeof m_useDeviceName);
 }
 
 WasapiUser::~WasapiUser(void)
 {
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
+    m_useDeviceId = -1;
+    m_useDeviceName[0] = 0;
 }
 
 HRESULT
@@ -121,6 +126,8 @@ WasapiUser::Term(void)
 
     SafeRelease(&m_deviceCollection);
     SafeRelease(&m_deviceToUse);
+    m_useDeviceId = -1;
+    m_useDeviceName[0] = 0;
 
     if (m_mutex) {
         CloseHandle(m_mutex);
@@ -383,6 +390,8 @@ WasapiUser::ChooseDevice(int id)
     assert(!m_deviceToUse);
 
     HRG(m_deviceCollection->Item(id, &m_deviceToUse));
+    m_useDeviceId = id;
+    wcscpy_s(m_useDeviceName, m_deviceInfo[id].name);
 
 end:
     SafeRelease(&m_deviceCollection);
@@ -395,6 +404,22 @@ WasapiUser::UnchooseDevice(void)
     dprintf("D: %s()\n", __FUNCTION__);
 
     SafeRelease(&m_deviceToUse);
+    m_useDeviceId = -1;
+    m_useDeviceName[0] = 0;
+}
+
+int
+WasapiUser::GetUseDeviceId(void)
+{
+    dprintf("D: %s() %d\n", __FUNCTION__, m_useDeviceId);
+    return m_useDeviceId;
+}
+
+bool
+WasapiUser::GetUseDeviceName(LPWSTR name, size_t nameBytes)
+{
+    wcsncpy(name, m_useDeviceName, nameBytes/sizeof name[0] -1);
+    return true;
 }
 
 HRESULT

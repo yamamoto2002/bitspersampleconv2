@@ -45,6 +45,14 @@ namespace Wasapi {
         WasapiIO_UnchooseDevice();
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetUseDeviceId();
+
+        [DllImport("WasapiIODLL.dll", CharSet = CharSet.Auto)]
+        private extern static bool
+        WasapiIO_GetUseDeviceName(System.Text.StringBuilder name, int nameBytes);
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int latencyMillisec);
 
@@ -166,6 +174,16 @@ namespace Wasapi {
 
         public void UnchooseDevice() {
             WasapiIO_UnchooseDevice();
+        }
+
+        public int GetUseDeviceId() {
+            return WasapiIO_GetUseDeviceId();
+        }
+
+        public string GetUseDeviceName() {
+            StringBuilder buf = new StringBuilder(64);
+            WasapiIO_GetUseDeviceName(buf, buf.Capacity * 2);
+            return buf.ToString();
         }
 
         public enum DataFeedMode {
