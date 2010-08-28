@@ -224,7 +224,7 @@ NJM072Dは明らかにピーク電圧が低いです。
 || NJM2114D || NJM072D ||
 || http://bitspersampleconv2.googlecode.com/files/2114_1kHzRect100pf.png||http://bitspersampleconv2.googlecode.com/files/072_1kHzRect100pf.png|| 
 
-左側が上がっているのは、測定ミスです(ACレンジに設定していた!）
+わずかに右肩下がりになっているのは、測定ミスです(ACレンジに設定していた!）
 暇なときに測り直す必要ありです。
 
 == 10kHz正弦波出力波形 ==
