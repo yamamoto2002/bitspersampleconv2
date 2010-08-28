@@ -71,6 +71,69 @@ namespace PlayPcmWin
         // メモリ上に読み込まれているGroupId。
         private int m_loadedGroupId = -1;
 
+        /// <summary>
+        /// デバイスのセットアップ情報
+        /// </summary>
+        struct DeviceSetupInfo {
+            bool setuped;
+            int samplingRate;
+            int bitsPerSample;
+            int latencyMillisec;
+            WasapiDataFeedMode dfm;
+            WasapiSharedOrExclusive shareMode;
+            RenderThreadTaskType threadTaskType;
+
+            public bool Is(int samplingRate,
+                int bitsPerSample,
+                int latencyMillisec,
+                WasapiDataFeedMode dfm,
+                WasapiSharedOrExclusive shareMode,
+                RenderThreadTaskType threadTaskType) {
+                return (this.setuped
+                    && this.samplingRate == samplingRate
+                    && this.bitsPerSample == bitsPerSample
+                    && this.latencyMillisec == latencyMillisec
+                    && this.dfm == dfm
+                    && this.shareMode == shareMode
+                    && this.threadTaskType == threadTaskType);
+            }
+
+            public void Set(int samplingRate,
+                int bitsPerSample,
+                int latencyMillisec,
+                WasapiDataFeedMode dfm,
+                WasapiSharedOrExclusive shareMode,
+                RenderThreadTaskType threadTaskType) {
+                    this.setuped = true;
+                this.samplingRate = samplingRate;
+                this.bitsPerSample = bitsPerSample;
+                this.latencyMillisec = latencyMillisec;
+                this.dfm = dfm;
+                this.shareMode = shareMode;
+                this.threadTaskType = threadTaskType;
+            }
+
+            /// <summary>
+            /// wasapi.Unsetup()された場合に呼ぶ。
+            /// </summary>
+            public void Unsetuped() {
+                setuped = false;
+            }
+
+            /// <summary>
+            /// Setup状態か？
+            /// </summary>
+            /// <returns>true: Setup状態。false: Setupされていない。</returns>
+            public bool IsSetuped() {
+                return setuped;
+            }
+        }
+
+        /// <summary>
+        /// デバイスSetup情報。サンプリングレート、量子化ビット数…。
+        /// </summary>
+        DeviceSetupInfo m_deviceSetupInfo = new DeviceSetupInfo();
+
         // 再生停止完了後に行うタスク。
         enum TaskType {
             /// <summary>
@@ -124,7 +187,7 @@ namespace PlayPcmWin
             プレイリストあり,
 
             // これ以降の状態にいる場合、再生リストに新しいファイルを追加できない。
-            デバイス選択完了,
+            デバイスSetup完了,
             ファイル読み込み完了,
             再生中,
             再生停止開始,
@@ -295,9 +358,9 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = false;
-                statusBarText.Content = "再生リストを作り、出力デバイスを選択して下さい。";
+                statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
-            case State.デバイス選択完了:
+            case State.デバイスSetup完了:
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
                 menuItemFileOpen.IsEnabled = false;
                 buttonPlay.IsEnabled             = false;
@@ -451,12 +514,13 @@ namespace PlayPcmWin
 
         /// <summary>
         /// デバイス選択を解除する。再生停止中に呼ぶ必要あり。
+        /// この関数は、デバイスリストが消えるため、不便である。
         /// </summary>
         private void DeviceDeselect() {
             System.Diagnostics.Debug.Assert(!m_playWorker.IsBusy);
 
-            wasapi.Unsetup();
-            AddLogText("wasapi.Unsetup()\r\n");
+            UnsetupDevice();
+
             wasapi.UnchooseDevice();
             AddLogText("wasapi.UnchooseDevice()\r\n");
         }
@@ -485,7 +549,7 @@ namespace PlayPcmWin
                     System.Threading.Thread.Sleep(100);
                 }
 
-                wasapi.Unsetup();
+                UnsetupDevice();
                 wasapi.Term();
                 wasapi = null;
 
@@ -494,6 +558,91 @@ namespace PlayPcmWin
             }
 
             Application.Current.Shutdown();
+        }
+
+        /// <summary>
+        /// wasapi.Unsetupを行う。
+        /// 既にUnsetup状態の場合は、空振りする。
+        /// </summary>
+        private void UnsetupDevice() {
+            if (!m_deviceSetupInfo.IsSetuped()) {
+                return;
+            }
+
+            wasapi.Unsetup();
+            AddLogText("wasapi.Unsetup()\r\n");
+            m_deviceSetupInfo.Unsetuped();
+        }
+
+        /// <summary>
+        /// デバイスSetupを行う。
+        /// すでに同一フォーマットのSetupがなされている場合は空振りする。
+        /// </summary>
+        /// <param name="loadGroupId">再生するグループ番号。この番号のWAVファイルのフォーマットでSetupする。</param>
+        /// <returns>false: デバイスSetup失敗。よく起こる。</returns>
+        private bool SetupDevice(int loadGroupId) {
+            int latencyMillisec = Int32.Parse(textBoxLatency.Text);
+            if (latencyMillisec <= 0) {
+                latencyMillisec = Preference.DefaultLatencyMilliseconds;
+                textBoxLatency.Text = string.Format("{0}", latencyMillisec);
+            }
+            m_preference.LatencyMillisec = latencyMillisec;
+
+            int startWavDataId = GetFirstWavDataIdOnGroup(loadGroupId);
+            System.Diagnostics.Debug.Assert(0 <= startWavDataId);
+
+            WavData startWavData = m_wavDataList[startWavDataId];
+
+            if (m_deviceSetupInfo.Is(
+                startWavData.SampleRate,
+                startWavData.BitsPerSample,
+                latencyMillisec,
+                m_preference.wasapiDataFeedMode,
+                m_preference.wasapiSharedOrExclusive,
+                m_preference.renderThreadTaskType)) {
+                // すでにこのフォーマットでSetup完了している。
+                return true;
+            }
+
+            m_deviceSetupInfo.Set(
+                startWavData.SampleRate,
+                startWavData.BitsPerSample,
+                latencyMillisec,
+                m_preference.wasapiDataFeedMode,
+                m_preference.wasapiSharedOrExclusive,
+                m_preference.renderThreadTaskType);
+
+            wasapi.SetShareMode(
+                PreferenceShareModeToWasapiCSShareMode(m_preference.wasapiSharedOrExclusive));
+            AddLogText(string.Format("wasapi.SetShareMode({0})\r\n",
+                m_preference.wasapiSharedOrExclusive));
+
+            wasapi.SetSchedulerTaskType(
+                PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(m_preference.renderThreadTaskType));
+            AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
+                m_preference.renderThreadTaskType));
+
+            int hr = wasapi.Setup(
+                PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
+                startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
+                startWavData.SampleRate, startWavData.BitsPerSample,
+                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
+            if (hr < 0) {
+                UnsetupDevice();
+
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
+                    startWavData.SampleRate, startWavData.BitsPerSample,
+                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
+                    ShareModeToStr(m_preference.wasapiSharedOrExclusive));
+                AddLogText(s);
+                MessageBox.Show(s);
+                return false;
+            }
+
+            ChangeState(State.デバイスSetup完了);
+            UpdateUIStatus();
+            return true;
         }
 
         void MainWindow_Closed(object sender, EventArgs e) {
@@ -608,9 +757,9 @@ namespace PlayPcmWin
                 Console.WriteLine("   {0}", paths[i]);
             }
 
-            if (State.デバイス選択完了 <= m_state) {
+            if (State.デバイスSetup完了 <= m_state) {
                 // 追加不可。
-                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん出力デバイス選択解除してから追加していただけますようお願い致します。");
+                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん再生を停止してから追加していただけますようお願い致します。");
                 return;
             }
 
@@ -622,9 +771,9 @@ namespace PlayPcmWin
 
         private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
         {
-            if (State.デバイス選択完了 <= m_state) {
+            if (State.デバイスSetup完了 <= m_state) {
                 // 追加不可。
-                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん出力デバイス選択解除してから追加していただけますようお願い致します。");
+                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん再生を停止してから追加していただけますようお願い致します。");
                 return;
             }
 
@@ -740,7 +889,7 @@ namespace PlayPcmWin
                 GC.Collect();
 
                 // 成功。
-                r.message = "全ファイル読み込み完了。\r\n";
+                r.message = string.Format("ファイルグループ{0}番読み込み完了。\r\n", readGroupId);
                 r.hr = 0;
                 args.Result = r;
 
@@ -846,58 +995,10 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// デバイスをセットアップし、loadGroupIdのファイル読み込みを開始する。
+        /// loadGroupIdのファイル読み込みを開始する。
+        /// 読み込みが完了したらReadFileRunWorkerCompletedが呼ばれる。
         /// </summary>
-        private void SetupAndStartReadFiles(int loadGroupId) {
-            // デバイス選択。 ////////////////////////////////////////////////
-
-            int latencyMillisec = Int32.Parse(textBoxLatency.Text);
-            if (latencyMillisec <= 0) {
-                latencyMillisec = Preference.DefaultLatencyMilliseconds;
-                textBoxLatency.Text = string.Format("{0}", latencyMillisec);
-            }
-            m_preference.LatencyMillisec = latencyMillisec;
-
-            wasapi.SetShareMode(
-                PreferenceShareModeToWasapiCSShareMode(m_preference.wasapiSharedOrExclusive));
-            AddLogText(string.Format("wasapi.SetShareMode({0})\r\n",
-                m_preference.wasapiSharedOrExclusive));
-
-            wasapi.SetSchedulerTaskType(
-                PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(m_preference.renderThreadTaskType));
-            AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
-                m_preference.renderThreadTaskType));
-
-            int startWavDataId = GetFirstWavDataIdOnGroup(loadGroupId);
-            System.Diagnostics.Debug.Assert(0 <= startWavDataId);
-
-            WavData startWavData = m_wavDataList[startWavDataId];
-
-            int hr = wasapi.Setup(
-                PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startWavData.SampleRate, startWavData.BitsPerSample, latencyMillisec);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                startWavData.SampleRate, startWavData.BitsPerSample,
-                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
-            if (hr < 0) {
-                wasapi.Unsetup();
-                AddLogText("wasapi.Unsetup()\r\n");
-
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
-                    startWavData.SampleRate, startWavData.BitsPerSample,
-                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
-                    ShareModeToStr(m_preference.wasapiSharedOrExclusive));
-                AddLogText(s);
-                MessageBox.Show(s);
-                return;
-            }
-
-            ChangeState(State.デバイス選択完了);
-            UpdateUIStatus();
-
-            // ファイル読み込み開始 ////////////////////////////////////////////////
-            // 読み込みが完了したらReadFileRunWorkerCompletedが呼ばれる。
-
+        private void StartReadFiles(int loadGroupId) {
             progressBar1.Visibility = System.Windows.Visibility.Visible;
             progressBar1.Value = 0;
 
@@ -924,7 +1025,7 @@ namespace PlayPcmWin
         /// wavDataIdのGroupがロードされていたら直ちに再生開始する。
         /// 読み込まれていない場合、直ちに再生を開始できないので、ロードしてから再生する。
         /// </summary>
-        private void ReadStartPlayByWavDataId(int wavDataId) {
+        private bool ReadStartPlayByWavDataId(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
             WavData wavData = m_wavDataList[wavDataId];
@@ -932,11 +1033,15 @@ namespace PlayPcmWin
             if (wavData.GroupId != m_loadedGroupId) {
                 // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
                 // 再生するためには、ロードする必要がある。
-                wasapi.Unsetup();
-                AddLogText("wasapi.Unsetup()\r\n");
+                UnsetupDevice();
+
+                if (!SetupDevice(wavData.GroupId)) {
+                    return false;
+                }
+
                 m_task.Set(TaskType.PlaySpecifiedGroup, wavData.GroupId, wavData.Id);
-                SetupAndStartReadPlayGroup();
-                return;
+                StartReadPlayGroupOnTask();
+                return true;
             }
 
             // wavDataIdのグループがm_LoadedGroupIdである。ロードされている。
@@ -944,8 +1049,11 @@ namespace PlayPcmWin
             // m_LoadedGroupIdの再生が自然に完了したら、行うタスクを決定する。
             UpdateNextTask();
 
+            if (!SetupDevice(wavData.GroupId)) {
+                return false;
+            }
             StartPlay(wavDataId);
-            return;
+            return true;
         }
 
         /// <summary>
@@ -991,7 +1099,6 @@ namespace PlayPcmWin
                 return false;
             }
 
-            slider1.Value = 0;
             slider1.Maximum = wasapi.GetTotalFrameNum();
 
             ChangeState(State.再生中);
@@ -1000,17 +1107,13 @@ namespace PlayPcmWin
             m_sw.Reset();
             m_sw.Start();
 
-            //wasapi.SetPosFrame(0);
-            int hr = wasapi.Start();
+            int hr = wasapi.Start(wavDataId);
             AddLogText(string.Format("wasapi.Start() {0:X8}\r\n", hr));
             if (hr < 0) {
                 MessageBox.Show(string.Format("再生開始に失敗！{0:X8}", hr));
                 Exit();
                 return false;
             }
-
-            // これは、再生開始後に呼ぶ必要あり。
-            wasapi.SetNowPlayingPcmDataId(wavDataId);
 
             // 再生バックグラウンドタスク開始。PlayDoWorkが実行される。
             // 再生バックグラウンドタスクを止めるには、Stop()を呼ぶ。
@@ -1077,7 +1180,7 @@ namespace PlayPcmWin
         /// m_taskに指定されているグループをロードし、ロード完了したら指定ファイルを再生開始する。
         /// ファイル読み込み完了状態にいるときに呼ぶ。
         /// </summary>
-        private void SetupAndStartReadPlayGroup() {
+        private void StartReadPlayGroupOnTask() {
             m_loadedGroupId = -1;
 
             System.Diagnostics.Debug.Assert(m_task.Type == TaskType.PlaySpecifiedGroup);
@@ -1086,7 +1189,7 @@ namespace PlayPcmWin
             ChangeState(State.再生グループ切り替え中);
             UpdateUIStatus();
 
-            SetupAndStartReadFiles(m_task.GroupId);
+            StartReadFiles(m_task.GroupId);
         }
 
         /// <summary>
@@ -1095,9 +1198,11 @@ namespace PlayPcmWin
         private void PerformPlayCompletedTask() {
             // 再生終了後に行うタスクがある場合、ここで実行する。
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
-                wasapi.Unsetup();
-                AddLogText("wasapi.Unsetup()\r\n");
-                SetupAndStartReadPlayGroup();
+                UnsetupDevice();
+
+                SetupDevice(m_task.GroupId);
+
+                StartReadPlayGroupOnTask();
                 return;
             }
 
@@ -1105,7 +1210,11 @@ namespace PlayPcmWin
             // 再生状態→ファイル読み込み完了状態。
             listBoxPlayFiles.SelectedIndex = 0;
             ChangeState(State.ファイル読み込み完了);
-            UpdateUIStatus();
+
+            // さらに、デバイスを選択解除し、デバイス一覧を更新する。
+            // 停止後に再生リストの追加ができて便利。
+            DeviceDeselect();
+            CreateDeviceList();
         }
 
         /// <summary>
@@ -1285,6 +1394,7 @@ namespace PlayPcmWin
         /// </summary>
         /// <param name="s">追加するログ。行末に\r\nを入れる必要あり。</param>
         private void AddLogText(string s) {
+            System.Console.Write(s);
             textBoxLog.Text += s;
             textBoxLog.ScrollToEnd();
         }
