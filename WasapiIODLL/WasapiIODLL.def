@@ -10,6 +10,7 @@ EXPORTS
 	WasapiIO_GetDeviceName
 	WasapiIO_InspectDevice
 	WasapiIO_ChooseDevice
+	WasapiIO_UnchooseDevice
 	WasapiIO_Setup
 	WasapiIO_Unsetup
 	WasapiIO_AddPlayPcmData

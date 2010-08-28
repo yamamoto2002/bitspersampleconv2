@@ -41,6 +41,10 @@ namespace Wasapi {
         WasapiIO_ChooseDevice(int id);
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_UnchooseDevice();
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int latencyMillisec);
 
@@ -160,6 +164,10 @@ namespace Wasapi {
             return WasapiIO_ChooseDevice(id);
         }
 
+        public void UnchooseDevice() {
+            WasapiIO_UnchooseDevice();
+        }
+
         public enum DataFeedMode {
             EventDriven,
             TimerDriven,
@@ -189,6 +197,12 @@ namespace Wasapi {
             return WasapiIO_GetNowPlayingPcmDataId();
         }
 
+        /// <summary>
+        /// 再生中の曲変更。
+        /// idのグループが読み込まれている必要がある。
+        /// 再生中に呼ぶ必要がある。再生中でない場合、空振りする。
+        /// </summary>
+        /// <param name="id">曲番号</param>
         public void SetNowPlayingPcmDataId(int id) {
             WasapiIO_SetNowPlayingPcmDataId(id);
         }

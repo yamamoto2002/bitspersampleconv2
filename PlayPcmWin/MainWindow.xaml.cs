@@ -68,8 +68,55 @@ namespace PlayPcmWin
         // プレイリストにAddしたファイルに振られるGroupId。
         private int m_readGroupId = 0;
 
-        // メモリ上に読み込まれている、または、読み込む予定のGroupId。
-        private int m_loadGroupId = -1;
+        // メモリ上に読み込まれているGroupId。
+        private int m_loadedGroupId = -1;
+
+        // 再生停止完了後に行うタスク。
+        enum TaskType {
+            /// <summary>
+            /// 停止する。
+            /// </summary>
+            None,
+
+            /// <summary>
+            /// 指定されたグループをメモリに読み込み、グループの先頭の項目を再生開始する。
+            /// </summary>
+            PlaySpecifiedGroup,
+        }
+
+        class Task {
+            public Task() {
+                Type = TaskType.None;
+                GroupId = -1;
+                WavDataId = -1;
+            }
+
+            public Task(TaskType type) {
+                Set(type);
+            }
+
+            public Task(TaskType type, int groupId, int wavDataId) {
+                Set(type, groupId, wavDataId);
+            }
+
+            public void Set(TaskType type) {
+                // 現時点で、このSet()のtypeはNoneしかありえない。
+                System.Diagnostics.Debug.Assert(type == TaskType.None);
+                Type = type;
+            }
+
+            public void Set(TaskType type, int groupId, int wavDataId) {
+                Type = type;
+                GroupId = groupId;
+                WavDataId = wavDataId;
+            }
+
+            public TaskType Type { get; set; }
+            public int GroupId { get; set; }
+            public int WavDataId { get; set; }
+        };
+
+        Task m_task = new Task();
 
         enum State {
             未初期化,
@@ -139,21 +186,6 @@ namespace PlayPcmWin
 
             return -1;
         }
-
-        // 再生停止完了後に行うタスク。
-        enum TaskAfterStop {
-            /// <summary>
-            /// 停止する。
-            /// </summary>
-            None,
-
-            /// <summary>
-            /// 次のグループをメモリに読み込み、グループの先頭の項目を再生開始する。
-            /// </summary>
-            PlayNextGroup,
-        }
-
-        TaskAfterStop m_taskAfterStop = TaskAfterStop.None;
 
         public MainWindow()
         {
@@ -230,6 +262,7 @@ namespace PlayPcmWin
             m_playWorker.DoWork += new DoWorkEventHandler(PlayDoWork);
             m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
             m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
+            m_playWorker.WorkerSupportsCancellation = true;
 
             CreateDeviceList();
         }
@@ -410,9 +443,19 @@ namespace PlayPcmWin
             UpdateUIStatus();
         }
 
-        void Stop(TaskAfterStop taskAfterStop) {
-            m_taskAfterStop = taskAfterStop;
+        void Stop(Task taskAfterStop) {
+            m_task = taskAfterStop;
+#if true
+            if (m_playWorker.IsBusy) {
+                m_playWorker.CancelAsync();
+                // 再生停止したらPlayRunWorkerCompletedでイベントを開始する。
+            } else {
+                // 再生停止後イベントをここで、いますぐ開始。
+                PerformPlayCompletedTask();
+            }
+#else
             wasapi.Stop();
+#endif
         }
 
         void MainWindow_Closed(object sender, EventArgs e) {
@@ -425,7 +468,7 @@ namespace PlayPcmWin
 
         private void Exit() {
             if (wasapi != null) {
-                Stop(TaskAfterStop.None);
+                Stop(new Task(TaskType.None));
                 m_readFileWorker.CancelAsync();
 
                 // バックグラウンドスレッドにjoinして、完全に止まるまで待ち合わせする。
@@ -477,7 +520,7 @@ namespace PlayPcmWin
             wasapi.ClearPlayList();
 
             m_readGroupId = 0;
-            m_loadGroupId = -1;
+            m_loadedGroupId = -1;
 
             GC.Collect();
 
@@ -636,8 +679,16 @@ namespace PlayPcmWin
             public int hr;
         }
 
+        /// <summary>
+        ///  バックグラウンド読み込み。
+        ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="args"></param>
         private void ReadFileDoWork(object o, DoWorkEventArgs args) {
             BackgroundWorker bw = (BackgroundWorker)o;
+            int readGroupId = (int)args.Argument;
+            Console.WriteLine("D: ReadFileDoWork({0}) started", readGroupId);
 
             ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
             try {
@@ -646,7 +697,7 @@ namespace PlayPcmWin
                 wasapi.ClearPlayList();
                 for (int i = 0; i < m_wavDataList.Count; ++i) {
                     WavData wd = m_wavDataList[i];
-                    if (wd.GroupId != m_loadGroupId) {
+                    if (wd.GroupId != readGroupId) {
                         continue;
                     }
 
@@ -665,6 +716,7 @@ namespace PlayPcmWin
                     if (!readSuccess) {
                         r.message = string.Format("エラー。再生リスト追加時には存在していたファイルが、今見たら消えていました。{0}", wd.FullPath);
                         args.Result = r;
+                        Console.WriteLine("D: ReadFileDoWork() !readSuccess");
                         return;
                     }
 
@@ -674,6 +726,7 @@ namespace PlayPcmWin
                         ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
                         r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
                         args.Result = r;
+                        Console.WriteLine("D: ReadFileDoWork() lowmemory");
                         return;
                     }
                     wd.ForgetDataPart();
@@ -688,9 +741,13 @@ namespace PlayPcmWin
                 r.hr = 0;
                 args.Result = r;
 
+                m_loadedGroupId = readGroupId;
+
+                Console.WriteLine("D: ReadFileDoWork({0}) done", readGroupId);
             } catch (Exception ex) {
                 r.message = ex.ToString();
                 args.Result = r;
+                Console.WriteLine("D: ReadFileDoWork() {0}", ex.ToString());
             }
         }
 
@@ -711,6 +768,9 @@ namespace PlayPcmWin
             wasapi.SetPlayRepeat(repeat);
         }
 
+        /// <summary>
+        /// バックグラウンドファイル読み込みが完了した。
+        /// </summary>
         private void ReadFileRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
             textBoxLog.Text += r.message;
@@ -721,12 +781,12 @@ namespace PlayPcmWin
                 return;
             }
 
-            // WasapiCSに、リピート設定できるかどうかの判定。
+            // WasapiCSのリピート設定。
             UpdatePlayRepeat();
 
-            if (m_taskAfterStop == TaskAfterStop.PlayNextGroup) {
+            if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 // ファイル読み込み完了後、再生を開始する。
-                ReadStartPlaySelectedItemOnPlayList();
+                ReadStartPlayByWavDataId(m_task.WavDataId);
                 return;
             }
 
@@ -758,7 +818,7 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// デバイスをセットアップし、loadGroupのファイル読み込みを開始する。
+        /// デバイスをセットアップし、loadGroupIdのファイル読み込みを開始する。
         /// </summary>
         private void SetupAndStartReadFiles(int loadGroupId) {
             // デバイス選択。 ////////////////////////////////////////////////
@@ -809,54 +869,89 @@ namespace PlayPcmWin
             UpdateUIStatus();
 
             // ファイル読み込み開始 ////////////////////////////////////////////////
+            // 読み込みが完了したらReadFileRunWorkerCompletedが呼ばれる。
 
-            m_loadGroupId = loadGroupId;
             progressBar1.Visibility = System.Windows.Visibility.Visible;
             progressBar1.Value = 0;
 
-            m_readFileWorker.RunWorkerAsync();
+            m_readFileWorker.RunWorkerAsync(loadGroupId);
         }
 
         private void buttonDeviceDeselect_Click(object sender, RoutedEventArgs e) {
-            Stop(TaskAfterStop.None);
+            Stop(new Task(TaskType.None));
             wasapi.Unsetup();
+            wasapi.UnchooseDevice();
             CreateDeviceList();
         }
 
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
-            ReadStartPlaySelectedItemOnPlayList();
-        }
-
-        /// <summary>
-        /// リストボックスの選択項目のファイルがロードされていたら直ちに再生開始する。
-        /// リストボックスの選択項目のWavDataが読み込まれていない場合
-        /// 直ちに再生を開始できないので、ロードしてから再生する。
-        /// </summary>
-        private void ReadStartPlaySelectedItemOnPlayList() {
             int wavDataId = 0;
-
             if (0 < listBoxPlayFiles.SelectedIndex) {
                 WavData wavData = m_playListItems[listBoxPlayFiles.SelectedIndex].WavData;
                 if (null != wavData) {
                     wavDataId = wavData.Id;
-
-                    if (wavData.GroupId != m_loadGroupId) {
-                        // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
-                        // 再生するためには、ロードする必要がある。
-                        wasapi.Unsetup();
-                        SetupAndStartReadPlayGroup(wavData.GroupId, wavDataId);
-                        return;
-                    }
                 }
             }
 
-            // wavDataIdのグループがロードされている。
-            // m_LoadedGroupIdの再生が自然に完了したら、
-            // m_loadGroupId+1のグループを読み込んで再生する。
-            m_taskAfterStop = TaskAfterStop.PlayNextGroup;
+            ReadStartPlayByWavDataId(wavDataId);
+        }
+
+        /// <summary>
+        /// wavDataIdのGroupがロードされていたら直ちに再生開始する。
+        /// 読み込まれていない場合、直ちに再生を開始できないので、ロードしてから再生する。
+        /// </summary>
+        private void ReadStartPlayByWavDataId(int wavDataId) {
+            System.Diagnostics.Debug.Assert(0 <= wavDataId);
+
+            WavData wavData = m_wavDataList[wavDataId];
+
+            if (wavData.GroupId != m_loadedGroupId) {
+                // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
+                // 再生するためには、ロードする必要がある。
+                wasapi.Unsetup();
+                m_task.Set(TaskType.PlaySpecifiedGroup, wavData.GroupId, wavData.Id);
+                SetupAndStartReadPlayGroup();
+                return;
+            }
+
+            // wavDataIdのグループがm_LoadedGroupIdである。ロードされている。
+            // 連続再生フラグの設定と、現在のグループが最後のグループかどうかによって
+            // m_LoadedGroupIdの再生が自然に完了したら、行うタスクを決定する。
+            UpdateNextTask();
 
             StartPlay(wavDataId);
             return;
+        }
+
+        /// <summary>
+        /// 現在のグループの最後のファイルの再生が終わった後に行うタスクを判定し、
+        /// m_taskにセットする。
+        /// </summary>
+        private void UpdateNextTask() {
+            // 順当に行ったら次に再生するグループ番号は(m_loadedGroupId+1)。
+            // ①(m_loadedGroupId+1)の再生グループが存在する場合
+            //     (m_loadedGroupId+1)の再生グループを再生開始する。
+            // ②(m_loadedGroupId+1)の再生グループが存在しない場合
+            //     ②-①連続再生(checkBoxContinuous.IsChecked==true)の場合
+            //         GroupId==0、wavDataId=0を再生開始する。
+            //     ②-②連続再生ではない場合
+            //         停止する。先頭の曲を選択状態にする。
+            int nextGroupId = m_loadedGroupId + 1;
+
+            if (0 < CountWaveDataOnPlayGroup(nextGroupId)) {
+                m_task.Set(TaskType.PlaySpecifiedGroup, 
+                    nextGroupId,
+                    GetFirstWavDataIdOnGroup(nextGroupId));
+                return;
+            }
+
+            if (checkBoxContinuous.IsChecked == true) {
+                m_task.Set(TaskType.PlaySpecifiedGroup, 0, 0);
+                return;
+            }
+
+            m_task.Set(TaskType.None);
+            listBoxPlayFiles.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -866,19 +961,10 @@ namespace PlayPcmWin
         /// <returns>false: 再生開始できなかった。</returns>
         private bool StartPlay(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
-            if (m_wavDataList[wavDataId].GroupId != m_loadGroupId) {
+            if (m_wavDataList[wavDataId].GroupId != m_loadedGroupId) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
-
-            //wasapi.SetPosFrame(0);
-            int hr = wasapi.Start();
-            textBoxLog.Text += string.Format("wasapi.Start() {0:X8}\r\n", hr);
-            if (hr < 0) {
-                return false;
-            }
-
-            wasapi.SetNowPlayingPcmDataId(wavDataId);
 
             slider1.Value = 0;
             slider1.Maximum = wasapi.GetTotalFrameNum();
@@ -886,11 +972,25 @@ namespace PlayPcmWin
             ChangeState(State.再生中);
             UpdateUIStatus();
 
-            m_playWorker.RunWorkerAsync();
-
             m_sw.Reset();
             m_sw.Start();
 
+            //wasapi.SetPosFrame(0);
+            int hr = wasapi.Start();
+            // これは、再生開始後に呼ぶ必要あり。
+            wasapi.SetNowPlayingPcmDataId(wavDataId);
+
+            textBoxLog.Text += string.Format("wasapi.Start() {0:X8}\r\n", hr);
+            if (hr < 0) {
+                MessageBox.Show(string.Format("再生開始に失敗！{0:X8}", hr));
+                Exit();
+                return false;
+            }
+
+            // 再生バックグラウンドタスク開始。PlayDoWorkが実行される。
+            // 再生バックグラウンドタスクを止めるには、Stop()を呼ぶ。
+            // 再生バックグラウンドタスクが止まったらPlayRunWorkerCompletedが呼ばれる。
+            m_playWorker.RunWorkerAsync();
             return true;
         }
 
@@ -899,14 +999,20 @@ namespace PlayPcmWin
         /// </summary>
         private void PlayDoWork(object o, DoWorkEventArgs args) {
             //Console.WriteLine("PlayDoWork started");
+            BackgroundWorker bw = (BackgroundWorker)o;
 
-            do {
+            while (!wasapi.Run(PROGRESS_REPORT_INTERVAL_MS)) {
                 m_playWorker.ReportProgress(0);
                 System.Threading.Thread.Sleep(1);
-            } while (!wasapi.Run(PROGRESS_REPORT_INTERVAL_MS));
+                if (bw.CancellationPending) {
+                    Console.WriteLine("PlayDoWork() CANCELED");
+                    wasapi.Stop();
+                    args.Cancel = true;
+                }
+            }
 
-            Console.WriteLine("PlayDoWork() wasapi.Stop() " + m_taskAfterStop);
-
+            // 正常に最後まで再生が終わった場合、ここでStopを呼んで、後始末する。
+            // キャンセルの場合は、2回Stopが呼ばれることになるが、問題ない!!!
             wasapi.Stop();
 
             // 停止完了後タスクの処理は、ここではなく、PlayRunWorkerCompletedで行う。
@@ -943,29 +1049,37 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// 指定グループをロードし、ロード完了したら指定ファイルを再生開始する。
+        /// m_taskに指定されているグループをロードし、ロード完了したら指定ファイルを再生開始する。
         /// ファイル読み込み完了状態にいるときに呼ぶ。
         /// </summary>
-        /// <param name="groupId">ロードするグループ</param>
-        /// <param name="playWavDataId">ロード後に再生するファイルId</param>
-        private void SetupAndStartReadPlayGroup(int groupId, int playWavDataId) {
-            // ロード完了後再生開始する必要があることはm_taskAfterStopで伝える。
-            // ロードするGroupIdはm_loadGroupIdで伝える。
-            // ロード後に再生するファイルはlistBoxPlayFiles.SelectedIndexで伝える。
+        private void SetupAndStartReadPlayGroup() {
+            m_loadedGroupId = -1;
 
-            m_taskAfterStop = TaskAfterStop.PlayNextGroup;
-
-            m_loadGroupId = -1;
-
-            int idx = GetPlayListIndexOfWaveDataId(playWavDataId);
-            System.Diagnostics.Debug.Assert(0 <= idx);
-            listBoxPlayFiles.SelectedIndex = idx;
+            System.Diagnostics.Debug.Assert(m_task.Type == TaskType.PlaySpecifiedGroup);
 
             // 再生状態→再生グループ切り替え中状態に遷移。
             ChangeState(State.再生グループ切り替え中);
             UpdateUIStatus();
 
-            SetupAndStartReadFiles(groupId);
+            SetupAndStartReadFiles(m_task.GroupId);
+        }
+
+        /// <summary>
+        /// 再生終了後タスクを実行する。
+        /// </summary>
+        private void PerformPlayCompletedTask() {
+            // 再生終了後に行うタスクがある場合、ここで実行する。
+            if (m_task.Type == TaskType.PlaySpecifiedGroup) {
+                wasapi.Unsetup();
+                SetupAndStartReadPlayGroup();
+                return;
+            }
+
+            // 再生終了後に行うタスクがない。停止する。先頭の曲を選択状態にする。
+            // 再生状態→ファイル読み込み完了状態。
+            listBoxPlayFiles.SelectedIndex = 0;
+            ChangeState(State.ファイル読み込み完了);
+            UpdateUIStatus();
         }
 
         /// <summary>
@@ -975,47 +1089,7 @@ namespace PlayPcmWin
             m_sw.Stop();
             textBoxLog.Text += string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed);
 
-            // m_loadGroupIdグループの再生終了。
-            // 再生終了後に行うタスクがある場合、ここで実行する。
-            // 一見意味不明であり、いまいちな出来のコードである。
-
-            if (m_taskAfterStop == TaskAfterStop.None) {
-                // 再生終了後に行うタスクがない。停止する。先頭の曲を選択状態にする。
-                listBoxPlayFiles.SelectedIndex = 0;
-            }
-
-            if (m_taskAfterStop == TaskAfterStop.PlayNextGroup) {
-                // 次に再生するグループ番号を(m_loadGroupId+1)と仮定する。
-                // ①(m_loadGroupId+1)の再生グループが存在する場合
-                //     (m_loadGroupId+1)の再生グループを再生開始する。
-                // ②(m_loadGroupId+1)の再生グループが存在しない場合
-                //     ②-①連続再生(checkBoxContinuous.IsChecked==true)の場合
-                //         GroupId==0の再生グループを再生開始する。
-                //     ②-②連続再生ではない場合
-                //         停止する。先頭の曲を選択状態にする。
-
-                if (0 < CountWaveDataOnPlayGroup(m_loadGroupId + 1)) {
-                    wasapi.Unsetup();
-                    SetupAndStartReadPlayGroup(
-                        m_loadGroupId + 1,
-                        GetFirstWavDataIdOnGroup(m_loadGroupId + 1));
-                    return;
-                }
-
-                if (checkBoxContinuous.IsChecked == true) {
-                    wasapi.Unsetup();
-                    SetupAndStartReadPlayGroup(0, 0);
-                    return;
-                }
-
-                m_taskAfterStop = TaskAfterStop.None;
-                listBoxPlayFiles.SelectedIndex = 0;
-            }
-
-            // 再生終了後に行うタスクがない。
-            // 再生状態→ファイル読み込み完了状態。
-            ChangeState(State.ファイル読み込み完了);
-            UpdateUIStatus();
+            PerformPlayCompletedTask();
         }
 
         private void buttonStop_Click(object sender, RoutedEventArgs e) {
@@ -1023,7 +1097,7 @@ namespace PlayPcmWin
             UpdateUIStatus();
 
             // 停止ボタンで停止した場合は、停止後何もしない。
-            Stop(TaskAfterStop.None);
+            Stop(new Task(TaskType.None));
             textBoxLog.Text += string.Format("wasapi.Stop()\r\n");
         }
 
@@ -1075,24 +1149,26 @@ namespace PlayPcmWin
         }
 
         private void buttonPrev_Click(object sender, RoutedEventArgs e) {
-            int playingId = wasapi.GetNowPlayingPcmDataId();
-            --playingId;
-            if (playingId < 0) {
-                playingId = 0;
+            int wavDataId = wasapi.GetNowPlayingPcmDataId();
+            --wavDataId;
+            if (wavDataId < 0) {
+                wavDataId = 0;
             }
-            wasapi.SetNowPlayingPcmDataId(playingId);
+
+            ChangePlayWavDataById(wavDataId);
         }
 
         private void buttonNext_Click(object sender, RoutedEventArgs e) {
-            int playingId = wasapi.GetNowPlayingPcmDataId();
-            ++playingId;
-            if (playingId < 0) {
-                playingId = 0;
+            int wavDataId = wasapi.GetNowPlayingPcmDataId();
+            ++wavDataId;
+            if (wavDataId < 0) {
+                wavDataId = 0;
             }
-            if (m_wavDataList.Count <= playingId) {
-                playingId = 0;
+            if (m_wavDataList.Count <= wavDataId) {
+                wavDataId = 0;
             }
-            wasapi.SetNowPlayingPcmDataId(playingId);
+
+            ChangePlayWavDataById(wavDataId);
         }
 
         private void checkBoxContinuous_CheckedChanged(object sender, RoutedEventArgs e) {
@@ -1106,12 +1182,15 @@ namespace PlayPcmWin
             // ところで、この再生リストに対するキーボード操作が全く効かないのは、
             // 何とかしたいところだ。
 
-            if (!buttonStop.IsEnabled || !m_playListMouseDown ||
+            if (m_state != State.再生中 || !m_playListMouseDown ||
                 listBoxPlayFiles.SelectedIndex < 0) {
                 return;
             }
             
             int playingId = wasapi.GetNowPlayingPcmDataId();
+            if (playingId < 0) {
+                return;
+            }
 
             PlayListItemInfo pli = m_playListItems[listBoxPlayFiles.SelectedIndex];
 
@@ -1119,10 +1198,33 @@ namespace PlayPcmWin
             // しかも、この曲を再生していない場合、この曲を再生する。
             if (null != pli.WavData &&
                 playingId != pli.WavData.Id) {
-                // @todo ファイルグループも違う場合、再生を停止し、グループを読み直し、再生を再開する。
-                // 同一ファイルグループのファイルの場合、再生WavDataIdを指定するだけで良い。
+                ChangePlayWavDataById(pli.WavData.Id);
+            }
+        }
 
-                wasapi.SetNowPlayingPcmDataId(listBoxPlayFiles.SelectedIndex);
+        /// <summary>
+        /// 再生中に、再生曲をwavDataIdの曲に切り替える。
+        /// wavDataIdの曲がロードされていたら、直ちに再生曲切り替え。
+        /// ロードされていなければ、グループをロードしてから再生。
+        /// 
+        /// 再生中に呼ぶ。再生中でない場合は何も起きない。
+        /// </summary>
+        /// <param name="wavDataId">再生曲</param>
+        private void ChangePlayWavDataById(int wavDataId) {
+            System.Diagnostics.Debug.Assert(0 <= wavDataId);
+
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            if (playingId < 0) {
+                return;
+            }
+
+            int groupId = m_wavDataList[wavDataId].GroupId;
+            if (m_wavDataList[playingId].GroupId == groupId) {
+                // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
+                wasapi.SetNowPlayingPcmDataId(wavDataId);
+            } else {
+                // ファイルグループが違う場合、再生を停止し、グループを読み直し、再生を再開する。
+                Stop(new Task(TaskType.PlaySpecifiedGroup, groupId, wavDataId));
             }
         }
 
@@ -1151,6 +1253,7 @@ namespace PlayPcmWin
         }
         
         // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
+
         private WasapiCS.SchedulerTaskType
         PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
             RenderThreadTaskType t) {
