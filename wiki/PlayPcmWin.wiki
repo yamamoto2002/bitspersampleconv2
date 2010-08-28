@@ -22,8 +22,8 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin128.jpg
 =ダウンロード=
 
 安定版
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin135.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin135x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin136.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin136x64.zip
 
 非常にバグっぽい開発版
   * なし
@@ -180,6 +180,13 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.36 ==
+バグ取り
+  * 最初のフレームが2回再生されて音飛びみたいになる現象を修正。
+  * ウィンドウをリサイズするとここまで一括読み込みボタンの位置が変になる問題を修正。
+機能追加
+  * デバイス選択ボタン、デバイス選択解除ボタンを削除。
 
 ===!PlayPcmWin 1.0.35 ==
   * 最初のフレームが2回再生されて音飛びみたいになる現象あり。
