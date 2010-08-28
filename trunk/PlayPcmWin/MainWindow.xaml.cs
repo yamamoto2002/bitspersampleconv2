@@ -1152,7 +1152,14 @@ namespace PlayPcmWin
         /// 再生の進行状況をUIに反映する。
         /// </summary>
         private void PlayProgressChanged(object o, ProgressChangedEventArgs args) {
+            BackgroundWorker bw = (BackgroundWorker)o;
+
             if (null == wasapi) {
+                return;
+            }
+
+            if (bw.CancellationPending) {
+                // ワーカースレッドがキャンセルされているので、何もしない。
                 return;
             }
 
