@@ -10,20 +10,6 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
   * 録音プログラム RecPcmWin
   * C#からWASAPIを使うためのクラスWasapiCSについて [http://code.google.com/p/bitspersampleconv2/wiki/WasapiCS WasapiCS]
 
-=資料=
-
-  * 共有モードの再生 http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
-  * 共有モードの録音 http://msdn.microsoft.com/en-us/library/dd370800%28v=VS.85%29.aspx
-  * 排他モードについての資料 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
-  * サンプルプログラム、バグ情報等 http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
-
-=Windows 7で追加された(Windows Vistaで使えない)機能について=
-
-  * 録音時に、音切れが発生したかどうかを知る機能 AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY
-  * S/PDIFのコピー禁止フラグを立てる機能
-  * HDMIのHDCPを有効にする機能
-  * デジタル出力を無効にする機能
-
 =デバイスごとの使用可能なPCMデータフォーマット一覧 (再生の場合)=
 
 使用可能なフォーマット(サンプリング周波数と量子化ビット数の組み合わせ)は
@@ -138,3 +124,17 @@ Multichannel (M-Audio ProFire 2626)
 176400Hz 32bit: ok 0x00000000
 192000Hz 32bit: ok 0x00000000
 }}}
+
+=資料=
+
+  * 共有モードの再生 http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
+  * 共有モードの録音 http://msdn.microsoft.com/en-us/library/dd370800%28v=VS.85%29.aspx
+  * 排他モードについての資料 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
+  * サンプルプログラム、バグ情報等 http://blogs.msdn.com/b/matthew_van_eerde/archive/tags/audio/
+
+=Windows 7で追加された(Windows Vistaで使えない)機能について=
+
+  * 録音時に、音切れが発生したかどうかを知る機能 AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY
+  * S/PDIFのコピー禁止フラグを立てる機能
+  * HDMIのHDCPを有効にする機能
+  * デジタル出力を無効にする機能
