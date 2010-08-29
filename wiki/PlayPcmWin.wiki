@@ -56,6 +56,11 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 32ビット版で、メモリ2GB以下の場合、!PlayPcmWinはCD1枚分のプレイリストも扱えず、
 あまり使い勝手がよくないと思います。
 
+=対応オーディオデバイスについて=
+
+こちらをご覧下さい。
+http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
+
 =RME FF400やM-AUDIO ProFireでWASAPI排他モードを使うときのコツ=
 
 これらのデバイスのドライバは、WASAPI排他モードの出来がいまいちで(作りかけっぽい)
