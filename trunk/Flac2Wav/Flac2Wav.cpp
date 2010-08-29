@@ -1,14 +1,16 @@
+// æ—¥æœ¬èªUTF-8
+
 #include "stdafx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include "FLAC/stream_decoder.h"
 #include "Flac2Wav.h"
 
-// x86 CPU‚É‚µ‚©‘Î‰‚µ‚Ä‚È‚¢B
-// ƒrƒbƒOƒGƒ“ƒfƒBƒAƒ“‚É‚Í‘Î‰‚µ‚Ä‚È‚¢‚µA
-// ‘¼‚ÌCPU‚Å‚ÍƒoƒXƒGƒ‰[‚ª‹N‚«‚é‚©‚àB
+// x86 CPUã«ã—ã‹å¯¾å¿œã—ã¦ãªã„ã€‚
+// ãƒ“ãƒƒã‚°ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã«ã¯å¯¾å¿œã—ã¦ãªã„ã—ã€
+// ä»–ã®CPUã§ã¯ãƒã‚¹ã‚¨ãƒ©ãƒ¼ãŒèµ·ãã‚‹ã‹ã‚‚ã€‚
 
-/// FlacƒR[ƒ‹ƒoƒbƒN‚É“n‚·clientDataˆø”B
+/// Flacã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯ã«æ¸¡ã™clientDataå¼•æ•°ã€‚
 struct FlacDecodeArgs {
     FLAC__uint64 totalSamples;
     FILE         *fout;
@@ -76,7 +78,7 @@ end:
 }
 
 ////////////////////////////////////////////////////////////////////////
-// FLACƒfƒR[ƒ_[ƒR[ƒ‹ƒoƒbƒN
+// FLACãƒ‡ã‚³ãƒ¼ãƒ€ãƒ¼ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
 
 static FLAC__StreamDecoderWriteStatus
 WriteCallback(const FLAC__StreamDecoder *decoder,
@@ -96,7 +98,7 @@ WriteCallback(const FLAC__StreamDecoder *decoder,
     }
 
     if(frame->header.number.sample_number == 0) {
-        // Å‰‚Ìƒf[ƒ^‚ª—ˆ‚½BWAVEƒwƒbƒ_‚ğo—Í‚·‚éB
+        // æœ€åˆã®ãƒ‡ãƒ¼ã‚¿ãŒæ¥ãŸã€‚WAVEãƒ˜ãƒƒãƒ€ã‚’å‡ºåŠ›ã™ã‚‹ã€‚
         if (!WriteWaveHeader(args)) {
             return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
         }

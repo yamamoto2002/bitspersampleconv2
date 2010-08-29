@@ -1,3 +1,4 @@
+ï»¿// æ—¥æœ¬èªUTF-8
 #pragma once
 
 enum Flac2WavResultType {
@@ -12,8 +13,8 @@ enum Flac2WavResultType {
     F2WRT_OtherError
 };
 
-/// FLACƒtƒ@ƒCƒ‹‚ğ“Ç‚İ‚ñ‚ÅAWAVƒtƒ@ƒCƒ‹‚ğo—Í‚·‚éB
-/// @return 0 ¬Œ÷B1ˆÈã: ƒGƒ‰[BFlac2WavResultTypeQÆB
+/// FLACãƒ•ã‚¡ã‚¤ãƒ«ã‚’èª­ã¿è¾¼ã‚“ã§ã€WAVãƒ•ã‚¡ã‚¤ãƒ«ã‚’å‡ºåŠ›ã™ã‚‹ã€‚
+/// @return 0 æˆåŠŸã€‚1ä»¥ä¸Š: ã‚¨ãƒ©ãƒ¼ã€‚Flac2WavResultTypeå‚ç…§ã€‚
 extern "C" __declspec(dllexport)
 int __stdcall
 Flac2Wav(const char *fromFlacPath, const char *toWavPath);
