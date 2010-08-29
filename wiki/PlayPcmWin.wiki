@@ -26,7 +26,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139x64.zip
 
 非常にバグっぽい開発版
-  * なし
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin140.zip
 
 
 || Windows  || !PlayPcmWin || 結果 ||
@@ -180,6 +180,10 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.40 ==
+機能追加
+  * FLAC対応
 
 ===!PlayPcmWin 1.0.39 ==
 機能追加
