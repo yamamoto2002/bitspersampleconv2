@@ -880,7 +880,10 @@ namespace PlayPcmWin
         
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
-                string.Format("PlayPcmWin バージョン {0}",
+                string.Format("PlayPcmWin バージョン {0}\r\n" +
+                    "PlayPcmWinは libFLACを使用しています。\r\n" +
+                    "libFLACのライセンスは、new BSDライセンスです。" +
+                    "libFlacLicense.txtをご覧ください。",
                     AssemblyVersion));
         }
 
