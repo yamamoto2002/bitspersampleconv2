@@ -64,6 +64,7 @@ namespace PlayPcmWin
         private BackgroundWorker m_readFileWorker;
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
         private bool m_playListMouseDown = false;
+        private List<string> m_tmpWavPathList = new List<string>();
 
         // プレイリストにAddしたファイルに振られるGroupId。
         private int m_readGroupId = 0;
@@ -534,7 +535,25 @@ namespace PlayPcmWin
             m_loadedGroupId = -1;
         }
 
+        /// <summary>
+        /// プレイリストが空になったら呼ぶ。
+        /// 終了時にも呼ぶ。
+        /// </summary>
+        private void DeleteAllTmpFiles() {
+            for (int i = 0; i < m_tmpWavPathList.Count; ++i) {
+                try {
+                    System.IO.File.Delete(m_tmpWavPathList[i]);
+                } catch (System.Exception ex) {
+                    System.Console.WriteLine(
+                        "D: DeleteAllTmpFiles({0}) {1} ignored", m_tmpWavPathList[i], ex);
+                }
+            }
+            m_tmpWavPathList.Clear();
+        }
+
         private void Exit() {
+            DeleteAllTmpFiles();
+
             if (wasapi != null) {
                 Stop(new Task(TaskType.None));
                 m_readFileWorker.CancelAsync();
@@ -698,6 +717,7 @@ namespace PlayPcmWin
 
             m_readGroupId = 0;
             m_loadedGroupId = -1;
+            DeleteAllTmpFiles();
 
             GC.Collect();
 
@@ -775,6 +795,47 @@ namespace PlayPcmWin
             }
         }
 
+        /// <summary>
+        /// ユーザーインターフェースから呼ぶ。
+        /// バックグラウンドスレッドから呼びたい場合は、AddLogを消す。
+        /// </summary>
+        private string CreateWavFileFromFlac(string flacPath) {
+            string wavPath = System.IO.Path.GetTempFileName();
+
+            AddLogText(string.Format("FLACファイルをWAVファイルに変換 {0} ==> {1}\r\n",
+                flacPath, wavPath));
+
+            Flac2WavCS.Flac2WavCS.ResultType r
+                        = Flac2WavCS.Flac2WavCS.Flac2WavBlocking(flacPath, wavPath);
+            if (r != Flac2WavCS.Flac2WavCS.ResultType.Success) {
+                MessageBox.Show(string.Format("FLACファイルデコードエラー： {0}\r\n{1}",
+                    r, flacPath));
+                try {
+                    System.IO.File.Delete(wavPath);
+                } catch (System.Exception ex) {
+                    System.Console.WriteLine("D: CreateWavFileFromFlac {0} ignored", ex);
+                }
+                return string.Empty;
+            }
+
+            m_tmpWavPathList.Add(wavPath);
+            return wavPath;
+        }
+
+        private bool LoadPcmFileFromPath(string path) {
+            string ext = System.IO.Path.GetExtension(path);
+            if (0 == String.Compare(".flac", ext, true)) {
+                string wavPath = CreateWavFileFromFlac(path);
+                if (wavPath.Length == 0) {
+                    return false;
+                }
+                return LoadWaveFileFromPath(wavPath);
+            }
+
+            // WAV
+            return LoadWaveFileFromPath(path);
+        }
+
         private void MainWindowDragDrop(object sender, DragEventArgs e)
         {
             string[] paths = e.Data.GetData(DataFormats.FileDrop) as string[];
@@ -790,7 +851,7 @@ namespace PlayPcmWin
             }
 
             for (int i = 0; i < paths.Length; ++i) {
-                LoadWaveFileFromPath(paths[i]);
+                LoadPcmFileFromPath(paths[i]);
             }
             UpdateUIStatus();
         }
@@ -805,12 +866,14 @@ namespace PlayPcmWin
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.DefaultExt = ".wav";
-            dlg.Filter = "WAVEファイル (.wav)|*.wav";
+            dlg.Filter =
+                "WAVEファイル (.wav)|*.wav" +
+                "FLACファイル (.flac)|*.flac";
 
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                LoadWaveFileFromPath(dlg.FileName);
+                LoadPcmFileFromPath(dlg.FileName);
                 UpdateUIStatus();
             }
         }

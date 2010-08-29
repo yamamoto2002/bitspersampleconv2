@@ -162,6 +162,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Flac2WavCS\Flac2WavCS.csproj">
+      <Project>{1702474F-AC86-4387-9518-6E0BB743C191}</Project>
+      <Name>Flac2WavCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Flac2Wav\Flac2Wav.vcxproj">
+      <Project>{531F2CD6-8410-465E-9D7F-3B7C84DBE21E}</Project>
+      <Name>Flac2Wav</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
       <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>
       <Name>WasapiCS</Name>
