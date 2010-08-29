@@ -7,8 +7,7 @@
 #include "Flac2Wav.h"
 
 // x86 CPUにしか対応してない。
-// ビッグエンディアンには対応してないし、
-// 他のCPUではバスエラーが起きるかも。
+// x64やビッグエンディアンには対応してない。
 
 /// Flacコールバックに渡すclientData引数。
 struct FlacDecodeArgs {
