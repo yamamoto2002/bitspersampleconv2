@@ -1,4 +1,5 @@
 // 日本語 UTF-8
+// WASAPIの機能を使って、音を出したり録音したりするWasapiUserクラス。
 
 #include "WasapiUser.h"
 #include "WWUtil.h"
