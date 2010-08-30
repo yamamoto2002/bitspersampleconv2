@@ -234,7 +234,7 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
         wchar_t name[WW_DEVICE_NAME_COUNT];
         HRG(DeviceNameGet(m_deviceCollection, i, name, sizeof name));
 
-        /*
+        /* CMDコンソールに出力する場合、文字化けして表示が乱れるので?に置換する。
         for (int j=0; j<wcslen(name); ++j) {
             if (name[j] < 0x20 || 127 <= name[j]) {
                 name[j] = L'?';
@@ -519,8 +519,9 @@ WasapiUser::Setup(
     bool needClockAdjustmentOnSharedMode = false;
 
     if (WWSMShared == m_shareMode) {
-        // 共有モードでデバイスサンプルレートとWAVファイルのサンプルレートが異なる場合、
-        // 入力サンプリング周波数調整を行う。
+        // 共有モードでデバイスサンプルレートと
+        // WAVファイルのサンプルレートが異なる場合、
+        // 入力サンプリング周波数調整(リサンプリング)を行う。
         // 共有モード イベント駆動の場合、bufferPeriodicityに0をセットする。
 
         if (waveFormat->nSamplesPerSec != (DWORD)sampleRate) {
@@ -545,8 +546,8 @@ WasapiUser::Setup(
         bufferPeriodicity = (REFERENCE_TIME)(
             10000.0 *                         // (REFERENCE_TIME(100ns) / ms) *
             1000 *                            // (ms / s) *
-            m_bufferFrameNum /                 // frames /
-            waveFormat->nSamplesPerSec +     // (frames / s)
+            m_bufferFrameNum /                // frames /
+            waveFormat->nSamplesPerSec +      // (frames / s)
             0.5);
         bufferDuration = bufferPeriodicity * periodsPerBuffer;
 
@@ -572,7 +573,8 @@ WasapiUser::Setup(
         dprintf("IAudioClockAdjustment::SetSampleRate(%d) %08x\n", sampleRate, hr);
     }
 
-    // サンプルレート変更後にGetBufferSizeする。なんとなく。
+    // サンプルレート変更後にGetBufferSizeする。なんとなく。なお
+    // サンプルレート変更前にGetBufferSizeしても、もどってくる値は同じだった。
 
     HRG(m_audioClient->GetBufferSize(&m_bufferFrameNum));
     dprintf("m_audioClient->GetBufferSize() rv=%u\n", m_bufferFrameNum);
@@ -633,7 +635,6 @@ WasapiUser::Start(int wavDataId)
 
     assert(m_playPcmDataList.size());
 
-    // イベント駆動モードで最初の音が繰り返される問題の修正。
     m_nowPlayingPcmData = FindPlayPcmDataById(wavDataId);
 
     HRG(m_audioClient->Reset());
@@ -650,8 +651,8 @@ WasapiUser::Start(int wavDataId)
 
         nFrames = m_bufferFrameNum;
         if (WWDFMTimerDriven == m_dataFeedMode || WWSMShared == m_shareMode) {
-            // タイマー駆動の場合、パッド計算必要。
-            // 共有モードの場合イベント駆動でもパッドが必要になる。
+            // 排他タイマー駆動の場合、パッド計算必要。
+            // 共有モードの場合タイマー駆動でもイベント駆動でもパッドが必要。
             // RenderSharedEventDrivenのWASAPIRenderer.cpp参照。
 
             UINT32 padding = 0; //< frame now using
@@ -720,8 +721,6 @@ WasapiUser::Stop(void)
         WaitForSingleObject(m_thread, INFINITE);
         dprintf("D: %s:%d CloseHandle(%p)\n", __FILE__, __LINE__, m_thread);
         if (m_thread) {
-            // ここでなぜかNULLになることがある。
-            // 暇なときに原因を調べましょう
             CloseHandle(m_thread);
         }
         m_thread = NULL;
@@ -737,20 +736,17 @@ WasapiUser::Stop(void)
 bool
 WasapiUser::Run(int millisec)
 {
-    // dprintf("%s WaitForSingleObject(%p, %d)\n",
-    // __FUNCTION__, m_thread, millisec);
     DWORD rv = WaitForSingleObject(m_thread, millisec);
     if (rv == WAIT_TIMEOUT) {
         Sleep(10);
-        //dprintf(".\n");
         return false;
     }
-    // dprintf("%s rv=0x%08x return true\n", __FUNCTION__, rv);
+
     return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// PCM data buffer management
+// PCMデータバッファ管理
 
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
@@ -966,10 +962,9 @@ WasapiUser::SetupCaptureBuffer(int bytes)
 
     ClearCapturedPcmData();
 
-    /* 録音時は
-     *   pcmData->posFrame: 有効な録音データのフレーム数
-     *   pcmData->nFrames: 録音可能総フレーム数
-     */
+    // 録音時は
+    //   pcmData->posFrame: 有効な録音データのフレーム数
+    //   pcmData->nFrames: 録音可能総フレーム数
     m_capturedPcmData = new WWPcmData();
     m_capturedPcmData->posFrame = 0;
     m_capturedPcmData->nFrames = bytes/m_frameBytes;
@@ -1001,21 +996,26 @@ WasapiUser::GetCaptureGlitchCount(void)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// render thread
+// 再生スレッド
 
+/// 再生スレッドの入り口。
+/// @param lpThreadParameter WasapiUserインスタンスのポインタが渡ってくる。
 DWORD
 WasapiUser::RenderEntry(LPVOID lpThreadParameter)
 {
     WasapiUser* self = (WasapiUser*)lpThreadParameter;
+
     return self->RenderMain();
 }
 
+/// PCMデータをwantFramesフレームだけpData_returnに戻す。
+/// @return 実際にpData_returnに書き込んだフレーム数。
 int
 WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
 {
-    int pos = 0;
-
+    int       pos      = 0;
     WWPcmData *pcmData = m_nowPlayingPcmData;
+
     while (NULL != pcmData && 0 < wantFrames) {
         int copyFrames = wantFrames;
         if (pcmData->nFrames <= pcmData->posFrame + wantFrames) {
@@ -1029,22 +1029,25 @@ WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
         CopyMemory(&pData_return[pos*m_frameBytes],
             &pcmData->stream[pcmData->posFrame * m_frameBytes],
             copyFrames * m_frameBytes);
-        pos += copyFrames;
+
+        pos               += copyFrames;
         pcmData->posFrame += copyFrames;
-        wantFrames -= copyFrames;
+        wantFrames        -= copyFrames;
 
         if (pcmData->nFrames <= pcmData->posFrame) {
             // pcmDataの最後まで来た。
             // このpcmDataの再生位置は巻き戻して、次のpcmDataの先頭をポイントする。
             pcmData->posFrame = 0;
-            pcmData = pcmData->next;
+            pcmData           = pcmData->next;
         }
     }
 
     m_nowPlayingPcmData = pcmData;
+
     return pos;
 }
 
+/// WASAPIデバイスにPCMデータを送れるだけ送る。
 bool
 WasapiUser::AudioSamplesSendProc(void)
 {
@@ -1063,11 +1066,13 @@ WasapiUser::AudioSamplesSendProc(void)
         // RenderSharedEventDrivenのWASAPIRenderer.cpp参照。
 
         UINT32 padding = 0; //< frame num now using
+
         assert(m_audioClient);
         HRGR(m_audioClient->GetCurrentPadding(&padding));
 
         writableFrames = m_bufferFrameNum - padding;
-        // dprintf("m_bufferFrameNum=%d padding=%d writableFrames=%d\n", m_bufferFrameNum, padding, writableFrames);
+        // dprintf("m_bufferFrameNum=%d padding=%d writableFrames=%d\n",
+        //     m_bufferFrameNum, padding, writableFrames);
         if (writableFrames <= 0) {
             goto end;
         }
@@ -1110,6 +1115,9 @@ end:
     return result;
 }
 
+/// 再生スレッド メイン。
+/// イベントやタイマーによって起き、PCMデータを送って、寝る。
+/// というのを繰り返す。
 DWORD
 WasapiUser::RenderMain(void)
 {
@@ -1126,14 +1134,13 @@ WasapiUser::RenderMain(void)
 
     timeBeginPeriod(1);
 
+    // マルチメディアクラススケジューラーサービスのスレッド優先度設定。
     if (WWSTTNone != m_schedulerTaskType) {
         dprintf("D: %s() AvSetMmThreadCharacteristics(%S)\n",
-            __FUNCTION__,
-            WWSchedulerTaskTypeToStr(m_schedulerTaskType));
+            __FUNCTION__, WWSchedulerTaskTypeToStr(m_schedulerTaskType));
 
         mmcssHandle = AvSetMmThreadCharacteristics(
-            WWSchedulerTaskTypeToStr(m_schedulerTaskType),
-            &mmcssTaskIndex);
+            WWSchedulerTaskTypeToStr(m_schedulerTaskType), &mmcssTaskIndex);
         if (NULL == mmcssHandle) {
             dprintf("Unable to enable MMCSS on render thread: 0x%08x\n",
                 GetLastError());
@@ -1158,17 +1165,16 @@ WasapiUser::RenderMain(void)
             waitArrayCount, waitArray, FALSE, timeoutMillisec);
         switch (waitResult) {
         case WAIT_OBJECT_0 + 0:     // m_shutdownEvent
+            // シャットダウン要求によって起きた場合。
             dprintf("D: %s() shutdown event flagged\n", __FUNCTION__);
             stillPlaying = false;
             break;
         case WAIT_OBJECT_0 + 1:     // m_audioSamplesReadyEvent
-            //dprintf("D: %s() samples ready event flagged\n", __FUNCTION__);
-            // only in EventDriven mode
+            // イベント駆動モードの時だけ起こる。
             stillPlaying = AudioSamplesSendProc();
             break;
         case WAIT_TIMEOUT:
-            //dprintf("D: %s() timeout event flagged\n", __FUNCTION__);
-            // only in TimerDriven mode
+            // タイマー駆動モードの時だけ起こる。
             stillPlaying = AudioSamplesSendProc();
             break;
         default:
@@ -1188,8 +1194,8 @@ end:
     return hr;
 }
 
-///////////////////////////////////////////////////////////////////////////////////
-// capture thread
+//////////////////////////////////////////////////////////////////////////////
+// 録音スレッド
 
 DWORD
 WasapiUser::CaptureEntry(LPVOID lpThreadParameter)
@@ -1292,7 +1298,8 @@ WasapiUser::AudioSamplesRecvProc(void)
     HRG(m_captureClient->GetBuffer(&pData,
         &numFramesAvailable, &flags, &devicePosition, NULL));
 
-    if ((m_capturedPcmData->nFrames - m_capturedPcmData->posFrame) < (int)numFramesAvailable) {
+    if ((m_capturedPcmData->nFrames - m_capturedPcmData->posFrame)
+        < (int)numFramesAvailable) {
         HRG(m_captureClient->ReleaseBuffer(numFramesAvailable));
         result = false;
         goto end;
@@ -1305,7 +1312,7 @@ WasapiUser::AudioSamplesRecvProc(void)
     writeFrames = (int)(numFramesAvailable);
 
     if (flags & AUDCLNT_BUFFERFLAGS_SILENT) {
-        // record silence
+        // 無音を録音した。
         dprintf("flags & AUDCLNT_BUFFERFLAGS_SILENT\n");
         memset(&m_capturedPcmData->stream[m_capturedPcmData->posFrame * m_frameBytes],
             0, writeFrames * m_frameBytes);
@@ -1331,66 +1338,4 @@ end:
     ReleaseMutex(m_mutex);
     return result;
 }
-
-/*
-/////////////////////////////////////////////////////////////////////////
-// test code of new features on Windows 7 
-
-HRESULT
-WasapiUser::SetDeviceSampleRate(int id, int sampleRate)
-{
-    HRESULT              hr;
-    WAVEFORMATEX         *waveFormat = NULL;
-    WAVEFORMATEXTENSIBLE *wfex       = NULL;
-    REFERENCE_TIME       hnsDefaultDevicePeriod;
-    REFERENCE_TIME       hnsMinimumDevicePeriod;
-    IAudioClockAdjustment *audioClockAdjustment = NULL;
-
-    assert(0 <= id && id < (int)m_deviceInfo.size());
-
-    assert(m_deviceCollection);
-    assert(!m_deviceToUse);
-
-    HRG(m_deviceCollection->Item(id, &m_deviceToUse));
-
-    HRG(m_deviceToUse->Activate(
-        __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
-
-    assert(!waveFormat);
-    HRG(m_audioClient->GetMixFormat(&waveFormat));
-    assert(waveFormat);
-
-    wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
-    dprintf("original Mix Format:\n");
-    WWWaveFormatDebug(waveFormat);
-    WWWFEXDebug(wfex);
-
-    HRG(m_audioClient->Initialize(
-        AUDCLNT_SHAREMODE_SHARED,
-        AUDCLNT_STREAMFLAGS_RATEADJUST,
-        100 * 10000,
-        0,
-        waveFormat,
-        NULL));
-    dprintf("m_audioClient->Initialize() %08x\n", hr);
-
-    HRG(m_audioClient->GetService(IID_PPV_ARGS(&audioClockAdjustment)));
-
-    HRG(audioClockAdjustment->SetSampleRate((float)sampleRate));
-    dprintf("IAudioClockAdjustment::SetSampleRate(%d) %08x\n", sampleRate, hr);
-
-end:
-    SafeRelease(&audioClockAdjustment);
-    SafeRelease(&m_deviceToUse);
-    SafeRelease(&m_audioClient);
-
-    if (waveFormat) {
-        CoTaskMemFree(waveFormat);
-        waveFormat = NULL;
-    }
-
-    return hr;
-}
-
-*/
 
