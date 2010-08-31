@@ -112,7 +112,7 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
 9600Hz 矩形波　192kHzサンプリングという条件では、!SqWave2も!WaveGeneも可聴域に関係ない周波数成分は含まれていません。
 
-!WaveGeneは出力レベルが間違っています。
+`!WaveGeneは出力レベルが間違っています。`
 
 第5次高調波成分 48000Hzのところにカーソルを合わせて出力レベル値を比べました(図9と図10参照)
 
@@ -123,6 +123,9 @@ http://bitspersampleconv2.googlecode.com/files/WG9600_192.png
 
 したがって割り切れる周波数比のような条件でも、
 !WaveGeneよりも!SqWave2のほうが正確な出力波形が出るみたいです。
+
+成分比はSqWaveの方が正確ですが、SqWaveの出力レベルの絶対値が正しいかどうかは
+どうも怪しいようです。
 
 =なぜフーリエ級数の正弦波加算処理をナイキスト周波数で打ち切る必要があるのか=
 
