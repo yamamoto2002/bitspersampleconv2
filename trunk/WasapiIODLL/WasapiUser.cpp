@@ -761,7 +761,7 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     pcmData.next     = NULL;
     pcmData.posFrame = 0;
 
-    // pcmData.streamを作る。
+    // pcmData.streamとpcmData.nFramesを作る。
     // WASAPI共有モードの場合:
     // ・int→floatに変換する。
     // WASAPI排他モードの場合:
