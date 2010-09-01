@@ -749,6 +749,9 @@ WasapiUser::Run(int millisec)
 ////////////////////////////////////////////////////////////////////////////
 // PCMデータバッファ管理
 
+/// @param id WAVファイルID。
+/// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
+/// @param bytes dataのバイト数。
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
@@ -758,7 +761,12 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     pcmData.next     = NULL;
     pcmData.posFrame = 0;
 
-    // pcmData.stream create
+    // pcmData.streamを作る。
+    // WASAPI共有モードの場合:
+    // ・int→floatに変換する。
+    // WASAPI排他モードの場合:
+    // ・量子化ビット数24ビットの場合32ビットに伸ばす。
+    // ・量子化ビット数16ビットの場合そのまま使用。
 
     if (WWSMShared == m_shareMode) {
         BYTE *p = NULL;
