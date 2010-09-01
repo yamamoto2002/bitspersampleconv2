@@ -767,6 +767,8 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     // WASAPI排他モードの場合:
     // ・量子化ビット数24ビットの場合32ビットに伸ばす。
     // ・量子化ビット数16ビットの場合そのまま使用。
+    //
+    // dataは、この関数から抜けたら消えるためmallocしてコピー。WWPcmData::Term()でfreeする。
 
     if (WWSMShared == m_shareMode) {
         BYTE *p = NULL;
