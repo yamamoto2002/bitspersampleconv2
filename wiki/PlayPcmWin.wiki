@@ -61,24 +61,6 @@ zipを展開して、中のSetup.exeを実行してインストールし、
 こちらをご覧下さい。
 http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 
-=RME FF400やM-AUDIO ProFireでWASAPI排他モードを使うときのコツ=
-
-これらのデバイスのドライバは、WASAPI排他モードの出来がいまいちで(作りかけっぽい)
-WASAPIからデバイスのマスターサンプリングレートの変更ができません。
-タスクトレイの「Fireface Settings」や「M-Audio ProFire」でマスターサンプリングレートを、再生するWAVファイルのサンプリングレートに予め設定してください。
-
-さらに、RME FF400はWASAPI排他モードから量子化ビット数24ビットの再生をすることができません。
-ASIOからは出来るのですが……。
-
-M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの再生が可能です。
-
-=Creative X-FiTiHDで44.1kHzのイベント駆動再生ができない問題=
-
-Creative X-FiTiHDは、44.1kHzサンプリングでWASAPI排他イベント駆動モードが使えません。
-WASAPI排他タイマー駆動モードにすれば動きます。
-
-理由はわかりません。PlayPcmWinのバグの可能性もあります。
-
 =WASAPI排他イベント駆動モードとタイマー駆動モードの違いについて=
 
   * イベント駆動モードは、WASAPIから、そろそろ次のデータを下さいというイベントが来たら再生スレッドが起きて、次のデータを送ります。
@@ -102,6 +84,24 @@ Pro Audioにすると、出力レイテンシーを10ミリ秒よりも短く設
 実際に試すと、あまり効果はありませんでした。
 
 [設定なし]を選ぶと、再生スレッドはAvSetMmThreadCharacteristics()を呼びません。
+
+=RME FF400やM-AUDIO ProFireでWASAPI排他モードを使うときのコツ=
+
+これらのデバイスのドライバは、WASAPI排他モードの出来がいまいちで(作りかけっぽい)
+WASAPIからデバイスのマスターサンプリングレートの変更ができません。
+タスクトレイの「Fireface Settings」や「M-Audio ProFire」でマスターサンプリングレートを、再生するWAVファイルのサンプリングレートに予め設定してください。
+
+さらに、RME FF400はWASAPI排他モードから量子化ビット数24ビットの再生をすることができません。
+ASIOからは出来るのですが……。
+
+M-AUDIO ProFireはWASAPI排他モードから量子化ビット数24ビットの再生が可能です。
+
+=Creative X-FiTiHDで44.1kHzのイベント駆動再生ができない問題=
+
+Creative X-FiTiHDは、44.1kHzサンプリングでWASAPI排他イベント駆動モードが使えません。
+WASAPI排他タイマー駆動モードにすれば動きます。
+
+理由はわかりません。PlayPcmWinのバグの可能性もあります。
 
 =RME FF400で出力レイテンシーをすごく短く設定したい場合=
 
