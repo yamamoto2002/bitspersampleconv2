@@ -35,10 +35,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
 || 32ビット版 || 64ビット版   || × ||
 || 64ビット版 || 32ビット版   || △ ||
 
-32ビット版のWindowsの場合は32ビット版の!PlayPcmWinを、
-64ビット版のWindowsの場合は64ビット版の!PlayPcmWinを使用してください。
-32ビット版のWindowsで64ビット版の!PlayPcmWinを動かすことはできません。
-64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、使用可能なメモリ量が制限されるため、再生リストに貯められるWAVデータ数が減り、実用性が低下します。
+  * 32ビット版のWindowsの場合は32ビット版の!PlayPcmWinを、64ビット版のWindowsの場合は64ビット版の!PlayPcmWinを使用してください。
+  * 32ビット版のWindowsで64ビット版の!PlayPcmWinを動かすことはできません。
+  * 64ビット版のWindowsで32ビット版の!PlayPcmWinを実行することは可能ですが、使用可能なメモリ量が制限されるため、再生リストに貯められるWAVデータ数が減り、実用性が低下します。
 
 =使用方法=
 
