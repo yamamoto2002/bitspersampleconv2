@@ -206,27 +206,27 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 ==関数呼び出しグラフ==
 
 {{{
-WasapiUser::RenderEntry()  ※1
-└WasapiUser::RenderMain()  ※2
-　├::CoInitialize()  ※3
-　├::timeBeginPeriod(1)  ※4
-　├::AvSetMmThreadCharacteristics()  ※5
-　├::WaitForMultipleObjects()  ※6
-　├WasapiUser::AudioSamplesSendProc()  ※7
-　│├::WaitForSingleObject()  ※8
-　│├IAudioClient::GetCurrentPadding()  ※9
-　│├::_malloca()  ※10
-　│├WasapiUser::CreateWritableFrames()  ※11
-　││└::CopyMemory()  ※12
-　│├IRenderClient::GetBuffer()  ※13
-　│├::CopyMemory()  ※14
-　│├::memset()  ※15
-　│├IRenderClient::ReleaseBuffer()  ※16
-　│├::_freea()  ※17
-　│└::ReleaseMutex()  ※18
-　├::AvRevertMmThreadCharacteristics()  ※19
-　├::timeEndPeriod(1)  ※20
-　└::CoUninitialize()  ※21
+WasapiUser::RenderEntry()…………………… ※1
+└WasapiUser::RenderMain()……………………※2
+　├::CoInitialize()……………………………※3
+　├::timeBeginPeriod(1)………………………※4
+　├::AvSetMmThreadCharacteristics()………※5
+　├::WaitForMultipleObjects()………………※6
+　├WasapiUser::AudioSamplesSendProc()……※7
+　│├::WaitForSingleObject()……………… ※8
+　│├IAudioClient::GetCurrentPadding()… ※9
+　│├::_malloca()………………………………※10
+　│├WasapiUser::CreateWritableFrames()…※11
+　││└::CopyMemory()…………………………※12
+　│├IRenderClient::GetBuffer()……………※13
+　│├::CopyMemory()……………………………※14
+　│├::memset()…………………………………※15
+　│├IRenderClient::ReleaseBuffer()………※16
+　│├::_freea()…………………………………※17
+　│└::ReleaseMutex()…………………………※18
+　├::AvRevertMmThreadCharacteristics()… ※19
+　├::timeEndPeriod(1)…………………………※20
+　└::CoUninitialize()…………………………※21
 }}}
 
   * ※1…再生スレッドのエントリーポイントです。staticメンバー関数です。
