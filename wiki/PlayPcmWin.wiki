@@ -231,7 +231,7 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 
 =再生スレッドの動作説明=
 
-再生スレッドは、PCMデータをWASAPIデバイスに送るスレッドです。
+再生スレッドは、PCMデータをWASAPIに送るスレッドです。
 
 WasapiUser.cppの1010行目あたりに書かれています。
 
