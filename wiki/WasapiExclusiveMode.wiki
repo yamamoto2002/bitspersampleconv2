@@ -24,6 +24,7 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
   * RME Fireface400は、ASIOでは量子化ビット数24ビットが使用できるがWASAPIでは選択できない。
   * Prodigy HD2はS/PDIF出力に量子化ビット数24ビットのデータを入れると出力に量子化ビット数16ビットのデータが出てきます。
 
+
 表1: 使用可能なフォーマット一覧
 {{{
 スピーカー (Realtek High Definition Audio) (Realtek ALC889A Realtekドライバ)
