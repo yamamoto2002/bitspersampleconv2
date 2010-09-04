@@ -59,7 +59,7 @@ http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 =.NET Framework 4.0 Client Profile(以下.NETと呼称)について=
 
 .NETは、ライブラリー群＋プラットフォーム独立の実行環境というか、うまく説明できてませんが、
-要するに、これを利用するとWindowsのプログラムを作るのが簡単になるという物です。
+要するに、これを利用するとWindowsアプリケーションを作るのが簡単になるという物です。
 
 PlayPcmWinでは、WPFを使ってウィンドウを出したり、マウスからの入力を処理したりするのに.NETを使用しています。
 
