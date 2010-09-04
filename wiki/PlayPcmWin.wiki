@@ -235,7 +235,7 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 
 WasapiUser.cppの1010行目あたりに書かれています。
 
-全部で200行ほどのプログラムです。
+全部で200行ほどの短いプログラムです。
 
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1009
 
