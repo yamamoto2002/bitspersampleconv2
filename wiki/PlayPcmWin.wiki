@@ -42,7 +42,10 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
 
 =使用方法=
 
-zipを展開して、中のSetup.exeを実行してインストールし、
+zipを展開して、中のSetup.exeを実行してインストールします。
+
+インストール時に、マイクロソフト .NET Framework 4.0 Client Profileの追加インストールが必要になることがあります。
+
 !PlayPcmWinを開き、再生するWAVファイルを指定して、
 使用する出力デバイスを選択し、再生ボタンを押します。
 
