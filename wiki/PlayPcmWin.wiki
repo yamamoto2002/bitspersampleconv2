@@ -56,6 +56,16 @@ zipを展開して、中のSetup.exeを実行してインストールします�
 こちらをご覧下さい。
 http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 
+=.NET Framework 4.0 Client Profile(以下.NETと呼称)について=
+
+.NETは、ライブラリー群というか、実行環境というか、うまく説明できませんが、
+これを利用すると、Windowsのプログラムを作るのが簡単になる、という物です。
+
+PlayPcmWinでは、ウィンドウを出したり、マウスからの入力を処理したりするのに.NETを使用しています。
+
+こちらをご覧ください。知らないおっさんが出てきて解説します
+http://msdn.microsoft.com/ja-jp/netframework/ee847315.aspx
+
 =[再生]ボタンを押すと、[メモリ不足です…]が出る問題=
 
 !PlayPcmWinは音声データを全て仮想メモリに読み込んでから再生を開始します。
