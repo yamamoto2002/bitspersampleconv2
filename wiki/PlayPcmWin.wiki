@@ -245,7 +245,7 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 WasapiUser::RenderEntry()…………………… ※1
 └WasapiUser::RenderMain()……………………※2
 　├::CoInitialize()……………………………※3
-　├::timeBeginPeriod(1)………………………※4
+　├::timeBeginPeriod()……………………… ※4
 　├::AvSetMmThreadCharacteristics()………※5
 　├::WaitForMultipleObjects()………………※6
 　├WasapiUser::AudioSamplesSendProc()……※7
@@ -261,7 +261,7 @@ WasapiUser::RenderEntry()…………………… ※1
 　│├::_freea()…………………………………※17
 　│└::ReleaseMutex()…………………………※18
 　├::AvRevertMmThreadCharacteristics()… ※19
-　├::timeEndPeriod(1)…………………………※20
+　├::timeEndPeriod()………………………… ※20
 　└::CoUninitialize()…………………………※21
 }}}
 
