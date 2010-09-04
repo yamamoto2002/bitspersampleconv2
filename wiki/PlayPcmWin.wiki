@@ -201,9 +201,12 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 再生スレッドは、PCMデータをWASAPIデバイスに送るスレッドです。
 
 WasapiUser.cppの1010行目あたりに書かれています。
+
+全部で200行ほどのプログラムです。
+
 http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1009
 
-==関数呼び出しグラフ==
+==再生スレッド 関数呼び出しグラフ==
 
 {{{
 WasapiUser::RenderEntry()…………………… ※1
