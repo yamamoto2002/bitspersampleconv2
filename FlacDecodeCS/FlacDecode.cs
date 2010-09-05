@@ -78,13 +78,18 @@ namespace FlacDecodeCS {
             return new string(chars);
         }
 
-        static System.IO.StreamWriter m_logFile;
+        static private System.IO.StreamWriter m_logFile;
+
         static private void LogOpen() {
+#if DEBUG == true
             m_logFile = new System.IO.StreamWriter("logDecodeCS.txt");
+#endif
         }
         static private void LogClose() {
+#if DEBUG == true
             m_logFile.Close();
             m_logFile = null;
+#endif
         }
 
         static private void LogWriteLine(string s) {
@@ -95,9 +100,7 @@ namespace FlacDecodeCS {
         }
 
         static private void LogFlush() {
-            m_logFile.Close();
-            m_logFile = null;
-            m_logFile = new System.IO.StreamWriter("logDecodeCS.txt", true);
+            m_logFile.Flush();
         }
 
         private int DecodeOne(BinaryWriter bw) {
