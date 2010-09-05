@@ -1,0 +1,12 @@
+LIBRARY FlacDecodeDLL
+
+EXPORTS
+	FlacDecodeDLL_DecodeStart
+	FlacDecodeDLL_DecodeEnd
+	FlacDecodeDLL_GetNumOfChannels
+	FlacDecodeDLL_GetBitsPerSample
+	FlacDecodeDLL_GetSampleRate
+	FlacDecodeDLL_GetNumSamples
+	FlacDecodeDLL_GetLastResult
+	FlacDecodeDLL_GetNextPcmData
+	FlacDecodeDLL_GetBlockSize
