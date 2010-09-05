@@ -72,7 +72,7 @@ namespace WavRWLib2
         private ushort m_blockAlign;
         public ushort BitsPerSample { get; set; }
 
-        public bool Create(ushort numChannels, uint sampleRate, ushort bitsPerSample)
+        public bool Create(int numChannels, int sampleRate, int bitsPerSample)
         {
             m_subChunk1Id = new byte[4];
             m_subChunk1Id[0] = (byte)'f';
@@ -85,13 +85,13 @@ namespace WavRWLib2
             m_audioFormat = 1;
 
             System.Diagnostics.Debug.Assert(0 < numChannels);
-            NumChannels = numChannels;
+            NumChannels = (ushort)numChannels;
 
-            SampleRate = sampleRate;
-            m_byteRate = sampleRate * numChannels * bitsPerSample / 8;
+            SampleRate = (uint)sampleRate;
+            m_byteRate = (uint)(sampleRate * numChannels * bitsPerSample / 8);
             m_blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
-            BitsPerSample = bitsPerSample;
+            BitsPerSample = (ushort)bitsPerSample;
 
             return true;
         }
@@ -238,14 +238,14 @@ namespace WavRWLib2
     class DataSubChunk
     {
         private byte[] m_subChunk2Id;
-        private uint   m_subChunk2Size;
+        private long   m_subChunk2Size;
 
         private List<PcmSamples1Channel> m_data;
 
         // rawDataモードの場合、numSamplesにサンプル数が入っている。
         // 通常モードの場合、data??[0].NumSamples
         private byte[] m_rawData;
-        private int    m_numSamples;
+        private long    m_numSamples;
 
         public byte[] SampleRawGet() {
             return m_rawData;
@@ -261,7 +261,7 @@ namespace WavRWLib2
             m_data[ch].Set16(pos, val);
         }
 
-        public int NumSamples
+        public long NumSamples
         {
             get {
                 if (m_data != null && 0 < m_data.Count) {
@@ -311,6 +311,13 @@ namespace WavRWLib2
             m_rawData = null;
         }
 
+        public void CreateHeader(int numChannels, int bitsPerSample, long numSamples) {
+            m_numSamples = numSamples;
+            m_subChunk2Size = m_numSamples * numChannels * bitsPerSample / 8;
+            m_data = null;
+            m_rawData = null;
+        }
+
         public bool ReadHeader(BinaryReader br, int numChannels, int bitsPerSample) {
             if (!SkipToDataHeader(br)) {
                 return false;
@@ -323,7 +330,7 @@ namespace WavRWLib2
                 return false;
             }
 
-            m_numSamples = (int)(m_subChunk2Size / (bitsPerSample / 8) / numChannels);
+            m_numSamples = m_subChunk2Size / (bitsPerSample / 8) / numChannels;
 
             m_data    = null;
             m_rawData = null;
@@ -339,6 +346,10 @@ namespace WavRWLib2
             return true;
         }
 
+        public void SetRawData(byte[] rawData) {
+            m_rawData = rawData;
+        }
+
         public void Clear() {
             m_subChunk2Size = 0;
             m_data = null;
@@ -347,7 +358,7 @@ namespace WavRWLib2
             m_numSamples = 0;
         }
 
-        public void SetRawData(int numSamples, byte[] rawData) {
+        public void SetRawData(long numSamples, byte[] rawData) {
             m_numSamples = numSamples;
             m_rawData = rawData;
         }
@@ -361,7 +372,7 @@ namespace WavRWLib2
 
             m_data = new List<PcmSamples1Channel>();
             for (int i=0; i < numChannels; ++i) {
-                PcmSamples1Channel ps1 = new PcmSamples1Channel(m_numSamples, bitsPerSample);
+                PcmSamples1Channel ps1 = new PcmSamples1Channel((int)m_numSamples, bitsPerSample);
                 m_data.Add(ps1);
             }
 
@@ -377,7 +388,9 @@ namespace WavRWLib2
         public void Write(BinaryWriter bw)
         {
             bw.Write(m_subChunk2Id);
-            bw.Write(m_subChunk2Size);
+
+            uint subChunk2Size = (uint)m_subChunk2Size;
+            bw.Write(subChunk2Size);
 
             switch (m_data[0].BitsPerSample) {
             case 16:
@@ -438,7 +451,7 @@ namespace WavRWLib2
             m_rcd.Create(36);
 
             m_fsc = new FmtSubChunk();
-            m_fsc.Create((ushort)rhs.NumChannels, (uint)rhs.SampleRate, (ushort)rhs.BitsPerSample);
+            m_fsc.Create(rhs.NumChannels, rhs.SampleRate, rhs.BitsPerSample);
 
             m_dsc = new DataSubChunk();
 
@@ -446,6 +459,17 @@ namespace WavRWLib2
             FileName = rhs.FileName;
             FullPath = rhs.FullPath;
             GroupId = rhs.GroupId;
+        }
+
+        public void CreateHeader(int nChannels, int sampleRate, int bitsPerSample, long numSamples) {
+            m_rcd = new RiffChunkDescriptor();
+            m_rcd.Create(36);
+
+            m_fsc = new FmtSubChunk();
+            m_fsc.Create(nChannels, sampleRate, bitsPerSample);
+
+            m_dsc = new DataSubChunk();
+            m_dsc.CreateHeader(nChannels, bitsPerSample, numSamples);
         }
 
         /// <summary>
@@ -465,7 +489,7 @@ namespace WavRWLib2
             m_rcd.Create(chunkSize);
 
             m_fsc = new FmtSubChunk();
-            if (!m_fsc.Create((ushort)samples.Count, (uint)sampleRate, (ushort)bitsPerSample)) {
+            if (!m_fsc.Create(samples.Count, sampleRate, bitsPerSample)) {
                 return false;
             }
 
@@ -560,7 +584,7 @@ namespace WavRWLib2
             get { return m_fsc.BitsPerSample; }
         }
 
-        public int NumSamples
+        public long NumSamples
         {
             get { return m_dsc.NumSamples; }
         }
@@ -584,6 +608,10 @@ namespace WavRWLib2
             return m_dsc.SampleRawGet();
         }
 
+        public void SetRawData(byte[] rawData) {
+            m_dsc.SetRawData(rawData);
+        }
+
         /// <summary>
         /// 量子化ビット数をbitsPerSampleに変更したWavDataを戻す。
         /// 自分自身の内容は変更しない。
@@ -595,7 +623,7 @@ namespace WavRWLib2
         public WavData BitsPerSampleConvertTo(int newBitsPerSample) {
             WavData newWavData = new WavData();
             newWavData.CopyHeaderInfoFrom(this);
-            newWavData.m_fsc.Create((ushort)NumChannels, (uint)SampleRate, (ushort)newBitsPerSample);
+            newWavData.m_fsc.Create(NumChannels, SampleRate, newBitsPerSample);
 
             byte [] rawData = null;
             if (BitsPerSample == 16 &&

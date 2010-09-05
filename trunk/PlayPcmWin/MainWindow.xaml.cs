@@ -732,12 +732,24 @@ namespace PlayPcmWin
 
         private bool LoadWaveFileFromPath(string path)
         {
-            WavData wavData = new WavData();
+            WavData wavData;
 
             bool readSuccess = false;
-            using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
-                readSuccess = wavData.ReadHeader(br);
+
+            string ext = System.IO.Path.GetExtension(path);
+            if (0 == String.Compare(".flac", ext, true)) {
+                FlacDecodeIF fdif = new FlacDecodeIF();
+                int ercd = fdif.ReadHeader(path, out wavData);
+                if (ercd == 0) {
+                    readSuccess = true;
+                }
+            } else {
+                wavData = new WavData();
+                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                    readSuccess = wavData.ReadHeader(br);
+                }
             }
+
             if (readSuccess) {
                 if (wavData.NumChannels != 2) {
                     string s = string.Format("2チャンネルステレオ以外のWAVファイルの再生には対応していません: {0} {1}ch\r\n",
@@ -795,47 +807,6 @@ namespace PlayPcmWin
             }
         }
 
-        /// <summary>
-        /// ユーザーインターフェースから呼ぶ。
-        /// バックグラウンドスレッドから呼びたい場合は、AddLogを消す。
-        /// </summary>
-        private string CreateWavFileFromFlac(string flacPath) {
-            string wavPath = System.IO.Path.GetTempFileName();
-
-            AddLogText(string.Format("FLACファイルをWAVファイルに変換 {0} ==> {1}\r\n",
-                flacPath, wavPath));
-
-            Flac2WavCS.Flac2WavCS.ResultType r
-                        = Flac2WavCS.Flac2WavCS.Flac2WavBlocking(flacPath, wavPath);
-            if (r != Flac2WavCS.Flac2WavCS.ResultType.Success) {
-                MessageBox.Show(string.Format("FLACファイルデコードエラー： {0}\r\n{1}",
-                    r, flacPath));
-                try {
-                    System.IO.File.Delete(wavPath);
-                } catch (System.Exception ex) {
-                    System.Console.WriteLine("D: CreateWavFileFromFlac {0} ignored", ex);
-                }
-                return string.Empty;
-            }
-
-            m_tmpWavPathList.Add(wavPath);
-            return wavPath;
-        }
-
-        private bool LoadPcmFileFromPath(string path) {
-            string ext = System.IO.Path.GetExtension(path);
-            if (0 == String.Compare(".flac", ext, true)) {
-                string wavPath = CreateWavFileFromFlac(path);
-                if (wavPath.Length == 0) {
-                    return false;
-                }
-                return LoadWaveFileFromPath(wavPath);
-            }
-
-            // WAV
-            return LoadWaveFileFromPath(path);
-        }
-
         private void MainWindowDragDrop(object sender, DragEventArgs e)
         {
             string[] paths = e.Data.GetData(DataFormats.FileDrop) as string[];
@@ -851,7 +822,7 @@ namespace PlayPcmWin
             }
 
             for (int i = 0; i < paths.Length; ++i) {
-                LoadPcmFileFromPath(paths[i]);
+                LoadWaveFileFromPath(paths[i]);
             }
             UpdateUIStatus();
         }
@@ -873,7 +844,7 @@ namespace PlayPcmWin
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                LoadPcmFileFromPath(dlg.FileName);
+                LoadWaveFileFromPath(dlg.FileName);
                 UpdateUIStatus();
             }
         }
@@ -882,7 +853,7 @@ namespace PlayPcmWin
             MessageBox.Show(
                 string.Format("PlayPcmWin バージョン {0}\r\n" +
                     "PlayPcmWinは libFLACを使用しています。\r\n" +
-                    "libFLACのライセンスは、new BSDライセンスです。" +
+                    "libFLACのライセンスは、New BSDライセンスです。" +
                     "libFlacLicense.txtをご覧ください。",
                     AssemblyVersion));
         }
@@ -923,6 +894,27 @@ namespace PlayPcmWin
             public int hr;
         }
 
+        private int ReadWavPcmData(WavData wavData) {
+            string ext = System.IO.Path.GetExtension(wavData.FullPath);
+            if (0 == String.Compare(".flac", ext, true)) {
+                WavData wd = new WavData();
+                FlacDecodeIF fdif = new FlacDecodeIF();
+                int ercd = fdif.ReadAll(wavData.FullPath, out wd);
+                if (0 == ercd) {
+                    wavData.SetRawData(wd.SampleRawGet());
+                }
+                return ercd;
+            } else {
+                using (BinaryReader br = new BinaryReader(File.Open(wavData.FullPath, FileMode.Open))) {
+                    bool readSuccess = wavData.ReadRaw(br);
+                    if (!readSuccess) {
+                        return -1;
+                    }
+                }
+                return 0;
+            }
+        }
+
         /// <summary>
         ///  バックグラウンド読み込み。
         ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
@@ -953,12 +945,10 @@ namespace PlayPcmWin
                     // 効果絶大である。
                     GC.Collect();
 
-                    bool readSuccess = false;
-                    using (BinaryReader br = new BinaryReader(File.Open(wd.FullPath, FileMode.Open))) {
-                        readSuccess = wd.ReadRaw(br);
-                    }
-                    if (!readSuccess) {
-                        r.message = string.Format("エラー。再生リスト追加時には存在していたファイルが、今見たら消えていました。{0}", wd.FullPath);
+                    int ercd = ReadWavPcmData(wd);
+                    if (0 != ercd) {
+                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード{1}。{2}",
+                            wd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
                         args.Result = r;
                         Console.WriteLine("D: ReadFileDoWork() !readSuccess");
                         return;
