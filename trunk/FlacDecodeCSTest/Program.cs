@@ -71,10 +71,10 @@ namespace FlacDecodeCSTest {
                 return rv;
             }
 
-            int nChannels     = br.ReadInt32();
-            int bitsPerSample = br.ReadInt32();
-            int sampleRate    = br.ReadInt32();
-            long numSamples   = br.ReadInt64();
+            int  nChannels     = br.ReadInt32();
+            int  bitsPerSample = br.ReadInt32();
+            int  sampleRate    = br.ReadInt32();
+            long numSamples    = br.ReadInt64();
 
             System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
                 nChannels, bitsPerSample, sampleRate, numSamples);
@@ -89,15 +89,15 @@ namespace FlacDecodeCSTest {
             SendBase64(flacFilePath);
 
             int rv = br.ReadInt32();
-            if (rv < 0) {
+            if (rv != 0) {
                 StopChildProcess();
                 return rv;
             }
 
-            int nChannels = br.ReadInt32();
-            int bitsPerSample = br.ReadInt32();
-            int sampleRate = br.ReadInt32();
-            long numSamples = br.ReadInt64();
+            int  nChannels     = br.ReadInt32();
+            int  bitsPerSample = br.ReadInt32();
+            int  sampleRate    = br.ReadInt32();
+            long numSamples    = br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
             int frameCount = 1048576;
