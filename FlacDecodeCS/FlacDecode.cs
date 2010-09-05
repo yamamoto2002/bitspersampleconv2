@@ -6,7 +6,7 @@ using System.IO.Pipes;
 
 
 namespace FlacDecodeCS {
-    class FlacDecode {
+    public class FlacDecode {
 
         public enum DecodeResultType {
             /// ヘッダの取得やデータの取得に成功。

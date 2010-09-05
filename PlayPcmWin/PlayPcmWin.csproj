@@ -94,6 +94,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FlacDecodeIF.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -162,13 +163,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Flac2WavCS\Flac2WavCS.csproj">
-      <Project>{1702474F-AC86-4387-9518-6E0BB743C191}</Project>
-      <Name>Flac2WavCS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Flac2Wav\Flac2Wav.vcxproj">
-      <Project>{531F2CD6-8410-465E-9D7F-3B7C84DBE21E}</Project>
-      <Name>Flac2Wav</Name>
+    <ProjectReference Include="..\FlacDecodeCS\FlacDecodeCS.csproj">
+      <Project>{2148EF2A-38E0-4E85-8459-386F55DB7015}</Project>
+      <Name>FlacDecodeCS</Name>
     </ProjectReference>
     <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
       <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>
@@ -181,8 +178,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy $(SolutionDir)$(Configuration)\FlacDecodeDLL.dll $(TargetDir)
+copy $(SolutionDir)$(Configuration)\libFLAC_dynamic.dll $(TargetDir)
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

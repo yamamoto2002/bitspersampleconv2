@@ -60,7 +60,8 @@
       <AdditionalDependencies>FlacDecodeDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>copy C:\work\flac-1.2.1\obj\release\lib\libFLAC_dynamic.dll $(SolutionDir)$(Configuration)</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
