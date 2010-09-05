@@ -1,4 +1,4 @@
-// “ú–{ŒêUTF-8
+// æ—¥æœ¬èªUTF-8
 
 #include "stdafx.h"
 #include <stdio.h>
@@ -7,8 +7,8 @@
 #include "FlacDecodeDLL.h"
 #include <assert.h>
 
-// x86 CPU‚É‚µ‚©‘Î‰‚µ‚Ä‚È‚¢B
-// x64‚âƒrƒbƒOƒGƒ“ƒfƒBƒAƒ“‚É‚Í‘Î‰‚µ‚Ä‚È‚¢B
+// x86 CPUã«ã—ã‹å¯¾å¿œã—ã¦ãªã„ã€‚
+// x64ã‚„ãƒ“ãƒƒã‚°ã‚¨ãƒ³ãƒ‡ã‚£ã‚¢ãƒ³ã«ã¯å¯¾å¿œã—ã¦ãªã„ã€‚
 
 #define FLACDECODE_MAXPATH (1024)
 
@@ -46,27 +46,27 @@ LogClose(void)
     }                                    \
 }
 
-/// FlacDecodeƒXƒŒƒbƒh‚Ö‚ÌƒRƒ}ƒ“ƒhB
+/// FlacDecodeã‚¹ãƒ¬ãƒƒãƒ‰ã¸ã®ã‚³ãƒãƒ³ãƒ‰ã€‚
 enum FlacDecodeCommand {
-    /// ƒRƒ}ƒ“ƒh‚È‚µB(ƒRƒ}ƒ“ƒhÀsŒã‚ÉFlacDecode‚ªƒZƒbƒg‚·‚é)
+    /// ã‚³ãƒãƒ³ãƒ‰ãªã—ã€‚(ã‚³ãƒãƒ³ãƒ‰å®Ÿè¡Œå¾Œã«FlacDecodeãŒã‚»ãƒƒãƒˆã™ã‚‹)
     FDC_None,
 
-    /// ƒVƒƒƒbƒgƒ_ƒEƒ“ƒCƒxƒ“ƒgB
+    /// ã‚·ãƒ£ãƒƒãƒˆãƒ€ã‚¦ãƒ³ã‚¤ãƒ™ãƒ³ãƒˆã€‚
     FDC_Shutdown,
 
-    /// ƒtƒŒ[ƒ€(ƒTƒ“ƒvƒ‹ƒf[ƒ^)æ“¾B
-    /// æ“¾‚·‚éƒtƒŒ[ƒ€”
+    /// ãƒ•ãƒ¬ãƒ¼ãƒ (ã‚µãƒ³ãƒ—ãƒ«ãƒ‡ãƒ¼ã‚¿)å–å¾—ã€‚
+    /// å–å¾—ã™ã‚‹ãƒ•ãƒ¬ãƒ¼ãƒ æ•°
     FDC_GetFrames,
 };
 
-/// FlacDecode‚Ì•¨’uB
+/// FlacDecodeã®ç‰©ç½®ã€‚
 struct FlacDecodeInfo {
     FLAC__uint64 totalSamples;
     int          sampleRate;
     int          channels;
     int          bitsPerSample;
 
-    /// 1ŒÂ‚ÌƒuƒƒbƒN‚É‰½ƒTƒ“ƒvƒ‹ƒf[ƒ^‚ª“ü‚Á‚Ä‚¢‚é‚©B
+    /// 1å€‹ã®ãƒ–ãƒ­ãƒƒã‚¯ã«ä½•ã‚µãƒ³ãƒ—ãƒ«ãƒ‡ãƒ¼ã‚¿ãŒå…¥ã£ã¦ã„ã‚‹ã‹ã€‚
     int          blockSize;
 
     HANDLE       thread;
@@ -76,7 +76,7 @@ struct FlacDecodeInfo {
     FlacDecodeCommand command;
     HANDLE            commandEvent;
     HANDLE            commandCompleteEvent;
-    /// ƒRƒ}ƒ“ƒh‚ğ“Š“ü‚·‚é•”•ª‚ğˆÍ‚Şƒ~ƒ…[ƒeƒbƒNƒXB
+    /// ã‚³ãƒãƒ³ãƒ‰ã‚’æŠ•å…¥ã™ã‚‹éƒ¨åˆ†ã‚’å›²ã‚€ãƒŸãƒ¥ãƒ¼ãƒ†ãƒƒã‚¯ã‚¹ã€‚
     HANDLE            commandMutex;
 
     char              *buff;
@@ -122,7 +122,7 @@ struct FlacDecodeInfo {
 }                                                 \
 
 ////////////////////////////////////////////////////////////////////////
-// FLACƒfƒR[ƒ_[ƒR[ƒ‹ƒoƒbƒN
+// FLACãƒ‡ã‚³ãƒ¼ãƒ€ãƒ¼ã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
 
 static FLAC__StreamDecoderWriteStatus
 WriteCallback1(const FLAC__StreamDecoder *decoder,
@@ -147,13 +147,13 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     if(frame->header.number.sample_number == 0) {
         args->blockSize = frame->header.blocksize;
 
-        // Å‰‚Ìƒf[ƒ^‚ª—ˆ‚½B‚±‚±‚Å‚¢‚Á‚½‚ñ‘Ò‚¿ó‘Ô‚É‚È‚éB
+        // æœ€åˆã®ãƒ‡ãƒ¼ã‚¿ãŒæ¥ãŸã€‚ã“ã“ã§ã„ã£ãŸã‚“å¾…ã¡çŠ¶æ…‹ã«ãªã‚‹ã€‚
         dprintf("%s first data come. blockSize=%d. set commandCompleteEvent\n",
             __FUNCTION__, args->blockSize);
         SetEvent(args->commandCompleteEvent);
         WaitForSingleObject(args->commandEvent, INFINITE);
 
-        // ‹N‚«‚½B—vˆö‚ğƒ`ƒFƒbƒN‚·‚éB
+        // èµ·ããŸã€‚è¦å› ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã€‚
         dprintf("%s event received. %d\n", __FUNCTION__, args->command);
         if (args->command == FDC_Shutdown) {
             return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
@@ -161,23 +161,23 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     }
 
     if (args->errorCode != FDRT_Success) {
-        // ƒfƒR[ƒhƒGƒ‰[‚ª‹N‚«‚½B‚±‚±‚Å‚¢‚Á‚½‚ñ‘Ò‚¿ó‘Ô‚É‚È‚éB
+        // ãƒ‡ã‚³ãƒ¼ãƒ‰ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸã€‚ã“ã“ã§ã„ã£ãŸã‚“å¾…ã¡çŠ¶æ…‹ã«ãªã‚‹ã€‚
         dprintf("%s decode error %d. set commandCompleteEvent\n",
             __FUNCTION__, args->errorCode);
         SetEvent(args->commandCompleteEvent);
         WaitForSingleObject(args->commandEvent, INFINITE);
 
-        // ‹N‚«‚½B—vˆö‚ğƒ`ƒFƒbƒN‚·‚éB‚Ç‚¿‚ç‚É‚µ‚Ä‚à‘±s‚Í‚Å‚«‚È‚¢B
+        // èµ·ããŸã€‚è¦å› ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã€‚ã©ã¡ã‚‰ã«ã—ã¦ã‚‚ç¶šè¡Œã¯ã§ããªã„ã€‚
         dprintf("%s event received. %d\n", __FUNCTION__, args->command);
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
-    // ƒf[ƒ^‚ª—ˆ‚½BƒuƒƒbƒN”‚Í frame->header.blocksize
+    // ãƒ‡ãƒ¼ã‚¿ãŒæ¥ãŸã€‚ãƒ–ãƒ­ãƒƒã‚¯æ•°ã¯ frame->header.blocksize
     if (args->blockSize != frame->header.blocksize) {
         args->blockSize = frame->header.blocksize;
         if (args->blockSize < (int)frame->header.blocksize) {
-            // ƒuƒƒbƒNƒTƒCƒY‚ª“r’†‚Å‘‰Á‚µ‚½B‚Ñ‚Á‚­‚è‚·‚éB
-            // ‚È‚¨AƒuƒƒbƒNƒTƒCƒY‚ªÅIƒtƒŒ[ƒ€‚Å¬‚³‚¢’l‚É‚È‚é‚±‚Æ‚Í•’Ê‚É‚ ‚éB
+            // ãƒ–ãƒ­ãƒƒã‚¯ã‚µã‚¤ã‚ºãŒé€”ä¸­ã§å¢—åŠ ã—ãŸã€‚ã³ã£ãã‚Šã™ã‚‹ã€‚
+            // ãªãŠã€ãƒ–ãƒ­ãƒƒã‚¯ã‚µã‚¤ã‚ºãŒæœ€çµ‚ãƒ•ãƒ¬ãƒ¼ãƒ ã§å°ã•ã„å€¤ã«ãªã‚‹ã“ã¨ã¯æ™®é€šã«ã‚ã‚‹ã€‚
             dprintf("D: block size changed !!! %d to %d\n",
                 args->blockSize, frame->header.blocksize);
             assert(0);
@@ -210,7 +210,7 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     SetEvent(args->commandCompleteEvent);
     WaitForSingleObject(args->commandEvent, INFINITE);
 
-    // ‹N‚«‚½B—vˆö‚ğƒ`ƒFƒbƒN‚·‚éB
+    // èµ·ããŸã€‚è¦å› ã‚’ãƒã‚§ãƒƒã‚¯ã™ã‚‹ã€‚
     dprintf("%s event received. %d args->errorCode=%d\n",
         __FUNCTION__, args->command, args->errorCode);
     if (args->command == FDC_Shutdown) {
@@ -229,7 +229,7 @@ WriteCallback(const FLAC__StreamDecoder *decoder,
         WriteCallback1(decoder, frame, buffer, clientData);
 
     if (rv == FLAC__STREAM_DECODER_WRITE_STATUS_ABORT) {
-        /* ƒfƒR[ƒhI—¹ */
+        /* ãƒ‡ã‚³ãƒ¼ãƒ‰çµ‚äº† */
     }
     return rv;
 }
@@ -277,13 +277,13 @@ ErrorCallback(const FLAC__StreamDecoder *decoder,
     }
 
     if (args->errorCode != FDRT_Success) {
-        /* ƒGƒ‰[‚ª‹N‚«‚½B */
+        /* ã‚¨ãƒ©ãƒ¼ãŒèµ·ããŸã€‚ */
     }
 };
 
 ///////////////////////////////////////////////////////////////
 
-// ƒfƒR[ƒhƒXƒŒƒbƒh
+// ãƒ‡ã‚³ãƒ¼ãƒ‰ã‚¹ãƒ¬ãƒƒãƒ‰
 static int
 DecodeMain(FlacDecodeInfo *args)
 {
@@ -348,11 +348,11 @@ DecodeEntry(LPVOID param)
 
 ///////////////////////////////////////////////////////////////
 
-/// •¨’u‚ÌÀ‘ÌBƒOƒ[ƒoƒ‹•Ï”B
+/// ç‰©ç½®ã®å®Ÿä½“ã€‚ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã€‚
 static FlacDecodeInfo g_flacDecodeInfo;
 
-/// ƒ`ƒƒƒ“ƒlƒ‹”B
-/// DecodeStart¬Œ÷Œã‚ÉŒÄ‚Ô‚±‚Æ‚ª‚Å‚«‚éB
+/// ãƒãƒ£ãƒ³ãƒãƒ«æ•°ã€‚
+/// DecodeStartæˆåŠŸå¾Œã«å‘¼ã¶ã“ã¨ãŒã§ãã‚‹ã€‚
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetNumOfChannels(void)
@@ -365,8 +365,8 @@ FlacDecodeDLL_GetNumOfChannels(void)
     return g_flacDecodeInfo.channels;
 }
 
-/// —Êq‰»ƒrƒbƒg”B
-/// DecodeStart¬Œ÷Œã‚ÉŒÄ‚Ô‚±‚Æ‚ª‚Å‚«‚éB
+/// é‡å­åŒ–ãƒ“ãƒƒãƒˆæ•°ã€‚
+/// DecodeStartæˆåŠŸå¾Œã«å‘¼ã¶ã“ã¨ãŒã§ãã‚‹ã€‚
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetBitsPerSample(void)
@@ -379,8 +379,8 @@ FlacDecodeDLL_GetBitsPerSample(void)
     return g_flacDecodeInfo.bitsPerSample;
 }
 
-/// ƒTƒ“ƒvƒ‹ƒŒ[ƒgB
-/// DecodeStart¬Œ÷Œã‚ÉŒÄ‚Ô‚±‚Æ‚ª‚Å‚«‚éB
+/// ã‚µãƒ³ãƒ—ãƒ«ãƒ¬ãƒ¼ãƒˆã€‚
+/// DecodeStartæˆåŠŸå¾Œã«å‘¼ã¶ã“ã¨ãŒã§ãã‚‹ã€‚
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetSampleRate(void)
@@ -393,8 +393,8 @@ FlacDecodeDLL_GetSampleRate(void)
     return g_flacDecodeInfo.sampleRate;
 }
 
-/// ƒTƒ“ƒvƒ‹(==frame)‘”B
-/// DecodeStart¬Œ÷Œã‚ÉŒÄ‚Ô‚±‚Æ‚ª‚Å‚«‚éB
+/// ã‚µãƒ³ãƒ—ãƒ«(==frame)ç·æ•°ã€‚
+/// DecodeStartæˆåŠŸå¾Œã«å‘¼ã¶ã“ã¨ãŒã§ãã‚‹ã€‚
 extern "C" __declspec(dllexport)
 int64_t __stdcall
 FlacDecodeDLL_GetNumSamples(void)
@@ -421,9 +421,9 @@ FlacDecodeDLL_GetBlockSize(void)
     return g_flacDecodeInfo.blockSize;
 }
 
-/// FLACƒwƒbƒ_[‚ğ“Ç‚İ‚ñ‚ÅAƒtƒH[ƒ}ƒbƒgî•ñ‚ğæ“¾‚·‚éB
-/// ’†‚ÌƒOƒ[ƒoƒ‹•Ï”‚É’™‚ß‚éBAPI‚ÌİŒv‚ªƒXƒŒƒbƒhƒZ[ƒt‚É‚È‚Á‚Ä‚È‚¢‚Ì‚Å’ˆÓB
-/// @return 0 ¬Œ÷B1ˆÈã: ƒGƒ‰[BFlacDecodeResultTypeQÆB
+/// FLACãƒ˜ãƒƒãƒ€ãƒ¼ã‚’èª­ã¿è¾¼ã‚“ã§ã€ãƒ•ã‚©ãƒ¼ãƒãƒƒãƒˆæƒ…å ±ã‚’å–å¾—ã™ã‚‹ã€‚
+/// ä¸­ã®ã‚°ãƒ­ãƒ¼ãƒãƒ«å¤‰æ•°ã«è²¯ã‚ã‚‹ã€‚APIã®è¨­è¨ˆãŒã‚¹ãƒ¬ãƒƒãƒ‰ã‚»ãƒ¼ãƒ•ã«ãªã£ã¦ãªã„ã®ã§æ³¨æ„ã€‚
+/// @return 0 æˆåŠŸã€‚1ä»¥ä¸Š: ã‚¨ãƒ©ãƒ¼ã€‚FlacDecodeResultTypeå‚ç…§ã€‚
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
@@ -457,9 +457,9 @@ FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
 
     dprintf("%s createThread\n", __FUNCTION__);
 
-    // FlacDecodeƒXƒŒ‚ª“®‚«n‚ß‚éBcommandCompleteEvent‚ğ‘Ò‚ÂB
-    // FlacDecodeƒXƒŒ‚ÍA“r’†‚ÅƒGƒ‰[‚ª‹N‚«‚é‚©A
-    // ƒf[ƒ^‚Ì€”õ‚ª‚Å‚«‚½‚çcommandCompleteEvent‚ğ”­s‚µAcommandEvent‚ğWait‚·‚éB
+    // FlacDecodeã‚¹ãƒ¬ãŒå‹•ãå§‹ã‚ã‚‹ã€‚commandCompleteEventã‚’å¾…ã¤ã€‚
+    // FlacDecodeã‚¹ãƒ¬ã¯ã€é€”ä¸­ã§ã‚¨ãƒ©ãƒ¼ãŒèµ·ãã‚‹ã‹ã€
+    // ãƒ‡ãƒ¼ã‚¿ã®æº–å‚™ãŒã§ããŸã‚‰commandCompleteEventã‚’ç™ºè¡Œã—ã€commandEventã‚’Waitã™ã‚‹ã€‚
     WaitForSingleObject(g_flacDecodeInfo.commandCompleteEvent, INFINITE);
     
     dprintf1("%s commandCompleteEvent. ercd=%d\n",
@@ -473,7 +473,7 @@ if (NULL != p) {          \
     p = NULL;             \
 }
 
-/// FlacDecode‚ğI—¹‚·‚éB(DecodeStart‚Å—§‚Ä‚½ƒXƒŒ‚ğ~‚ß‚½‚è‚·‚é)
+/// FlacDecodeã‚’çµ‚äº†ã™ã‚‹ã€‚(DecodeStartã§ç«‹ã¦ãŸã‚¹ãƒ¬ã‚’æ­¢ã‚ãŸã‚Šã™ã‚‹)
 extern "C" __declspec(dllexport)
 void __stdcall
 FlacDecodeDLL_DecodeEnd(void)
@@ -494,7 +494,7 @@ FlacDecodeDLL_DecodeEnd(void)
         SetEvent(g_flacDecodeInfo.commandEvent);
         ReleaseMutex(g_flacDecodeInfo.commandMutex);
 
-        // ƒXƒŒƒbƒh‚ªI‚í‚é‚Í‚¸B
+        // ã‚¹ãƒ¬ãƒƒãƒ‰ãŒçµ‚ã‚ã‚‹ã¯ãšã€‚
         WaitForSingleObject(g_flacDecodeInfo.thread, INFINITE);
 
         dprintf("%s thread stopped. delete FlacDecodeThead\n",
@@ -512,7 +512,7 @@ FlacDecodeDLL_DecodeEnd(void)
     LogClose();
 }
 
-/// Ÿ‚ÌPCMƒf[ƒ^‚ğnumFrameƒTƒ“ƒvƒ‹‚¾‚¯buff_return‚É‹l‚ß‚é
+/// æ¬¡ã®PCMãƒ‡ãƒ¼ã‚¿ã‚’numFrameã‚µãƒ³ãƒ—ãƒ«ã ã‘buff_returnã«è©°ã‚ã‚‹
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetNextPcmData(int numFrame, char *buff_return)
@@ -536,7 +536,7 @@ FlacDecodeDLL_GetNextPcmData(int numFrame, char *buff_return)
         dprintf("%s pos=%d numFrame=%d\n",
             __FUNCTION__, pos, numFrame);
 
-        {   // FlacDecodeThread‚ÉGetFramesƒRƒ}ƒ“ƒh‚ğ“`‚¦‚é
+        {   // FlacDecodeThreadã«GetFramesã‚³ãƒãƒ³ãƒ‰ã‚’ä¼ãˆã‚‹
             WaitForSingleObject(g_flacDecodeInfo.commandMutex, INFINITE);
 
             g_flacDecodeInfo.errorCode    = FDRT_Success;
@@ -570,7 +570,7 @@ FlacDecodeDLL_GetNextPcmData(int numFrame, char *buff_return)
 
     if (FDRT_Success   != g_flacDecodeInfo.errorCode &&
         FDRT_Completed != g_flacDecodeInfo.errorCode) {
-        // ƒGƒ‰[I—¹B
+        // ã‚¨ãƒ©ãƒ¼çµ‚äº†ã€‚
         return -1;
     }
     return pos;
