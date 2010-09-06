@@ -10,6 +10,7 @@ int _tmain(int argc, _TCHAR* argv[])
         return 1;
     }
 
+    printf("D: %s:%d FlacDecodeDLL_DecodeStart %s\n", __FILE__, __LINE__, argv[1]);
     int rv = FlacDecodeDLL_DecodeStart(argv[1]);
     if (rv != 0) {
         printf("E: %s:%d FlacDecodeDLL_DecodeStart %d\n", __FILE__, __LINE__, rv);

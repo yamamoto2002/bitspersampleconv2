@@ -15,6 +15,7 @@ enum FlacDecodeResultType {
     FDRT_WriteOpenFailed,
     FDRT_FlacStreamDecoderNewFailed,
     FDRT_FlacStreamDecoderInitFailed,
+    FDRT_DecorderProcessFailed,
     FDRT_LostSync,
     FDRT_BadHeader,
     FDRT_FrameCrcMismatch,
