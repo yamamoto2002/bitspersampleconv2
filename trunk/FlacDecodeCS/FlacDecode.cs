@@ -20,6 +20,7 @@ namespace FlacDecodeCS {
             WriteOpenFailed,
             FlacStreamDecoderNewFailed,
             FlacStreamDecoderInitFailed,
+            FlacStreamDecorderProcessFailed,
             LostSync,
             BadHeader,
             FrameCrcMismatch,
@@ -78,7 +79,9 @@ namespace FlacDecodeCS {
             return new string(chars);
         }
 
+#if DEBUG == true
         static private System.IO.StreamWriter m_logFile;
+#endif
 
         static private void LogOpen() {
 #if DEBUG == true
@@ -100,7 +103,9 @@ namespace FlacDecodeCS {
         }
 
         static private void LogFlush() {
+#if DEBUG == true
             m_logFile.Flush();
+#endif
         }
 
         private int DecodeOne(BinaryWriter bw) {

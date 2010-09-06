@@ -26,15 +26,17 @@ LogClose(void)
     g_fp = NULL;
 }
 #else
-#define LogOpen(x)
-#define LogClose(x)
+#define LogOpen()
+#define LogClose()
 #endif
 
 #ifdef _DEBUG
 #  define dprintf1(x, ...) fprintf(g_fp, x, __VA_ARGS__); fflush(g_fp);
 #  define dprintf(x, ...)
+//#  define dprintf1(x, ...) printf(x, __VA_ARGS__)
 //#  define dprintf(x, ...) printf(x, __VA_ARGS__)
 #else
+#  define dprintf1(x, ...)
 #  define dprintf(x, ...)
 #endif
 
@@ -315,7 +317,9 @@ DecodeMain(FlacDecodeInfo *args)
 
     ok = FLAC__stream_decoder_process_until_end_of_stream(decoder);
     if (!ok) {
-        // result == args->errorCode;
+        if (args->errorCode == FDRT_Success) {
+            args->errorCode = FDRT_DecorderProcessFailed;
+        }
         dprintf("%s Flac decode error %d. set complete event.\n",
             __FUNCTION__, args->errorCode);
         goto end;
@@ -330,7 +334,7 @@ end:
 
     SetEvent(args->commandCompleteEvent);
 
-    dprintf("%s end\n", __FUNCTION__);
+    dprintf("%s end ercd=%d\n", __FUNCTION__, args->errorCode);
     return args->errorCode;
 }
 

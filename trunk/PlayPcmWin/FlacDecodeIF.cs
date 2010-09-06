@@ -26,6 +26,8 @@ namespace PlayPcmWin {
                 return "FlacStreamDecoderの作成に失敗。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecoderInitFailed:
                 return "FlacStreamDecoderの初期化失敗。";
+            case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecorderProcessFailed:
+                return "FlacStreamDecoderが失敗を戻しました。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.LostSync:
                 return "デコード中に同期を見失いました(データが壊れている)。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.BadHeader:

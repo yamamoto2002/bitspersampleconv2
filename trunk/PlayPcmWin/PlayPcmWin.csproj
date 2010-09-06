@@ -176,10 +176,13 @@
       <Name>WavRWLib2</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="libFlacLicense.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(SolutionDir)$(Configuration)\FlacDecodeDLL.dll $(TargetDir)
-copy $(SolutionDir)$(Configuration)\libFLAC_dynamic.dll $(TargetDir)
+    <PostBuildEvent>copy $(SolutionDir)bin\$(Configuration)\FlacDecodeDLL.dll $(TargetDir)
+copy $(SolutionDir)bin\$(Configuration)\libFLAC_dynamic.dll $(TargetDir)
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -735,12 +735,13 @@ namespace PlayPcmWin
             WavData wavData;
 
             bool readSuccess = false;
+            int flacErcd = 0;
 
             string ext = System.IO.Path.GetExtension(path);
             if (0 == String.Compare(".flac", ext, true)) {
                 FlacDecodeIF fdif = new FlacDecodeIF();
-                int ercd = fdif.ReadHeader(path, out wavData);
-                if (ercd == 0) {
+                flacErcd = fdif.ReadHeader(path, out wavData);
+                if (flacErcd == 0) {
                     readSuccess = true;
                 }
             } else {
@@ -791,6 +792,10 @@ namespace PlayPcmWin
                 ChangeState(State.プレイリストあり);
             } else {
                 string s = string.Format("読み込み失敗: {0}\r\n", path);
+                if (flacErcd != 0) {
+                    s = string.Format("読み込み失敗: {0}\r\n{1}",
+                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
+                }
                 AddLogText(s);
                 MessageBox.Show(s);
                 return false;
@@ -1146,6 +1151,11 @@ namespace PlayPcmWin
                 UnsetupDevice();
 
                 if (!SetupDevice(wavData.GroupId)) {
+                    listBoxPlayFiles.SelectedIndex = 0;
+                    ChangeState(State.ファイル読み込み完了);
+
+                    DeviceDeselect();
+                    CreateDeviceList();
                     return false;
                 }
 
@@ -1160,6 +1170,11 @@ namespace PlayPcmWin
             UpdateNextTask();
 
             if (!SetupDevice(wavData.GroupId)) {
+                listBoxPlayFiles.SelectedIndex = 0;
+                ChangeState(State.ファイル読み込み完了);
+
+                DeviceDeselect();
+                CreateDeviceList();
                 return false;
             }
             StartPlay(wavDataId);
