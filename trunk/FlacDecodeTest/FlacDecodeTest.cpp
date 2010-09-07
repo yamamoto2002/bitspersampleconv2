@@ -2,11 +2,13 @@
 #include "FlacDecodeDLL.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
 
 int _tmain(int argc, _TCHAR* argv[])
 {
     if (argc != 3) {
-        printf("E: %s:%d inputFlacFilePath outputWavFilePath\n", __FILE__, __LINE__);
+        printf("E: %s:%d inputFlacFilePath outputBinFilePath\n", __FILE__, __LINE__);
         return 1;
     }
 
@@ -29,20 +31,34 @@ int _tmain(int argc, _TCHAR* argv[])
         numSamples,
         channels);
 
-    int  ercd    = 0;
-    int  nFrames = 1048576;
-    char *data   = (char *)malloc(nFrames * channels * bitsPerSample / 8);
+    FILE *fp = fopen(argv[2], "wb");
+    assert(fp);
+
+    int     ercd    = 0;
+    int     nFrames = 1048576;
+    int     bytesPerFrame = channels * bitsPerSample / 8;
+    int64_t pcmPos  = 0;
+    char *data   = (char *)malloc(nFrames * bytesPerFrame);
     do {
+        memset(data, 0xee, nFrames * bytesPerFrame);
+
         int rv = FlacDecodeDLL_GetNextPcmData(nFrames, data);
         ercd   = FlacDecodeDLL_GetLastResult();
 
-        printf("D: GetNextPcmData get %d samples\n", rv);
+        if (0 < rv) {
+            fwrite(data, 1, rv * bytesPerFrame, fp);
+            pcmPos += rv;
+        }
+        printf("D: GetNextPcmData get %d samples. total %lld\n", rv, pcmPos);
 
         if (rv <= 0 || ercd == FDRT_Completed) {
             printf("D: GetNextPcmData rv=%d ercd=%d\n", rv, ercd);
             break;
         }
     } while (true);
+
+    fclose(fp);
+    fp = NULL;
 
     free(data);
     data = NULL;

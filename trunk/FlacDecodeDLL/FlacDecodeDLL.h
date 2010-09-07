@@ -8,20 +8,23 @@ enum FlacDecodeResultType {
     FDRT_Success = 0,
 
     /// ファイルの最後まで行き、デコードを完了した。もうデータはない。
-    FDRT_Completed,
+    FDRT_Completed = 1,
 
     // 以下、FLACデコードエラー。
-    FDRT_DataNotReady,
-    FDRT_WriteOpenFailed,
-    FDRT_FlacStreamDecoderNewFailed,
-    FDRT_FlacStreamDecoderInitFailed,
-    FDRT_DecorderProcessFailed,
-    FDRT_LostSync,
-    FDRT_BadHeader,
-    FDRT_FrameCrcMismatch,
-    FDRT_Unparseable,
-    FDRT_NumFrameIsNotAligned,
-    FDRT_OtherError
+    FDRT_DataNotReady,                //< = 2
+    FDRT_WriteOpenFailed,             //< = 3
+    FDRT_FlacStreamDecoderNewFailed,  //< = 4
+
+    FDRT_FlacStreamDecoderInitFailed, //< = 5
+    FDRT_DecorderProcessFailed,       //< = 6
+    FDRT_LostSync,                    //< = 7
+    FDRT_BadHeader,                   //< = 8
+    FDRT_FrameCrcMismatch,            //< = 9
+
+    FDRT_Unparseable,                 //< = 10
+    FDRT_NumFrameIsNotAligned,        //< = 11
+    FDRT_RecvBufferSizeInsufficient,  //< = 12
+    FDRT_OtherError                   //< = 13
 };
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
@@ -72,7 +75,7 @@ FlacDecodeDLL_GetLastResult(void);
 /// FlacDecodeDLL_GetNextPcmData()のnumFrameはこのサイズの倍数である必要がある。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_GetBlockSize(void);
+FlacDecodeDLL_GetNumFramesPerBlock(void);
 
 
 /// 次のPCMデータをnumFrameサンプルだけbuff_returnに詰める

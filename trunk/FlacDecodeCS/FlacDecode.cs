@@ -19,12 +19,16 @@ namespace FlacDecodeCS {
             DataNotReady,
             WriteOpenFailed,
             FlacStreamDecoderNewFailed,
+
             FlacStreamDecoderInitFailed,
             FlacStreamDecorderProcessFailed,
             LostSync,
             BadHeader,
             FrameCrcMismatch,
+ 
             Unparseable,
+            NumFrameIsNotAligned,
+            RecvBufferSizeInsufficient,
             OtherError
         };
 
