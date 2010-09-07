@@ -68,8 +68,8 @@ struct FlacDecodeInfo {
     int          channels;
     int          bitsPerSample;
 
-    /// 1個のブロックに何サンプルデータが入っているか。
-    int          blockSize;
+    /// 1個のブロックに何サンプル(frame)データが入っているか。
+    int          numFramesPerBlock;
 
     HANDLE       thread;
 
@@ -82,7 +82,7 @@ struct FlacDecodeInfo {
     HANDLE            commandMutex;
 
     char              *buff;
-    int               numFrames;
+    int               buffFrames;
     int               retrievedFrames;
 
     char         fromFlacPath[FLACDECODE_MAXPATH];
@@ -92,7 +92,7 @@ struct FlacDecodeInfo {
         sampleRate    = 0;
         channels      = 0;
         bitsPerSample = 0;
-        blockSize     = 0;
+        numFramesPerBlock     = 0;
 
         thread        = NULL;
 
@@ -104,7 +104,7 @@ struct FlacDecodeInfo {
         commandMutex         = NULL;
 
         buff            = NULL;
-        numFrames       = 0;
+        buffFrames       = 0;
         retrievedFrames = 0;
 
         fromFlacPath[0] = 0;
@@ -132,7 +132,6 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     void *clientData)
 {
     FlacDecodeInfo *args = (FlacDecodeInfo*)clientData;
-    size_t i;
 
     dprintf("%s args->totalSamples=%lld errorCode=%d\n", __FUNCTION__,
         args->totalSamples, args->errorCode);
@@ -140,18 +139,13 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     if(args->totalSamples == 0) {
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
-    if(args->channels != 2
-        || (args->bitsPerSample != 16
-         && args->bitsPerSample != 24)) {
-        return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
-    }
 
     if(frame->header.number.sample_number == 0) {
-        args->blockSize = frame->header.blocksize;
+        args->numFramesPerBlock = frame->header.blocksize;
 
         // 最初のデータが来た。ここでいったん待ち状態になる。
-        dprintf("%s first data come. blockSize=%d. set commandCompleteEvent\n",
-            __FUNCTION__, args->blockSize);
+        dprintf("%s first data come. numFramesPerBlock=%d. set commandCompleteEvent\n",
+            __FUNCTION__, args->numFramesPerBlock);
         SetEvent(args->commandCompleteEvent);
         WaitForSingleObject(args->commandEvent, INFINITE);
 
@@ -175,49 +169,51 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     }
 
     // データが来た。ブロック数は frame->header.blocksize
-    if (args->blockSize != frame->header.blocksize) {
-        args->blockSize = frame->header.blocksize;
-        if (args->blockSize < (int)frame->header.blocksize) {
-            // ブロックサイズが途中で増加した。びっくりする。
-            // なお、ブロックサイズが最終フレームで小さい値になることは普通にある。
-            dprintf("D: block size changed !!! %d to %d\n",
-                args->blockSize, frame->header.blocksize);
-            assert(0);
+    if (args->numFramesPerBlock != frame->header.blocksize) {
+        dprintf("%s args->numFramesPerBlock changed %d to %d\n",
+            __FUNCTION__, args->numFramesPerBlock, frame->header.blocksize);
+        args->numFramesPerBlock = frame->header.blocksize;
+    }
+
+    if ((args->buffFrames - args->retrievedFrames) < args->numFramesPerBlock) {
+        // このブロックを収容する場所がない。データ詰め終わり。
+        args->errorCode       = FDRT_Success;
+        SetEvent(args->commandCompleteEvent);
+        WaitForSingleObject(args->commandEvent, INFINITE);
+
+        // 起きた。要因をチェックする。
+        dprintf("%s event received. %d args->errorCode=%d\n",
+            __FUNCTION__, args->command, args->errorCode);
+        if (args->command == FDC_Shutdown) {
+            return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
+        }
+
+        assert(args->retrievedFrames == 0);
+        // いったんバッファをフラッシュしたのに、まだ足りない場合はデータが詰められない。
+        if ((args->buffFrames - args->retrievedFrames) < args->numFramesPerBlock) {
+            args->errorCode = FDRT_RecvBufferSizeInsufficient;
+            dprintf("D: bufferSize insufficient %d < %d\n",
+                args->buffFrames, args->numFramesPerBlock);
+            return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
         }
     }
 
-    if (args->bitsPerSample == 16) {
-        assert((int)frame->header.blocksize <= args->numFrames);
+    {
+        int bytesPerSample = args->bitsPerSample / 8;
+        int bytesPerFrame  = bytesPerSample * args->channels;
 
-        for(i = 0; i < frame->header.blocksize; i++) {
-            memcpy(&args->buff[i*4+0], &buffer[0][i], 2);
-            memcpy(&args->buff[i*4+2], &buffer[1][i], 2);
-        }
-    }
-
-    if (args->bitsPerSample == 24) {
-        assert((int)frame->header.blocksize <= args->numFrames);
-
-        for(i = 0; i < frame->header.blocksize; i++) {
-            memcpy(&args->buff[i*6+0], &buffer[0][i], 3);
-            memcpy(&args->buff[i*6+3], &buffer[1][i], 3);
+        for(int i = 0; i < args->numFramesPerBlock; i++) {
+            for (int ch = 0; ch < args->channels; ++ch) {
+                memcpy(&args->buff[(args->retrievedFrames + i) * bytesPerFrame + ch * bytesPerSample],
+                    &buffer[ch][i], bytesPerSample);
+            }
         }
     }
 
     dprintf("%s set %d frame. args->errorCode=%d set commandCompleteEvent\n",
-        __FUNCTION__, frame->header.blocksize, args->errorCode);
+        __FUNCTION__, args->numFramesPerBlock, args->errorCode);
 
-    args->retrievedFrames = frame->header.blocksize;
-    args->errorCode       = FDRT_Success;
-    SetEvent(args->commandCompleteEvent);
-    WaitForSingleObject(args->commandEvent, INFINITE);
-
-    // 起きた。要因をチェックする。
-    dprintf("%s event received. %d args->errorCode=%d\n",
-        __FUNCTION__, args->command, args->errorCode);
-    if (args->command == FDC_Shutdown) {
-        return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
-    }
+    args->retrievedFrames += args->numFramesPerBlock;
 
     return FLAC__STREAM_DECODER_WRITE_STATUS_CONTINUE;
 }
@@ -323,6 +319,21 @@ DecodeMain(FlacDecodeInfo *args)
         dprintf("%s Flac decode error %d. set complete event.\n",
             __FUNCTION__, args->errorCode);
         goto end;
+    } else {
+        // OK。データがバッファに溜まっていたら最後のイベントを出す。
+
+        if (0 < args->retrievedFrames) {
+            SetEvent(args->commandCompleteEvent);
+            WaitForSingleObject(args->commandEvent, INFINITE);
+
+            // 起きた。要因をチェックする。
+            dprintf("%s event received. %d args->errorCode=%d\n",
+                __FUNCTION__, args->command, args->errorCode);
+            if (args->command == FDC_Shutdown) {
+                args->errorCode = FDRT_DecorderProcessFailed;
+                goto end;
+            }
+        }
     }
 
     args->errorCode = FDRT_Completed;
@@ -420,9 +431,9 @@ FlacDecodeDLL_GetLastResult(void)
 
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_GetBlockSize(void)
+FlacDecodeDLL_GetNumFramesPerBlock(void)
 {
-    return g_flacDecodeInfo.blockSize;
+    return g_flacDecodeInfo.numFramesPerBlock;
 }
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
@@ -546,7 +557,7 @@ FlacDecodeDLL_GetNextPcmData(int numFrame, char *buff_return)
             g_flacDecodeInfo.errorCode    = FDRT_Success;
             g_flacDecodeInfo.command      = FDC_GetFrames;
             g_flacDecodeInfo.buff         = &buff_return[bytesPerFrame * pos];
-            g_flacDecodeInfo.numFrames    = numFrame;
+            g_flacDecodeInfo.buffFrames    = numFrame;
             g_flacDecodeInfo.retrievedFrames = 0;
 
             dprintf("%s set command.\n", __FUNCTION__);

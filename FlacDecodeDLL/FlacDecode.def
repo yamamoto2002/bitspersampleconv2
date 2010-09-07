@@ -9,4 +9,4 @@ EXPORTS
 	FlacDecodeDLL_GetNumSamples
 	FlacDecodeDLL_GetLastResult
 	FlacDecodeDLL_GetNextPcmData
-	FlacDecodeDLL_GetBlockSize
+	FlacDecodeDLL_GetNumFramesPerBlock

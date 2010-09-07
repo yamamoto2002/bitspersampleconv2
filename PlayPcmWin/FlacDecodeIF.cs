@@ -24,6 +24,7 @@ namespace PlayPcmWin {
                 return "ファイルが開けませんでした。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecoderNewFailed:
                 return "FlacStreamDecoderの作成に失敗。";
+
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecoderInitFailed:
                 return "FlacStreamDecoderの初期化失敗。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecorderProcessFailed:
@@ -34,8 +35,13 @@ namespace PlayPcmWin {
                 return "ヘッダー部分が壊れています。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FrameCrcMismatch:
                 return "CRCエラー。ファイルの内容が壊れています。";
+
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.Unparseable:
                 return "解析失敗。";
+            case (int)FlacDecodeCS.FlacDecode.DecodeResultType.NumFrameIsNotAligned:
+                return "フレーム数のアラインエラー(内部エラー)";
+            case (int)FlacDecodeCS.FlacDecode.DecodeResultType.RecvBufferSizeInsufficient:
+                return "受信バッファサイズが小さすぎて１ブロックも入りませんでした。";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.OtherError:
             default:
                 return "分類外のエラー。";
