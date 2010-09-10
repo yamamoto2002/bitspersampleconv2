@@ -10,7 +10,7 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
   * 録音プログラム RecPcmWin
   * C#からWASAPIを使うためのクラスWasapiCSについて [http://code.google.com/p/bitspersampleconv2/wiki/WasapiCS WasapiCS]
 
-=WASAPIの音楽再生を100%楽しむための、おすすめオーディオインターフェース=
+=WASAPIの音楽再生機能を100%楽しむための、おすすめオーディオインターフェース=
 
 ==超おすすめ: Lynx L22==
 
