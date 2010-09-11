@@ -81,6 +81,11 @@ enum WWShareMode {
     WWSMExclusive,
 };
 
+enum WWBitFormatType {
+    WWSInt,
+    WWSFloat
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -103,11 +108,16 @@ public:
     int  GetUseDeviceId(void);
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
-    HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec);
+    HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample,
+        WWBitFormatType bitFormatType, int latencyMillisec);
     void Unsetup(void);
 
     // before play start
     void ClearPlayList(void);
+
+    // サンプルフォーマット変換は上のレイヤーに任せた。
+    // ここでは、来たdataを中のメモリにそのままコピーする。
+    // Setupでセットアップした形式でdataを渡してください。
     bool AddPlayPcmData(int id, BYTE *data, int bytes);
     void SetPlayRepeat(bool b);
 
@@ -148,9 +158,10 @@ private:
     UINT32       m_bufferFrameNum;
 
     int          m_deviceBitsPerSample;
-    int          m_dataBitsPerSample;
+    //int          m_dataBitsPerSample;
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
+    WWBitFormatType m_bitFormatType;
 
     IAudioRenderClient  *m_renderClient;
     IAudioCaptureClient *m_captureClient;

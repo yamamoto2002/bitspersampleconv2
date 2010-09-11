@@ -79,6 +79,7 @@ namespace PlayPcmWin
             bool setuped;
             int samplingRate;
             int bitsPerSample;
+            WasapiCS.BitFormatType bitFormatType;
             int latencyMillisec;
             WasapiDataFeedMode dfm;
             WasapiSharedOrExclusive shareMode;
@@ -86,6 +87,7 @@ namespace PlayPcmWin
 
             public bool Is(int samplingRate,
                 int bitsPerSample,
+                WasapiCS.BitFormatType bitFormatType,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
                 WasapiSharedOrExclusive shareMode,
@@ -93,6 +95,7 @@ namespace PlayPcmWin
                 return (this.setuped
                     && this.samplingRate == samplingRate
                     && this.bitsPerSample == bitsPerSample
+                    && this.bitFormatType == bitFormatType
                     && this.latencyMillisec == latencyMillisec
                     && this.dfm == dfm
                     && this.shareMode == shareMode
@@ -101,6 +104,7 @@ namespace PlayPcmWin
 
             public void Set(int samplingRate,
                 int bitsPerSample,
+                WasapiCS.BitFormatType bitFormatType,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
                 WasapiSharedOrExclusive shareMode,
@@ -108,6 +112,7 @@ namespace PlayPcmWin
                     this.setuped = true;
                 this.samplingRate = samplingRate;
                 this.bitsPerSample = bitsPerSample;
+                this.bitFormatType = bitFormatType;
                 this.latencyMillisec = latencyMillisec;
                 this.dfm = dfm;
                 this.shareMode = shareMode;
@@ -250,6 +255,11 @@ namespace PlayPcmWin
 
             return -1;
         }
+
+        struct SampleFormat {
+            public int bitsPerSample;
+            public WasapiCS.BitFormatType bitFormatType;
+        };
 
         public MainWindow()
         {
@@ -621,25 +631,13 @@ namespace PlayPcmWin
 
             WavData startWavData = m_wavDataList[startWavDataId];
 
-            // 量子化ビット数固定設定。
-            int preferedBitsPerSample = startWavData.BitsPerSample;
-            switch (m_preference.bitsPerSampleFixType) {
-            case BitsPerSampleFixType.Variable:
-                break;
-            case BitsPerSampleFixType.Sint16:
-                preferedBitsPerSample = 16;
-                break;
-            case BitsPerSampleFixType.Sint32:
-                preferedBitsPerSample = 24;
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
-            }
+            SampleFormat sf = GetDeviceSampleFormat(startWavData.BitsPerSample,
+                startWavData.SampleValueRepresentationType);
 
             if (m_deviceSetupInfo.Is(
                 startWavData.SampleRate,
-                preferedBitsPerSample,
+                sf.bitsPerSample,
+                sf.bitFormatType,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
                 m_preference.wasapiSharedOrExclusive,
@@ -650,7 +648,8 @@ namespace PlayPcmWin
 
             m_deviceSetupInfo.Set(
                 startWavData.SampleRate,
-                preferedBitsPerSample,
+                sf.bitsPerSample,
+                sf.bitFormatType,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
                 m_preference.wasapiSharedOrExclusive,
@@ -668,15 +667,17 @@ namespace PlayPcmWin
 
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startWavData.SampleRate, preferedBitsPerSample, latencyMillisec);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                startWavData.SampleRate, preferedBitsPerSample,
+                startWavData.SampleRate, sf.bitsPerSample,
+                sf.bitFormatType, latencyMillisec);
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
+                startWavData.SampleRate, sf.bitsPerSample,
+                sf.bitFormatType,
                 latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3})失敗。{4:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
-                    startWavData.SampleRate, preferedBitsPerSample,
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3}, {4})失敗。{5:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
+                    startWavData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive));
                 AddLogText(s);
@@ -760,8 +761,9 @@ namespace PlayPcmWin
                     return false;
                 }
                 if (wavData.BitsPerSample != 16
-                 && wavData.BitsPerSample != 24) {
-                    string s = string.Format("量子化ビット数が16でも24でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
+                 && wavData.BitsPerSample != 24
+                 && wavData.BitsPerSample != 32) {
+                    string s = string.Format("量子化ビット数が16でも24でも32でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
                         path, wavData.BitsPerSample);
                     MessageBox.Show(s);
                     AddLogText(s);
@@ -856,9 +858,9 @@ namespace PlayPcmWin
         
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
-                string.Format("PlayPcmWin バージョン {0}\r\n" +
+                string.Format("PlayPcmWin バージョン {0}\r\n\r\n" +
                     "PlayPcmWinは libFLACを使用しています。\r\n" +
-                    "libFLACのライセンスは、New BSDライセンスです。" +
+                    "libFLACのライセンスは、New BSD Licenseです。" +
                     "libFlacLicense.txtをご覧ください。",
                     AssemblyVersion));
         }
@@ -996,23 +998,97 @@ namespace PlayPcmWin
         }
 
         /// <summary>
+        /// WavDataの形式と、(共有・排他)、フォーマット固定設定から、
+        /// デバイスに設定されるビットフォーマットを取得。
+        /// </summary>
+        /// <returns>デバイスに設定されるビットフォーマット</returns>
+        private SampleFormat GetDeviceSampleFormat(int wavDataBitsPerSample, ValueRepresentationType waveDataVrt) {
+            // 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
+
+            if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
+                SampleFormat sf = new SampleFormat();
+                sf.bitsPerSample = 32;
+                sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
+                return sf;
+            } else {
+                SampleFormat sf = new SampleFormat();
+
+                switch (m_preference.bitsPerSampleFixType) {
+                case BitsPerSampleFixType.Sint16:
+                    sf.bitsPerSample = 16;
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    break;
+                case BitsPerSampleFixType.Sint32:
+                    sf.bitsPerSample = 32;
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    break;
+                case BitsPerSampleFixType.Sfloat32:
+                    sf.bitsPerSample = 32;
+                    sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
+                    break;
+                case BitsPerSampleFixType.Variable:
+                    if (wavDataBitsPerSample != 16) {
+                        sf.bitsPerSample = 32;
+                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    } else {
+                        System.Diagnostics.Debug.Assert(waveDataVrt == ValueRepresentationType.SInt);
+                        sf.bitsPerSample = 16;
+                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    }
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
+                }
+
+                return sf;
+            }
+        }
+
+        /// <summary>
         /// 量子化ビット数を、もし必要なら変更する。
         /// </summary>
         /// <param name="wd">入力WavData</param>
         /// <returns>変更後WavData</returns>
         private WavData BitsPerSampleConvAsNeeded(WavData wd) {
-            if (wd.BitsPerSample == 16
-                && m_preference.bitsPerSampleFixType == BitsPerSampleFixType.Sint32) {
-                // 16→24に変換する。
-                System.Console.WriteLine("Converting 16bit to 24bit...");
-                wd = wd.BitsPerSampleConvertTo(24);
+            if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
+                // 共有モードの場合Sfloat32に変換する。
+                // 元データがSint32の場合、切り捨てによって情報が失われる。
+                System.Console.WriteLine("Converting to Sfloat32bit...");
+                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SFloat);
+                return wd;
             }
-            if (wd.BitsPerSample == 24
-                && m_preference.bitsPerSampleFixType == BitsPerSampleFixType.Sint16) {
-                // 24→16に変換する。
-                // この場合は、切り捨てによって情報が失われる。
-                System.Console.WriteLine("Converting 24bit to 16bit...");
-                wd = wd.BitsPerSampleConvertTo(16);
+
+            // 排他モード。
+            // 似たようなプログラムがGetDeviceBitFormat()にコピペされている。
+            switch (m_preference.bitsPerSampleFixType) {
+            case BitsPerSampleFixType.Sint16:
+                // Sint16に変換する。
+                // この場合は、元データが24ビット以上の場合、切り捨てによって情報が失われる。
+                System.Console.WriteLine("Converting to SInt16bit...");
+                wd = wd.BitsPerSampleConvertTo(16, ValueRepresentationType.SInt);
+                break;
+            case BitsPerSampleFixType.Sint32:
+                // Sint32に変換する。
+                System.Console.WriteLine("Converting to SInt32bit...");
+                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SInt);
+                break;
+            case BitsPerSampleFixType.Sfloat32:
+                // Sfloat32に変換する。
+                // この場合は、元データがSint32の場合、切り捨てによって情報が失われる。
+                System.Console.WriteLine("Converting to Sfloat32bit...");
+                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SFloat);
+                break;
+            case BitsPerSampleFixType.Variable:
+                // SInt16→SInt16のまま。
+                // SInt32、SFloat32、SInt24→SInt32に変換。
+                if (wd.BitsPerSample != 16) {
+                    wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SInt);
+                }
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
             }
 
             return wd;
@@ -1582,6 +1658,19 @@ namespace PlayPcmWin
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return WasapiCS.DataFeedMode.EventDriven;
+            }
+        }
+
+        private WasapiCS.BitFormatType
+        VrtToBft(ValueRepresentationType vrt) {
+            switch (vrt) {
+            case ValueRepresentationType.SInt:
+                return WasapiCS.BitFormatType.SInt;
+            case ValueRepresentationType.SFloat:
+                return WasapiCS.BitFormatType.SFloat;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.BitFormatType.SInt;
             }
         }
     }
