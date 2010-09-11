@@ -38,6 +38,9 @@ namespace PlayPcmWin {
             case BitsPerSampleFixType.Sint32:
                 radioButtonBpsSint32.IsChecked = true;
                 break;
+            case BitsPerSampleFixType.Sfloat32:
+                radioButtonBpsSfloat32.IsChecked = true;
+                break;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 break;
@@ -53,6 +56,9 @@ namespace PlayPcmWin {
             }
             if (true == radioButtonBpsSint32.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint32;
+            }
+            if (true == radioButtonBpsSfloat32.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sfloat32;
             }
 
             Close();

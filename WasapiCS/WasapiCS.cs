@@ -54,7 +54,7 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int latencyMillisec);
+        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int bitFormatType, int latencyMillisec);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
@@ -148,6 +148,11 @@ namespace Wasapi {
             Rec
         };
 
+        public enum BitFormatType {
+            SInt,
+            SFloat
+        };
+
         public int DoDeviceEnumeration(DeviceType t) {
             return WasapiIO_DoDeviceEnumeration((int)t);
         }
@@ -191,8 +196,8 @@ namespace Wasapi {
             TimerDriven,
         };
 
-        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample, int latencyMillisec) {
-            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample, latencyMillisec);
+        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample, BitFormatType bft, int latencyMillisec) {
+            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample, (int)bft, latencyMillisec);
         }
 
         public void Unsetup() {

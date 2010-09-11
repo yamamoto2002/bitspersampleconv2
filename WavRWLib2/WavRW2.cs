@@ -60,6 +60,11 @@ namespace WavRWLib2
         }
     }
 
+    public enum ValueRepresentationType {
+        SInt,
+        SFloat
+    };
+
     class FmtSubChunk
     {
         private byte[] m_subChunk1Id;
@@ -67,6 +72,8 @@ namespace WavRWLib2
         private ushort m_audioFormat;
         public ushort NumChannels { get; set; }
         public uint SampleRate { get; set; }
+
+        public ValueRepresentationType SampleValueRepresentationType { get; set; }
 
         private uint   m_byteRate;
         private ushort m_blockAlign;
@@ -92,6 +99,8 @@ namespace WavRWLib2
             m_blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
             BitsPerSample = (ushort)bitsPerSample;
+
+            SampleValueRepresentationType = ValueRepresentationType.SInt;
 
             return true;
         }
@@ -120,7 +129,11 @@ namespace WavRWLib2
             }
 
             m_audioFormat = br.ReadUInt16();
-            if (1 != m_audioFormat) {
+            if (1 == m_audioFormat) {
+                SampleValueRepresentationType = ValueRepresentationType.SInt;
+            } else if (3 == m_audioFormat) {
+                SampleValueRepresentationType = ValueRepresentationType.SFloat;
+            } else {
                 Console.WriteLine("E: this wave file is not PCM format {0}. Cannot read this file", m_audioFormat);
                 return false;
             }
@@ -436,6 +449,11 @@ namespace WavRWLib2
         public string FileName { get; set; }
         public string FullPath { get; set; }
 
+        public ValueRepresentationType SampleValueRepresentationType {
+            get { return m_fsc.SampleValueRepresentationType; }
+            set { m_fsc.SampleValueRepresentationType = value; }
+        }
+
         /// <summary>
         /// 何でもありの、物置みたいになってきたな…
         /// </summary>
@@ -620,30 +638,106 @@ namespace WavRWLib2
         /// </summary>
         /// <param name="newBitsPerSample">新しい量子化ビット数</param>
         /// <returns>量子化ビット数変更後のWavData</returns>
-        public WavData BitsPerSampleConvertTo(int newBitsPerSample) {
+        public WavData BitsPerSampleConvertTo(int newBitsPerSample, ValueRepresentationType newValueRepType) {
             WavData newWavData = new WavData();
             newWavData.CopyHeaderInfoFrom(this);
             newWavData.m_fsc.Create(NumChannels, SampleRate, newBitsPerSample);
 
             byte [] rawData = null;
-            if (BitsPerSample == 16 &&
-                newBitsPerSample == 24) {
-                rawData = Conv16to24(SampleRawGet());
-            } else if (BitsPerSample == 24 &&
-                newBitsPerSample == 16) {
-                rawData = Conv24to16(SampleRawGet());
+            if (newBitsPerSample == 32) {
+                if (newValueRepType == ValueRepresentationType.SFloat) {
+                    switch (BitsPerSample) {
+                    case 16:
+                        rawData = ConvI16toF32(SampleRawGet());
+                        break;
+                    case 24:
+                        rawData = ConvI24toF32(SampleRawGet());
+                        break;
+                    case 32:
+                        if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
+                            rawData = (byte[])SampleRawGet().Clone();
+                        } else {
+                            rawData = ConvI32toF32(SampleRawGet());
+                        }
+                        break;
+                    default:
+                        System.Diagnostics.Debug.Assert(false);
+                        return null;
+                    }
+                } else if (newValueRepType == ValueRepresentationType.SInt) {
+                    switch (BitsPerSample) {
+                    case 16:
+                        rawData = ConvI16toI32(SampleRawGet());
+                        break;
+                    case 24:
+                        rawData = ConvI24toI32(SampleRawGet());
+                        break;
+                    case 32:
+                        if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
+                            rawData = ConvF32toI32(SampleRawGet());
+                        } else {
+                            rawData = (byte[])SampleRawGet().Clone();
+                        }
+                        break;
+                    default:
+                        System.Diagnostics.Debug.Assert(false);
+                        return null;
+                    }
+                } else {
+                    System.Diagnostics.Debug.Assert(false);
+                    return null;
+                }
+            } else if (newBitsPerSample == 24) {
+                switch (BitsPerSample) {
+                case 16:
+                    rawData = ConvI16toI24(SampleRawGet());
+                    break;
+                case 24:
+                    rawData = (byte[])SampleRawGet().Clone();
+                    break;
+                case 32:
+                    if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
+                        rawData = ConvF32toI24(SampleRawGet());
+                    } else {
+                        rawData = ConvI32toI24(SampleRawGet());
+                    }
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    return null;
+                }
+            } else if (newBitsPerSample == 16) {
+                switch (BitsPerSample) {
+                case 16:
+                    rawData = (byte[])SampleRawGet().Clone();
+                    break;
+                case 24:
+                    rawData = ConvI24toI16(SampleRawGet());
+                    break;
+                case 32:
+                    if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
+                        rawData = ConvF32toI16(SampleRawGet());
+                    } else {
+                        rawData = ConvI32toI16(SampleRawGet());
+                    }
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    return null;
+                }
             } else {
                 System.Diagnostics.Debug.Assert(false);
                 return null;
             }
 
+            newWavData.SampleValueRepresentationType = newValueRepType;
             newWavData.m_dsc = new DataSubChunk();
             newWavData.m_dsc.SetRawData(NumSamples, rawData);
 
             return newWavData;
         }
 
-        private byte[] Conv16to24(byte[] from) {
+        private byte[] ConvI16toI24(byte[] from) {
             int nSample = from.Length/2;
             byte[] to = new byte[nSample * 3];
             int fromPos = 0;
@@ -657,7 +751,39 @@ namespace WavRWLib2
             }
             return to;
         }
-        private byte[] Conv24to16(byte[] from) {
+        private byte[] ConvI16toI32(byte[] from) {
+            int nSample = from.Length/2;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットは、0埋めする。
+                to[toPos++] = 0;
+                to[toPos++] = 0;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+
+        private byte[] ConvI24toI32(byte[] from) {
+            int nSample = from.Length/3;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットは、0埋めする。
+                to[toPos++] = 0;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+
+        private byte[] ConvI24toI16(byte[] from) {
             int nSample = from.Length / 3;
             byte[] to = new byte[nSample * 2];
             int fromPos = 0;
@@ -668,6 +794,151 @@ namespace WavRWLib2
 
                 to[toPos++] = from[fromPos++];
                 to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+
+        private byte[] ConvI32toI16(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 2];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットの情報が失われる瞬間
+                ++fromPos;
+                ++fromPos;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+
+        private byte[] ConvI32toI24(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 3];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                // 下位ビットの情報が失われる瞬間
+                ++fromPos;
+
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+                to[toPos++] = from[fromPos++];
+            }
+            return to;
+        }
+
+        private byte[] ConvF32toI16(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 2];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                float fv = System.BitConverter.ToSingle(from, fromPos);
+                int iv = (int)(fv * 32768.0f);
+
+                to[toPos++] = (byte)(iv & 0xff);
+                to[toPos++] = (byte)((iv >> 8) & 0xff);
+                fromPos += 4;
+            }
+            return to;
+        }
+        private byte[] ConvF32toI24(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 3];
+            int fromPos = 0;
+            int toPos   = 0;
+            for (int i = 0; i < nSample; ++i) {
+                float fv = System.BitConverter.ToSingle(from, fromPos);
+                int iv = (int)(fv * 8388608.0f);
+
+                to[toPos++] = (byte)(iv & 0xff);
+                to[toPos++] = (byte)((iv>>8) & 0xff);
+                to[toPos++] = (byte)((iv>>16) & 0xff);
+                fromPos += 4;
+            }
+            return to;
+        }
+
+        private byte[] ConvF32toI32(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos   = 0;
+            for (int i = 0; i < nSample; ++i) {
+                float fv = System.BitConverter.ToSingle(from, fromPos);
+                int iv = (int)(fv * 8388608.0f);
+
+                to[toPos++] = 0;
+                to[toPos++] = (byte)(iv & 0xff);
+                to[toPos++] = (byte)((iv>>8) & 0xff);
+                to[toPos++] = (byte)((iv>>16) & 0xff);
+                fromPos += 4;
+            }
+            return to;
+        }
+
+        private byte[] ConvI16toF32(byte[] from) {
+            int nSample = from.Length / 2;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                short iv = (short)(from[fromPos]
+                    + (from[fromPos+1]<<8));
+                float fv = ((float)iv) * (1.0f / 32768.0f);
+
+                byte [] b = System.BitConverter.GetBytes(fv);
+
+                to[toPos++] = b[0];
+                to[toPos++] = b[1];
+                to[toPos++] = b[2];
+                to[toPos++] = b[3];
+                fromPos += 2;
+            }
+            return to;
+        }
+        private byte[] ConvI24toF32(byte[] from) {
+            int nSample = from.Length / 3;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                int iv = ((int)from[fromPos]<<8)
+                    + ((int)from[fromPos+1]<<16)
+                    + ((int)from[fromPos+2]<<24);
+                float fv = ((float)iv) * (1.0f / 2147483648.0f);
+
+                byte [] b = System.BitConverter.GetBytes(fv);
+
+                to[toPos++] = b[0];
+                to[toPos++] = b[1];
+                to[toPos++] = b[2];
+                to[toPos++] = b[3];
+                fromPos += 3;
+            }
+            return to;
+        }
+        private byte[] ConvI32toF32(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                int iv = ((int)from[fromPos+1]<<8)
+                    + ((int)from[fromPos+2]<<16)
+                    + ((int)from[fromPos+3]<<24);
+                float fv = ((float)iv) * (1.0f / 2147483648.0f);
+
+                byte [] b = System.BitConverter.GetBytes(fv);
+
+                to[toPos++] = b[0];
+                to[toPos++] = b[1];
+                to[toPos++] = b[2];
+                to[toPos++] = b[3];
+                fromPos += 4;
             }
             return to;
         }

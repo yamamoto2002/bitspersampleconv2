@@ -23,7 +23,8 @@ namespace PlayPcmWin {
     public enum BitsPerSampleFixType {
         Variable,
         Sint16,
-        Sint32
+        Sint32,
+        Sfloat32,
     }
 
     public class Preference {

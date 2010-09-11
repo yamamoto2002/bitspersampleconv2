@@ -284,70 +284,84 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
     int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000};
     int bitsPerSampleList[] = {16, 32};
+    const wchar_t *bitFormatNameList[] = {
+        L"int",
+        L"float"};
 
     HRG(m_deviceCollection->Item(id, &m_deviceToUse));
 
     HRG(m_deviceToUse->Activate(
         __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
 
-    for (int j=0; j<sizeof bitsPerSampleList/sizeof bitsPerSampleList[0]; ++j) {
-        for (int i=0; i<sizeof sampleRateList/sizeof sampleRateList[0]; ++i) {
-            int sampleRate    = sampleRateList[i];
-            int bitsPerSample = bitsPerSampleList[j];
-
-            assert(!waveFormat);
-            HRG(m_audioClient->GetMixFormat(&waveFormat));
-            assert(waveFormat);
-
-            WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
-
-            dprintf("original Mix Format:\n");
-            WWWaveFormatDebug(waveFormat);
-            WWWFEXDebug(wfex);
-
-            if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
-                dprintf("E: unsupported device ! mixformat == 0x%08x\n",
-                    waveFormat->wFormatTag);
-                hr = E_FAIL;
-                goto end;
+    // 汚いプログラムだなぁ～
+    for (int k=0; k<2; ++k) {
+        for (int j=0; j<sizeof bitsPerSampleList/sizeof bitsPerSampleList[0]; ++j) {
+            if (k==1 && j==0) {
+                // float16bit スキップする。
+                continue;
             }
+            for (int i=0; i<sizeof sampleRateList/sizeof sampleRateList[0]; ++i) {
+                int sampleRate    = sampleRateList[i];
+                int bitsPerSample = bitsPerSampleList[j];
 
-            wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-            wfex->Format.wBitsPerSample = (WORD)bitsPerSample;
-            wfex->Format.nSamplesPerSec = sampleRate;
+                assert(!waveFormat);
+                HRG(m_audioClient->GetMixFormat(&waveFormat));
+                assert(waveFormat);
 
-            wfex->Format.nBlockAlign = (WORD)(
-                (bitsPerSample / 8) * waveFormat->nChannels);
-            wfex->Format.nAvgBytesPerSec =
-                wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-            wfex->Samples.wValidBitsPerSample = (WORD)bitsPerSample;
+                WAVEFORMATEXTENSIBLE * wfex = (WAVEFORMATEXTENSIBLE*)waveFormat;
 
-            dprintf("preferred Format:\n");
-            WWWaveFormatDebug(waveFormat);
-            WWWFEXDebug(wfex);
+                dprintf("original Mix Format:\n");
+                WWWaveFormatDebug(waveFormat);
+                WWWFEXDebug(wfex);
 
-            hr = m_audioClient->IsFormatSupported(
-                m_shareMode,waveFormat,NULL);
-            dprintf("IsFormatSupported=%08x\n", hr);
-            if (S_OK == hr) {
-                wchar_t s[256];
-                StringCbPrintfW(s, sizeof s-1,
-                    L"  %6dHz %dbit: ok 0x%08x\r\n",
-                    sampleRate, bitsPerSample, hr);
-                wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
-            } else {
-                wchar_t s[256];
-                StringCbPrintfW(s, sizeof s-1,
-                    L"  %6dHz %dbit: na 0x%08x\r\n",
-                    sampleRate, bitsPerSample, hr);
-                wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+                if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
+                    dprintf("E: unsupported device ! mixformat == 0x%08x\n",
+                        waveFormat->wFormatTag);
+                    hr = E_FAIL;
+                    goto end;
+                }
+
+                if (k == 0) {
+                    wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+                } else {
+                    wfex->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+                }
+                wfex->Format.wBitsPerSample = (WORD)bitsPerSample;
+                wfex->Format.nSamplesPerSec = sampleRate;
+
+                wfex->Format.nBlockAlign = (WORD)(
+                    (bitsPerSample / 8) * waveFormat->nChannels);
+                wfex->Format.nAvgBytesPerSec =
+                    wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+                wfex->Samples.wValidBitsPerSample = (WORD)bitsPerSample;
+
+                dprintf("preferred Format:\n");
+                WWWaveFormatDebug(waveFormat);
+                WWWFEXDebug(wfex);
+
+                hr = m_audioClient->IsFormatSupported(
+                    m_shareMode,waveFormat,NULL);
+                dprintf("IsFormatSupported=%08x\n", hr);
+                if (S_OK == hr) {
+                    wchar_t s[256];
+                    StringCbPrintfW(s, sizeof s-1,
+                        L"  %6dHz %s%dbit: ok 0x%08x\r\n",
+                        sampleRate, bitFormatNameList[k], bitsPerSample, hr);
+                    wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+                } else {
+                    wchar_t s[256];
+                    StringCbPrintfW(s, sizeof s-1,
+                        L"  %6dHz %s%dbit: na 0x%08x\r\n",
+                        sampleRate, bitFormatNameList[k], bitsPerSample, hr);
+                    wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+                }
+
+                if (waveFormat) {
+                    CoTaskMemFree(waveFormat);
+                    waveFormat = NULL;
+                }
+
             }
-
-            if (waveFormat) {
-                CoTaskMemFree(waveFormat);
-                waveFormat = NULL;
-            }
-
         }
     }
 
@@ -428,6 +442,7 @@ WasapiUser::Setup(
     WWDataFeedMode mode,
     int sampleRate,
     int bitsPerSample,
+    WWBitFormatType bitFormatType,
     int latencyMillisec)
 {
     HRESULT      hr          = 0;
@@ -439,15 +454,29 @@ WasapiUser::Setup(
     m_dataFeedMode        = mode;
     m_latencyMillisec     = latencyMillisec;
     m_sampleRate          = sampleRate;
-    m_dataBitsPerSample   = bitsPerSample;
-    m_deviceBitsPerSample = m_dataBitsPerSample;
+    m_deviceBitsPerSample = bitsPerSample;
+    m_bitFormatType       = bitFormatType;
 
+#if 1
+    // WasapiUserクラスが備えていたサンプルフォーマット変換機能は、廃止した。
+    // 上のレイヤーでPCMデータを適切な形式に変換してから渡してください。
+    if (WWSMShared == m_shareMode) {
+        assert(bitsPerSample == 32);
+        assert(bitFormatType == WWSFloat);
+    }
+#else
+    // WasapiUserクラスはささやかなサンプルフォーマット変換機能を備えている。
+    // ・SInt24→SInt32変換。
+    // ・共有モードのFloat32変換機能。
+    m_dataBitsPerSample = bitsPerSample;
     if (24 == m_deviceBitsPerSample) {
         m_deviceBitsPerSample = 32;
     }
     if (WWSMShared == m_shareMode) {
         m_deviceBitsPerSample = 32;
+        m_bitFormatType       = WWSFloat;
     }
+#endif
 
     m_audioSamplesReadyEvent =
         CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -477,7 +506,9 @@ WasapiUser::Setup(
     }
 
     if (WWSMExclusive == m_shareMode) {
-        wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+        if (WWSInt == m_bitFormatType) {
+            wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+        }
         wfex->Format.wBitsPerSample = (WORD)m_deviceBitsPerSample;
         wfex->Format.nSamplesPerSec = sampleRate;
 
@@ -760,12 +791,28 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     pcmData.id       = id;
     pcmData.next     = NULL;
     pcmData.posFrame = 0;
+    pcmData.nFrames  = 0;
+    pcmData.stream   = NULL;
 
+    // サンプルフォーマット変換は上のレイヤーに任せた。
+    // ここでは、来たdataを中のメモリにそのままコピーする。
+    // Setupでセットアップした形式でdataを渡してください。
+#if 1
+    {
+        BYTE *p = (BYTE *)malloc(bytes);
+        if (NULL != p) {
+            memcpy(p, data, bytes);
+            pcmData.nFrames = bytes/m_frameBytes;
+        }
+        pcmData.stream = p;
+    }
+#else
     // pcmData.streamとpcmData.nFramesを作る。
     // WASAPI共有モードの場合:
-    // ・int→floatに変換する。
+    // ・int→floatに変換する。(SInt32は受け付けない。)
     // WASAPI排他モードの場合:
-    // ・量子化ビット数24ビットの場合32ビットに伸ばす。
+    // ・量子化ビット数32ビットの場合そのまま使用。(SFloat32とSInt32の2種類がある)
+    // ・量子化ビット数24ビットの場合SInt32に伸ばす。
     // ・量子化ビット数16ビットの場合そのまま使用。
     //
     // dataは、この関数から抜けたら消えるためmallocしてコピー。WWPcmData::Term()でfreeする。
@@ -773,24 +820,42 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     if (WWSMShared == m_shareMode) {
         BYTE *p = NULL;
         if (24 == m_dataBitsPerSample) {
-            // 共有モード 24ビット
+            // 共有モード SInt24→Float32
+            assert(m_bitFormatType == WWSInt);
             pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
             p = WWStereo24ToStereoFloat32(data, bytes);
         } else if (16 == m_dataBitsPerSample) {
-            // 共有モード 16ビット
+            // 共有モード SInt16→Float32
+            assert(m_bitFormatType == WWSInt);
             pcmData.nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
             p = WWStereo16ToStereoFloat32(data, bytes);
-        } else {
-            assert(0);
+        } else if (32 == m_dataBitsPerSample) {
+            // 共有モード 32bit
+            // Float32ビット以外は受け付けない。
+            // そのままコピーする。
+            p = (BYTE *)malloc(bytes);
+            if (NULL != p) {
+                memcpy(p, data, bytes);
+                pcmData.nFrames = bytes/m_frameBytes;
+            }
         }
         pcmData.stream = p;
     } else if (24 == m_dataBitsPerSample) {
         // 排他モード 24bit
+        // SInt32に拡張する。
+        assert(m_bitFormatType == WWSInt);
         BYTE *p = WWStereo24ToStereo32(data, bytes);
         pcmData.stream = p;
         pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
-    } else if (16 == m_dataBitsPerSample) {
-        // 排他モード 16bit
+    } else if (16 == m_dataBitsPerSample ||
+        32 == m_dataBitsPerSample) {
+        // 排他モード 16bitまたは32bit。
+        // 16bitはSIint32しかありえない。
+        // 32ビットは、ビットフォーマットにSInt32とSFloatの2種類がある。
+        // 量子化ビット数変換を行わず、memcpyして格納する。
+
+        assert(32 == m_dataBitsPerSample || m_bitFormatType == WWSInt);
+
         BYTE *p = (BYTE *)malloc(bytes);
         if (NULL != p) {
             memcpy(p, data, bytes);
@@ -800,6 +865,7 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     } else {
         assert(0);
     }
+#endif
 
     if (NULL == pcmData.stream) {
         return false;
@@ -818,7 +884,7 @@ WasapiUser::ClearPlayList(void)
 void
 WasapiUser::ClearPlayPcmData(void)
 {
-    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
         m_playPcmDataList[i].Term();
     }
     m_playPcmDataList.clear();
@@ -843,7 +909,7 @@ WasapiUser::SetPlayRepeat(bool repeat)
     // リピートフラグが立っていたら最後のpcmDataのnextを最初のpcmDataにする。
     dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
 
-    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
         if (i == m_playPcmDataList.size()-1) {
             // 最後の項目。
             if (repeat) {
@@ -874,7 +940,7 @@ WasapiUser::GetNowPlayingPcmDataId(void)
 WWPcmData *
 WasapiUser::FindPlayPcmDataById(int id)
 {
-    for (int i=0; i<m_playPcmDataList.size(); ++i) {
+    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
         if (m_playPcmDataList[i].id == id) {
             return &m_playPcmDataList[i];
         }
