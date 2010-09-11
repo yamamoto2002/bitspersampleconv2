@@ -299,7 +299,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 =更新履歴=
 
-===!PlayPcmWin 1.0.42 ==
+===!PlayPcmWin 1.0.43 ==
 機能追加
   * 量子化ビット数32ビット(SInt32またはSFloat32)のWAVファイル対応。
   * デバイスに送るデータの量子化ビット数固定機能に、Float32に固定する機能を追加。
