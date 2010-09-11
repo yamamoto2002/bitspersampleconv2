@@ -7,10 +7,6 @@
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
 
-↓[詳細設定]画面
-
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin143Settings.png
-
 =特徴=
   * 量子化ビット数16、24、32ビットの2チャンネルステレオWAVファイル再生に対応。
   * 量子化ビット数16ビットと24ビットの2チャンネルステレオFLACファイル再生に対応。
@@ -307,6 +303,11 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 機能追加
   * 量子化ビット数32ビット(SInt32またはSFloat32)のWAVファイル対応。
   * デバイスに送るデータの量子化ビット数固定機能に、Float32に固定する機能を追加。
+
+↓[詳細設定]画面
+
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin143Settings.png
+
 
 ===!PlayPcmWin 1.0.42 ==
 機能追加
