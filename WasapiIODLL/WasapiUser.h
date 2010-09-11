@@ -158,7 +158,6 @@ private:
     UINT32       m_bufferFrameNum;
 
     int          m_deviceBitsPerSample;
-    //int          m_dataBitsPerSample;
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
     WWBitFormatType m_bitFormatType;
