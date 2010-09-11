@@ -142,6 +142,7 @@ Pro Audioにすると、出力レイテンシーを10ミリ秒よりも短く設
 実際に試すと、あまり効果はありませんでした。
 
 [設定なし]を選ぶと、再生スレッドはAvSetMmThreadCharacteristics()を呼びません。
+この場合でも、スレッドの状態を観察すると、AvSetMmThreadCharacteristics()を呼ばなくても、IAudioClient::Initialize()呼出によって何らかのMMCSS的な処理が暗黙的に呼ばれているようです。
 
 =RME FF400やM-AUDIO ProFireでWASAPI排他モードを使うときのコツ=
 
