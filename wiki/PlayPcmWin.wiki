@@ -133,7 +133,7 @@ CPU負荷が低くなります。
 これは、
 AvSetMmThreadCharacteristics()関数の第1引数です。
 
-この引数の説明はMultimedia Class Scheduler Serviceの解説にあります
+この引数の説明はMultimedia Class Scheduler Service(MMCSS)の解説にあります
 
 http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
 
