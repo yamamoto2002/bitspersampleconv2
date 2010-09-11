@@ -457,26 +457,12 @@ WasapiUser::Setup(
     m_deviceBitsPerSample = bitsPerSample;
     m_bitFormatType       = bitFormatType;
 
-#if 1
     // WasapiUserクラスが備えていたサンプルフォーマット変換機能は、廃止した。
     // 上のレイヤーでPCMデータを適切な形式に変換してから渡してください。
     if (WWSMShared == m_shareMode) {
         assert(bitsPerSample == 32);
         assert(bitFormatType == WWSFloat);
     }
-#else
-    // WasapiUserクラスはささやかなサンプルフォーマット変換機能を備えている。
-    // ・SInt24→SInt32変換。
-    // ・共有モードのFloat32変換機能。
-    m_dataBitsPerSample = bitsPerSample;
-    if (24 == m_deviceBitsPerSample) {
-        m_deviceBitsPerSample = 32;
-    }
-    if (WWSMShared == m_shareMode) {
-        m_deviceBitsPerSample = 32;
-        m_bitFormatType       = WWSFloat;
-    }
-#endif
 
     m_audioSamplesReadyEvent =
         CreateEventEx(NULL, NULL, 0, EVENT_MODIFY_STATE | SYNCHRONIZE);
@@ -797,7 +783,6 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     // サンプルフォーマット変換は上のレイヤーに任せた。
     // ここでは、来たdataを中のメモリにそのままコピーする。
     // Setupでセットアップした形式でdataを渡してください。
-#if 1
     {
         BYTE *p = (BYTE *)malloc(bytes);
         if (NULL != p) {
@@ -806,66 +791,6 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
         }
         pcmData.stream = p;
     }
-#else
-    // pcmData.streamとpcmData.nFramesを作る。
-    // WASAPI共有モードの場合:
-    // ・int→floatに変換する。(SInt32は受け付けない。)
-    // WASAPI排他モードの場合:
-    // ・量子化ビット数32ビットの場合そのまま使用。(SFloat32とSInt32の2種類がある)
-    // ・量子化ビット数24ビットの場合SInt32に伸ばす。
-    // ・量子化ビット数16ビットの場合そのまま使用。
-    //
-    // dataは、この関数から抜けたら消えるためmallocしてコピー。WWPcmData::Term()でfreeする。
-
-    if (WWSMShared == m_shareMode) {
-        BYTE *p = NULL;
-        if (24 == m_dataBitsPerSample) {
-            // 共有モード SInt24→Float32
-            assert(m_bitFormatType == WWSInt);
-            pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
-            p = WWStereo24ToStereoFloat32(data, bytes);
-        } else if (16 == m_dataBitsPerSample) {
-            // 共有モード SInt16→Float32
-            assert(m_bitFormatType == WWSInt);
-            pcmData.nFrames = bytes /2 / 2; // 3==16bit, 2==stereo
-            p = WWStereo16ToStereoFloat32(data, bytes);
-        } else if (32 == m_dataBitsPerSample) {
-            // 共有モード 32bit
-            // Float32ビット以外は受け付けない。
-            // そのままコピーする。
-            p = (BYTE *)malloc(bytes);
-            if (NULL != p) {
-                memcpy(p, data, bytes);
-                pcmData.nFrames = bytes/m_frameBytes;
-            }
-        }
-        pcmData.stream = p;
-    } else if (24 == m_dataBitsPerSample) {
-        // 排他モード 24bit
-        // SInt32に拡張する。
-        assert(m_bitFormatType == WWSInt);
-        BYTE *p = WWStereo24ToStereo32(data, bytes);
-        pcmData.stream = p;
-        pcmData.nFrames = bytes /3 / 2; // 3==24bit, 2==stereo
-    } else if (16 == m_dataBitsPerSample ||
-        32 == m_dataBitsPerSample) {
-        // 排他モード 16bitまたは32bit。
-        // 16bitはSIint32しかありえない。
-        // 32ビットは、ビットフォーマットにSInt32とSFloatの2種類がある。
-        // 量子化ビット数変換を行わず、memcpyして格納する。
-
-        assert(32 == m_dataBitsPerSample || m_bitFormatType == WWSInt);
-
-        BYTE *p = (BYTE *)malloc(bytes);
-        if (NULL != p) {
-            memcpy(p, data, bytes);
-            pcmData.nFrames = bytes/m_frameBytes;
-        }
-        pcmData.stream = p;
-    } else {
-        assert(0);
-    }
-#endif
 
     if (NULL == pcmData.stream) {
         return false;

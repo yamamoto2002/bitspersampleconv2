@@ -676,10 +676,10 @@ namespace PlayPcmWin
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3}, {4})失敗。{5:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {1}bit レイテンシー{2}ms {3} {5}に対応していないのか、どちらかです。\r\n",
+                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3}, {4})失敗。{5:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {2}{1}bit レイテンシー{3}ms {4} {5}に対応していないのか、どちらかです。\r\n",
                     startWavData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
-                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode), hr,
-                    ShareModeToStr(m_preference.wasapiSharedOrExclusive));
+                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
+                    ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
                 AddLogText(s);
                 MessageBox.Show(s);
                 return false;
