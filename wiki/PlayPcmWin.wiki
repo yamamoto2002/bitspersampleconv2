@@ -23,9 +23,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
 
 =ダウンロード=
 
-安定版　(バージョン1.0.43)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin143.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin143x64.zip
+安定版　(バージョン1.0.44)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin144.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin144x64.zip
 
 非常にバグっぽい開発版 
   * なし
@@ -315,6 +315,13 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 
 
 =更新履歴=
+
+===!PlayPcmWin 1.0.44 ==
+機能追加
+  * CUEシート対応。
+
+バグ取り
+  * 1.0.43でIAudioClient::Initialize失敗時のメッセージ表示が、バグにより、エラーコードを含まなくなっていたのを修正。
 
 ===!PlayPcmWin 1.0.43 ==
 機能追加
