@@ -74,6 +74,7 @@ enum WWSchedulerTaskType {
     WWSTTNone,
     WWSTTAudio,
     WWSTTProAudio,
+    WWSTTPlayback
 };
 
 enum WWShareMode {

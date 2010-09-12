@@ -55,7 +55,8 @@
                     <Grid>
                         <RadioButton Content="Audio" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,0,0" Name="radioButtonTaskAudio" VerticalAlignment="Top" Checked="radioButtonTaskAudio_Checked" />
                         <RadioButton Content="Pro Audio" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTaskProAudio" VerticalAlignment="Top" Checked="radioButtonTaskProAudio_Checked" IsChecked="True" />
-                        <RadioButton Content="設定なし" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="96,6,0,0" Name="radioButtonTaskNone" VerticalAlignment="Top" Width="98" Checked="radioButtonTaskNone_Checked" />
+                        <RadioButton Content="Playback" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="96,6,0,0" Name="radioButtonTaskNone" VerticalAlignment="Top" Width="98" Checked="radioButtonTaskPlayback_Checked" />
+                        <RadioButton Content="設定なし" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="96,28,0,0" Name="radioButtonTaskPlayback" VerticalAlignment="Top" Width="98" Checked="radioButtonTaskNone_Checked" />
                     </Grid>
                 </GroupBox>
                 <GroupBox Header="データ供給モード" Height="78" HorizontalAlignment="Left" Margin="6,85,0,0" Name="groupBox6" VerticalAlignment="Top" Width="199">

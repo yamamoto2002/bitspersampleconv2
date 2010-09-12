@@ -317,6 +317,9 @@ namespace PlayPcmWin
             case RenderThreadTaskType.ProAudio:
                 radioButtonTaskProAudio.IsChecked = true;
                 break;
+            case RenderThreadTaskType.Playback:
+                radioButtonTaskPlayback.IsChecked = true;
+                break;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 break;
@@ -676,7 +679,7 @@ namespace PlayPcmWin
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("エラー: wasapi.Setup({0}, {1}, {2}, {3}, {4})失敗。{5:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {2}{1}bit レイテンシー{3}ms {4} {5}に対応していないのか、どちらかです。\r\n",
+                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{6:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {2}{1}bit レイテンシー{3}ms {4} {5}に対応していないのか、どちらかです。\r\n",
                     startWavData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
@@ -731,79 +734,159 @@ namespace PlayPcmWin
             }
         }
 
-        private bool LoadWaveFileFromPath(string path)
+        /// <summary>
+        /// サブルーチン
+        /// WavDataファイル読み込み成功後に行う処理。
+        /// FLACとWAVで共通。
+        /// </summary>
+        /// <param name="wavData"></param>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        private bool CheckAddWavData(WavData wavData, string path) {
+            if (wavData.NumChannels != 2) {
+                string s = string.Format("2チャンネルステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
+                    path, wavData.NumChannels);
+                MessageBox.Show(s);
+                AddLogText(s);
+                return false;
+            }
+            if (wavData.BitsPerSample != 16
+             && wavData.BitsPerSample != 24
+             && wavData.BitsPerSample != 32) {
+                string s = string.Format("量子化ビット数が16でも24でも32でもないPCMファイルの再生には対応していません: {0} {1}bit\r\n",
+                    path, wavData.BitsPerSample);
+                MessageBox.Show(s);
+                AddLogText(s);
+                return false;
+            }
+
+            if (0 < m_wavDataList.Count
+                && !m_wavDataList[m_wavDataList.Count - 1].IsSameFormat(wavData)) {
+                // データフォーマットが変わった。
+                listBoxPlayFiles.Items.Add(
+                    string.Format("----------{0}Hz {1}bitに変更------------", wavData.SampleRate, wavData.BitsPerSample));
+                m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
+                ++m_readGroupId;
+            }
+
+            wavData.FullPath = path;
+            wavData.FileName = System.IO.Path.GetFileName(path);
+            wavData.Id = m_wavDataList.Count();
+            wavData.GroupId = m_readGroupId;
+
+            m_wavDataList.Add(wavData);
+            listBoxPlayFiles.Items.Add(wavData.FileName);
+            m_playListItems.Add(new PlayListItemInfo(
+                PlayListItemInfo.ItemType.Item,
+                wavData));
+
+            // 状態の更新。再生リストにファイル有り。
+            ChangeState(State.プレイリストあり);
+            return true;
+        }
+
+        /// <summary>
+        /// WAVファイルを読み込む。
+        /// </summary>
+        private bool LoadWavFileFromPath(string path)
         {
             WavData wavData;
 
             bool readSuccess = false;
-            int flacErcd = 0;
 
-            string ext = System.IO.Path.GetExtension(path);
-            if (0 == String.Compare(".flac", ext, true)) {
-                FlacDecodeIF fdif = new FlacDecodeIF();
-                flacErcd = fdif.ReadHeader(path, out wavData);
-                if (flacErcd == 0) {
-                    readSuccess = true;
-                }
-            } else {
-                wavData = new WavData();
-                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
-                    readSuccess = wavData.ReadHeader(br);
-                }
+            wavData = new WavData();
+            using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                readSuccess = wavData.ReadHeader(br);
             }
 
             if (readSuccess) {
-                if (wavData.NumChannels != 2) {
-                    string s = string.Format("2チャンネルステレオ以外のWAVファイルの再生には対応していません: {0} {1}ch\r\n",
-                        path, wavData.NumChannels);
-                    MessageBox.Show(s);
-                    AddLogText(s);
-                    return false;
-                }
-                if (wavData.BitsPerSample != 16
-                 && wavData.BitsPerSample != 24
-                 && wavData.BitsPerSample != 32) {
-                    string s = string.Format("量子化ビット数が16でも24でも32でもないWAVファイルの再生には対応していません: {0} {1}bit\r\n",
-                        path, wavData.BitsPerSample);
-                    MessageBox.Show(s);
-                    AddLogText(s);
-                    return false;
-                }
-
-                if (0 < m_wavDataList.Count
-                    && !m_wavDataList[m_wavDataList.Count-1].IsSameFormat(wavData)) {
-                    // データフォーマットが変わった。
-                    listBoxPlayFiles.Items.Add(
-                        string.Format("----------{0}Hz {1}bitに変更------------", wavData.SampleRate, wavData.BitsPerSample));
-                    m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
-                    ++m_readGroupId;
-                }
-
-                wavData.FullPath = path;
-                wavData.FileName = System.IO.Path.GetFileName(path);
-                wavData.Id = m_wavDataList.Count();
-                wavData.GroupId = m_readGroupId;
-
-                m_wavDataList.Add(wavData);
-                listBoxPlayFiles.Items.Add(wavData.FileName);
-                m_playListItems.Add(new PlayListItemInfo(
-                    PlayListItemInfo.ItemType.Item,
-                    wavData));
-
-                // 状態の更新。再生リストにファイル有り。
-                ChangeState(State.プレイリストあり);
+                CheckAddWavData(wavData, path);
             } else {
-                string s = string.Format("読み込み失敗: {0}\r\n", path);
-                if (flacErcd != 0) {
-                    s = string.Format("読み込み失敗: {0}\r\n{1}",
-                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
-                }
+                string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
                 AddLogText(s);
                 MessageBox.Show(s);
                 return false;
             }
             return true;
         }
+
+        /// <summary>
+        /// FLACファイルを読み込む。
+        /// </summary>
+        private bool LoadFlacFileFromPath(string path) {
+            WavData wavData;
+
+            bool readSuccess = false;
+            int flacErcd = 0;
+
+            FlacDecodeIF fdif = new FlacDecodeIF();
+            flacErcd = fdif.ReadHeader(path, out wavData);
+            if (flacErcd == 0) {
+                readSuccess = true;
+            }
+
+            if (readSuccess) {
+                CheckAddWavData(wavData, path);
+            } else {
+                string s = string.Format("FLACファイル読み込み失敗: {0}\r\n{1}",
+                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
+                AddLogText(s);
+                MessageBox.Show(s);
+                return false;
+            }
+            return true;
+        }
+
+        private bool LoadCueFileFromPath(string path) {
+            CueSheetReader csr = new CueSheetReader();
+            bool result = csr.ReadFromFile(path);
+            if (!result) {
+                string s = string.Format("CUEファイル読み込み失敗: {0}",
+                        path);
+                AddLogText(s);
+                MessageBox.Show(s);
+                return false;
+            }
+
+            for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
+                CueSheetTrackInfo csti = csr.GetTrackInfo(i);
+                ParseFile(csti.path, ParseFileMode.OnlyConcreteFile);
+            }
+            return true;
+        }
+
+        enum ParseFileMode {
+            AllowAll,
+            OnlyConcreteFile,
+            OnlyMetaFile,
+        }
+
+        /// <summary>
+        /// N.B. ReadWavPcmDataも参照。
+        /// </summary>
+        private void ParseFile(string path, ParseFileMode mode) {
+            string ext = System.IO.Path.GetExtension(path);
+
+            switch (ext.ToLower()) {
+            case ".cue":
+                if (mode != ParseFileMode.OnlyConcreteFile) {
+                    LoadCueFileFromPath(path);
+                }
+                break;
+            case ".flac":
+                if (mode != ParseFileMode.OnlyMetaFile) {
+                    LoadFlacFileFromPath(path);
+                }
+                break;
+            default:
+                if (mode != ParseFileMode.OnlyMetaFile) {
+                    LoadWavFileFromPath(path);
+                }
+                break;
+            }
+        }
+
+        //////////////////////////////////////////////////////////////////////////
 
         private void MainWindowDragEnter(object sender, DragEventArgs e)
         {
@@ -829,7 +912,7 @@ namespace PlayPcmWin
             }
 
             for (int i = 0; i < paths.Length; ++i) {
-                LoadWaveFileFromPath(paths[i]);
+                ParseFile(paths[i], ParseFileMode.AllowAll);
             }
             UpdateUIStatus();
         }
@@ -846,12 +929,13 @@ namespace PlayPcmWin
             dlg.DefaultExt = ".wav";
             dlg.Filter =
                 "WAVEファイル (.wav)|*.wav" +
-                "FLACファイル (.flac)|*.flac";
+                "FLACファイル (.flac)|*.flac" +
+                "CUEファイル (.cue)|*.cue";
 
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                LoadWaveFileFromPath(dlg.FileName);
+                ParseFile(dlg.FileName, ParseFileMode.AllowAll);
                 UpdateUIStatus();
             }
         }
@@ -875,9 +959,9 @@ namespace PlayPcmWin
         private static string DfmToStr(WasapiDataFeedMode dfm) {
             switch (dfm) {
             case WasapiDataFeedMode.EventDriven:
-                return "イベント駆動モード";
+                return "イベント駆動";
             case WasapiDataFeedMode.TimerDriven:
-                return "タイマー駆動モード";
+                return "タイマー駆動";
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "unknown";
@@ -901,6 +985,9 @@ namespace PlayPcmWin
             public int hr;
         }
 
+        /// <summary>
+        /// N.B. LoadWavFileとLoadFlacFileも参照。
+        /// </summary>
         private int ReadWavPcmData(WavData wavData) {
             string ext = System.IO.Path.GetExtension(wavData.FullPath);
             if (0 == String.Compare(".flac", ext, true)) {
@@ -1477,6 +1564,10 @@ namespace PlayPcmWin
             m_preference.renderThreadTaskType = RenderThreadTaskType.ProAudio;
         }
 
+        private void radioButtonTaskPlayback_Checked(object sender, RoutedEventArgs e) {
+            m_preference.renderThreadTaskType = RenderThreadTaskType.Playback;
+        }
+
         private void radioButtonTaskNone_Checked(object sender, RoutedEventArgs e) {
             m_preference.renderThreadTaskType = RenderThreadTaskType.None;
         }
@@ -1629,6 +1720,8 @@ namespace PlayPcmWin
                 return WasapiCS.SchedulerTaskType.Audio;
             case RenderThreadTaskType.ProAudio:
                 return WasapiCS.SchedulerTaskType.ProAudio;
+            case RenderThreadTaskType.Playback:
+                return WasapiCS.SchedulerTaskType.Playback;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return WasapiCS.SchedulerTaskType.None; ;

@@ -52,6 +52,7 @@ WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
     case WWSTTNone: return L"None";
     case WWSTTAudio: return L"Audio";
     case WWSTTProAudio: return L"Pro Audio";
+    case WWSTTPlayback: return L"Playback";
     default: assert(0); return L"";
     }
 }
@@ -143,7 +144,7 @@ WasapiUser::Term(void)
 void
 WasapiUser::SetSchedulerTaskType(WWSchedulerTaskType t)
 {
-    assert(0 <= t&& t <= WWSTTProAudio);
+    assert(0 <= t&& t <= WWSTTPlayback);
 
     dprintf("D: %s() t=%d\n", __FUNCTION__, (int)t);
 
