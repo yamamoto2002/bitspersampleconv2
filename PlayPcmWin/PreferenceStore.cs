@@ -17,7 +17,8 @@ namespace PlayPcmWin {
     public enum RenderThreadTaskType {
         None,
         Audio,
-        ProAudio
+        ProAudio,
+        Playback
     };
 
     public enum BitsPerSampleFixType {

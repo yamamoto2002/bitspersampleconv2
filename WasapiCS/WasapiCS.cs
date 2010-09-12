@@ -127,7 +127,8 @@ namespace Wasapi {
         public enum SchedulerTaskType {
             None,
             Audio,
-            ProAudio
+            ProAudio,
+            Playback
         };
 
         public void SetSchedulerTaskType(SchedulerTaskType t) {
