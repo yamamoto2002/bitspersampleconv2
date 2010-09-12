@@ -319,6 +319,7 @@ http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
 ===!PlayPcmWin 1.0.44 ==
 機能追加
   * CUEシート対応。
+  * MMCSS設定に"Playback"追加。
 
 バグ取り
   * 1.0.43でIAudioClient::Initialize失敗時のメッセージ表示が、バグにより、エラーコードを含まなくなっていたのを修正。
