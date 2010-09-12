@@ -231,6 +231,16 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
   * !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
   * 別途libFLACのソースコードと、libFLACをビルドするためのliboggのソースコードが必要です。
 
+=FLAC読み込み対応について=
+
+!PlayPcmWinはFLAC読み込み処理でlibFLACの機能を使用しています。
+
+libFLACのライセンスは New BSD Licenseです。
+
+ライセンスの全文はここで読むことができます。
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/libFlacLicense.txt
+
 =再生スレッドの動作説明=
 
 再生スレッドは、PCMデータをWASAPIに送るスレッドです。
