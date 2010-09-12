@@ -52,6 +52,10 @@ zipを展開して、中のSetup.exeを実行してインストールします�
 
 アンインストールは、[スタート][コントロールパネル][プログラムのアンインストール] または[プログラムと機能]で行うか、もう一度Setup.exeを実行して削除を選びます。
 
+=更新履歴=
+こちらをご覧下さい。
+http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog
+
 =対応オーディオデバイスについて=
 
 こちらをご覧下さい。
@@ -312,4 +316,3 @@ WASAPI排他イベント駆動モードで、出力レイテンシー設定200�
 =参考文献=
 
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
-
