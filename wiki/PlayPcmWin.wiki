@@ -251,6 +251,9 @@ C:\Program Files\yamamoto2002\PlayPcmWin\libFlacLicense.txt
 }}}
 に同内容のテキストファイルがコピーされます。
 
+量子化ビット数32ビットのFLACファイルの読み込みは対応しておりません。
+これは、現時点でlibFLACが対応していないためです。
+
 =再生スレッドの動作説明=
 
 再生スレッドは、PCMデータをWASAPIに送るスレッドです。
