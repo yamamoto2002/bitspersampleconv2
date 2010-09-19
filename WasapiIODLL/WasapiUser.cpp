@@ -652,6 +652,8 @@ WasapiUser::Start(int wavDataId)
 
     dprintf("D: %s()\n", __FUNCTION__);
 
+    PlayPcmDataListDebug();
+
     assert(m_playPcmDataList.size());
 
     m_nowPlayingPcmData = FindPlayPcmDataById(wavDataId);
@@ -770,11 +772,16 @@ WasapiUser::Run(int millisec)
 /// @param id WAVファイルID。
 /// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
 /// @param bytes dataのバイト数。
+/// @return true: 追加成功。false: 追加失敗。
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
-    WWPcmData pcmData;
+    if (data == NULL || 0 == bytes) {
+        dprintf("E: %s(%d, %p, %d) arg check failed\n", __FUNCTION__, id, data, bytes);
+        return false;
+    }
 
+    WWPcmData pcmData;
     pcmData.id       = id;
     pcmData.next     = NULL;
     pcmData.posFrame = 0;
@@ -784,19 +791,14 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     // サンプルフォーマット変換は上のレイヤーに任せた。
     // ここでは、来たdataを中のメモリにそのままコピーする。
     // Setupでセットアップした形式でdataを渡してください。
-    {
-        BYTE *p = (BYTE *)malloc(bytes);
-        if (NULL != p) {
-            memcpy(p, data, bytes);
-            pcmData.nFrames = bytes/m_frameBytes;
-        }
-        pcmData.stream = p;
-    }
-
-    if (NULL == pcmData.stream) {
+    BYTE *p = (BYTE *)malloc(bytes);
+    if (NULL == p) {
+        dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
-
+    memcpy(p, data, bytes);
+    pcmData.nFrames = bytes/m_frameBytes;
+    pcmData.stream = p;
     m_playPcmDataList.push_back(pcmData);
     return true;
 }
@@ -875,6 +877,18 @@ WasapiUser::FindPlayPcmDataById(int id)
     return NULL;
 }
 
+void
+WasapiUser::PlayPcmDataListDebug(void)
+{
+    dprintf("D: %s() count=%u\n", __FUNCTION__, m_playPcmDataList.size());
+    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
+        WWPcmData *p = &m_playPcmDataList[i];
+
+        dprintf("  i=%d id=%d next=%p nFrames=%d posFrame=%d pregapFrames=%d stream=%p\n", i,
+            p->id, p->next, p->nFrames, p->posFrame, p->pregapFrames, p->stream);
+    }
+}
+
 bool
 WasapiUser::SetNowPlayingPcmDataId(int id)
 {
@@ -885,6 +899,7 @@ WasapiUser::SetNowPlayingPcmDataId(int id)
     {
         WWPcmData *p = FindPlayPcmDataById(id);
         if (NULL == p) {
+            dprintf("D: %s(%d) id not found\n", __FUNCTION__, id);
             goto end;
         }
 

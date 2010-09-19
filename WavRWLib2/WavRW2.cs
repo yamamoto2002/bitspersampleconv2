@@ -264,6 +264,22 @@ namespace WavRWLib2
             return m_rawData;
         }
 
+        public void TrimRawData(long newNumSamples, long startBytes, long endBytes) {
+            System.Diagnostics.Debug.Assert(0 <= startBytes);
+            System.Diagnostics.Debug.Assert(0 <= endBytes);
+            System.Diagnostics.Debug.Assert(startBytes <= endBytes);
+
+            m_numSamples = newNumSamples;
+            if (newNumSamples == 0) {
+                m_rawData = null;
+            } else {
+                byte[] newArray = new byte[endBytes - startBytes];
+                Array.Copy(m_rawData, startBytes, newArray, 0, endBytes - startBytes);
+                m_rawData = null;
+                m_rawData = newArray;
+            }
+        }
+
         public short Sample16Get(int ch, int pos)
         {
             return m_data[ch].Get16(pos);
@@ -455,9 +471,54 @@ namespace WavRWLib2
         }
 
         /// <summary>
-        /// 何でもありの、物置みたいになってきたな…
+        /// ファイルグループ番号。何でもありの、物置みたいになってきたな…
         /// </summary>
         public int GroupId { get; set; }
+
+        /// <summary>
+        /// 表示名。CUEシートから来る
+        /// </summary>
+        public string DisplayName { get; set; }
+
+        /// <summary>
+        /// 開始Tick(75分の1秒=1)。0のとき、ファイルの先頭が開始Tick
+        /// </summary>
+        public int    StartTick { get; set; }
+
+        /// <summary>
+        /// 終了Tick(75分の1秒=1)。-1のとき、ファイルの終わりが終了Tick
+        /// </summary>
+        public int    EndTick { get; set; }
+
+        /// <summary>
+        /// StartTickとEndTickを見て、必要な部分以外をカットする。
+        /// </summary>
+        public void Trim() {
+            if (StartTick == 0 && EndTick == -1) {
+                return;
+            }
+
+            if (StartTick < 0) {
+                // データ壊れ。無視する。
+                return;
+            }
+
+            long startBytes = (long)(StartTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
+            long endBytes = (long)(EndTick) * SampleRate / 75 * BitsPerSample/8 * NumChannels;
+
+            if (endBytes < 0) {
+                // 終了位置はファイルの終わり。
+                endBytes = NumSamples * BitsPerSample / 8 * NumChannels;
+            }
+
+            if (endBytes < startBytes) {
+                // 1サンプルもない。
+                startBytes = endBytes;
+            }
+
+            long newNumSamples = (endBytes - startBytes) / (BitsPerSample / 8 * NumChannels);
+            m_dsc.TrimRawData(newNumSamples, startBytes, endBytes);
+        }
 
         /// <summary>
         /// rhsの内容(チャンネル数、サンプルレート、量子化ビット数の情報)を自分自身にコピーする。
