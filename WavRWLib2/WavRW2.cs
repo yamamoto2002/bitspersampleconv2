@@ -270,7 +270,8 @@ namespace WavRWLib2
             System.Diagnostics.Debug.Assert(startBytes <= endBytes);
 
             m_numSamples = newNumSamples;
-            if (newNumSamples == 0) {
+            if (newNumSamples == 0 ||
+                m_rawData.Length <= startBytes) {
                 m_rawData = null;
             } else {
                 byte[] newArray = new byte[endBytes - startBytes];
@@ -506,7 +507,8 @@ namespace WavRWLib2
             long startBytes = (long)(StartTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
             long endBytes = (long)(EndTick) * SampleRate / 75 * BitsPerSample/8 * NumChannels;
 
-            if (endBytes < 0) {
+            if (endBytes < 0 ||
+                (NumSamples * BitsPerSample / 8 * NumChannels) < endBytes) {
                 // 終了位置はファイルの終わり。
                 endBytes = NumSamples * BitsPerSample / 8 * NumChannels;
             }
