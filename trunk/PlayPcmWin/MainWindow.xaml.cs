@@ -736,13 +736,10 @@ namespace PlayPcmWin
 
         /// <summary>
         /// サブルーチン
-        /// WavDataファイル読み込み成功後に行う処理。
+        /// WavData読み込み成功後に行う処理。
         /// FLACとWAVで共通。
         /// </summary>
-        /// <param name="wavData"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        private bool CheckAddWavData(WavData wavData, string path) {
+        private bool CheckAddWavData(CueSheetTrackInfo csti, WavData wavData, string path) {
             if (wavData.NumChannels != 2) {
                 string s = string.Format("2チャンネルステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
                     path, wavData.NumChannels);
@@ -774,8 +771,26 @@ namespace PlayPcmWin
             wavData.Id = m_wavDataList.Count();
             wavData.GroupId = m_readGroupId;
 
+            // CUEシートの情報をセットする。
+            if (null == csti) {
+                wavData.DisplayName = wavData.FileName;
+                wavData.StartTick = 0;
+                wavData.EndTick = -1;
+            } else {
+                if (0 < csti.title.Length) {
+                    wavData.DisplayName = csti.title;
+                    if (csti.indexId == 0) {
+                        wavData.DisplayName = "[gap] " + csti.title;
+                    }
+                } else {
+                    wavData.DisplayName = wavData.FileName;
+                }
+                wavData.StartTick = csti.startTick;
+                wavData.EndTick = csti.endTick;
+            }
+
             m_wavDataList.Add(wavData);
-            listBoxPlayFiles.Items.Add(wavData.FileName);
+            listBoxPlayFiles.Items.Add(wavData.DisplayName);
             m_playListItems.Add(new PlayListItemInfo(
                 PlayListItemInfo.ItemType.Item,
                 wavData));
@@ -786,9 +801,9 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// WAVファイルを読み込む。
+        /// WAVファイルのヘッダ部分を読み込む。
         /// </summary>
-        private bool LoadWavFileFromPath(string path)
+        private bool ReadWavFileHeader(string path, CueSheetTrackInfo csti)
         {
             WavData wavData;
 
@@ -800,7 +815,7 @@ namespace PlayPcmWin
             }
 
             if (readSuccess) {
-                CheckAddWavData(wavData, path);
+                CheckAddWavData(csti, wavData, path);
             } else {
                 string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
                 AddLogText(s);
@@ -811,9 +826,9 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// FLACファイルを読み込む。
+        /// FLACファイルのヘッダ部分を読み込む。
         /// </summary>
-        private bool LoadFlacFileFromPath(string path) {
+        private bool ReadFlacFileHeader(string path, CueSheetTrackInfo csti) {
             WavData wavData;
 
             bool readSuccess = false;
@@ -826,7 +841,7 @@ namespace PlayPcmWin
             }
 
             if (readSuccess) {
-                CheckAddWavData(wavData, path);
+                CheckAddWavData(csti, wavData, path);
             } else {
                 string s = string.Format("FLACファイル読み込み失敗: {0}\r\n{1}",
                         path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
@@ -837,7 +852,10 @@ namespace PlayPcmWin
             return true;
         }
 
-        private bool LoadCueFileFromPath(string path) {
+        /// <summary>
+        /// CUEシートを読み込む。
+        /// </summary>
+        private bool ReadCueSheet(string path) {
             CueSheetReader csr = new CueSheetReader();
             bool result = csr.ReadFromFile(path);
             if (!result) {
@@ -850,13 +868,13 @@ namespace PlayPcmWin
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                ParseFile(csti.path, ParseFileMode.OnlyConcreteFile);
+                ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csti);
             }
             return true;
         }
 
-        enum ParseFileMode {
-            AllowAll,
+        enum ReadHeaderMode {
+            ReadAll,
             OnlyConcreteFile,
             OnlyMetaFile,
         }
@@ -864,23 +882,23 @@ namespace PlayPcmWin
         /// <summary>
         /// N.B. ReadWavPcmDataも参照。
         /// </summary>
-        private void ParseFile(string path, ParseFileMode mode) {
+        private void ReadFileHeader(string path, ReadHeaderMode mode, CueSheetTrackInfo csti) {
             string ext = System.IO.Path.GetExtension(path);
 
             switch (ext.ToLower()) {
             case ".cue":
-                if (mode != ParseFileMode.OnlyConcreteFile) {
-                    LoadCueFileFromPath(path);
+                if (mode != ReadHeaderMode.OnlyConcreteFile) {
+                    ReadCueSheet(path);
                 }
                 break;
             case ".flac":
-                if (mode != ParseFileMode.OnlyMetaFile) {
-                    LoadFlacFileFromPath(path);
+                if (mode != ReadHeaderMode.OnlyMetaFile) {
+                    ReadFlacFileHeader(path, csti);
                 }
                 break;
             default:
-                if (mode != ParseFileMode.OnlyMetaFile) {
-                    LoadWavFileFromPath(path);
+                if (mode != ReadHeaderMode.OnlyMetaFile) {
+                    ReadWavFileHeader(path, csti);
                 }
                 break;
             }
@@ -912,7 +930,7 @@ namespace PlayPcmWin
             }
 
             for (int i = 0; i < paths.Length; ++i) {
-                ParseFile(paths[i], ParseFileMode.AllowAll);
+                ReadFileHeader(paths[i], ReadHeaderMode.ReadAll, null);
             }
             UpdateUIStatus();
         }
@@ -935,7 +953,7 @@ namespace PlayPcmWin
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                ParseFile(dlg.FileName, ParseFileMode.AllowAll);
+                ReadFileHeader(dlg.FileName, ReadHeaderMode.ReadAll, null);
                 UpdateUIStatus();
             }
         }
@@ -986,7 +1004,8 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// N.B. LoadWavFileとLoadFlacFileも参照。
+        /// ファイルからヘッダ＋PCMデータ部分を読む。
+        /// N.B. ReadWavFileHeaderとReadFlacFileHeaderも参照。
         /// </summary>
         private int ReadWavPcmData(WavData wavData) {
             string ext = System.IO.Path.GetExtension(wavData.FullPath);
@@ -997,6 +1016,8 @@ namespace PlayPcmWin
                 if (0 == ercd) {
                     wavData.SetRawData(wd.SampleRawGet());
                 }
+                // StartTickとEndTickを見て、必要な部分以外をカットする。
+                wavData.Trim();
                 return ercd;
             } else {
                 using (BinaryReader br = new BinaryReader(File.Open(wavData.FullPath, FileMode.Open))) {
@@ -1005,8 +1026,11 @@ namespace PlayPcmWin
                         return -1;
                     }
                 }
+                // StartTickとEndTickを見て、必要な部分以外をカットする。
+                wavData.Trim();
                 return 0;
             }
+
         }
 
         /// <summary>
@@ -1051,7 +1075,9 @@ namespace PlayPcmWin
                     // 必要に応じて量子化ビット数の変更を行う。
                     wd = BitsPerSampleConvAsNeeded(wd);
 
-                    int wavDataLength = wd.SampleRawGet().Length;
+                    // どーなのよ、という感じがするが。
+                    // 効果絶大である。
+                    GC.Collect();
 
                     if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
                         ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
@@ -1063,7 +1089,7 @@ namespace PlayPcmWin
                     wd.ForgetDataPart();
 
                     m_readFileWorker.ReportProgress(100 * (i + 1) / m_wavDataList.Count,
-                        string.Format("wasapi.AddOutputData({0}, {1}bytes)\r\n", wd.Id, wavDataLength));
+                        string.Format("wasapi.AddOutputData({0}, {1}samples)\r\n", wd.Id, wd.NumSamples));
                 }
 
                 // ダメ押し。
@@ -1349,6 +1375,15 @@ namespace PlayPcmWin
         /// m_taskにセットする。
         /// </summary>
         private void UpdateNextTask() {
+            if (0 == CountWaveDataOnPlayGroup(1)) {
+                // ファイルグループが1個しかない場合、
+                // wasapiUserの中で自発的にループ再生する。
+                // ファイルの再生が終わった=停止。
+                m_task.Set(TaskType.None);
+                listBoxPlayFiles.SelectedIndex = 0;
+                return;
+            }
+
             // 順当に行ったら次に再生するグループ番号は(m_loadedGroupId+1)。
             // ①(m_loadedGroupId+1)の再生グループが存在する場合
             //     (m_loadedGroupId+1)の再生グループを再生開始する。

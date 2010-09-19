@@ -203,5 +203,7 @@ private:
     int CreateWritableFrames(BYTE *pData_return, int wantFrames);
 
     WWPcmData *FindPlayPcmDataById(int id);
+
+    void PlayPcmDataListDebug(void);
 };
 
