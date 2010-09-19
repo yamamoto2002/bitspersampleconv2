@@ -1075,16 +1075,17 @@ namespace PlayPcmWin
                     // 必要に応じて量子化ビット数の変更を行う。
                     wd = BitsPerSampleConvAsNeeded(wd);
 
-                    // どーなのよ、という感じがするが。
-                    // 効果絶大である。
-                    GC.Collect();
+                    if (wd.SampleRawGet() != null &&
+                        0 < wd.SampleRawGet().Length) {
+                        // サンプルが存在する場合だけWasapiにAddする。
 
-                    if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
-                        ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
-                        r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
-                        args.Result = r;
-                        Console.WriteLine("D: ReadFileDoWork() lowmemory");
-                        return;
+                        if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
+                            ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
+                            r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                            args.Result = r;
+                            Console.WriteLine("D: ReadFileDoWork() lowmemory");
+                            return;
+                        }
                     }
                     wd.ForgetDataPart();
 
