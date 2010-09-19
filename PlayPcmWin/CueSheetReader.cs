@@ -1,4 +1,7 @@
-﻿using System;
+﻿// 日本語 UTF-8
+// CUEシートを読む。
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
