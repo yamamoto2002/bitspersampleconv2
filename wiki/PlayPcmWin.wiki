@@ -12,6 +12,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin146.jpg
   * 量子化ビット数16ビットと24ビットの2チャンネルステレオFLACファイル再生に対応。
   * WASAPI排他モード使用。Bit perfect再生可能。
   * 再生リスト。ギャップレス再生。
+  * CUEシートの読み込みに対応。
   * WASAPI排他 タイマー駆動モードとイベント駆動モードの切り替え機能。
   * 再生スレッドの優先度設定機能。
   * 再生スレッドはネイティブC++で書かれており、音声データを全てメモリに読み込んでから再生するため、CPU負荷が低い。低レイテンシ設定で音切れの可能性が減ります。
@@ -23,9 +24,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin146.jpg
 
 =ダウンロード=
 
-安定版　(バージョン1.0.46)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin146.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin146x64.zip
+安定版　(バージョン1.0.48)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin148.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin148x64.zip
 
 非常にバグっぽい開発版 
   * なし
