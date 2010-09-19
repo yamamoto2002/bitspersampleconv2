@@ -1,6 +1,11 @@
 #summary PlayPcmWin 更新履歴
+#labels Featured
 
 =PlayPcmWin 更新履歴=
+
+===!PlayPcmWin 1.0.46 ==
+機能追加
+  * CUEシート対応(2)単一WAVファイルの一部を切り取るタイプのCUEシートに対応。
 
 ===!PlayPcmWin 1.0.44 ==
 機能追加
