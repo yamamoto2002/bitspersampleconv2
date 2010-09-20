@@ -810,8 +810,15 @@ namespace PlayPcmWin
             bool readSuccess = false;
 
             wavData = new WavData();
-            using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
-                readSuccess = wavData.ReadHeader(br);
+            try {
+                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                    readSuccess = wavData.ReadHeader(br);
+                }
+            } catch (Exception ex) {
+                string s = string.Format("WAVファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
+                AddLogText(s);
+                MessageBox.Show(s);
+                return false;
             }
 
             if (readSuccess) {
