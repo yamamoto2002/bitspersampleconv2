@@ -1026,8 +1026,6 @@ namespace PlayPcmWin
                         return -1;
                     }
                 }
-                // StartTickとEndTickを見て、必要な部分以外をカットする。
-                wavData.Trim();
                 return 0;
             }
 
