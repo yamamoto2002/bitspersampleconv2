@@ -115,7 +115,7 @@ namespace PlayPcmWin {
 
             bool result = true;
             try {
-                using (StreamReader sr = new StreamReader(path)) {
+                using (StreamReader sr = new StreamReader(path, Encoding.Default)) {
                     string line;
                     int lineno = 0;
                     while ((line = sr.ReadLine()) != null) {
