@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.50 ==
+バグ取り
+  * CUEシートに書いてあるファイルが存在しない場合にエラーを表示。
+
 ===!PlayPcmWin 1.0.49 ==
 バグ取り
   * Single WAV File CUEシートの読み込みの無駄をなくす。
