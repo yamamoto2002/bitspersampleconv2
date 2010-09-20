@@ -273,6 +273,7 @@ namespace WavRWLib2
             if (newNumSamples == 0 ||
                 m_rawData.Length <= startBytes) {
                 m_rawData = null;
+                m_numSamples = 0;
             } else {
                 byte[] newArray = new byte[endBytes - startBytes];
                 Array.Copy(m_rawData, startBytes, newArray, 0, endBytes - startBytes);
@@ -360,19 +361,72 @@ namespace WavRWLib2
                 return false;
             }
 
-            m_numSamples = m_subChunk2Size / (bitsPerSample / 8) / numChannels;
+            int frameBytes = bitsPerSample / 8 * numChannels;
+            m_numSamples = m_subChunk2Size / frameBytes;
 
             m_data    = null;
             m_rawData = null;
             return true;
         }
 
-        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample) {
+        /// <summary>
+        /// readerのデータをcountバイトだけスキップする。
+        /// </summary>
+        private static void BinaryReaderSkip(BinaryReader reader, long count) {
+            if (reader.BaseStream.CanSeek) {
+                reader.BaseStream.Seek(count, SeekOrigin.Current);
+            }
+            else {
+                for (long i = 0; i < count; ++i) {
+                    reader.ReadByte();
+                }
+            }
+        }
+
+        /// <summary>
+        /// PCMデータを無加工で読み出す。
+        /// </summary>
+        /// <param name="startBytes">0を指定すると最初から。</param>
+        /// <param name="endBytes">負の値を指定するとファイルの最後まで。</param>
+        /// <returns>false: ファイルの読み込みエラーなど</returns>
+        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample,
+            long startBytes, long endBytes) {
             if (!ReadHeader(br, numChannels, bitsPerSample)) {
                 return false;
             }
 
-            m_rawData = br.ReadBytes((int)m_subChunk2Size);
+            // ReadHeaderによって、m_numSamplesが判明。
+            // endBytesがファイルの終わり指定(負の値)の場合の具体的位置を設定する。
+            // startBytesとendBytesがファイルの終わり以降を指していたら修正する。
+            // ・endBytesがファイルの終わり以降…ファイルの終わりを指す。
+            // ・startBytesがファイルの終わり以降…サイズ0バイトのWAVファイルにする。
+
+            int frameBytes = bitsPerSample / 8 * numChannels;
+
+            System.Diagnostics.Debug.Assert(0 <= startBytes);
+
+            if (endBytes < 0 ||
+                (m_numSamples * frameBytes) < endBytes) {
+                // 終了位置はファイルの終わり。
+                endBytes = NumSamples * frameBytes;
+            }
+
+            long newNumSamples = (endBytes - startBytes) / frameBytes;
+            if (newNumSamples <= 0 ||
+                m_numSamples * frameBytes <= startBytes ||
+                endBytes <= startBytes) {
+                // サイズが0バイトのWAV。
+                m_rawData = null;
+                m_numSamples = 0;
+                return true;
+            }
+
+            if (0 < startBytes) {
+                BinaryReaderSkip(br, startBytes);
+            }
+
+            m_rawData = br.ReadBytes((int)newNumSamples * frameBytes);
+            m_numSamples = newNumSamples;
             return true;
         }
 
@@ -495,17 +549,17 @@ namespace WavRWLib2
         /// StartTickとEndTickを見て、必要な部分以外をカットする。
         /// </summary>
         public void Trim() {
+            if (StartTick < 0) {
+                // データ壊れ。先頭を読む。
+                StartTick = 0;
+            }
+
             if (StartTick == 0 && EndTick == -1) {
                 return;
             }
 
-            if (StartTick < 0) {
-                // データ壊れ。無視する。
-                return;
-            }
-
             long startBytes = (long)(StartTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
-            long endBytes = (long)(EndTick) * SampleRate / 75 * BitsPerSample/8 * NumChannels;
+            long endBytes = (long)(EndTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
 
             if (endBytes < 0 ||
                 (NumSamples * BitsPerSample / 8 * NumChannels) < endBytes) {
@@ -520,6 +574,27 @@ namespace WavRWLib2
 
             long newNumSamples = (endBytes - startBytes) / (BitsPerSample / 8 * NumChannels);
             m_dsc.TrimRawData(newNumSamples, startBytes, endBytes);
+        }
+
+        /// <summary>
+        /// StartTickとEndTickを見て、必要な部分以外をカットする。
+        /// </summary>
+        public bool TrimmedReadRaw(BinaryReader br) {
+            if (StartTick < 0) {
+                // データ壊れ。先頭を読む。
+                StartTick = 0;
+            }
+
+            int frameBytes = m_fsc.BitsPerSample / 8 * m_fsc.NumChannels;
+            long startBytes = (long)(StartTick) * m_fsc.SampleRate / 75 * frameBytes;
+            long endBytes   = (long)(EndTick)   * m_fsc.SampleRate / 75 * frameBytes;
+
+            if (0 <= endBytes && endBytes < startBytes) {
+                // 1サンプルもない。
+                startBytes = endBytes;
+            }
+
+            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample, startBytes, endBytes);
         }
 
         /// <summary>
@@ -606,7 +681,7 @@ namespace WavRWLib2
                 }
                 break;
             case ReadMode.RawData:
-                if (!m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
+                if (!TrimmedReadRaw(br)) {
                     return false;
                 }
                 break;
