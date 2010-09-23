@@ -785,11 +785,9 @@ namespace PlayPcmWin
         /// </summary>
         private bool ReadWavFileHeader(string path, CueSheetTrackInfo csti)
         {
-            WavData wavData;
-
             bool readSuccess = false;
 
-            wavData = new WavData();
+            WavData wavData = new WavData();
             try {
                 using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
                     readSuccess = wavData.ReadHeader(br);
@@ -813,6 +811,39 @@ namespace PlayPcmWin
                 return false;
             }
             return true;
+        }
+
+        /// <summary>
+        /// AIFFファイルのヘッダ部分を読み込む。
+        /// </summary>
+        private bool ReadAiffFileHeader(string path, CueSheetTrackInfo csti) {
+
+            bool readSuccess = false;
+
+            AiffReader ar = new AiffReader();
+            try {
+                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                    PcmDataLib.PcmData pd;
+                    AiffReader.ResultType result = ar.ReadHeader(br, out pd);
+                    if (result == AiffReader.ResultType.Success) {
+                        if (CheckAddPcmData(csti, path, pd)) {
+                            readSuccess = true;
+                        }
+                    } else {
+                        readSuccess = false;
+                        string s = string.Format("AIFFファイル読み込み失敗: {0}\r\n", result);
+                        AddLogText(s);
+                        MessageBox.Show(s);
+                    }
+                }
+            } catch (Exception ex) {
+                string s = string.Format("AIFFファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
+                AddLogText(s);
+                MessageBox.Show(s);
+                return false;
+            }
+
+            return readSuccess;
         }
 
         /// <summary>
@@ -884,6 +915,11 @@ namespace PlayPcmWin
             case ".flac":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
                     ReadFlacFileHeader(path, csti);
+                }
+                break;
+            case ".aif":
+                if (mode != ReadHeaderMode.OnlyMetaFile) {
+                    ReadAiffFileHeader(path, csti);
                 }
                 break;
             default:
@@ -1009,6 +1045,20 @@ namespace PlayPcmWin
                 pd = null;
 
                 // StartTickとEndTickを見て、必要な部分以外をカットする。
+                pcmData.Trim();
+                return ercd;
+            } else if (0 == String.Compare(".aif", ext, true)) {
+                // AIFFファイル読み込み。
+                int ercd = -1;
+                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open))) {
+                    AiffReader ar = new AiffReader();
+                    AiffReader.ResultType result = ar.ReadHeaderAndPcmData(br);
+                    if (result == AiffReader.ResultType.Success) {
+                        pcmData.SetSampleArray(ar.NumFrames, ar.GetSampleArray());
+                        ercd = 0;
+                    }
+                    ar = null;
+                }
                 pcmData.Trim();
                 return ercd;
             } else {

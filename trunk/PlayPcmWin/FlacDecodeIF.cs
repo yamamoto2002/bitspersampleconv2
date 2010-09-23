@@ -8,9 +8,9 @@ using System.IO.Pipes;
 
 namespace PlayPcmWin {
     class FlacDecodeIF {
-        private Process childProcess;
-        private BinaryReader br;
-        private AnonymousPipeServerStream pss;
+        private Process m_childProcess;
+        private BinaryReader m_br;
+        private AnonymousPipeServerStream m_pss;
 
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
@@ -49,7 +49,7 @@ namespace PlayPcmWin {
         }
 
         private void SendString(string s) {
-            childProcess.StandardInput.WriteLine(s);
+            m_childProcess.StandardInput.WriteLine(s);
         }
 
         private void SendBase64(string s) {
@@ -60,38 +60,38 @@ namespace PlayPcmWin {
                 b[i * 2 + 1] = (byte)((s[i] >> 8) & 0xff);
             }
             string sSend = Convert.ToBase64String(b);
-            childProcess.StandardInput.WriteLine(sSend);
+            m_childProcess.StandardInput.WriteLine(sSend);
         }
 
         private void StartChildProcess() {
-            System.Diagnostics.Debug.Assert(null == childProcess);
+            System.Diagnostics.Debug.Assert(null == m_childProcess);
 
-            childProcess = new Process();
-            childProcess.StartInfo.FileName = "FlacDecodeCS.exe";
+            m_childProcess = new Process();
+            m_childProcess.StartInfo.FileName = "FlacDecodeCS.exe";
 
-            pss = new AnonymousPipeServerStream(
+            m_pss = new AnonymousPipeServerStream(
                 PipeDirection.In, HandleInheritability.Inheritable);
 
-            childProcess.StartInfo.Arguments = pss.GetClientHandleAsString();
-            childProcess.StartInfo.UseShellExecute = false;
-            childProcess.StartInfo.CreateNoWindow = true;
-            childProcess.StartInfo.RedirectStandardInput = true;
-            childProcess.StartInfo.RedirectStandardOutput = false;
-            childProcess.Start();
+            m_childProcess.StartInfo.Arguments = m_pss.GetClientHandleAsString();
+            m_childProcess.StartInfo.UseShellExecute = false;
+            m_childProcess.StartInfo.CreateNoWindow = true;
+            m_childProcess.StartInfo.RedirectStandardInput = true;
+            m_childProcess.StartInfo.RedirectStandardOutput = false;
+            m_childProcess.Start();
 
-            pss.DisposeLocalCopyOfClientHandle();
-            br = new BinaryReader(pss);
+            m_pss.DisposeLocalCopyOfClientHandle();
+            m_br = new BinaryReader(m_pss);
         }
 
         private int StopChildProcess() {
-            System.Diagnostics.Debug.Assert(null != childProcess);
-            childProcess.WaitForExit();
-            int exitCode = childProcess.ExitCode;
-            childProcess.Close();
-            childProcess = null;
-            pss.Close();
-            br.Close();
-            br = null;
+            System.Diagnostics.Debug.Assert(null != m_childProcess);
+            m_childProcess.WaitForExit();
+            int exitCode = m_childProcess.ExitCode;
+            m_childProcess.Close();
+            m_childProcess = null;
+            m_pss.Close();
+            m_br.Close();
+            m_br = null;
 
             return exitCode;
         }
@@ -103,16 +103,16 @@ namespace PlayPcmWin {
             SendString("H");
             SendBase64(flacFilePath);
 
-            int rv = br.ReadInt32();
+            int rv = m_br.ReadInt32();
             if (rv != 0) {
                 StopChildProcess();
                 return rv;
             }
 
-            int nChannels     = br.ReadInt32();
-            int bitsPerSample = br.ReadInt32();
-            int sampleRate    = br.ReadInt32();
-            long numFrames    = br.ReadInt64();
+            int nChannels     = m_br.ReadInt32();
+            int bitsPerSample = m_br.ReadInt32();
+            int sampleRate    = m_br.ReadInt32();
+            long numFrames    = m_br.ReadInt64();
 
             System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
                 nChannels, bitsPerSample, sampleRate, numFrames);
@@ -136,16 +136,16 @@ namespace PlayPcmWin {
             SendString("A");
             SendBase64(flacFilePath);
 
-            int rv = br.ReadInt32();
+            int rv = m_br.ReadInt32();
             if (rv != 0) {
                 StopChildProcess();
                 return rv;
             }
 
-            int nChannels     = br.ReadInt32();
-            int bitsPerSample = br.ReadInt32();
-            int sampleRate    = br.ReadInt32();
-            long numFrames    = br.ReadInt64();
+            int nChannels     = m_br.ReadInt32();
+            int bitsPerSample = m_br.ReadInt32();
+            int sampleRate    = m_br.ReadInt32();
+            long numFrames    = m_br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
             int frameCount = 1048576;
@@ -154,7 +154,7 @@ namespace PlayPcmWin {
 
             long pos = 0;
             while (pos < numFrames) {
-                byte[] buff = br.ReadBytes(frameCount * bytesPerFrame);
+                byte[] buff = m_br.ReadBytes(frameCount * bytesPerFrame);
 
                 System.Console.WriteLine("frameCount={0} readCount={1} pos={2}",
                     frameCount, buff.Length / bytesPerFrame, pos);
