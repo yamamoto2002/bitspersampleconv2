@@ -60,11 +60,6 @@ namespace WavRWLib2
         }
     }
 
-    public enum ValueRepresentationType {
-        SInt,
-        SFloat
-    };
-
     class FmtSubChunk
     {
         private byte[] m_subChunk1Id;
@@ -73,11 +68,11 @@ namespace WavRWLib2
         public ushort NumChannels { get; set; }
         public uint SampleRate { get; set; }
 
-        public ValueRepresentationType SampleValueRepresentationType { get; set; }
+        public PcmDataLib.PcmData.ValueRepresentationType SampleValueRepresentationType { get; set; }
 
         private uint   m_byteRate;
         private ushort m_blockAlign;
-        public ushort BitsPerSample { get; set; }
+        public ushort BitsPerFrame { get; set; }
 
         public bool Create(int numChannels, int sampleRate, int bitsPerSample)
         {
@@ -98,9 +93,9 @@ namespace WavRWLib2
             m_byteRate = (uint)(sampleRate * numChannels * bitsPerSample / 8);
             m_blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
-            BitsPerSample = (ushort)bitsPerSample;
+            BitsPerFrame = (ushort)bitsPerSample;
 
-            SampleValueRepresentationType = ValueRepresentationType.SInt;
+            SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
 
             return true;
         }
@@ -130,9 +125,9 @@ namespace WavRWLib2
 
             m_audioFormat = br.ReadUInt16();
             if (1 == m_audioFormat) {
-                SampleValueRepresentationType = ValueRepresentationType.SInt;
+                SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
             } else if (3 == m_audioFormat) {
-                SampleValueRepresentationType = ValueRepresentationType.SFloat;
+                SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SFloat;
             } else {
                 Console.WriteLine("E: this wave file is not PCM format {0}. Cannot read this file", m_audioFormat);
                 return false;
@@ -150,19 +145,19 @@ namespace WavRWLib2
             m_blockAlign = br.ReadUInt16();
             Console.WriteLine("D: blockAlign={0}", m_blockAlign);
 
-            BitsPerSample = br.ReadUInt16();
-            Console.WriteLine("D: bitsPerSample={0}", BitsPerSample);
+            BitsPerFrame = br.ReadUInt16();
+            Console.WriteLine("D: bitsPerSample={0}", BitsPerFrame);
 
             if (16 < m_subChunk1Size) {
                 br.ReadBytes((int)(m_subChunk1Size - 16));
             }
 
-            if (m_byteRate != SampleRate * NumChannels * BitsPerSample / 8) {
+            if (m_byteRate != SampleRate * NumChannels * BitsPerFrame / 8) {
                 Console.WriteLine("E: byteRate is wrong value. corrupted file?");
                 return false;
             }
 
-            if (m_blockAlign != NumChannels * BitsPerSample / 8) {
+            if (m_blockAlign != NumChannels * BitsPerFrame / 8) {
                 Console.WriteLine("E: blockAlign is wrong value. corrupted file?");
                 return false;
             }
@@ -180,7 +175,7 @@ namespace WavRWLib2
 
             bw.Write(m_byteRate);
             bw.Write(m_blockAlign);
-            bw.Write(BitsPerSample);
+            bw.Write(BitsPerFrame);
         }
     }
 
@@ -253,15 +248,29 @@ namespace WavRWLib2
         private byte[] m_subChunk2Id;
         private long   m_subChunk2Size;
 
-        private List<PcmSamples1Channel> m_data;
-
-        // rawDataモードの場合、numSamplesにサンプル数が入っている。
-        // 通常モードの場合、data??[0].NumSamples
         private byte[] m_rawData;
-        private long    m_numSamples;
 
-        public byte[] SampleRawGet() {
+        // numSamplesにサンプル数が入っている。
+        private long m_numFrames;
+
+        public long NumFrames {
+            get { return m_numFrames; }
+        }
+
+        public byte[] GetSampleArray() {
             return m_rawData;
+        }
+
+        public void Clear() {
+            m_subChunk2Id = null;
+            m_subChunk2Size = 0;
+            m_rawData = null;
+            m_numFrames = 0;
+        }
+
+        public void SetRawData(long numSamples, byte[] rawData) {
+            m_numFrames = numSamples;
+            m_rawData = rawData;
         }
 
         public void TrimRawData(long newNumSamples, long startBytes, long endBytes) {
@@ -269,11 +278,11 @@ namespace WavRWLib2
             System.Diagnostics.Debug.Assert(0 <= endBytes);
             System.Diagnostics.Debug.Assert(startBytes <= endBytes);
 
-            m_numSamples = newNumSamples;
+            m_numFrames = newNumSamples;
             if (newNumSamples == 0 ||
                 m_rawData.Length <= startBytes) {
                 m_rawData = null;
-                m_numSamples = 0;
+                m_numFrames = 0;
             } else {
                 byte[] newArray = new byte[endBytes - startBytes];
                 Array.Copy(m_rawData, startBytes, newArray, 0, endBytes - startBytes);
@@ -282,36 +291,17 @@ namespace WavRWLib2
             }
         }
 
-        public short Sample16Get(int ch, int pos)
-        {
-            return m_data[ch].Get16(pos);
-        }
-
-        public void Sample16Set(int ch, int pos, short val)
-        {
-            m_data[ch].Set16(pos, val);
-        }
-
-        public long NumSamples
-        {
-            get {
-                if (m_data != null && 0 < m_data.Count) {
-                    return m_data[0].NumSamples;
+        /// <summary>
+        /// readerのデータをcountバイトだけスキップする。
+        /// </summary>
+        private static void BinaryReaderSkip(BinaryReader reader, long count) {
+            if (reader.BaseStream.CanSeek) {
+                reader.BaseStream.Seek(count, SeekOrigin.Current);
+            } else {
+                for (long i = 0; i < count; ++i) {
+                    reader.ReadByte();
                 }
-                return m_numSamples;
             }
-        }
-
-        public void Create(uint subChunk2Size, List<PcmSamples1Channel> allChannelSamples)
-        {
-            m_subChunk2Id = new byte[4];
-            m_subChunk2Id[0] = (byte)'d';
-            m_subChunk2Id[1] = (byte)'a';
-            m_subChunk2Id[2] = (byte)'t';
-            m_subChunk2Id[3] = (byte)'a';
-
-            this.m_subChunk2Size = subChunk2Size;
-            this.m_data = allChannelSamples;
         }
 
         private bool SkipToDataHeader(BinaryReader br) {
@@ -334,21 +324,6 @@ namespace WavRWLib2
             }
         }
 
-        /// <summary>
-        /// forget data part.
-        /// </summary>
-        public void ForgetDataPart() {
-            m_data = null;
-            m_rawData = null;
-        }
-
-        public void CreateHeader(int numChannels, int bitsPerSample, long numSamples) {
-            m_numSamples = numSamples;
-            m_subChunk2Size = m_numSamples * numChannels * bitsPerSample / 8;
-            m_data = null;
-            m_rawData = null;
-        }
-
         public bool ReadHeader(BinaryReader br, int numChannels, int bitsPerSample) {
             if (!SkipToDataHeader(br)) {
                 return false;
@@ -362,35 +337,20 @@ namespace WavRWLib2
             }
 
             int frameBytes = bitsPerSample / 8 * numChannels;
-            m_numSamples = m_subChunk2Size / frameBytes;
+            m_numFrames = m_subChunk2Size / frameBytes;
 
-            m_data    = null;
             m_rawData = null;
             return true;
         }
 
         /// <summary>
-        /// readerのデータをcountバイトだけスキップする。
-        /// </summary>
-        private static void BinaryReaderSkip(BinaryReader reader, long count) {
-            if (reader.BaseStream.CanSeek) {
-                reader.BaseStream.Seek(count, SeekOrigin.Current);
-            }
-            else {
-                for (long i = 0; i < count; ++i) {
-                    reader.ReadByte();
-                }
-            }
-        }
-
-        /// <summary>
         /// PCMデータを無加工で読み出す。
         /// </summary>
-        /// <param name="startBytes">0を指定すると最初から。</param>
-        /// <param name="endBytes">負の値を指定するとファイルの最後まで。</param>
+        /// <param name="startFrame">0を指定すると最初から。</param>
+        /// <param name="endFrame">負の値を指定するとファイルの最後まで。</param>
         /// <returns>false: ファイルの読み込みエラーなど</returns>
         public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample,
-            long startBytes, long endBytes) {
+            long startFrame, long endFrame) {
             if (!ReadHeader(br, numChannels, bitsPerSample)) {
                 return false;
             }
@@ -402,22 +362,24 @@ namespace WavRWLib2
             // ・startBytesがファイルの終わり以降…サイズ0バイトのWAVファイルにする。
 
             int frameBytes = bitsPerSample / 8 * numChannels;
+            long startBytes = startFrame * frameBytes;
+            long endBytes   = endFrame   * frameBytes;
 
             System.Diagnostics.Debug.Assert(0 <= startBytes);
 
             if (endBytes < 0 ||
-                (m_numSamples * frameBytes) < endBytes) {
+                (m_numFrames * frameBytes) < endBytes) {
                 // 終了位置はファイルの終わり。
-                endBytes = NumSamples * frameBytes;
+                endBytes = m_numFrames * frameBytes;
             }
 
-            long newNumSamples = (endBytes - startBytes) / frameBytes;
-            if (newNumSamples <= 0 ||
-                m_numSamples * frameBytes <= startBytes ||
+            long newNumFrames = (endBytes - startBytes) / frameBytes;
+            if (newNumFrames <= 0 ||
+                m_numFrames * frameBytes <= startBytes ||
                 endBytes <= startBytes) {
                 // サイズが0バイトのWAV。
                 m_rawData = null;
-                m_numSamples = 0;
+                m_numFrames = 0;
                 return true;
             }
 
@@ -425,88 +387,18 @@ namespace WavRWLib2
                 BinaryReaderSkip(br, startBytes);
             }
 
-            m_rawData = br.ReadBytes((int)newNumSamples * frameBytes);
-            m_numSamples = newNumSamples;
+            m_rawData = br.ReadBytes((int)newNumFrames * frameBytes);
+            m_numFrames = newNumFrames;
             return true;
         }
 
-        public void SetRawData(byte[] rawData) {
-            m_rawData = rawData;
-        }
-
-        public void Clear() {
-            m_subChunk2Size = 0;
-            m_data = null;
-            m_rawData = null;
-            m_subChunk2Id = null;
-            m_numSamples = 0;
-        }
-
-        public void SetRawData(long numSamples, byte[] rawData) {
-            m_numSamples = numSamples;
-            m_rawData = rawData;
-        }
-
-        public bool Read(BinaryReader br, int numChannels, int bitsPerSample)
-        {
-            System.Diagnostics.Debug.Assert(16 == bitsPerSample);
-            if (!ReadHeader(br, numChannels, bitsPerSample)) {
-                return false;
-            }
-
-            m_data = new List<PcmSamples1Channel>();
-            for (int i=0; i < numChannels; ++i) {
-                PcmSamples1Channel ps1 = new PcmSamples1Channel((int)m_numSamples, bitsPerSample);
-                m_data.Add(ps1);
-            }
-
-            for (int pos=0; pos < m_numSamples; ++pos) {
-                for (int ch=0; ch < numChannels; ++ch) {
-                    Sample16Set(ch, pos, br.ReadInt16());
-                }
-            }
-
-            return true;
-        }
-
-        public void Write(BinaryWriter bw)
-        {
+        public void Write(BinaryWriter bw) {
             bw.Write(m_subChunk2Id);
 
             uint subChunk2Size = (uint)m_subChunk2Size;
             bw.Write(subChunk2Size);
 
-            switch (m_data[0].BitsPerSample) {
-            case 16:
-                Write16(bw);
-                break;
-            case 32:
-                Write32(bw);
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
-            }
-        }
-
-        private void Write16(BinaryWriter bw) {
-            int numSamples = m_data[0].NumSamples;
-            int numChannels = m_data.Count;
-            for (int pos = 0; pos < numSamples; ++pos) {
-                for (int ch = 0; ch < numChannels; ++ch) {
-                    bw.Write(m_data[ch].Get16(pos));
-                }
-            }
-        }
-
-        private void Write32(BinaryWriter bw) {
-            int numSamples = m_data[0].NumSamples;
-            int numChannels = m_data.Count;
-            for (int pos = 0; pos < numSamples; ++pos) {
-                for (int ch = 0; ch < numChannels; ++ch) {
-                    bw.Write(m_data[ch].Get32(pos));
-                }
-            }
+            bw.Write(m_rawData);
         }
     }
 
@@ -516,153 +408,34 @@ namespace WavRWLib2
         private FmtSubChunk         m_fsc;
         private DataSubChunk        m_dsc;
 
-        public int Id { get; set; }
-        public string FileName { get; set; }
-        public string FullPath { get; set; }
-
-        public ValueRepresentationType SampleValueRepresentationType {
+        public PcmDataLib.PcmData.ValueRepresentationType SampleValueRepresentationType {
             get { return m_fsc.SampleValueRepresentationType; }
             set { m_fsc.SampleValueRepresentationType = value; }
         }
 
-        /// <summary>
-        /// ファイルグループ番号。何でもありの、物置みたいになってきたな…
-        /// </summary>
-        public int GroupId { get; set; }
-
-        /// <summary>
-        /// 表示名。CUEシートから来る
-        /// </summary>
-        public string DisplayName { get; set; }
-
-        /// <summary>
-        /// 開始Tick(75分の1秒=1)。0のとき、ファイルの先頭が開始Tick
-        /// </summary>
-        public int    StartTick { get; set; }
-
-        /// <summary>
-        /// 終了Tick(75分の1秒=1)。-1のとき、ファイルの終わりが終了Tick
-        /// </summary>
-        public int    EndTick { get; set; }
-
-        /// <summary>
-        /// StartTickとEndTickを見て、必要な部分以外をカットする。
-        /// </summary>
-        public void Trim() {
-            if (StartTick < 0) {
-                // データ壊れ。先頭を読む。
-                StartTick = 0;
-            }
-
-            if (StartTick == 0 && EndTick == -1) {
-                return;
-            }
-
-            long startBytes = (long)(StartTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
-            long endBytes = (long)(EndTick) * SampleRate / 75 * BitsPerSample / 8 * NumChannels;
-
-            if (endBytes < 0 ||
-                (NumSamples * BitsPerSample / 8 * NumChannels) < endBytes) {
-                // 終了位置はファイルの終わり。
-                endBytes = NumSamples * BitsPerSample / 8 * NumChannels;
-            }
-
-            if (endBytes < startBytes) {
-                // 1サンプルもない。
-                startBytes = endBytes;
-            }
-
-            long newNumSamples = (endBytes - startBytes) / (BitsPerSample / 8 * NumChannels);
-            m_dsc.TrimRawData(newNumSamples, startBytes, endBytes);
-        }
-
-        /// <summary>
-        /// StartTickとEndTickを見て、必要な部分以外をカットする。
-        /// </summary>
-        public bool TrimmedReadRaw(BinaryReader br) {
-            if (StartTick < 0) {
-                // データ壊れ。先頭を読む。
-                StartTick = 0;
-            }
-
-            int frameBytes = m_fsc.BitsPerSample / 8 * m_fsc.NumChannels;
-            long startBytes = (long)(StartTick) * m_fsc.SampleRate / 75 * frameBytes;
-            long endBytes   = (long)(EndTick)   * m_fsc.SampleRate / 75 * frameBytes;
-
-            if (0 <= endBytes && endBytes < startBytes) {
-                // 1サンプルもない。
-                startBytes = endBytes;
-            }
-
-            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample, startBytes, endBytes);
-        }
-
-        /// <summary>
-        /// rhsの内容(チャンネル数、サンプルレート、量子化ビット数の情報)を自分自身にコピーする。
-        /// DSC(PCMデータ)はコピーしない。(空データとなる)
-        /// </summary>
-        /// <param name="rhs">from</param>
-        public void CopyHeaderInfoFrom(WavData rhs) {
-            m_rcd = new RiffChunkDescriptor();
-            m_rcd.Create(36);
-
-            m_fsc = new FmtSubChunk();
-            m_fsc.Create(rhs.NumChannels, rhs.SampleRate, rhs.BitsPerSample);
-
-            m_dsc = new DataSubChunk();
-
-            Id = rhs.Id;
-            FileName = rhs.FileName;
-            FullPath = rhs.FullPath;
-            GroupId = rhs.GroupId;
-        }
-
-        public void CreateHeader(int nChannels, int sampleRate, int bitsPerSample, long numSamples) {
-            m_rcd = new RiffChunkDescriptor();
-            m_rcd.Create(36);
-
-            m_fsc = new FmtSubChunk();
-            m_fsc.Create(nChannels, sampleRate, bitsPerSample);
-
-            m_dsc = new DataSubChunk();
-            m_dsc.CreateHeader(nChannels, bitsPerSample, numSamples);
-        }
-
-        /// <summary>
-        /// サンプリング周波数と量子化ビット数が同じならtrue
-        /// </summary>
-        public bool IsSameFormat(WavData other) {
-            return m_fsc.BitsPerSample == other.m_fsc.BitsPerSample
-                && m_fsc.SampleRate    == other.m_fsc.SampleRate;
-        }
-
-        public bool Create(int sampleRate, int bitsPerSample, List<PcmSamples1Channel> samples)
-        {
-            int subChunk2Size = samples[0].NumSamples * (bitsPerSample / 8) * samples.Count;
-            int chunkSize     = subChunk2Size + 36;
-
-            m_rcd = new RiffChunkDescriptor();
-            m_rcd.Create(chunkSize);
-
-            m_fsc = new FmtSubChunk();
-            if (!m_fsc.Create(samples.Count, sampleRate, bitsPerSample)) {
-                return false;
-            }
-
-            m_dsc = new DataSubChunk();
-            m_dsc.Create((uint)subChunk2Size, samples);
-
-            return true;
-        }
-
         private enum ReadMode {
-            ChannelList,
-            RawData,
+            HeaderAndPcmData,
             OnlyHeader
         }
 
-        private bool Read(BinaryReader br, ReadMode mode)
-        {
+        /// <summary>
+        /// StartTickとEndTickを見て、必要な部分だけ読み込む。
+        /// </summary>
+        private bool ReadHeaderAndPcmData(BinaryReader br, long startFrame, long endFrame) {
+            if (startFrame < 0) {
+                // データ壊れ。先頭を読む。
+                startFrame = 0;
+            }
+
+            if (0 <= endFrame && endFrame < startFrame) {
+                // 1サンプルもない。
+                startFrame = endFrame;
+            }
+
+            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerFrame, startFrame, endFrame);
+        }
+
+        private bool Read(BinaryReader br, ReadMode mode, long startFrame, long endFrame) {
             m_rcd = new RiffChunkDescriptor();
             if (!m_rcd.Read(br)) {
                 return false;
@@ -675,18 +448,13 @@ namespace WavRWLib2
 
             m_dsc = new DataSubChunk();
             switch (mode) {
-            case ReadMode.ChannelList:
-                if (!m_dsc.Read(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
-                    return false;
-                }
-                break;
-            case ReadMode.RawData:
-                if (!TrimmedReadRaw(br)) {
+            case ReadMode.HeaderAndPcmData:
+                if (!ReadHeaderAndPcmData(br, startFrame, endFrame)) {
                     return false;
                 }
                 break;
             case ReadMode.OnlyHeader:
-                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
+                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerFrame)) {
                     return false;
                 }
                 break;
@@ -703,24 +471,11 @@ namespace WavRWLib2
         /// NumSamples
         /// </summary>
         public bool ReadHeader(BinaryReader br) {
-            return Read(br, ReadMode.OnlyHeader);
+            return Read(br, ReadMode.OnlyHeader, 0, -1);
         }
 
-        /// <summary>
-        /// forget data part
-        /// Raw Data
-        /// Channel List
-        /// </summary>
-        public void ForgetDataPart() {
-            m_dsc.ForgetDataPart();
-        }
-
-        public bool Read(BinaryReader br) {
-            return Read(br, ReadMode.ChannelList);
-        }
-
-        public bool ReadRaw(BinaryReader br) {
-            return Read(br, ReadMode.RawData);
+        public bool ReadAll(BinaryReader br, long startFrame, long endFrame) {
+            return Read(br, ReadMode.HeaderAndPcmData, startFrame, endFrame);
         }
 
         public void Write(BinaryWriter bw)
@@ -735,14 +490,14 @@ namespace WavRWLib2
             get { return m_fsc.NumChannels; }
         }
 
-        public int BitsPerSample
+        public int BitsPerFrame
         {
-            get { return m_fsc.BitsPerSample; }
+            get { return m_fsc.BitsPerFrame; }
         }
 
-        public long NumSamples
+        public long NumFrames
         {
-            get { return m_dsc.NumSamples; }
+            get { return m_dsc.NumFrames; }
         }
 
         public int SampleRate
@@ -750,335 +505,9 @@ namespace WavRWLib2
             get { return (int)m_fsc.SampleRate; }
         }
 
-        public short Sample16Get(int ch, int pos)
-        {
-            return m_dsc.Sample16Get(ch, pos);
+        public byte[] GetSampleArray() {
+            return m_dsc.GetSampleArray();
         }
 
-        public void Sample16Set(int ch, int pos, short val)
-        {
-            m_dsc.Sample16Set(ch, pos, val);
-        }
-
-        public byte[] SampleRawGet() {
-            return m_dsc.SampleRawGet();
-        }
-
-        public void SetRawData(byte[] rawData) {
-            m_dsc.SetRawData(rawData);
-        }
-
-        /// <summary>
-        /// 量子化ビット数をbitsPerSampleに変更したWavDataを戻す。
-        /// 自分自身の内容は変更しない。
-        /// 
-        /// RawDataモードの場合のみの対応。
-        /// </summary>
-        /// <param name="newBitsPerSample">新しい量子化ビット数</param>
-        /// <returns>量子化ビット数変更後のWavData</returns>
-        public WavData BitsPerSampleConvertTo(int newBitsPerSample, ValueRepresentationType newValueRepType) {
-            WavData newWavData = new WavData();
-            newWavData.CopyHeaderInfoFrom(this);
-            newWavData.m_fsc.Create(NumChannels, SampleRate, newBitsPerSample);
-
-            byte [] rawData = null;
-            if (newBitsPerSample == 32) {
-                if (newValueRepType == ValueRepresentationType.SFloat) {
-                    switch (BitsPerSample) {
-                    case 16:
-                        rawData = ConvI16toF32(SampleRawGet());
-                        break;
-                    case 24:
-                        rawData = ConvI24toF32(SampleRawGet());
-                        break;
-                    case 32:
-                        if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
-                            rawData = (byte[])SampleRawGet().Clone();
-                        } else {
-                            rawData = ConvI32toF32(SampleRawGet());
-                        }
-                        break;
-                    default:
-                        System.Diagnostics.Debug.Assert(false);
-                        return null;
-                    }
-                } else if (newValueRepType == ValueRepresentationType.SInt) {
-                    switch (BitsPerSample) {
-                    case 16:
-                        rawData = ConvI16toI32(SampleRawGet());
-                        break;
-                    case 24:
-                        rawData = ConvI24toI32(SampleRawGet());
-                        break;
-                    case 32:
-                        if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
-                            rawData = ConvF32toI32(SampleRawGet());
-                        } else {
-                            rawData = (byte[])SampleRawGet().Clone();
-                        }
-                        break;
-                    default:
-                        System.Diagnostics.Debug.Assert(false);
-                        return null;
-                    }
-                } else {
-                    System.Diagnostics.Debug.Assert(false);
-                    return null;
-                }
-            } else if (newBitsPerSample == 24) {
-                switch (BitsPerSample) {
-                case 16:
-                    rawData = ConvI16toI24(SampleRawGet());
-                    break;
-                case 24:
-                    rawData = (byte[])SampleRawGet().Clone();
-                    break;
-                case 32:
-                    if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
-                        rawData = ConvF32toI24(SampleRawGet());
-                    } else {
-                        rawData = ConvI32toI24(SampleRawGet());
-                    }
-                    break;
-                default:
-                    System.Diagnostics.Debug.Assert(false);
-                    return null;
-                }
-            } else if (newBitsPerSample == 16) {
-                switch (BitsPerSample) {
-                case 16:
-                    rawData = (byte[])SampleRawGet().Clone();
-                    break;
-                case 24:
-                    rawData = ConvI24toI16(SampleRawGet());
-                    break;
-                case 32:
-                    if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
-                        rawData = ConvF32toI16(SampleRawGet());
-                    } else {
-                        rawData = ConvI32toI16(SampleRawGet());
-                    }
-                    break;
-                default:
-                    System.Diagnostics.Debug.Assert(false);
-                    return null;
-                }
-            } else {
-                System.Diagnostics.Debug.Assert(false);
-                return null;
-            }
-
-            newWavData.SampleValueRepresentationType = newValueRepType;
-            newWavData.m_dsc = new DataSubChunk();
-            newWavData.m_dsc.SetRawData(NumSamples, rawData);
-
-            return newWavData;
-        }
-
-        private byte[] ConvI16toI24(byte[] from) {
-            int nSample = from.Length/2;
-            byte[] to = new byte[nSample * 3];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットは、0埋めする。
-                to[toPos++] = 0;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-        private byte[] ConvI16toI32(byte[] from) {
-            int nSample = from.Length/2;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットは、0埋めする。
-                to[toPos++] = 0;
-                to[toPos++] = 0;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-
-        private byte[] ConvI24toI32(byte[] from) {
-            int nSample = from.Length/3;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットは、0埋めする。
-                to[toPos++] = 0;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-
-        private byte[] ConvI24toI16(byte[] from) {
-            int nSample = from.Length / 3;
-            byte[] to = new byte[nSample * 2];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットの情報が失われる瞬間
-                ++fromPos;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-
-        private byte[] ConvI32toI16(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 2];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットの情報が失われる瞬間
-                ++fromPos;
-                ++fromPos;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-
-        private byte[] ConvI32toI24(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 3];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                // 下位ビットの情報が失われる瞬間
-                ++fromPos;
-
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-                to[toPos++] = from[fromPos++];
-            }
-            return to;
-        }
-
-        private byte[] ConvF32toI16(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 2];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                float fv = System.BitConverter.ToSingle(from, fromPos);
-                int iv = (int)(fv * 32768.0f);
-
-                to[toPos++] = (byte)(iv & 0xff);
-                to[toPos++] = (byte)((iv >> 8) & 0xff);
-                fromPos += 4;
-            }
-            return to;
-        }
-        private byte[] ConvF32toI24(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 3];
-            int fromPos = 0;
-            int toPos   = 0;
-            for (int i = 0; i < nSample; ++i) {
-                float fv = System.BitConverter.ToSingle(from, fromPos);
-                int iv = (int)(fv * 8388608.0f);
-
-                to[toPos++] = (byte)(iv & 0xff);
-                to[toPos++] = (byte)((iv>>8) & 0xff);
-                to[toPos++] = (byte)((iv>>16) & 0xff);
-                fromPos += 4;
-            }
-            return to;
-        }
-
-        private byte[] ConvF32toI32(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos   = 0;
-            for (int i = 0; i < nSample; ++i) {
-                float fv = System.BitConverter.ToSingle(from, fromPos);
-                int iv = (int)(fv * 8388608.0f);
-
-                to[toPos++] = 0;
-                to[toPos++] = (byte)(iv & 0xff);
-                to[toPos++] = (byte)((iv>>8) & 0xff);
-                to[toPos++] = (byte)((iv>>16) & 0xff);
-                fromPos += 4;
-            }
-            return to;
-        }
-
-        private byte[] ConvI16toF32(byte[] from) {
-            int nSample = from.Length / 2;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                short iv = (short)(from[fromPos]
-                    + (from[fromPos+1]<<8));
-                float fv = ((float)iv) * (1.0f / 32768.0f);
-
-                byte [] b = System.BitConverter.GetBytes(fv);
-
-                to[toPos++] = b[0];
-                to[toPos++] = b[1];
-                to[toPos++] = b[2];
-                to[toPos++] = b[3];
-                fromPos += 2;
-            }
-            return to;
-        }
-        private byte[] ConvI24toF32(byte[] from) {
-            int nSample = from.Length / 3;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                int iv = ((int)from[fromPos]<<8)
-                    + ((int)from[fromPos+1]<<16)
-                    + ((int)from[fromPos+2]<<24);
-                float fv = ((float)iv) * (1.0f / 2147483648.0f);
-
-                byte [] b = System.BitConverter.GetBytes(fv);
-
-                to[toPos++] = b[0];
-                to[toPos++] = b[1];
-                to[toPos++] = b[2];
-                to[toPos++] = b[3];
-                fromPos += 3;
-            }
-            return to;
-        }
-        private byte[] ConvI32toF32(byte[] from) {
-            int nSample = from.Length / 4;
-            byte[] to = new byte[nSample * 4];
-            int fromPos = 0;
-            int toPos = 0;
-            for (int i = 0; i < nSample; ++i) {
-                int iv = ((int)from[fromPos+1]<<8)
-                    + ((int)from[fromPos+2]<<16)
-                    + ((int)from[fromPos+3]<<24);
-                float fv = ((float)iv) * (1.0f / 2147483648.0f);
-
-                byte [] b = System.BitConverter.GetBytes(fv);
-
-                to[toPos++] = b[0];
-                to[toPos++] = b[1];
-                to[toPos++] = b[2];
-                to[toPos++] = b[3];
-                fromPos += 4;
-            }
-            return to;
-        }
     }
 }

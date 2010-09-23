@@ -96,8 +96,8 @@ namespace PlayPcmWin {
             return exitCode;
         }
 
-        public int ReadHeader(string flacFilePath, out WavRWLib2.WavData wavData) {
-            wavData = new WavRWLib2.WavData();
+        public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+            pcmData = new PcmDataLib.PcmData();
 
             StartChildProcess();
             SendString("H");
@@ -109,23 +109,28 @@ namespace PlayPcmWin {
                 return rv;
             }
 
-            int nChannels = br.ReadInt32();
+            int nChannels     = br.ReadInt32();
             int bitsPerSample = br.ReadInt32();
-            int sampleRate = br.ReadInt32();
-            long numSamples = br.ReadInt64();
+            int sampleRate    = br.ReadInt32();
+            long numFrames    = br.ReadInt64();
 
-            System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
-                nChannels, bitsPerSample, sampleRate, numSamples);
+            System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
+                nChannels, bitsPerSample, sampleRate, numFrames);
 
             StopChildProcess();
 
-            wavData.CreateHeader(nChannels, sampleRate, bitsPerSample, numSamples);
+            pcmData.SetFormat(
+                nChannels,
+                bitsPerSample,
+                sampleRate,
+                PcmDataLib.PcmData.ValueRepresentationType.SInt,
+                numFrames);
 
             return 0;
         }
 
-        public int ReadAll(string flacFilePath, out WavRWLib2.WavData wavData) {
-            wavData = new WavRWLib2.WavData();
+        public int ReadAll(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+            pcmData = new PcmDataLib.PcmData();
 
             StartChildProcess();
             SendString("A");
@@ -137,18 +142,18 @@ namespace PlayPcmWin {
                 return rv;
             }
 
-            int nChannels = br.ReadInt32();
+            int nChannels     = br.ReadInt32();
             int bitsPerSample = br.ReadInt32();
-            int sampleRate = br.ReadInt32();
-            long numSamples = br.ReadInt64();
+            int sampleRate    = br.ReadInt32();
+            long numFrames    = br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
             int frameCount = 1048576;
 
-            byte[] rawData = new byte[numSamples * bytesPerFrame];
+            byte[] sampleArray = new byte[numFrames * bytesPerFrame];
 
             long pos = 0;
-            while (pos < numSamples) {
+            while (pos < numFrames) {
                 byte[] buff = br.ReadBytes(frameCount * bytesPerFrame);
 
                 System.Console.WriteLine("frameCount={0} readCount={1} pos={2}",
@@ -157,20 +162,25 @@ namespace PlayPcmWin {
                     break;
                 }
 
-                buff.CopyTo(rawData, pos * bytesPerFrame);
+                buff.CopyTo(sampleArray, pos * bytesPerFrame);
                 pos += buff.Length / bytesPerFrame;
             }
 
-            System.Console.WriteLine("numSamples={0} pos={1} ({2}M samples)",
-                numSamples, pos, pos / 1048576);
+            System.Console.WriteLine("numFrames={0} pos={1} ({2}M frames)",
+                numFrames, pos, pos / 1048576);
 
             int exitCode = StopChildProcess();
             System.Console.WriteLine("exitCode={0}",
                 exitCode);
 
             if (0 == exitCode) {
-                wavData.CreateHeader(nChannels, sampleRate, bitsPerSample, numSamples);
-                wavData.SetRawData(rawData);
+                pcmData.SetFormat(
+                    nChannels,
+                    bitsPerSample,
+                    sampleRate,
+                    PcmDataLib.PcmData.ValueRepresentationType.SInt,
+                    numFrames);
+                pcmData.SetSampleArray(numFrames, sampleArray);
             }
             return exitCode;
         }
