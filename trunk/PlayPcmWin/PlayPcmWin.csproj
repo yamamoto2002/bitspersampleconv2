@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{23DC272C-B67B-41C5-9622-A35BFA3B9D1E}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PlayPcmWin</RootNamespace>
     <AssemblyName>PlayPcmWin</AssemblyName>
@@ -167,6 +167,10 @@
     <ProjectReference Include="..\FlacDecodeCS\FlacDecodeCS.csproj">
       <Project>{2148EF2A-38E0-4E85-8459-386F55DB7015}</Project>
       <Name>FlacDecodeCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PcmData\PcmDataLib.csproj">
+      <Project>{7AF36E7B-839D-4C2F-AAFD-6D8319714D66}</Project>
+      <Name>PcmDataLib</Name>
     </ProjectReference>
     <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
       <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>

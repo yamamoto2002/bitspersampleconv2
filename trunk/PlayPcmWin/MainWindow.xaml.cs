@@ -29,16 +29,16 @@ namespace PlayPcmWin
         }
 
         public ItemType Type { get; set; }
-        public WavData WavData { get; set; }
+        public PcmDataLib.PcmData PcmData { get; set; }
 
         public PlayListItemInfo() {
             Type = ItemType.Item;
-            WavData = null;
+            PcmData = null;
         }
 
-        public PlayListItemInfo(ItemType type, WavData wavData) {
+        public PlayListItemInfo(ItemType type, PcmDataLib.PcmData pcmData) {
             Type = type;
-            WavData = wavData;
+            PcmData = pcmData;
         }
     }
 
@@ -51,9 +51,9 @@ namespace PlayPcmWin
         private Preference m_preference = new Preference();
 
         /// <summary>
-        /// WavDataのリスト。
+        /// PcmDataのリスト。
         /// </summary>
-        private List<WavData> m_wavDataList = new List<WavData>();
+        private List<PcmDataLib.PcmData> m_pcmDataList = new List<PcmDataLib.PcmData>();
 
         /// <summary>
         /// プレイリスト項目情報。
@@ -64,7 +64,6 @@ namespace PlayPcmWin
         private BackgroundWorker m_readFileWorker;
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
         private bool m_playListMouseDown = false;
-        private List<string> m_tmpWavPathList = new List<string>();
 
         // プレイリストにAddしたファイルに振られるGroupId。
         private int m_readGroupId = 0;
@@ -215,9 +214,9 @@ namespace PlayPcmWin
         /// <param name="groupId">再生グループId</param>
         /// <returns>再生グループId==groupIdの先頭のファイルのWavDataId。見つからないときは-1</returns>
         private int GetFirstWavDataIdOnGroup(int groupId) {
-            for (int i = 0; i < m_wavDataList.Count(); ++i) {
-                if (m_wavDataList[i].GroupId == groupId) {
-                    return m_wavDataList[i].Id;
+            for (int i = 0; i < m_pcmDataList.Count(); ++i) {
+                if (m_pcmDataList[i].GroupId == groupId) {
+                    return m_pcmDataList[i].Id;
                 }
             }
 
@@ -231,8 +230,8 @@ namespace PlayPcmWin
         /// <returns>WavDataの数。1つもないときは0</returns>
         private int CountWaveDataOnPlayGroup(int groupId) {
             int count = 0;
-            for (int i = 0; i < m_wavDataList.Count(); ++i) {
-                if (m_wavDataList[i].GroupId == groupId) {
+            for (int i = 0; i < m_pcmDataList.Count(); ++i) {
+                if (m_pcmDataList[i].GroupId == groupId) {
                     ++count;
                 }
             }
@@ -247,8 +246,8 @@ namespace PlayPcmWin
         /// <returns>プレイリスト位置番号(プレイリスト内のindex)。見つからないときは-1</returns>
         private int GetPlayListIndexOfWaveDataId(int wavDataId) {
             for (int i = 0; i < m_playListItems.Count(); ++i) {
-                if (m_playListItems[i].WavData != null
-                    && m_playListItems[i].WavData.Id == wavDataId) {
+                if (m_playListItems[i].PcmData != null
+                    && m_playListItems[i].PcmData.Id == wavDataId) {
                     return i;
                 }
             }
@@ -504,7 +503,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = true;
             }
 
-            if (0 < m_wavDataList.Count) {
+            if (0 < m_pcmDataList.Count) {
                 ChangeState(State.プレイリストあり);
             } else {
                 ChangeState(State.初期化完了);
@@ -548,25 +547,7 @@ namespace PlayPcmWin
             m_loadedGroupId = -1;
         }
 
-        /// <summary>
-        /// プレイリストが空になったら呼ぶ。
-        /// 終了時にも呼ぶ。
-        /// </summary>
-        private void DeleteAllTmpFiles() {
-            for (int i = 0; i < m_tmpWavPathList.Count; ++i) {
-                try {
-                    System.IO.File.Delete(m_tmpWavPathList[i]);
-                } catch (System.Exception ex) {
-                    System.Console.WriteLine(
-                        "D: DeleteAllTmpFiles({0}) {1} ignored", m_tmpWavPathList[i], ex);
-                }
-            }
-            m_tmpWavPathList.Clear();
-        }
-
         private void Exit() {
-            DeleteAllTmpFiles();
-
             if (wasapi != null) {
                 Stop(new Task(TaskType.None));
                 m_readFileWorker.CancelAsync();
@@ -632,13 +613,13 @@ namespace PlayPcmWin
             int startWavDataId = GetFirstWavDataIdOnGroup(loadGroupId);
             System.Diagnostics.Debug.Assert(0 <= startWavDataId);
 
-            WavData startWavData = m_wavDataList[startWavDataId];
+            PcmDataLib.PcmData startPcmData = m_pcmDataList[startWavDataId];
 
-            SampleFormat sf = GetDeviceSampleFormat(startWavData.BitsPerSample,
-                startWavData.SampleValueRepresentationType);
+            SampleFormat sf = GetDeviceSampleFormat(startPcmData.BitsPerSample,
+                startPcmData.SampleValueRepresentationType);
 
             if (m_deviceSetupInfo.Is(
-                startWavData.SampleRate,
+                startPcmData.SampleRate,
                 sf.bitsPerSample,
                 sf.bitFormatType,
                 latencyMillisec,
@@ -650,7 +631,7 @@ namespace PlayPcmWin
             }
 
             m_deviceSetupInfo.Set(
-                startWavData.SampleRate,
+                startPcmData.SampleRate,
                 sf.bitsPerSample,
                 sf.bitFormatType,
                 latencyMillisec,
@@ -670,17 +651,17 @@ namespace PlayPcmWin
 
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startWavData.SampleRate, sf.bitsPerSample,
+                startPcmData.SampleRate, sf.bitsPerSample,
                 sf.bitFormatType, latencyMillisec);
             AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
-                startWavData.SampleRate, sf.bitsPerSample,
+                startPcmData.SampleRate, sf.bitsPerSample,
                 sf.bitFormatType,
                 latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
                 string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{6:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {2}{1}bit レイテンシー{3}ms {4} {5}に対応していないのか、どちらかです。\r\n",
-                    startWavData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
+                    startPcmData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
                     latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
                 AddLogText(s);
@@ -715,13 +696,12 @@ namespace PlayPcmWin
         }
 
         private void ClearPlayList(PlayListClearMode mode) {
-            m_wavDataList.Clear();
+            m_pcmDataList.Clear();
             m_playListItems.Clear();
             wasapi.ClearPlayList();
 
             m_readGroupId = 0;
             m_loadedGroupId = -1;
-            DeleteAllTmpFiles();
 
             GC.Collect();
 
@@ -736,64 +716,64 @@ namespace PlayPcmWin
 
         /// <summary>
         /// サブルーチン
-        /// WavData読み込み成功後に行う処理。
+        /// PcmData読み込み成功後に行う処理。
         /// FLACとWAVで共通。
         /// </summary>
-        private bool CheckAddWavData(CueSheetTrackInfo csti, WavData wavData, string path) {
-            if (wavData.NumChannels != 2) {
+        private bool CheckAddPcmData(CueSheetTrackInfo csti, string path, PcmDataLib.PcmData pcmData) {
+            if (pcmData.NumChannels != 2) {
                 string s = string.Format("2チャンネルステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
-                    path, wavData.NumChannels);
+                    path, pcmData.NumChannels);
                 MessageBox.Show(s);
                 AddLogText(s);
                 return false;
             }
-            if (wavData.BitsPerSample != 16
-             && wavData.BitsPerSample != 24
-             && wavData.BitsPerSample != 32) {
+            if (pcmData.BitsPerSample != 16
+             && pcmData.BitsPerSample != 24
+             && pcmData.BitsPerSample != 32) {
                 string s = string.Format("量子化ビット数が16でも24でも32でもないPCMファイルの再生には対応していません: {0} {1}bit\r\n",
-                    path, wavData.BitsPerSample);
+                    path, pcmData.BitsPerSample);
                 MessageBox.Show(s);
                 AddLogText(s);
                 return false;
             }
 
-            if (0 < m_wavDataList.Count
-                && !m_wavDataList[m_wavDataList.Count - 1].IsSameFormat(wavData)) {
+            if (0 < m_pcmDataList.Count
+                && !m_pcmDataList[m_pcmDataList.Count - 1].IsSameFormat(pcmData)) {
                 // データフォーマットが変わった。
                 listBoxPlayFiles.Items.Add(
-                    string.Format("----------{0}Hz {1}bitに変更------------", wavData.SampleRate, wavData.BitsPerSample));
+                    string.Format("----------{0}Hz {1}bitに変更------------", pcmData.SampleRate, pcmData.BitsPerSample));
                 m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
                 ++m_readGroupId;
             }
 
-            wavData.FullPath = path;
-            wavData.FileName = System.IO.Path.GetFileName(path);
-            wavData.Id = m_wavDataList.Count();
-            wavData.GroupId = m_readGroupId;
+            pcmData.FullPath = path;
+            pcmData.FileName = System.IO.Path.GetFileName(path);
+            pcmData.Id = m_pcmDataList.Count();
+            pcmData.GroupId = m_readGroupId;
 
             // CUEシートの情報をセットする。
             if (null == csti) {
-                wavData.DisplayName = wavData.FileName;
-                wavData.StartTick = 0;
-                wavData.EndTick = -1;
+                pcmData.DisplayName = pcmData.FileName;
+                pcmData.StartTick = 0;
+                pcmData.EndTick = -1;
             } else {
                 if (0 < csti.title.Length) {
-                    wavData.DisplayName = csti.title;
+                    pcmData.DisplayName = csti.title;
                     if (csti.indexId == 0) {
-                        wavData.DisplayName = "[gap] " + csti.title;
+                        pcmData.DisplayName = csti.title + " (gap)";
                     }
                 } else {
-                    wavData.DisplayName = wavData.FileName;
+                    pcmData.DisplayName = pcmData.FileName;
                 }
-                wavData.StartTick = csti.startTick;
-                wavData.EndTick = csti.endTick;
+                pcmData.StartTick = csti.startTick;
+                pcmData.EndTick = csti.endTick;
             }
 
-            m_wavDataList.Add(wavData);
-            listBoxPlayFiles.Items.Add(wavData.DisplayName);
+            m_pcmDataList.Add(pcmData);
+            listBoxPlayFiles.Items.Add(pcmData.DisplayName);
             m_playListItems.Add(new PlayListItemInfo(
                 PlayListItemInfo.ItemType.Item,
-                wavData));
+                pcmData));
 
             // 状態の更新。再生リストにファイル有り。
             ChangeState(State.プレイリストあり);
@@ -822,7 +802,10 @@ namespace PlayPcmWin
             }
 
             if (readSuccess) {
-                CheckAddWavData(csti, wavData, path);
+                PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
+                pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame,
+                    wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
+                CheckAddPcmData(csti, path, pd);
             } else {
                 string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
                 AddLogText(s);
@@ -836,19 +819,19 @@ namespace PlayPcmWin
         /// FLACファイルのヘッダ部分を読み込む。
         /// </summary>
         private bool ReadFlacFileHeader(string path, CueSheetTrackInfo csti) {
-            WavData wavData;
+            PcmDataLib.PcmData pcmData;
 
             bool readSuccess = false;
             int flacErcd = 0;
 
             FlacDecodeIF fdif = new FlacDecodeIF();
-            flacErcd = fdif.ReadHeader(path, out wavData);
+            flacErcd = fdif.ReadHeader(path, out pcmData);
             if (flacErcd == 0) {
                 readSuccess = true;
             }
 
             if (readSuccess) {
-                CheckAddWavData(csti, wavData, path);
+                CheckAddPcmData(csti, path, pcmData);
             } else {
                 string s = string.Format("FLACファイル読み込み失敗: {0}\r\n{1}",
                         path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
@@ -1014,24 +997,34 @@ namespace PlayPcmWin
         /// ファイルからヘッダ＋PCMデータ部分を読む。
         /// N.B. ReadWavFileHeaderとReadFlacFileHeaderも参照。
         /// </summary>
-        private int ReadWavPcmData(WavData wavData) {
-            string ext = System.IO.Path.GetExtension(wavData.FullPath);
+        private int ReadPcmDataFromFile(PcmDataLib.PcmData pcmData) {
+            string ext = System.IO.Path.GetExtension(pcmData.FullPath);
             if (0 == String.Compare(".flac", ext, true)) {
-                WavData wd = new WavData();
+                PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
                 FlacDecodeIF fdif = new FlacDecodeIF();
-                int ercd = fdif.ReadAll(wavData.FullPath, out wd);
+                int ercd = fdif.ReadAll(pcmData.FullPath, out pd);
                 if (0 == ercd) {
-                    wavData.SetRawData(wd.SampleRawGet());
+                    pcmData.SetSampleArray(pd.NumFrames, pd.GetSampleArray());
                 }
+                pd = null;
+
                 // StartTickとEndTickを見て、必要な部分以外をカットする。
-                wavData.Trim();
+                pcmData.Trim();
                 return ercd;
             } else {
-                using (BinaryReader br = new BinaryReader(File.Open(wavData.FullPath, FileMode.Open))) {
-                    bool readSuccess = wavData.ReadRaw(br);
+                // WAVファイル読み込み。
+
+                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open))) {
+                    WavData wavData = new WavData();
+
+                    long startFrame = (long)(pcmData.StartTick) * pcmData.SampleRate / 75;
+                    long endFrame   = (long)(pcmData.EndTick)   * pcmData.SampleRate / 75;
+
+                    bool readSuccess = wavData.ReadAll(br, startFrame, endFrame);
                     if (!readSuccess) {
                         return -1;
                     }
+                    pcmData.SetSampleArray(wavData.NumFrames, wavData.GetSampleArray());
                 }
                 return 0;
             }
@@ -1052,9 +1045,9 @@ namespace PlayPcmWin
                 r.hr = -1;
 
                 wasapi.ClearPlayList();
-                for (int i = 0; i < m_wavDataList.Count; ++i) {
-                    WavData wd = m_wavDataList[i];
-                    if (wd.GroupId != readGroupId) {
+                for (int i = 0; i < m_pcmDataList.Count; ++i) {
+                    PcmDataLib.PcmData pd = m_pcmDataList[i];
+                    if (pd.GroupId != readGroupId) {
                         continue;
                     }
 
@@ -1068,23 +1061,23 @@ namespace PlayPcmWin
                     // 効果絶大である。
                     GC.Collect();
 
-                    int ercd = ReadWavPcmData(wd);
+                    int ercd = ReadPcmDataFromFile(pd);
                     if (0 != ercd) {
                         r.message = string.Format("読み込みエラー。{0}\r\nエラーコード{1}。{2}",
-                            wd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
+                            pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
                         args.Result = r;
                         Console.WriteLine("D: ReadFileDoWork() !readSuccess");
                         return;
                     }
 
                     // 必要に応じて量子化ビット数の変更を行う。
-                    wd = BitsPerSampleConvAsNeeded(wd);
+                    pd = BitsPerSampleConvAsNeeded(pd);
 
-                    if (wd.SampleRawGet() != null &&
-                        0 < wd.SampleRawGet().Length) {
+                    if (pd.GetSampleArray() != null &&
+                        0 < pd.GetSampleArray().Length) {
                         // サンプルが存在する場合だけWasapiにAddする。
 
-                        if (!wasapi.AddPlayPcmData(wd.Id, wd.SampleRawGet())) {
+                        if (!wasapi.AddPlayPcmData(pd.Id, pd.GetSampleArray())) {
                             ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
                             r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
                             args.Result = r;
@@ -1092,10 +1085,10 @@ namespace PlayPcmWin
                             return;
                         }
                     }
-                    wd.ForgetDataPart();
+                    pd.ForgetDataPart();
 
-                    m_readFileWorker.ReportProgress(100 * (i + 1) / m_wavDataList.Count,
-                        string.Format("wasapi.AddOutputData({0}, {1}samples)\r\n", wd.Id, wd.NumSamples));
+                    m_readFileWorker.ReportProgress(100 * (i + 1) / m_pcmDataList.Count,
+                        string.Format("wasapi.AddOutputData({0}, {1} frames)\r\n", pd.Id, pd.NumFrames));
                 }
 
                 // ダメ押し。
@@ -1117,11 +1110,13 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// WavDataの形式と、(共有・排他)、フォーマット固定設定から、
+        /// PcmDataの形式と、(共有・排他)、フォーマット固定設定から、
         /// デバイスに設定されるビットフォーマットを取得。
         /// </summary>
         /// <returns>デバイスに設定されるビットフォーマット</returns>
-        private SampleFormat GetDeviceSampleFormat(int wavDataBitsPerSample, ValueRepresentationType waveDataVrt) {
+        private SampleFormat GetDeviceSampleFormat(
+            int pcmDataBitsPerSample,
+            PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
             // 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
 
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
@@ -1146,11 +1141,11 @@ namespace PlayPcmWin
                     sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
                     break;
                 case BitsPerSampleFixType.Variable:
-                    if (wavDataBitsPerSample != 16) {
+                    if (pcmDataBitsPerSample != 16) {
                         sf.bitsPerSample = 32;
                         sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     } else {
-                        System.Diagnostics.Debug.Assert(waveDataVrt == ValueRepresentationType.SInt);
+                        System.Diagnostics.Debug.Assert(pcmDataVrt == PcmDataLib.PcmData.ValueRepresentationType.SInt);
                         sf.bitsPerSample = 16;
                         sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     }
@@ -1167,15 +1162,15 @@ namespace PlayPcmWin
         /// <summary>
         /// 量子化ビット数を、もし必要なら変更する。
         /// </summary>
-        /// <param name="wd">入力WavData</param>
+        /// <param name="pd">入力WavData</param>
         /// <returns>変更後WavData</returns>
-        private WavData BitsPerSampleConvAsNeeded(WavData wd) {
+        private PcmDataLib.PcmData BitsPerSampleConvAsNeeded(PcmDataLib.PcmData pd) {
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
                 // 共有モードの場合Sfloat32に変換する。
                 // 元データがSint32の場合、切り捨てによって情報が失われる。
                 System.Console.WriteLine("Converting to Sfloat32bit...");
-                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SFloat);
-                return wd;
+                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SFloat);
+                return pd;
             }
 
             // 排他モード。
@@ -1185,24 +1180,24 @@ namespace PlayPcmWin
                 // Sint16に変換する。
                 // この場合は、元データが24ビット以上の場合、切り捨てによって情報が失われる。
                 System.Console.WriteLine("Converting to SInt16bit...");
-                wd = wd.BitsPerSampleConvertTo(16, ValueRepresentationType.SInt);
+                pd = pd.BitsPerSampleConvertTo(16, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 break;
             case BitsPerSampleFixType.Sint32:
                 // Sint32に変換する。
                 System.Console.WriteLine("Converting to SInt32bit...");
-                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SInt);
+                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 break;
             case BitsPerSampleFixType.Sfloat32:
                 // Sfloat32に変換する。
                 // この場合は、元データがSint32の場合、切り捨てによって情報が失われる。
                 System.Console.WriteLine("Converting to Sfloat32bit...");
-                wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SFloat);
+                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SFloat);
                 break;
             case BitsPerSampleFixType.Variable:
                 // SInt16→SInt16のまま。
                 // SInt32、SFloat32、SInt24→SInt32に変換。
-                if (wd.BitsPerSample != 16) {
-                    wd = wd.BitsPerSampleConvertTo(32, ValueRepresentationType.SInt);
+                if (pd.BitsPerSample != 16) {
+                    pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 }
                 break;
             default:
@@ -1210,7 +1205,7 @@ namespace PlayPcmWin
                 break;
             }
 
-            return wd;
+            return pd;
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -1296,7 +1291,7 @@ namespace PlayPcmWin
 
             int loadGroupId = 0;
             if (0 < listBoxPlayFiles.SelectedIndex) {
-                WavData w = m_playListItems[listBoxPlayFiles.SelectedIndex].WavData;
+                PcmDataLib.PcmData w = m_playListItems[listBoxPlayFiles.SelectedIndex].PcmData;
                 if (null != w) {
                     loadGroupId = w.GroupId;
                 }
@@ -1322,9 +1317,9 @@ namespace PlayPcmWin
 
             int wavDataId = 0;
             if (0 < listBoxPlayFiles.SelectedIndex) {
-                WavData wavData = m_playListItems[listBoxPlayFiles.SelectedIndex].WavData;
-                if (null != wavData) {
-                    wavDataId = wavData.Id;
+                PcmDataLib.PcmData pcmData = m_playListItems[listBoxPlayFiles.SelectedIndex].PcmData;
+                if (null != pcmData) {
+                    wavDataId = pcmData.Id;
                 }
             }
 
@@ -1338,14 +1333,14 @@ namespace PlayPcmWin
         private bool ReadStartPlayByWavDataId(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
-            WavData wavData = m_wavDataList[wavDataId];
+            PcmDataLib.PcmData pcmData = m_pcmDataList[wavDataId];
 
-            if (wavData.GroupId != m_loadedGroupId) {
+            if (pcmData.GroupId != m_loadedGroupId) {
                 // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
                 // 再生するためには、ロードする必要がある。
                 UnsetupDevice();
 
-                if (!SetupDevice(wavData.GroupId)) {
+                if (!SetupDevice(pcmData.GroupId)) {
                     listBoxPlayFiles.SelectedIndex = 0;
                     ChangeState(State.ファイル読み込み完了);
 
@@ -1354,7 +1349,7 @@ namespace PlayPcmWin
                     return false;
                 }
 
-                m_task.Set(TaskType.PlaySpecifiedGroup, wavData.GroupId, wavData.Id);
+                m_task.Set(TaskType.PlaySpecifiedGroup, pcmData.GroupId, pcmData.Id);
                 StartReadPlayGroupOnTask();
                 return true;
             }
@@ -1364,7 +1359,7 @@ namespace PlayPcmWin
             // m_LoadedGroupIdの再生が自然に完了したら、行うタスクを決定する。
             UpdateNextTask();
 
-            if (!SetupDevice(wavData.GroupId)) {
+            if (!SetupDevice(pcmData.GroupId)) {
                 listBoxPlayFiles.SelectedIndex = 0;
                 ChangeState(State.ファイル読み込み完了);
 
@@ -1423,7 +1418,7 @@ namespace PlayPcmWin
         /// <returns>false: 再生開始できなかった。</returns>
         private bool StartPlay(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
-            if (m_wavDataList[wavDataId].GroupId != m_loadedGroupId) {
+            if (m_pcmDataList[wavDataId].GroupId != m_loadedGroupId) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
@@ -1493,23 +1488,23 @@ namespace PlayPcmWin
                 return;
             }
 
-            int playingWavDataId = wasapi.GetNowPlayingPcmDataId();
+            int playingPcmDataId = wasapi.GetNowPlayingPcmDataId();
             int maximum = wasapi.GetNowPlayingPcmDataId();
 
-            if (playingWavDataId < 0) {
+            if (playingPcmDataId < 0) {
                 textBoxFileName.Text = "";
                 label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
             } else {
                 listBoxPlayFiles.SelectedIndex
-                    = GetPlayListIndexOfWaveDataId(playingWavDataId);
+                    = GetPlayListIndexOfWaveDataId(playingPcmDataId);
                 slider1.Value =wasapi.GetPosFrame();
-                WavData wavData = m_wavDataList[playingWavDataId];
-                textBoxFileName.Text = wavData.FileName;
+                PcmDataLib.PcmData pcmData = m_pcmDataList[playingPcmDataId];
+                textBoxFileName.Text = pcmData.FileName;
 
-                slider1.Maximum = wavData.NumSamples;
+                slider1.Maximum = pcmData.NumFrames;
 
                 label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}",
-                    slider1.Value / wavData.SampleRate, wavData.NumSamples / wavData.SampleRate);
+                    slider1.Value / pcmData.SampleRate, pcmData.NumFrames / pcmData.SampleRate);
             }
         }
 
@@ -1649,7 +1644,7 @@ namespace PlayPcmWin
             if (wavDataId < 0) {
                 wavDataId = 0;
             }
-            if (m_wavDataList.Count <= wavDataId) {
+            if (m_pcmDataList.Count <= wavDataId) {
                 wavDataId = 0;
             }
 
@@ -1681,9 +1676,9 @@ namespace PlayPcmWin
 
             // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
             // しかも、この曲を再生していない場合、この曲を再生する。
-            if (null != pli.WavData &&
-                playingId != pli.WavData.Id) {
-                ChangePlayWavDataById(pli.WavData.Id);
+            if (null != pli.PcmData &&
+                playingId != pli.PcmData.Id) {
+                ChangePlayWavDataById(pli.PcmData.Id);
             }
         }
 
@@ -1703,8 +1698,8 @@ namespace PlayPcmWin
                 return;
             }
 
-            int groupId = m_wavDataList[wavDataId].GroupId;
-            if (m_wavDataList[playingId].GroupId == groupId) {
+            int groupId = m_pcmDataList[wavDataId].GroupId;
+            if (m_pcmDataList[playingId].GroupId == groupId) {
                 // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
                 wasapi.SetNowPlayingPcmDataId(wavDataId);
                 AddLogText(string.Format("wasapi.SetNowPlayingPcmDataId({0})\r\n",
@@ -1729,7 +1724,7 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (m_wavDataList[m_wavDataList.Count - 1].GroupId != m_readGroupId) {
+            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_readGroupId) {
                 // 既にグループ区切り線が入れられている。
                 return;
             }
@@ -1796,11 +1791,11 @@ namespace PlayPcmWin
         }
 
         private WasapiCS.BitFormatType
-        VrtToBft(ValueRepresentationType vrt) {
+        VrtToBft(PcmDataLib.PcmData.ValueRepresentationType vrt) {
             switch (vrt) {
-            case ValueRepresentationType.SInt:
+            case PcmDataLib.PcmData.ValueRepresentationType.SInt:
                 return WasapiCS.BitFormatType.SInt;
-            case ValueRepresentationType.SFloat:
+            case PcmDataLib.PcmData.ValueRepresentationType.SFloat:
                 return WasapiCS.BitFormatType.SFloat;
             default:
                 System.Diagnostics.Debug.Assert(false);
