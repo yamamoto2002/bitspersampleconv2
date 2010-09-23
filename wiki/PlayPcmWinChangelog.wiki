@@ -4,6 +4,10 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 1.0.51 ==
+機能追加
+  * AIFFファイル読み込み対応。
+
+===!PlayPcmWin 1.0.51 ==
 バグ取り
   * CUEシートの文字コードをANSIと想定して読むように修正。
 
