@@ -3,7 +3,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 1.0.51 ==
+===!PlayPcmWin 1.0.54 ==
 機能追加
   * AIFFファイル読み込み対応。
 
