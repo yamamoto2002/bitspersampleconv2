@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.57 ==
+バグ取り
+  * AIFFファイル読み込み高速化。
+
 ===!PlayPcmWin 1.0.54 ==
 機能追加
   * AIFFファイル読み込み対応。
