@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace PlayPcmWin {
 
@@ -136,21 +137,78 @@ namespace PlayPcmWin {
             }
 
             m_sampleArray = br.ReadBytes((int)(NumFrames * BitsPerFrame / 8));
+            
 
-            long i = 0;
-            for (long sample = 0; sample < NumFrames * NumChannels; ++sample) {
-                byte v0 = m_sampleArray[i];
-                byte v1 = m_sampleArray[i+1];
-                m_sampleArray[i + 1] = v0;
-                m_sampleArray[i + 0] = v1;
-                i += 2;
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            /*
+            // 案1 (1サンプルごとの処理)
+            Parallel.For(0, NumFrames * NumChannels, delegate(long sample) {
+                long pos = sample * 2;
+                byte v0 = m_sampleArray[pos + 0];
+                byte v1 = m_sampleArray[pos + 1];
+                m_sampleArray[pos + 1] = v0;
+                m_sampleArray[pos + 0] = v1;
+            });
+            */
+            /*
+            // 案2 (1フレームごとの処理) 案1の半分ぐらいの速度
+            int numChannels = NumChannels;
+            Parallel.For(0, NumFrames, delegate(long frame) {
+                for (int i = 0; i < numChannels; ++i) {
+                    long pos = frame * 2 * i;
+                    byte v0 = m_sampleArray[pos + 0];
+                    byte v1 = m_sampleArray[pos + 1];
+                    m_sampleArray[pos + 1] = v0;
+                    m_sampleArray[pos + 0] = v1;
+                }
+            });
+            */
+            /*
+            // 案3 (全部1スレッド) 6コア12スレッドCPUでも案1よりも少し速い
+            for (long i = 0; i < NumFrames * NumChannels; ++i) {
+                long pos = i * 2;
+                byte v0 = m_sampleArray[pos + 0];
+                byte v1 = m_sampleArray[pos + 1];
+                m_sampleArray[pos + 1] = v0;
+                m_sampleArray[pos + 0] = v1;
+            }
+            */
+
+            {
+                // 案4 (1Mサンプルごとの処理) 案3よりも6倍ぐらい速い
+                int workUnit = 1048576;
+                long sampleUnits = NumFrames * NumChannels / workUnit;
+                Parallel.For(0, sampleUnits, delegate(long m) {
+                    long pos = m * workUnit * 2;
+                    for (int i = 0; i < workUnit; ++i) {
+                        byte v0 = m_sampleArray[pos + 0];
+                        byte v1 = m_sampleArray[pos + 1];
+                        m_sampleArray[pos + 1] = v0;
+                        m_sampleArray[pos + 0] = v1;
+                        pos += 2;
+                    }
+                });
+                for (long i = workUnit * sampleUnits;
+                    i < NumFrames * NumChannels; ++i) {
+                    long pos = i * 2;
+                    byte v0 = m_sampleArray[pos + 0];
+                    byte v1 = m_sampleArray[pos + 1];
+                    m_sampleArray[pos + 1] = v0;
+                    m_sampleArray[pos + 0] = v1;
+                }
             }
 
-            /* PCMデータのテスト出力。
+            sw.Stop();
+            System.Console.WriteLine("{0} bytes : {1} ms", m_sampleArray.Length, sw.ElapsedMilliseconds);
+
+            /*
+            //PCMデータのテスト出力。
             using (BinaryWriter bw = new BinaryWriter(File.Open("C:\\tmp\\test.bin", FileMode.Create))) {
                 bw.Write(m_sampleArray);
             }
-             */
+            */
 
             return ResultType.Success;
         }
