@@ -176,6 +176,7 @@ namespace PlayPcmWin {
             }
             */
 
+            /*
             {
                 // 案4 (1Mサンプルごとの処理) 案3よりも6倍ぐらい速い
                 int workUnit = 1048576;
@@ -193,6 +194,32 @@ namespace PlayPcmWin {
                 for (long i = workUnit * sampleUnits;
                     i < NumFrames * NumChannels; ++i) {
                     long pos = i * 2;
+                    byte v0 = m_sampleArray[pos + 0];
+                    byte v1 = m_sampleArray[pos + 1];
+                    m_sampleArray[pos + 1] = v0;
+                    m_sampleArray[pos + 0] = v1;
+                }
+            }
+            */
+
+            {
+                // 案5 (1Mサンプルごとの処理、この時点で2GB以下なので、long→intにする)
+                // 64bit版は変わらず、32bit版は
+                int workUnit = 1048576;
+                int sampleUnits = (int)(NumFrames * NumChannels / workUnit);
+                Parallel.For(0, sampleUnits, delegate(int m) {
+                    int pos = m * workUnit * 2;
+                    for (int i = 0; i < workUnit; ++i) {
+                        byte v0 = m_sampleArray[pos + 0];
+                        byte v1 = m_sampleArray[pos + 1];
+                        m_sampleArray[pos + 1] = v0;
+                        m_sampleArray[pos + 0] = v1;
+                        pos += 2;
+                    }
+                });
+                for (int i = workUnit * sampleUnits;
+                    i < NumFrames * NumChannels; ++i) {
+                    int pos = i * 2;
                     byte v0 = m_sampleArray[pos + 0];
                     byte v1 = m_sampleArray[pos + 1];
                     m_sampleArray[pos + 1] = v0;
