@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.68 ==
+  * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。
+
 ===!PlayPcmWin 1.0.65 ==
   * AIFFファイル読み込み高速化。
 
