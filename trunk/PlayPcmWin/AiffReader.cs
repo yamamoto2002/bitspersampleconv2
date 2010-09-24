@@ -1,4 +1,6 @@
-﻿using System;
+﻿// 日本語UTF-8
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -138,12 +140,13 @@ namespace PlayPcmWin {
 
             m_sampleArray = br.ReadBytes((int)(NumFrames * BitsPerFrame / 8));
             
-
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
+            // エンディアン変換
+
             /*
-            // 案1 (1サンプルごとの処理)
+            // 案1 (1サンプルごとに並列化する)
             Parallel.For(0, NumFrames * NumChannels, delegate(long sample) {
                 long pos = sample * 2;
                 byte v0 = m_sampleArray[pos + 0];
@@ -153,7 +156,7 @@ namespace PlayPcmWin {
             });
             */
             /*
-            // 案2 (1フレームごとの処理) 案1の半分ぐらいの速度
+            // 案2 (1フレームごとに並列化) 案1の半分ぐらいの速度
             int numChannels = NumChannels;
             Parallel.For(0, NumFrames, delegate(long frame) {
                 for (int i = 0; i < numChannels; ++i) {
@@ -166,7 +169,7 @@ namespace PlayPcmWin {
             });
             */
             /*
-            // 案3 (全部1スレッド) 6コア12スレッドCPUでも案1よりも少し速い
+            // 案3 (並列化せず、全部1スレッド) 6コア12スレッドCPUでも案1よりも少し速い
             for (long i = 0; i < NumFrames * NumChannels; ++i) {
                 long pos = i * 2;
                 byte v0 = m_sampleArray[pos + 0];
@@ -178,7 +181,7 @@ namespace PlayPcmWin {
 
             /*
             {
-                // 案4 (1Mサンプルごとの処理) 案3よりも6倍ぐらい速い
+                // 案4 (1Mサンプルごとに並列化) 6コア12スレッドCPUで、案3よりも6倍ぐらい速い
                 int workUnit = 1048576;
                 long sampleUnits = NumFrames * NumChannels / workUnit;
                 Parallel.For(0, sampleUnits, delegate(long m) {
@@ -203,8 +206,8 @@ namespace PlayPcmWin {
             */
 
             {
-                // 案5 (1Mサンプルごとの処理、この時点で2GB以下なので、long→intにする)
-                // 64bit版は変わらず、32bit版は
+                // 案5 (1Mサンプルごとに並列化、この時点で2GB以下なので、long→intにする)
+                // 64bit版は変わらず、32bit版は3倍ぐらい速くなった。
                 int workUnit = 1048576;
                 int sampleUnits = (int)(NumFrames * NumChannels / workUnit);
                 Parallel.For(0, sampleUnits, delegate(int m) {
