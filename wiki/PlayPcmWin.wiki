@@ -55,6 +55,7 @@ zipを展開して、中のSetup.exeを実行してインストールします�
 アンインストールは、[スタート][コントロールパネル][プログラムのアンインストール] または[プログラムと機能]で行うか、もう一度Setup.exeを実行して削除を選びます。
 
 =更新履歴=
+
 こちらをご覧下さい。
 http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog
 
@@ -62,6 +63,11 @@ http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog
 
 こちらをご覧下さい。
 http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
+
+=既知のバグ一覧=
+
+こちらをご覧下さい。
+http://code.google.com/p/bitspersampleconv2/issues/list
 
 =.NET Framework 4.0 Client Profile(以下.NETと呼称)について=
 
