@@ -40,6 +40,8 @@ namespace PlayPcmWin {
         public RenderThreadTaskType renderThreadTaskType { get; set; }
         public BitsPerSampleFixType bitsPerSampleFixType { get; set; }
 
+        public bool ReplaceGapWithKokomade { get; set; }
+
         public string PreferredDeviceName { get; set; }
 
         public Preference() {
@@ -57,6 +59,7 @@ namespace PlayPcmWin {
             renderThreadTaskType = RenderThreadTaskType.ProAudio;
             bitsPerSampleFixType = BitsPerSampleFixType.Variable;
             PreferredDeviceName = "";
+            ReplaceGapWithKokomade = false;
         }
     }
 

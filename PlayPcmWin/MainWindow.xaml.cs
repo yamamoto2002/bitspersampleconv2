@@ -889,7 +889,13 @@ namespace PlayPcmWin
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csti);
+                if (csti.indexId == 0 &&
+                    m_preference.ReplaceGapWithKokomade) {
+                    // INDEX 00 == gap。gapのかわりに[ここまで読みこみ]を追加する。
+                    AddKokomade();
+                } else {
+                    ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csti);
+                }
             }
             return true;
         }
@@ -1771,7 +1777,13 @@ namespace PlayPcmWin
             m_playListMouseDown = false;
         }
 
-        private void buttonReadSeparator_Click(object sender, RoutedEventArgs e) {
+        /// <summary>
+        /// [ここまで一括読み込み]を追加できたら追加する。
+        /// 
+        /// [ここまで一括読み込み]ボタン押下以外にも、
+        /// ギャップ→ここまで変換からも呼び出される。
+        /// </summary>
+        private void AddKokomade() {
             if (0 == listBoxPlayFiles.Items.Count) {
                 return;
             }
@@ -1784,6 +1796,10 @@ namespace PlayPcmWin
             listBoxPlayFiles.Items.Add("----------ここまで一括読み込み------------");
             m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
             ++m_readGroupId;
+        }
+
+        private void buttonReadSeparator_Click(object sender, RoutedEventArgs e) {
+            AddKokomade();
         }
 
         /// <summary>

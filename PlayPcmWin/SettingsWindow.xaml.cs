@@ -45,6 +45,9 @@ namespace PlayPcmWin {
                 System.Diagnostics.Debug.Assert(false);
                 break;
             }
+
+            checkBoxReplaceGapWithKokomade.IsChecked =
+                m_preference.ReplaceGapWithKokomade;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -59,6 +62,12 @@ namespace PlayPcmWin {
             }
             if (true == radioButtonBpsSfloat32.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sfloat32;
+            }
+
+            if (true == checkBoxReplaceGapWithKokomade.IsChecked) {
+                m_preference.ReplaceGapWithKokomade = true;
+            } else {
+                m_preference.ReplaceGapWithKokomade = false;
             }
 
             Close();
