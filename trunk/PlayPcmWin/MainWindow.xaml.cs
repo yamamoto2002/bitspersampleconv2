@@ -652,7 +652,7 @@ namespace PlayPcmWin
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
                 startPcmData.SampleRate, sf.bitsPerSample,
-                sf.bitFormatType, latencyMillisec);
+                sf.bitFormatType, latencyMillisec, 2);
             AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
                 startPcmData.SampleRate, sf.bitsPerSample,
                 sf.bitFormatType,
@@ -1095,6 +1095,7 @@ namespace PlayPcmWin
                 r.hr = -1;
 
                 wasapi.ClearPlayList();
+                wasapi.AddPlayPcmDataStart();
                 for (int i = 0; i < m_pcmDataList.Count; ++i) {
                     PcmDataLib.PcmData pd = m_pcmDataList[i];
                     if (pd.GroupId != readGroupId) {
@@ -1143,6 +1144,7 @@ namespace PlayPcmWin
 
                 // ダメ押し。
                 GC.Collect();
+                wasapi.AddPlayPcmDataEnd();
 
                 // 成功。
                 r.message = string.Format("再生グループ{0}番読み込み完了。\r\n", readGroupId);

@@ -112,12 +112,15 @@ WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Setup(int dataFeedMode, int sampleRate, int bitsPerSample, int bitFormatType, int latencyMillisec)
+WasapiIO_Setup(int dataFeedMode, int sampleRate,
+    int bitsPerSample, int bitFormatType, int latencyMillisec,
+    int numChannels)
 {
     assert(g_pWasapi);
     assert(0 <= dataFeedMode && dataFeedMode < (int)WWDFMNum);
     return g_pWasapi->Setup((WWDataFeedMode)dataFeedMode, sampleRate,
-        bitsPerSample, (WWBitFormatType)bitFormatType, latencyMillisec);
+        bitsPerSample, (WWBitFormatType)bitFormatType, latencyMillisec,
+        numChannels);
 }
 
 extern "C" __declspec(dllexport)
@@ -130,10 +133,26 @@ WasapiIO_Unsetup(void)
 
 extern "C" __declspec(dllexport)
 bool __stdcall
+WasapiIO_AddPlayPcmDataStart(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->AddPlayPcmDataStart();
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
 WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes)
 {
     assert(g_pWasapi);
     return g_pWasapi->AddPlayPcmData(id, data, bytes);
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
+WasapiIO_AddPlayPcmDataEnd(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->AddPlayPcmDataEnd();
 }
 
 extern "C" __declspec(dllexport)

@@ -54,7 +54,8 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample, int bitFormatType, int latencyMillisec);
+        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample,
+            int bitFormatType, int latencyMillisec, int numChannels);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
@@ -62,7 +63,15 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool 
+        WasapiIO_AddPlayPcmDataStart();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static bool
         WasapiIO_AddPlayPcmData(int id, byte[] data, int bytes);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static bool
+        WasapiIO_AddPlayPcmDataEnd();
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
@@ -197,16 +206,26 @@ namespace Wasapi {
             TimerDriven,
         };
 
-        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample, BitFormatType bft, int latencyMillisec) {
-            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample, (int)bft, latencyMillisec);
+        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample,
+            BitFormatType bft, int latencyMillisec, int numChannels) {
+            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample,
+                (int)bft, latencyMillisec, numChannels);
         }
 
         public void Unsetup() {
             WasapiIO_Unsetup();
         }
 
+        public bool AddPlayPcmDataStart() {
+            return WasapiIO_AddPlayPcmDataStart();
+        }
+
         public bool AddPlayPcmData(int id, byte[] data) {
             return WasapiIO_AddPlayPcmData(id, data, data.Length);
+        }
+
+        public bool AddPlayPcmDataEnd() {
+            return WasapiIO_AddPlayPcmDataEnd();
         }
 
         public void ClearPlayList() {
