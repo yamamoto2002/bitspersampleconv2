@@ -247,7 +247,8 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 
 =FLAC読み込み対応について=
 
-!PlayPcmWinはFLAC読み込み処理でlibFLACの機能を使用しています。
+!PlayPcmWin.exeがFLAC読み込み処理で使用しているFlacDecode.exeは
+libFLACの機能を使用しています。
 
 libFLACのライセンスは New BSD Licenseです。
 
@@ -260,6 +261,8 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/libFl
 C:\Program Files\yamamoto2002\PlayPcmWin\libFlacLicense.txt
 }}}
 に同内容のテキストファイルがコピーされます。
+
+ちなみにPlayPcmWin.exeのライセンスはMITライセンスです。
 
 量子化ビット数32ビットのFLACファイルの読み込みは対応しておりません。
 これは、現時点でlibFLACが対応していないためです。
