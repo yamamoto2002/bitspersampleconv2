@@ -1793,7 +1793,14 @@ namespace PlayPcmWin
                 return;
             }
 
-            listBoxPlayFiles.Items.Add("----------ここまで一括読み込み------------");
+            // 同じ名前の項目を複数入れると選択状態が変になるので
+            string dispNameOnPlayList = "----------ここまで一括読み込み------------";
+            for (int i = 0; i < m_readGroupId; ++i) {
+                dispNameOnPlayList =
+                    dispNameOnPlayList + " ";
+            }
+
+            listBoxPlayFiles.Items.Add(dispNameOnPlayList);
             m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
             ++m_readGroupId;
         }
