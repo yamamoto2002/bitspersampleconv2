@@ -8,7 +8,7 @@
   * CUEシートを読む際に、GAPを[ここまで一括読み込み]に置き換える機能。
 
 ↓[詳細設定]画面
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.png
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 ===!PlayPcmWin 1.0.69 ==
 バグ取り
