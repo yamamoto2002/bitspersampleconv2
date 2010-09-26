@@ -9,6 +9,7 @@
 #include <strsafe.h>
 #include <mmsystem.h>
 #include <malloc.h>
+#include <stdint.h>
 
 #define FOOTER_SEND_FRAME_NUM (2)
 #define PERIODS_PER_BUFFER_ON_TIMER_DRIVEN_MODE (4)
@@ -17,6 +18,15 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
     this->id = id;
     wcsncpy_s(this->name, name, WW_DEVICE_NAME_COUNT-1);
+}
+
+const char *
+WWPcmDataContentTypeToStr(WWPcmDataContentType w)
+{
+    switch (w) {
+    case WWPcmDataContentSilence: return "Silence";
+    case WWPcmDataContentPcmData: return "PcmData";
+    }
 }
 
 void
@@ -444,7 +454,8 @@ WasapiUser::Setup(
     int sampleRate,
     int bitsPerSample,
     WWBitFormatType bitFormatType,
-    int latencyMillisec)
+    int latencyMillisec,
+    int numChannels)
 {
     HRESULT      hr          = 0;
     WAVEFORMATEX *waveFormat = NULL;
@@ -457,6 +468,7 @@ WasapiUser::Setup(
     m_sampleRate          = sampleRate;
     m_deviceBitsPerSample = bitsPerSample;
     m_bitFormatType       = bitFormatType;
+    m_numChannels         = numChannels;
 
     // WasapiUserクラスが備えていたサンプルフォーマット変換機能は、廃止した。
     // 上のレイヤーでPCMデータを適切な形式に変換してから渡してください。
@@ -484,6 +496,13 @@ WasapiUser::Setup(
     dprintf("original Mix Format:\n");
     WWWaveFormatDebug(waveFormat);
     WWWFEXDebug(wfex);
+
+    if (waveFormat->nChannels != m_numChannels) {
+        dprintf("E: waveFormat->nChannels(%d) != %d\n",
+            waveFormat->nChannels, m_numChannels);
+        hr = E_FAIL;
+        goto end;
+    }
 
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
         dprintf("E: unsupported device ! mixformat == 0x%08x\n",
@@ -652,11 +671,13 @@ WasapiUser::Start(int wavDataId)
 
     dprintf("D: %s()\n", __FUNCTION__);
 
-    PlayPcmDataListDebug();
-
     assert(m_playPcmDataList.size());
 
-    m_nowPlayingPcmData = FindPlayPcmDataById(wavDataId);
+    // 再生開始するに当たり、リンクリストをつなげなおす。
+    // 先頭の項目→最初に再生したい曲
+    SetFirstPlayPcmData(FindPlayPcmDataById(wavDataId));
+
+    PlayPcmDataListDebug();
 
     HRG(m_audioClient->Reset());
 
@@ -769,10 +790,32 @@ WasapiUser::Run(int millisec)
 ////////////////////////////////////////////////////////////////////////////
 // PCMデータバッファ管理
 
-/// @param id WAVファイルID。
-/// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
-/// @param bytes dataのバイト数。
-/// @return true: 追加成功。false: 追加失敗。
+bool
+WasapiUser::AddPcmDataSilence(int nFrames)
+{
+    WWPcmData pcmData;
+    pcmData.id       = -1;
+    pcmData.contentType = WWPcmDataContentSilence;
+    pcmData.next     = NULL;
+    pcmData.posFrame = 0;
+    pcmData.nFrames  = 0;
+    pcmData.stream   = NULL;
+
+    int bytes = nFrames * m_frameBytes;
+
+    BYTE *p = (BYTE *)malloc(bytes);
+    if (NULL == p) {
+        // 失敗…
+        return false;
+    }
+
+    memset(p, 0, bytes);
+    pcmData.nFrames = nFrames;
+    pcmData.stream = p;
+    m_playPcmDataList.push_back(pcmData);
+    return true;
+}
+
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
@@ -783,6 +826,7 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 
     WWPcmData pcmData;
     pcmData.id       = id;
+    pcmData.contentType = WWPcmDataContentPcmData;
     pcmData.next     = NULL;
     pcmData.posFrame = 0;
     pcmData.nFrames  = 0;
@@ -801,6 +845,24 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     pcmData.stream = p;
     m_playPcmDataList.push_back(pcmData);
     return true;
+}
+
+bool
+WasapiUser::AddPlayPcmDataStart(void)
+{
+    assert(m_playPcmDataList.size() == 0);
+
+    // バッファ1個分の無音を作って詰める。
+    int nFrames = (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
+    return AddPcmDataSilence(nFrames);
+}
+
+bool
+WasapiUser::AddPlayPcmDataEnd(void)
+{
+    // バッファ4個分の無音を作って詰める。
+    int nFrames = 4 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
+    return AddPcmDataSilence(nFrames);
 }
 
 void
@@ -833,25 +895,54 @@ WasapiUser::ClearCapturedPcmData(void)
 void
 WasapiUser::SetPlayRepeat(bool repeat)
 {
-    // 最初のpcmDataから、最後のpcmDataまでnextでつなげる。
-    // リピートフラグが立っていたら最後のpcmDataのnextを最初のpcmDataにする。
     dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
 
-    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
-        if (i == m_playPcmDataList.size()-1) {
-            // 最後の項目。
+    // 最初の項目＝無音データ(バグ1修正のため)
+    // 最後の項目＝無音データ(バグ2修正のため)
+
+    if (m_playPcmDataList.size() < 3) {
+        dprintf("D: %s(%d) pcmDataList.size() == %d nothing to do\n",
+            __FUNCTION__, (int)repeat, m_playPcmDataList.size());
+        return;
+    }
+
+    // 最初のpcmDataから、最後のpcmDataまでnextでつなげる。
+    // リピートフラグが立っていたら最後から2個目のpcmDataのnextを最初のpcmDataにする。
+
+    // このループは最初の項目～最後から2個目までループする。
+    for (size_t i=0; i<m_playPcmDataList.size()-1; ++i) {
+        if (i == m_playPcmDataList.size()-2) {
+            // 最後から2個目→最初から2個目に接続。
             if (repeat) {
                 m_playPcmDataList[i].next = 
-                    &m_playPcmDataList[0];
+                    &m_playPcmDataList[1];
             } else {
-                m_playPcmDataList[i].next = NULL;
+                // 最後から2個目→最後の項目→NULL
+                m_playPcmDataList[i].next =
+                    &m_playPcmDataList[i+1];
+
+                m_playPcmDataList[i+1].next = NULL;
             }
         } else {
-            // 最後の項目以外は、連続にnextをつなげる。
+            // 最後のあたりの項目以外は、連続にnextをつなげる。
             m_playPcmDataList[i].next = 
                 &m_playPcmDataList[i+1];
         }
     }
+}
+
+void
+WasapiUser::SetFirstPlayPcmData(WWPcmData *pcmData)
+{
+    if (pcmData == NULL) {
+        dprintf("D: %s pcmData == NULL. nothing to do\n", __FUNCTION__);
+        return;
+    }
+
+    // 再生開始直後は、無音を再生する。
+    // その後pcmDataを再生する。
+    m_nowPlayingPcmData = &m_playPcmDataList[0];
+    m_playPcmDataList[0].next = pcmData;
 }
 
 int
@@ -881,11 +972,13 @@ void
 WasapiUser::PlayPcmDataListDebug(void)
 {
     dprintf("D: %s() count=%u\n", __FUNCTION__, m_playPcmDataList.size());
+    dprintf("  m_nowPlayingPcmData=%p\n", m_nowPlayingPcmData);
     for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
         WWPcmData *p = &m_playPcmDataList[i];
 
-        dprintf("  i=%d id=%d next=%p nFrames=%d posFrame=%d pregapFrames=%d stream=%p\n", i,
-            p->id, p->next, p->nFrames, p->posFrame, p->pregapFrames, p->stream);
+        dprintf("  %p next=%p i=%d id=%d nFrames=%d posFrame=%d contentType=%s stream=%p\n",
+            p, p->next, i, p->id, p->nFrames, p->posFrame,
+            WWPcmDataContentTypeToStr(p->contentType), p->stream);
     }
 }
 

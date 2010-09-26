@@ -22,6 +22,14 @@ struct WWDeviceInfo {
     WWDeviceInfo(int id, const wchar_t * name);
 };
 
+enum WWPcmDataContentType {
+    WWPcmDataContentSilence,
+    WWPcmDataContentPcmData
+};
+
+const char *
+WWPcmDataContentTypeToStr(WWPcmDataContentType w);
+
 /*
  * play
  *   pcmData->posFrame: playing position
@@ -33,7 +41,7 @@ struct WWDeviceInfo {
 struct WWPcmData {
     int       id;
     WWPcmData *next;
-    int       pregapFrames; //< pregap from cue sheet
+    WWPcmDataContentType contentType;
     int       nFrames;
     int       posFrame;
     BYTE      *stream;
@@ -41,7 +49,7 @@ struct WWPcmData {
     WWPcmData(void) {
         id       = 0;
         next     = NULL;
-        pregapFrames = 0;
+        contentType = WWPcmDataContentPcmData;
         nFrames  = 0;
         posFrame = 0;
         stream   = NULL;
@@ -110,16 +118,32 @@ public:
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
     HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample,
-        WWBitFormatType bitFormatType, int latencyMillisec);
+        WWBitFormatType bitFormatType, int latencyMillisec, int numChannels);
     void Unsetup(void);
 
-    // before play start
+    // PCMデータのセット方法
+    //     1. ClearPlayList()を呼ぶ。
+    //     2. AddPlayPcmDataStart()を呼ぶ。
+    //     3. PCMデータの数だけAddPlayPcmData()を呼ぶ。
+    //     4. AddPlayPcmDataEnd()を呼ぶ。
+    // 注1: サンプルフォーマット変換は上のレイヤーに任せた。
+    //      ここでは、来たdataを中のメモリにそのままコピーする。
+    //      Setupでセットアップした形式でdataを渡してください。
+    // 注2: AddPlayPcmDataEnd()後に、
+    //      ClearPlayList()をしないでAddPlayPcmData()することはできません。
+
     void ClearPlayList(void);
 
-    // サンプルフォーマット変換は上のレイヤーに任せた。
-    // ここでは、来たdataを中のメモリにそのままコピーする。
-    // Setupでセットアップした形式でdataを渡してください。
+    bool AddPlayPcmDataStart(void);
+
+    /// @param id WAVファイルID。
+    /// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
+    /// @param bytes dataのバイト数。
+    /// @return true: 追加成功。false: 追加失敗。
     bool AddPlayPcmData(int id, BYTE *data, int bytes);
+
+    bool AddPlayPcmDataEnd(void);
+
     void SetPlayRepeat(bool b);
 
     /// -1: not playing
@@ -162,6 +186,7 @@ private:
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
     WWBitFormatType m_bitFormatType;
+    int          m_numChannels;
 
     IAudioRenderClient  *m_renderClient;
     IAudioCaptureClient *m_captureClient;
@@ -205,5 +230,9 @@ private:
     WWPcmData *FindPlayPcmDataById(int id);
 
     void PlayPcmDataListDebug(void);
+
+    bool AddPcmDataSilence(int nFrames);
+
+    void SetFirstPlayPcmData(WWPcmData *pcmData);
 };
 

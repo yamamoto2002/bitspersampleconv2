@@ -15,7 +15,9 @@ EXPORTS
 	WasapiIO_GetUseDeviceName
 	WasapiIO_Setup
 	WasapiIO_Unsetup
+	WasapiIO_AddPlayPcmDataStart
 	WasapiIO_AddPlayPcmData
+	WasapiIO_AddPlayPcmDataEnd
 	WasapiIO_ClearPlayList
 	WasapiIO_SetPlayRepeat
 	WasapiIO_GetNowPlayingPcmDataId
