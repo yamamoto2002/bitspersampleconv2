@@ -39,7 +39,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 ===!PlayPcmWin 1.0.51 ==
 バグ取り
-  * CUEシートの文字コードをANSIと想定して読むように修正。
+  * CUEシートの文字コードをUTF-8と想定して読んでいたのを、ANSIと想定して読むように修正。
   * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1330&r=1330&format=side&path=/trunk/PlayPcmWin/CueSheetReader.cs
 
 ===!PlayPcmWin 1.0.50 ==
