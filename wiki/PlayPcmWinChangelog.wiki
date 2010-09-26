@@ -6,11 +6,12 @@
 ===!PlayPcmWin 1.0.73 ==
 バグ取り
   * 再生リストに[ここまで一括読み込み]が複数ある場合に、[ここまで一括読み込み]を選択すると再生リストの表示が変になる問題を修正。
-http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1363&r=1363&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs
+  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1363&r=1363&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs
 
 ===!PlayPcmWin 1.0.70 ==
 機能追加
-  * CUEシートを読む際に、GAPを[ここまで一括読み込み]に置き換える機能。 http://code.google.com/p/bitspersampleconv2/source/detail?r=1360
+  * CUEシートを読む際に、GAPを[ここまで一括読み込み]に置き換える機能。
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1360
 
 ↓[詳細設定]画面
 
@@ -22,10 +23,12 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
   * bug2を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=2&can=1
 
 ===!PlayPcmWin 1.0.68 ==
-  * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1344&r=1344&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
+  * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。
+  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1344&r=1344&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
 
 ===!PlayPcmWin 1.0.65 ==
-  * AIFFファイル読み込み高速化。 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1341&r=1341&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
+  * AIFFファイル読み込み高速化。
+  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1341&r=1341&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
 
 ===!PlayPcmWin 1.0.57 ==
   * AIFFファイル読み込み高速化。
@@ -36,23 +39,28 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 ===!PlayPcmWin 1.0.51 ==
 バグ取り
-  * CUEシートの文字コードをANSIと想定して読むように修正。 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1330&r=1330&format=side&path=/trunk/PlayPcmWin/CueSheetReader.cs
+  * CUEシートの文字コードをANSIと想定して読むように修正。
+  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1330&r=1330&format=side&path=/trunk/PlayPcmWin/CueSheetReader.cs
 
 ===!PlayPcmWin 1.0.50 ==
 バグ取り
-  * CUEシートに書いてあるファイルが存在しない場合にエラーを表示。 http://code.google.com/p/bitspersampleconv2/source/detail?r=1326
+  * CUEシートに書いてあるファイルが存在しない場合にエラーを表示。
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1326
 
 ===!PlayPcmWin 1.0.49 ==
 バグ取り
-  * Single WAV File CUEシートの読み込みの無駄をなくす。  http://code.google.com/p/bitspersampleconv2/source/detail?r=1321
+  * Single WAV File CUEシートの読み込みの無駄をなくす。
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1321
 
 ===!PlayPcmWin 1.0.48 ==
 バグ取り
-  * CUEシートの再生開始時間がファイルの最後よりも後を指している場合に異常終了する不具合を修正。 http://code.google.com/p/bitspersampleconv2/source/detail?r=1314
+  * CUEシートの再生開始時間がファイルの最後よりも後を指している場合に異常終了する不具合を修正。
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1314
 
 ===!PlayPcmWin 1.0.46 ==
 機能追加
-  * CUEシート対応(2)単一WAVファイルの一部を切り取るタイプのCUEシートに対応。 http://code.google.com/p/bitspersampleconv2/source/detail?r=1310
+  * CUEシート対応(2)単一WAVファイルの一部を切り取るタイプのCUEシートに対応。
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1310
 
 ===!PlayPcmWin 1.0.44 ==
 機能追加
