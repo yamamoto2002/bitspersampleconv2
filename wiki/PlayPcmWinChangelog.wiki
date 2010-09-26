@@ -5,10 +5,8 @@
 
 ===!PlayPcmWin 1.0.69 ==
 バグ取り
-  * bug1を修正
-http://code.google.com/p/bitspersampleconv2/issues/detail?id=1&can=1
-  * bug2を修正
-http://code.google.com/p/bitspersampleconv2/issues/detail?id=2&can=1
+  * bug1を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=1&can=1
+  * bug2を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=2&can=1
 
 ===!PlayPcmWin 1.0.68 ==
   * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。
