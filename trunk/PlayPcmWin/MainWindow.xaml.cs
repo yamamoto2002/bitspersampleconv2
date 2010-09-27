@@ -976,16 +976,21 @@ namespace PlayPcmWin
             }
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.DefaultExt = ".wav";
             dlg.Filter =
-                "WAVEファイル (.wav)|*.wav" +
-                "FLACファイル (.flac)|*.flac" +
-                "CUEファイル (.cue)|*.cue";
+                "対応しているファイル|*.wav;*.flac;*.aif;*.cue|" +
+                "WAVEファイル|*.wav|" +
+                "FLACファイル|*.flac|" +
+                "AIFFファイル|*.aif|" +
+                "CUEファイル|*.cue|" +
+                "全てのファイル|*.*";
+            dlg.Multiselect = true;
 
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
-                ReadFileHeader(dlg.FileName, ReadHeaderMode.ReadAll, null);
+                for (int i = 0; i < dlg.FileNames.Length; ++i) {
+                    ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null);
+                }
                 UpdateUIStatus();
             }
         }
