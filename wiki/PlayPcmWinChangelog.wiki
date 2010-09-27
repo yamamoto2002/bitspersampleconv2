@@ -6,6 +6,8 @@
 ===!PlayPcmWin 1.0.74 ==
 バグ取り
   * bug7を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=7&can=1
+機能追加
+  * [ファイル][開く]で出てくるOpenFileDialogで、複数ファイル選択できるようにした。
 
 ===!PlayPcmWin 1.0.73 ==
 バグ取り
