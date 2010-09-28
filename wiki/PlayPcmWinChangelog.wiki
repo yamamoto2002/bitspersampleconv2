@@ -12,11 +12,13 @@
 ===!PlayPcmWin 1.0.73 ==
 バグ取り
   * 再生リストに[ここまで一括読み込み]が複数ある場合に、[ここまで一括読み込み]を選択すると再生リストの表示が変になる問題を修正。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1363&r=1363&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs
 
 ===!PlayPcmWin 1.0.70 ==
 機能追加
   * CUEシートを読む際に、GAPを[ここまで一括読み込み]に置き換える機能。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/detail?r=1360
 
 ↓[詳細設定]画面
@@ -30,42 +32,51 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 ===!PlayPcmWin 1.0.68 ==
   * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1344&r=1344&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
 
 ===!PlayPcmWin 1.0.65 ==
   * AIFFファイル読み込み高速化。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1341&r=1341&format=side&path=/trunk/PlayPcmWin/AiffReader.cs
-
-===!PlayPcmWin 1.0.57 ==
-  * AIFFファイル読み込み高速化。
 
 ===!PlayPcmWin 1.0.54 ==
 機能追加
   * AIFFファイル読み込み対応。
 
+変更箇所
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1333
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1334
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1338
+
 ===!PlayPcmWin 1.0.51 ==
 バグ取り
   * CUEシートの文字コードをUTF-8と想定して読んでいたのを、ANSIと想定して読むように修正。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1330&r=1330&format=side&path=/trunk/PlayPcmWin/CueSheetReader.cs
 
 ===!PlayPcmWin 1.0.50 ==
 バグ取り
   * CUEシートに書いてあるファイルが存在しない場合にエラーを表示。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/detail?r=1326
 
 ===!PlayPcmWin 1.0.49 ==
 バグ取り
   * Single WAV File CUEシートの読み込みの無駄をなくす。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/detail?r=1321
 
 ===!PlayPcmWin 1.0.48 ==
 バグ取り
   * CUEシートの再生開始時間がファイルの最後よりも後を指している場合に異常終了する不具合を修正。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/detail?r=1314
 
 ===!PlayPcmWin 1.0.46 ==
 機能追加
   * CUEシート対応(2)単一WAVファイルの一部を切り取るタイプのCUEシートに対応。
+変更箇所
   * http://code.google.com/p/bitspersampleconv2/source/detail?r=1310
 
 ===!PlayPcmWin 1.0.44 ==
@@ -76,6 +87,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 バグ取り
   * 1.0.43でIAudioClient::Initialize失敗時のメッセージ表示が、バグにより、エラーコードを含まなくなっていたのを修正。
 
+変更箇所
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1296
+
 ===!PlayPcmWin 1.0.43 ==
 機能追加
   * 量子化ビット数32ビット(SInt32またはSFloat32)のWAVファイル対応。
@@ -85,10 +99,23 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin143Settings.png
 
+変更箇所
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1249
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1267
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1268
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1269
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1270
 
 ===!PlayPcmWin 1.0.42 ==
 機能追加
   * PlayPcmWin 64ビット版のFLAC対応
+変更箇所
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1240
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1241
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1242
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1243
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1244
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1245
 
 ===!PlayPcmWin 1.0.41 ==
 機能追加
