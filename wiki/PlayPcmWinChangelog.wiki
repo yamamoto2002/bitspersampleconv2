@@ -18,12 +18,13 @@
 ===!PlayPcmWin 1.0.70 ==
 機能追加
   * CUEシートを読む際に、GAPを[ここまで一括読み込み]に置き換える機能。
-変更箇所
-  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1360
 
 ↓[詳細設定]画面
 
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
+
+変更箇所
+  * http://code.google.com/p/bitspersampleconv2/source/detail?r=1360
 
 ===!PlayPcmWin 1.0.69 ==
 バグ取り
