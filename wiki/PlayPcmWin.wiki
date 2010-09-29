@@ -242,7 +242,7 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/MainW
 ソースコードをコンパイルしてexeを作りたい場合
 
   * Sourceページに行ってソースコードをTortoiseSVNなどでチェックアウトしてきます。
-  * !PlayPcmWin/!PlayPcmWin.slnをVS2010で開いてビルド。
+  * !PlayPcmWin/!PlayPcmWin.slnをVisual Studio 2010で開いてビルド。
   * 別途libFLACのソースコードと、libFLACをビルドするためのliboggのソースコードが必要です。 http://sourceforge.net/projects/flac/
 
 =FLAC読み込み対応について=
