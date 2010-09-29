@@ -13,7 +13,7 @@
 バグ取り
   * 再生リストに[ここまで一括読み込み]が複数ある場合に、[ここまで一括読み込み]を選択すると再生リストの表示が変になる問題を修正。
 変更箇所
-  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1363&r=1363&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs
+  * http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1363&r=1363&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs の1796行目
 
 ===!PlayPcmWin 1.0.70 ==
 機能追加
