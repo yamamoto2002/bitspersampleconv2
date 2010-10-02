@@ -48,6 +48,9 @@ namespace PlayPcmWin {
 
             checkBoxReplaceGapWithKokomade.IsChecked =
                 m_preference.ReplaceGapWithKokomade;
+
+            checkBoxManuallySetMainWindowDimension.IsChecked =
+                m_preference.ManuallySetMainWindowDimension;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -64,11 +67,11 @@ namespace PlayPcmWin {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sfloat32;
             }
 
-            if (true == checkBoxReplaceGapWithKokomade.IsChecked) {
-                m_preference.ReplaceGapWithKokomade = true;
-            } else {
-                m_preference.ReplaceGapWithKokomade = false;
-            }
+            m_preference.ReplaceGapWithKokomade
+                = checkBoxReplaceGapWithKokomade.IsChecked == true;
+
+            m_preference.ManuallySetMainWindowDimension
+                = checkBoxManuallySetMainWindowDimension.IsChecked == true;
 
             Close();
         }

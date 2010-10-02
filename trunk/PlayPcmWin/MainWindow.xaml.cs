@@ -269,6 +269,13 @@ namespace PlayPcmWin
 
             m_preference = PreferenceStore.Load();
 
+            if (m_preference.ManuallySetMainWindowDimension) {
+                Left   = m_preference.MainWindowLeft;
+                Top    = m_preference.MainWindowTop;
+                Width  = m_preference.MainWindowWidth;
+                Height = m_preference.MainWindowHeight;
+            }
+
             AddLogText(string.Format("PlayPcmWin {0} {1}\r\n",
                     AssemblyVersion,
                     IntPtr.Size == 8 ? "64bit" : "32bit"));
@@ -574,6 +581,9 @@ namespace PlayPcmWin
                 UnsetupDevice();
                 wasapi.Term();
                 wasapi = null;
+
+                // ウィンドウの位置とサイズを保存
+                m_preference.SetMainWindowLeftTopWidthHeight(Left, Top, Width, Height);
 
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);

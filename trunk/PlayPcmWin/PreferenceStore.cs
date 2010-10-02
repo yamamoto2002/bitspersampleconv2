@@ -44,6 +44,13 @@ namespace PlayPcmWin {
 
         public string PreferredDeviceName { get; set; }
 
+        public double MainWindowLeft { get; set; }
+        public double MainWindowTop { get; set; }
+        public double MainWindowWidth { get; set; }
+        public double MainWindowHeight { get; set; }
+
+        public bool ManuallySetMainWindowDimension { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -60,6 +67,18 @@ namespace PlayPcmWin {
             bitsPerSampleFixType = BitsPerSampleFixType.Variable;
             PreferredDeviceName = "";
             ReplaceGapWithKokomade = false;
+        }
+
+        /// <summary>
+        /// ウィンドウサイズセット。
+        /// </summary>
+        public void SetMainWindowLeftTopWidthHeight(
+                double left, double top,
+                double width, double height) {
+            MainWindowLeft   = left;
+            MainWindowTop    = top;
+            MainWindowWidth  = width;
+            MainWindowHeight = height;
         }
     }
 
