@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.75 ==
+機能追加
+  * bug9対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=9&can=1
+
 ===!PlayPcmWin 1.0.74 ==
 バグ取り
   * bug7を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=7&can=1
