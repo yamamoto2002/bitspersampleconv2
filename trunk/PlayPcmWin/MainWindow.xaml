@@ -4,8 +4,8 @@
         Title="PlayPcmWin" HorizontalContentAlignment="Right" mc:Ignorable="d" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" Height="640" Width="971" AllowDrop="True" DragEnter="MainWindowDragEnter" Drop="MainWindowDragDrop">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="480*" />
-            <ColumnDefinition Width="494" />
+            <ColumnDefinition Width="400*" />
+            <ColumnDefinition Width="400" />
         </Grid.ColumnDefinitions>
         <Menu Height="23" Name="menu1" VerticalAlignment="Top" Grid.ColumnSpan="2">
             <MenuItem Header="ファイル(_F)">
@@ -18,11 +18,11 @@
                 <MenuItem Header="PlayPcmWinのWebページ(_W)" Click="MenuItemHelpWeb_Click" />
             </MenuItem>
         </Menu>
-        <GroupBox Header="出力デバイス" Margin="8,221,0,163" Name="groupBox1" HorizontalAlignment="Left" Width="476" Grid.Column="1">
+        <GroupBox Header="出力デバイス" Margin="8,221,12,163" Name="groupBox1" Grid.Column="1">
             <Grid>
                 <ListBox Margin="6,6,6,37" Name="listBoxDevices" />
-                <Button Content="詳細設定…(_D)" Height="23" HorizontalAlignment="Left" Margin="136,0,0,6" Name="buttonSettings" VerticalAlignment="Bottom" Width="149" Click="buttonSettings_Click" />
-                <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="291,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
+                <Button Content="詳細設定…(_D)" Height="23" HorizontalAlignment="Left" Margin="43,0,0,6" Name="buttonSettings" VerticalAlignment="Bottom" Width="149" Click="buttonSettings_Click" />
+                <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="198,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
             </Grid>
         </GroupBox>
         <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="0,29,0,151" Name="groupBox2">
@@ -37,21 +37,21 @@
                 <TextBox Name="textBoxLog" Margin="0,0,0,0" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" />
             </Grid>
         </GroupBox>
-        <GroupBox Header="WASAPI設定" Height="194" Margin="8,29,0,0" Name="groupBoxWasapiSettings" VerticalAlignment="Top" HorizontalAlignment="Left" Width="476" Grid.Column="1">
-            <Grid Width="463">
-                <GroupBox Header="動作モード" Height="79" HorizontalAlignment="Left" Name="groupBox5" VerticalAlignment="Top" Width="199" Margin="6,6,0,0">
+        <GroupBox Header="WASAPI設定" Height="194" Margin="8,29,12,0" Name="groupBoxWasapiSettings" VerticalAlignment="Top" Grid.Column="1">
+            <Grid Width="360">
+                <GroupBox Header="動作モード" Height="79" HorizontalAlignment="Left" Name="groupBox5" VerticalAlignment="Top" Width="127" Margin="6,6,0,0">
                     <Grid>
                         <RadioButton Content="排他モード" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="radioButtonExclusive" VerticalAlignment="Top" IsChecked="True" Checked="radioButtonExclusive_Checked" />
                         <RadioButton Content="共有モード" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonShared" VerticalAlignment="Top" Checked="radioButtonShared_Checked" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="出力レイテンシー" Height="59" HorizontalAlignment="Left" Margin="211,104,0,0" Name="groupBox3" VerticalAlignment="Top" Width="212">
+                <GroupBox Header="出力レイテンシー" Height="59" HorizontalAlignment="Left" Margin="144,104,0,0" Name="groupBox3" VerticalAlignment="Top" Width="212">
                     <Grid>
                         <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxLatency" VerticalAlignment="Top" Width="120" Text="latency" HorizontalContentAlignment="Right" />
                         <Label Content="ミリ秒" Height="28" HorizontalAlignment="Left" Margin="132,4,0,0" Name="label2" VerticalAlignment="Top" Width="55" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="レンダースレッドタスクタイプ" Height="92" HorizontalAlignment="Left" Margin="211,6,0,0" Name="groupBox4" VerticalAlignment="Top" Width="212">
+                <GroupBox Header="レンダースレッドタスクタイプ" Height="92" HorizontalAlignment="Left" Margin="144,6,0,0" Name="groupBox4" VerticalAlignment="Top" Width="212">
                     <Grid>
                         <RadioButton Content="Audio" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,0,0" Name="radioButtonTaskAudio" VerticalAlignment="Top" Checked="radioButtonTaskAudio_Checked" />
                         <RadioButton Content="Pro Audio" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTaskProAudio" VerticalAlignment="Top" Checked="radioButtonTaskProAudio_Checked" IsChecked="True" />
@@ -59,7 +59,7 @@
                         <RadioButton Content="設定なし" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="96,28,0,0" Name="radioButtonTaskPlayback" VerticalAlignment="Top" Width="98" Checked="radioButtonTaskNone_Checked" />
                     </Grid>
                 </GroupBox>
-                <GroupBox Header="データ供給モード" Height="78" HorizontalAlignment="Left" Margin="6,85,0,0" Name="groupBox6" VerticalAlignment="Top" Width="199">
+                <GroupBox Header="データ供給モード" Height="78" HorizontalAlignment="Left" Margin="6,85,0,0" Name="groupBox6" VerticalAlignment="Top" Width="127">
                     <Grid>
                         <RadioButton Content="イベント駆動" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,6,0,0" Name="radioButtonEventDriven" VerticalAlignment="Top" Checked="radioButtonEventDriven_Checked" />
                         <RadioButton Content="タイマー駆動" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTimerDriven" VerticalAlignment="Top"  Checked="radioButtonTimerDriven_Checked" />
@@ -69,13 +69,13 @@
         </GroupBox>
         <GroupBox Grid.Column="1" Header="再生制御" Margin="8,0,12,30" Name="groupBox7" Height="133" VerticalAlignment="Bottom">
             <Grid>
-                <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="buttonPlay_Click" />
-                <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="87,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="buttonStop_Click" />
-                <Label Content="0/0" Margin="0,4,6,0" Name="label1" Height="28" VerticalAlignment="Top" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="142" />
+                <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="67" IsEnabled="False" Click="buttonPlay_Click" />
+                <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="76,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="66" IsEnabled="False" Click="buttonStop_Click" />
+                <Label Content="0/0" Margin="0,4,6,0" Name="label1" Height="28" VerticalAlignment="Top" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="102" />
                 <Slider Margin="6,0,7,0" Name="slider1" MouseMove="slider1_MouseMove" Height="23" VerticalAlignment="Bottom" />
                 <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
-                <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="168,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="75" Click="buttonPrev_Click" />
-                <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="249,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="75" Click="buttonNext_Click" />
+                <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="148,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
+                <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="204,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="50" Click="buttonNext_Click" />
                 <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" />
             </Grid>
         </GroupBox>
