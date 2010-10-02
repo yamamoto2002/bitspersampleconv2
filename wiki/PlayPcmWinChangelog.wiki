@@ -5,7 +5,7 @@
 
 ===!PlayPcmWin 1.0.75 ==
 機能追加
-  * bug9対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=9&can=1
+  * Issue 9対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=9&can=1
 
 ↓[詳細設定]画面
 
@@ -13,7 +13,7 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin175Settings.png
 
 ===!PlayPcmWin 1.0.74 ==
 バグ取り
-  * bug7を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=7&can=1
+  * Issue 7を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=7&can=1
 機能追加
   * [ファイル][開く]で出てくるファイル選択ダイアログ画面で、複数ファイル選択できるようにした。
 
@@ -36,8 +36,8 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin170Settings.jpg
 
 ===!PlayPcmWin 1.0.69 ==
 バグ取り
-  * bug1を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=1&can=1
-  * bug2を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=2&can=1
+  * Issue 1を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=1&can=1
+  * Issue 2を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=2&can=1
 
 ===!PlayPcmWin 1.0.68 ==
   * PlayPcmWin 32ビット版 AIFFファイル読み込み高速化。
