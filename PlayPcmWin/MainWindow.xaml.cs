@@ -1186,55 +1186,57 @@ namespace PlayPcmWin
         /// <summary>
         /// PcmDataの形式と、(共有・排他)、フォーマット固定設定から、
         /// デバイスに設定されるビットフォーマットを取得。
+        /// 
+        /// 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
         /// </summary>
         /// <returns>デバイスに設定されるビットフォーマット</returns>
         private SampleFormat GetDeviceSampleFormat(
-            int pcmDataBitsPerSample,
-            PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
-            // 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
+                int pcmDataBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
+            SampleFormat sf = new SampleFormat();
 
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
-                SampleFormat sf = new SampleFormat();
                 sf.bitsPerSample = 32;
                 sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
                 return sf;
-            } else {
-                SampleFormat sf = new SampleFormat();
+            }
 
-                switch (m_preference.bitsPerSampleFixType) {
-                case BitsPerSampleFixType.Sint16:
+            // 排他モード
+            switch (m_preference.bitsPerSampleFixType) {
+            case BitsPerSampleFixType.Sint16:
+                sf.bitsPerSample = 16;
+                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                break;
+            case BitsPerSampleFixType.Sint32:
+                sf.bitsPerSample = 32;
+                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                break;
+            case BitsPerSampleFixType.Sfloat32:
+                sf.bitsPerSample = 32;
+                sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
+                break;
+            case BitsPerSampleFixType.Variable:
+                if (pcmDataBitsPerSample != 16) {
+                    sf.bitsPerSample = 32;
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                } else {
+                    System.Diagnostics.Debug.Assert(pcmDataVrt == PcmDataLib.PcmData.ValueRepresentationType.SInt);
                     sf.bitsPerSample = 16;
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    break;
-                case BitsPerSampleFixType.Sint32:
-                    sf.bitsPerSample = 32;
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    break;
-                case BitsPerSampleFixType.Sfloat32:
-                    sf.bitsPerSample = 32;
-                    sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
-                    break;
-                case BitsPerSampleFixType.Variable:
-                    if (pcmDataBitsPerSample != 16) {
-                        sf.bitsPerSample = 32;
-                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    } else {
-                        System.Diagnostics.Debug.Assert(pcmDataVrt == PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                        sf.bitsPerSample = 16;
-                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    }
-                    break;
-                default:
-                    System.Diagnostics.Debug.Assert(false);
-                    break;
                 }
-
-                return sf;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
             }
+
+            return sf;
         }
 
         /// <summary>
         /// 量子化ビット数を、もし必要なら変更する。
+        /// 
+        /// 似たようなプログラムがGetDeviceBitFormat()にコピペされている。
         /// </summary>
         /// <param name="pd">入力WavData</param>
         /// <returns>変更後WavData</returns>
@@ -1248,7 +1250,6 @@ namespace PlayPcmWin
             }
 
             // 排他モード。
-            // 似たようなプログラムがGetDeviceBitFormat()にコピペされている。
             switch (m_preference.bitsPerSampleFixType) {
             case BitsPerSampleFixType.Sint16:
                 // Sint16に変換する。
