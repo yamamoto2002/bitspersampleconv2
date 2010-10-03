@@ -8,6 +8,10 @@ using System.Text;
 using System.IO;
 
 namespace PlayPcmWin {
+
+    /// <summary>
+    /// 1曲の情報
+    /// </summary>
     class CueSheetTrackInfo {
         public string path;
         public string title;
@@ -15,16 +19,16 @@ namespace PlayPcmWin {
         public int    startTick; // *75 seconds
         public int    endTick;   // -1: till the end of file
         public int    indexId;   // INDEX 00 ==> 0, INDEX 01 ==> 1
-        public bool   preKokomade;
+        public string performer;
 
         public void Clear() {
             path = "";
-            title = "NO TITLE";
+            title = string.Empty;
             trackId = 0;
             startTick = 0;
             endTick = -1;
             indexId = -1;
-            preKokomade = false;
+            performer = string.Empty;
         }
 
         public void CopyFrom(CueSheetTrackInfo rhs) {
@@ -34,7 +38,7 @@ namespace PlayPcmWin {
             startTick = rhs.startTick;
             endTick   = rhs.endTick;
             indexId   = rhs.indexId;
-            preKokomade = rhs.preKokomade;
+            performer = rhs.performer;
         }
 
         private static bool TimeStrToInt(string timeStr, out int timeInt) {
@@ -80,16 +84,22 @@ namespace PlayPcmWin {
         }
 
         public void Debug() {
-            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) preK={7}\n    title={8}",
+            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) performer={7}\n    title={8}",
                 path, trackId, indexId, startTick, TickIntToStr(startTick),
-                endTick, TickIntToStr(endTick), preKokomade, title);
+                endTick, TickIntToStr(endTick), performer, title);
         }
     };
 
+    /// <summary>
+    /// CUEシートを読むクラス
+    /// </summary>
     class CueSheetReader {
         private List<CueSheetTrackInfo> m_trackInfoList;
         private CueSheetTrackInfo m_currentTrackInfo;
         private string m_dirPath;
+
+        private string m_albumTitle;
+        private string m_albumPerformer;
 
         public int GetTrackInfoCount() {
             return m_trackInfoList.Count;
@@ -97,6 +107,21 @@ namespace PlayPcmWin {
 
         public CueSheetTrackInfo GetTrackInfo(int nth) {
             return m_trackInfoList[nth];
+        }
+
+        /// <summary>
+        /// タイトルがファイルに書いてない場合、string.Emptyがもどる。
+        /// </summary>
+        public string GetAlbumTitle() {
+            return m_albumTitle;
+        }
+
+        /// <summary>
+        /// 演奏者がファイルに書いてない場合、string.Emptyが戻る。
+        /// </summary>
+        /// <returns></returns>
+        public string GetAlbumPerformer() {
+            return m_albumPerformer;
         }
 
         public bool ReadFromFile(string path) {
@@ -113,6 +138,10 @@ namespace PlayPcmWin {
             m_currentTrackInfo = new CueSheetTrackInfo();
             m_currentTrackInfo.Clear();
 
+            m_albumTitle     = string.Empty;
+            m_albumPerformer = string.Empty;
+
+            // Pass 1の処理
             bool result = true;
             try {
                 using (StreamReader sr = new StreamReader(path, Encoding.Default)) {
@@ -136,13 +165,14 @@ namespace PlayPcmWin {
                 return false;
             }
 
-            Console.WriteLine("Pass1 =================================");
+            Console.WriteLine("after Pass1 =================================");
             Console.WriteLine("trackInfoList.Count={0}", m_trackInfoList.Count);
             for (int i = 0; i < m_trackInfoList.Count; ++i) {
                 Console.WriteLine("trackInfo {0}", i);
                 m_trackInfoList[i].Debug();
             }
 
+            // Pass 2の処理
             for (int i = 0; i < m_trackInfoList.Count-1; ++i) {
                 CueSheetTrackInfo cur = m_trackInfoList[i];
                 CueSheetTrackInfo next = m_trackInfoList[i+1];
@@ -161,7 +191,7 @@ namespace PlayPcmWin {
                 }
             }
 
-            Console.WriteLine("Pass2 =================================");
+            Console.WriteLine("after Pass2 =================================");
             Console.WriteLine("trackInfoList.Count={0}", m_trackInfoList.Count);
             for (int i = 0; i < m_trackInfoList.Count; ++i) {
                 Console.WriteLine("trackInfo {0}", i);
@@ -233,20 +263,27 @@ namespace PlayPcmWin {
             }
 
             switch (tokenList[0].ToLower()) {
+            case "performer":
+                m_currentTrackInfo.performer = string.Empty;
+                if (2 <= tokenList.Count && 0 < tokenList[1].Trim().Length) {
+                    m_currentTrackInfo.performer = tokenList[1];
+                }
+                if (m_albumPerformer.Length == 0) {
+                    m_albumPerformer = m_currentTrackInfo.performer;
+                }
+                Console.WriteLine("performer {0}", m_currentTrackInfo.performer);
+                break;
             case "title":
-                m_currentTrackInfo.title = "NO TITLE";
+                m_currentTrackInfo.title = string.Empty;
                 if (2 <= tokenList.Count && 0 < tokenList[1].Trim().Length) {
                     m_currentTrackInfo.title = tokenList[1];
+                }
+                if (m_albumTitle.Length == 0) {
+                    m_albumTitle = m_currentTrackInfo.title;
                 }
                 Console.WriteLine("title {0}", m_currentTrackInfo.title);
                 break;
             case "rem":
-                if (2 <= tokenList.Count) {
-                    if (0 == tokenList[1].CompareTo("kokomade")) {
-                        m_currentTrackInfo.preKokomade = true;
-                        Console.WriteLine("rem KOKOMADE processed");
-                    }
-                }
                 Console.WriteLine("rem tag has come");
                 break;
             case "file":
@@ -291,7 +328,7 @@ namespace PlayPcmWin {
 
                     // 揮発要素はここでリセットする。
                     m_currentTrackInfo.startTick = -1;
-                    m_currentTrackInfo.preKokomade = false;
+                    m_currentTrackInfo.performer = string.Empty;
                 }
                 break;
 

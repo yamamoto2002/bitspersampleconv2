@@ -81,6 +81,21 @@ namespace PcmDataLib {
         public int    EndTick { get; set; }
 
         /// <summary>
+        /// アルバムタイトル
+        /// </summary>
+        public string AlbumTitle { get; set; }
+
+        /// <summary>
+        /// アルバム演奏者
+        /// </summary>
+        public string AlbumPerformer { get; set; }
+
+        /// <summary>
+        /// 曲演奏者
+        /// </summary>
+        public string Performer { get; set; }
+
+        /// <summary>
         /// rhsの内容をコピーする。PCMデータ配列だけはコピーしない。(nullをセットする)
         /// PCMデータ配列は、SetSampleArrayで別途設定する。
         /// </summary>
@@ -99,6 +114,9 @@ namespace PcmDataLib {
             DisplayName = rhs.DisplayName;
             StartTick   = rhs.StartTick;
             EndTick     = rhs.EndTick;
+            AlbumTitle  = rhs.AlbumTitle;
+            AlbumPerformer = rhs.AlbumPerformer;
+            Performer   = rhs.Performer;
         }
 
         // プロパティIO /////////////////////////////////////////////////////
