@@ -350,6 +350,18 @@ namespace PlayPcmWin
             CreateDeviceList();
         }
 
+        void MainWindow_Closed(object sender, EventArgs e) {
+            Exit();
+        }
+
+        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
+            Exit();
+        }
+
+        private static string AssemblyVersion {
+            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
+        }
+
         private void UpdateUIStatus() {
             switch (m_state) {
             case State.初期化完了:
@@ -471,8 +483,8 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// 起動時に1回だけ呼ぶようにする。
-        /// そうしないと再生中のデバイス番号がずれる。
+        /// デバイス一覧を取得し、デバイス一覧リストを更新する。
+        /// 同一デバイスのデバイス番号がずれるので注意。
         /// </summary>
         private void CreateDeviceList() {
             int hr;
@@ -541,7 +553,8 @@ namespace PlayPcmWin
 
         /// <summary>
         /// デバイス選択を解除する。再生停止中に呼ぶ必要あり。
-        /// この関数は、デバイスリストが消えるため、不便である。
+        /// この関数を呼ぶと、デバイスリストが消えるため要注意。
+        /// ふたたびCreateDeviceList()する必要あり。
         /// </summary>
         private void DeviceDeselect() {
             System.Diagnostics.Debug.Assert(!m_playWorker.IsBusy);
@@ -684,18 +697,6 @@ namespace PlayPcmWin
             return true;
         }
 
-        void MainWindow_Closed(object sender, EventArgs e) {
-            Exit();
-        }
-
-        private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
-            Exit();
-        }
-
-        private static string AssemblyVersion {
-            get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
-        }
-
         enum PlayListClearMode {
             // プレイリストをクリアーし、UI状態も更新する。(通常はこちらを使用。)
             ClearWithUpdateUI,
@@ -727,7 +728,7 @@ namespace PlayPcmWin
         /// <summary>
         /// サブルーチン
         /// PcmData読み込み成功後に行う処理。
-        /// FLACとWAVで共通。
+        /// FLACとWAVとAIFFで共通。
         /// </summary>
         private bool CheckAddPcmData(CueSheetTrackInfo csti, string path, PcmDataLib.PcmData pcmData) {
             if (pcmData.NumChannels != 2) {
