@@ -146,7 +146,6 @@ namespace PlayPcmWin {
             // エンディアン変換
             {
                 // 案5 (1Mサンプルごとに並列化、この時点で2GB以下なので、long→intにする)
-                // 64bit版は変わらず、32bit版は3倍ぐらい速くなった。
                 int workUnit = 1048576;
                 int sampleUnits = (int)(NumFrames * NumChannels / workUnit);
                 Parallel.For(0, sampleUnits, delegate(int m) {
