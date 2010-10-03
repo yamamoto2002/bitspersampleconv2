@@ -67,6 +67,7 @@ namespace PlayPcmWin {
             bitsPerSampleFixType = BitsPerSampleFixType.Variable;
             PreferredDeviceName = "";
             ReplaceGapWithKokomade = false;
+            ManuallySetMainWindowDimension = false;
         }
 
         /// <summary>

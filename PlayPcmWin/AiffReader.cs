@@ -144,67 +144,6 @@ namespace PlayPcmWin {
             sw.Start();
 
             // エンディアン変換
-
-            /*
-            // 案1 (1サンプルごとに並列化する)
-            Parallel.For(0, NumFrames * NumChannels, delegate(long sample) {
-                long pos = sample * 2;
-                byte v0 = m_sampleArray[pos + 0];
-                byte v1 = m_sampleArray[pos + 1];
-                m_sampleArray[pos + 1] = v0;
-                m_sampleArray[pos + 0] = v1;
-            });
-            */
-            /*
-            // 案2 (1フレームごとに並列化) 案1の半分ぐらいの速度
-            int numChannels = NumChannels;
-            Parallel.For(0, NumFrames, delegate(long frame) {
-                for (int i = 0; i < numChannels; ++i) {
-                    long pos = frame * 2 * i;
-                    byte v0 = m_sampleArray[pos + 0];
-                    byte v1 = m_sampleArray[pos + 1];
-                    m_sampleArray[pos + 1] = v0;
-                    m_sampleArray[pos + 0] = v1;
-                }
-            });
-            */
-            /*
-            // 案3 (並列化せず、全部1スレッド) 6コア12スレッドCPUでも案1よりも少し速い
-            for (long i = 0; i < NumFrames * NumChannels; ++i) {
-                long pos = i * 2;
-                byte v0 = m_sampleArray[pos + 0];
-                byte v1 = m_sampleArray[pos + 1];
-                m_sampleArray[pos + 1] = v0;
-                m_sampleArray[pos + 0] = v1;
-            }
-            */
-
-            /*
-            {
-                // 案4 (1Mサンプルごとに並列化) 6コア12スレッドCPUで、案3よりも6倍ぐらい速い
-                int workUnit = 1048576;
-                long sampleUnits = NumFrames * NumChannels / workUnit;
-                Parallel.For(0, sampleUnits, delegate(long m) {
-                    long pos = m * workUnit * 2;
-                    for (int i = 0; i < workUnit; ++i) {
-                        byte v0 = m_sampleArray[pos + 0];
-                        byte v1 = m_sampleArray[pos + 1];
-                        m_sampleArray[pos + 1] = v0;
-                        m_sampleArray[pos + 0] = v1;
-                        pos += 2;
-                    }
-                });
-                for (long i = workUnit * sampleUnits;
-                    i < NumFrames * NumChannels; ++i) {
-                    long pos = i * 2;
-                    byte v0 = m_sampleArray[pos + 0];
-                    byte v1 = m_sampleArray[pos + 1];
-                    m_sampleArray[pos + 1] = v0;
-                    m_sampleArray[pos + 0] = v1;
-                }
-            }
-            */
-
             {
                 // 案5 (1Mサンプルごとに並列化、この時点で2GB以下なので、long→intにする)
                 // 64bit版は変わらず、32bit版は3倍ぐらい速くなった。
