@@ -97,7 +97,8 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 ||16/44||16/48||16/88||16/96||16/176||16/192||32/44||32/48||32/88||32/96||32/176||32/192||
 ||○   ||○   ||○   ||○   ||○    ||○    ||○   ||○   ||○   ||○   ||○    ||○    ||
 
-↓Lynx L22とAES16eはWindows Vista x64 SP2で動作確認
+↓(Windows Vista x64 SP2)
+
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin175ss.png
 
 =資料=
