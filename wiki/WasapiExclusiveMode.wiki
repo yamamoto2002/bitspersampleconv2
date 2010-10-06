@@ -94,6 +94,8 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 ||×   ||○   ||×   ||×   ||×    ||×    ||×   ||×   ||×   ||×   ||×    ||×    ||
 
 
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin175ss.png
+
 =資料=
 
   * 共有モードの再生 http://msdn.microsoft.com/en-us/library/dd316756%28v=VS.85%29.aspx
