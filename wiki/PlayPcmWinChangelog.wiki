@@ -5,7 +5,7 @@
 
 ===!PlayPcmWin 1.0.83 ==
 機能追加
-  * 対応フォーマット一覧のサンプリング周波数に352.8kHzと384kHzを追加
+  * 対応フォーマット一覧のサンプリング周波数に352.8kHzと384kHzを追加 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1409&r=1408&format=side&path=/trunk/WasapiIODLL/WasapiUser.cpp
 
 バグ取り
   * Issue 11を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=11&can=1
