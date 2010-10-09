@@ -65,6 +65,8 @@ namespace FlacDecodeCSTest {
             SendString("H");
             SendBase64(flacFilePath);
 
+            System.Console.WriteLine("ReadHeaderTest({0}) started", flacFilePath);
+
             int rv = br.ReadInt32();
             if (rv != 0) {
                 StopChildProcess();
@@ -76,7 +78,7 @@ namespace FlacDecodeCSTest {
             int  sampleRate    = br.ReadInt32();
             long numSamples    = br.ReadInt64();
 
-            System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
+            System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
                 nChannels, bitsPerSample, sampleRate, numSamples);
 
             StopChildProcess();
@@ -87,6 +89,8 @@ namespace FlacDecodeCSTest {
             StartChildProcess();
             SendString("A");
             SendBase64(flacFilePath);
+
+            System.Console.WriteLine("ReadAllTest({0}) started", flacFilePath);
 
             int rv = br.ReadInt32();
             if (rv != 0) {
@@ -100,13 +104,22 @@ namespace FlacDecodeCSTest {
             long numSamples    = br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
-            int frameCount = 1048576;
+
+            System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
+                nChannels, bitsPerSample, sampleRate, numSamples);
 
             long pos = 0;
             while (pos < numSamples) {
+                int frameCount = br.ReadInt32();
+                if (frameCount == 0) {
+                    break;
+                }
+
+                System.Console.WriteLine("ReadAllTest() frameCount={0}", frameCount);
+
                 byte[] buff = br.ReadBytes(frameCount * bytesPerFrame);
 
-                System.Console.WriteLine("frameCount={0} readCount={1} pos={2}",
+                System.Console.WriteLine("ReadAllTest() frameCount={0} readCount={1} pos={2}",
                     frameCount, buff.Length / bytesPerFrame, pos);
                 if (buff.Length == 0) {
                     break;
@@ -114,11 +127,11 @@ namespace FlacDecodeCSTest {
                 pos += buff.Length / bytesPerFrame;
             }
 
-            System.Console.WriteLine("numSamples={0} pos={1} ({2}M samples)",
+            System.Console.WriteLine("ReadAllTest() numSamples={0} pos={1} ({2}M samples)",
                 numSamples, pos, pos / 1048576);
 
             int exitCode = StopChildProcess();
-            System.Console.WriteLine("exitCode={0}",
+            System.Console.WriteLine("ReadAllTest() exitCode={0}",
                 exitCode);
             return exitCode;
         }
@@ -127,10 +140,10 @@ namespace FlacDecodeCSTest {
             int exitCode;
             
             exitCode = ReadHeaderTest(flacPath);
-            System.Console.WriteLine("ReadHeaderTest result={0}", exitCode);
+            System.Console.WriteLine("Run() ReadHeaderTest result={0}", exitCode);
 
             exitCode = ReadAllTest(flacPath);
-            System.Console.WriteLine("ReadAllTest result={0}", exitCode);
+            System.Console.WriteLine("Run() ReadAllTest result={0}", exitCode);
 
             return exitCode;
         }

@@ -31,10 +31,12 @@ LogClose(void)
 #endif
 
 #ifdef _DEBUG
-#  define dprintf1(x, ...) fprintf(g_fp, x, __VA_ARGS__); fflush(g_fp);
-#  define dprintf(x, ...)
+//#  define dprintf1(x, ...) fprintf(g_fp, x, __VA_ARGS__); fflush(g_fp);
+//#  define dprintf(x, ...) fprintf(g_fp, x, __VA_ARGS__); fflush(g_fp);
 //#  define dprintf1(x, ...) printf(x, __VA_ARGS__)
 //#  define dprintf(x, ...) printf(x, __VA_ARGS__)
+#  define dprintf1(x, ...)
+#  define dprintf(x, ...)
 #else
 #  define dprintf1(x, ...)
 #  define dprintf(x, ...)
@@ -140,6 +142,8 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
+    dprintf("%s frame->header.number.sample_number=%d\n", __FUNCTION__,
+        frame->header.number.sample_number);
     if(frame->header.number.sample_number == 0) {
         args->numFramesPerBlock = frame->header.blocksize;
 
@@ -150,7 +154,7 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
         WaitForSingleObject(args->commandEvent, INFINITE);
 
         // 起きた。要因をチェックする。
-        dprintf("%s event received. %d\n", __FUNCTION__, args->command);
+        dprintf("%s event received1. %d\n", __FUNCTION__, args->command);
         if (args->command == FDC_Shutdown) {
             return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
         }
@@ -164,17 +168,21 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
         WaitForSingleObject(args->commandEvent, INFINITE);
 
         // 起きた。要因をチェックする。どちらにしても続行はできない。
-        dprintf("%s event received. %d\n", __FUNCTION__, args->command);
+        dprintf("%s event received2. %d\n", __FUNCTION__, args->command);
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
     // データが来た。ブロック数は frame->header.blocksize
+    dprintf("%s args->numFramesPerBlock=%d frame->header.blocksize=%d\n", __FUNCTION__,
+        args->numFramesPerBlock, frame->header.blocksize);
     if (args->numFramesPerBlock != frame->header.blocksize) {
         dprintf("%s args->numFramesPerBlock changed %d to %d\n",
             __FUNCTION__, args->numFramesPerBlock, frame->header.blocksize);
         args->numFramesPerBlock = frame->header.blocksize;
     }
 
+    dprintf("%s args->buffFrames=%d args->retrievedFrames=%d args->numFramesPerBlock=%d\n", __FUNCTION__,
+        args->buffFrames, args->retrievedFrames, args->numFramesPerBlock);
     if ((args->buffFrames - args->retrievedFrames) < args->numFramesPerBlock) {
         // このブロックを収容する場所がない。データ詰め終わり。
         args->errorCode       = FDRT_Success;
@@ -182,7 +190,7 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
         WaitForSingleObject(args->commandEvent, INFINITE);
 
         // 起きた。要因をチェックする。
-        dprintf("%s event received. %d args->errorCode=%d\n",
+        dprintf("%s event received3. %d args->errorCode=%d\n",
             __FUNCTION__, args->command, args->errorCode);
         if (args->command == FDC_Shutdown) {
             return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
@@ -196,6 +204,8 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
                 args->buffFrames, args->numFramesPerBlock);
             return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
         }
+        dprintf("%s args->buffFrames=%d args->retrievedFrames=%d args->numFramesPerBlock=%d\n", __FUNCTION__,
+            args->buffFrames, args->retrievedFrames, args->numFramesPerBlock);
     }
 
     {
@@ -545,49 +555,33 @@ FlacDecodeDLL_GetNextPcmData(int numFrame, char *buff_return)
     const int bytesPerFrame
         = g_flacDecodeInfo.channels * g_flacDecodeInfo.bitsPerSample/8;
 
-    int pos = 0;
+    {   // FlacDecodeThreadにGetFramesコマンドを伝える
+        WaitForSingleObject(g_flacDecodeInfo.commandMutex, INFINITE);
 
-    while (pos < numFrame) {
-        dprintf("%s pos=%d numFrame=%d\n",
-            __FUNCTION__, pos, numFrame);
+        g_flacDecodeInfo.errorCode    = FDRT_Success;
+        g_flacDecodeInfo.command      = FDC_GetFrames;
+        g_flacDecodeInfo.buff         = buff_return;
+        g_flacDecodeInfo.buffFrames    = numFrame;
+        g_flacDecodeInfo.retrievedFrames = 0;
 
-        {   // FlacDecodeThreadにGetFramesコマンドを伝える
-            WaitForSingleObject(g_flacDecodeInfo.commandMutex, INFINITE);
+        dprintf("%s set command.\n", __FUNCTION__);
+        SetEvent(g_flacDecodeInfo.commandEvent);
 
-            g_flacDecodeInfo.errorCode    = FDRT_Success;
-            g_flacDecodeInfo.command      = FDC_GetFrames;
-            g_flacDecodeInfo.buff         = &buff_return[bytesPerFrame * pos];
-            g_flacDecodeInfo.buffFrames    = numFrame;
-            g_flacDecodeInfo.retrievedFrames = 0;
-
-            dprintf("%s set command.\n", __FUNCTION__);
-            SetEvent(g_flacDecodeInfo.commandEvent);
-
-            ReleaseMutex(g_flacDecodeInfo.commandMutex);
-        }
-
-        dprintf("%s wait for commandCompleteEvent.\n", __FUNCTION__);
-        WaitForSingleObject(g_flacDecodeInfo.commandCompleteEvent, INFINITE);
-
-        dprintf("%s command completed. ercd=%d retrievedFrames=%d\n",
-            __FUNCTION__, g_flacDecodeInfo.errorCode,
-            g_flacDecodeInfo.retrievedFrames);
-
-        pos += g_flacDecodeInfo.retrievedFrames;
-
-        if (g_flacDecodeInfo.errorCode != FDRT_Success) {
-            break;
-        }
+        ReleaseMutex(g_flacDecodeInfo.commandMutex);
     }
 
+    dprintf("%s wait for commandCompleteEvent.\n", __FUNCTION__);
+    WaitForSingleObject(g_flacDecodeInfo.commandCompleteEvent, INFINITE);
+
     dprintf1("%s numFrame=%d retrieved=%d ercd=%d\n",
-            __FUNCTION__, numFrame, pos, g_flacDecodeInfo.errorCode);
+            __FUNCTION__, numFrame,
+            g_flacDecodeInfo.retrievedFrames, g_flacDecodeInfo.errorCode);
 
     if (FDRT_Success   != g_flacDecodeInfo.errorCode &&
         FDRT_Completed != g_flacDecodeInfo.errorCode) {
         // エラー終了。
         return -1;
     }
-    return pos;
+    return g_flacDecodeInfo.retrievedFrames;
 }
 

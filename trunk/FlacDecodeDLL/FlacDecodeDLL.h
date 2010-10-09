@@ -78,7 +78,8 @@ int __stdcall
 FlacDecodeDLL_GetNumFramesPerBlock(void);
 
 
-/// 次のPCMデータをnumFrameサンプルだけbuff_returnに詰める
+/// 次のPCMデータをnumFrameサンプルだけbuff_returnに詰める。
+/// 最後のデータでなくても、numFrameが取得できないこともあるので注意。
 /// @return エラーの場合、-1が戻る。0以上の場合、取得できたサンプル数。FDRT_Completedは、正常終了に分類されている。
 /// @retval 0 0が戻った場合、取得できたデータが0サンプルであった(成功)。
 extern "C" __declspec(dllexport)
