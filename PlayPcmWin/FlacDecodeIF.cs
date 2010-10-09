@@ -114,7 +114,7 @@ namespace PlayPcmWin {
             int sampleRate    = m_br.ReadInt32();
             long numFrames    = m_br.ReadInt64();
 
-            System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
+            System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
                 nChannels, bitsPerSample, sampleRate, numFrames);
 
             StopChildProcess();
@@ -148,15 +148,22 @@ namespace PlayPcmWin {
             long numFrames    = m_br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
-            int frameCount = 1048576;
 
             byte[] sampleArray = new byte[numFrames * bytesPerFrame];
 
             long pos = 0;
             while (pos < numFrames) {
+                int frameCount = m_br.ReadInt32();
+
+                System.Console.WriteLine("ReadAll() frameCount={0}", frameCount);
+
+                if (frameCount == 0) {
+                    break;
+                }
+
                 byte[] buff = m_br.ReadBytes(frameCount * bytesPerFrame);
 
-                System.Console.WriteLine("frameCount={0} readCount={1} pos={2}",
+                System.Console.WriteLine("ReadAll() frameCount={0} readCount={1} pos={2}",
                     frameCount, buff.Length / bytesPerFrame, pos);
                 if (buff.Length == 0) {
                     break;
@@ -166,11 +173,11 @@ namespace PlayPcmWin {
                 pos += buff.Length / bytesPerFrame;
             }
 
-            System.Console.WriteLine("numFrames={0} pos={1} ({2}M frames)",
+            System.Console.WriteLine("ReadAll() numFrames={0} pos={1} ({2}M frames)",
                 numFrames, pos, pos / 1048576);
 
             int exitCode = StopChildProcess();
-            System.Console.WriteLine("exitCode={0}",
+            System.Console.WriteLine("ReadAll() exitCode={0}",
                 exitCode);
 
             if (0 == exitCode) {

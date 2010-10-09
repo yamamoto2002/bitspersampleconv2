@@ -148,9 +148,13 @@ namespace FlacDecodeCS {
              * 8          4              サンプルレート sampleRate
              * 12         4              量子化ビット数 bitsPerSample
              * 16         8              総サンプル数   numSamples
-             * 24         ※1            PCMデータ(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし)
+             * 24         4              frameCount1 (ヘッダのみの場合なし)
+             * 28         ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
+             * ※2        4              frameCount2
+             * ※2+4      ※3            PCMデータ2 frameCount2個
              * 
-             * ※1…numSamples * nChannels * (bitsPerSample/8)
+             * ※1…frameCount1 * nChannels * (bitsPerSample/8)
+             * ※2…※1+28
              */
 
             int rv = FlacDecodeDLL_DecodeStart(path);
@@ -187,11 +191,14 @@ namespace FlacDecodeCS {
                     LogWriteLine(string.Format("FlacDecodeDLL_GetNextPcmData rv={0} ercd={1}", rv, ercd));
 
                     if (0 < rv) {
+                        bw.Write(rv);
                         bw.Write(buff, 0, rv * frameBytes);
                     }
 
                     if (rv <= 0 || ercd == 1) {
                         // これでおしまい。
+                        int v0 = 0;
+                        bw.Write(v0);
                         LogWriteLine(string.Format("FlacDecodeDLL_GetNextPcmData 終了。rv={0} ercd={1}", rv, ercd));
                         if (0 <= rv && ercd == 1) {
                             ercd = 0;
