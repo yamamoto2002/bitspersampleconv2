@@ -3,6 +3,13 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.83 ==
+機能追加
+  * 対応フォーマット一覧のサンプリング周波数に352.8kHzと384kHzを追加
+
+バグ取り
+  * Issue 11を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=11&can=1
+
 ===!PlayPcmWin 1.0.75 ==
 機能追加
   * Issue 9対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=9&can=1
