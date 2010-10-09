@@ -328,7 +328,6 @@ namespace PlayPcmWin {
 
                     // 揮発要素はここでリセットする。
                     m_currentTrackInfo.startTick = -1;
-                    m_currentTrackInfo.performer = string.Empty;
                 }
                 break;
 

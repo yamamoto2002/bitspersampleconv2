@@ -1143,7 +1143,7 @@ namespace PlayPcmWin
 
                     int ercd = ReadPcmDataFromFile(pd);
                     if (0 != ercd) {
-                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード{1}。{2}",
+                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
                             pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
                         args.Result = r;
                         Console.WriteLine("D: ReadFileDoWork() !readSuccess");

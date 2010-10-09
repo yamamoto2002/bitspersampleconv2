@@ -26,6 +26,7 @@ WWPcmDataContentTypeToStr(WWPcmDataContentType w)
     switch (w) {
     case WWPcmDataContentSilence: return "Silence";
     case WWPcmDataContentPcmData: return "PcmData";
+    default: return "unknown";
     }
 }
 
@@ -293,7 +294,7 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
     result[0] = 0;
 
-    int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000};
+    int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000};
     int bitsPerSampleList[] = {16, 32};
     const wchar_t *bitFormatNameList[] = {
         L"int",
