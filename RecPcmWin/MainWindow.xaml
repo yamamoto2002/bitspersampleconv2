@@ -56,7 +56,7 @@
                 </GroupBox>
                 <GroupBox Header="録音バッファーサイズ" Height="62" HorizontalAlignment="Left" Margin="6,181,0,0" Name="groupBox7" VerticalAlignment="Top" Width="199">
                     <Grid>
-                        <TextBox Height="24" Margin="6,6,61,0" Name="textBoxRecMaxMB" VerticalAlignment="Top" Text="1024" HorizontalContentAlignment="Right" />
+                        <TextBox Height="24" Margin="6,6,61,0" Name="textBoxRecMaxMB" VerticalAlignment="Top" Text="bufferSizeMB" HorizontalContentAlignment="Right" />
                         <Label Content="MB" Height="25" Margin="0,6,6,0" Name="label3" VerticalAlignment="Top" HorizontalAlignment="Right" Width="52" VerticalContentAlignment="Center" />
                     </Grid>
                 </GroupBox>

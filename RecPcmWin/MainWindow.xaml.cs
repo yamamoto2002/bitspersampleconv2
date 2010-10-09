@@ -20,11 +20,13 @@ namespace RecPcmWin {
     public partial class MainWindow : Window {
         private WasapiCS wasapi;
 
-        WavData m_wavData = null; 
+        WavData m_wavData = null;
 
+        const int DEFAULT_BUFFER_SIZE_MB    = 256;
         const int DEFAULT_OUTPUT_LATENCY_MS = 200;
         int m_samplingFrequency     = 44100;
         int m_samplingBitsPerSample = 16;
+        byte[] m_capturedPcmData;
 
         public MainWindow() {
             InitializeComponent();
@@ -34,6 +36,7 @@ namespace RecPcmWin {
             hr = wasapi.Init();
             textBoxLog.Text += string.Format("wasapi.Init() {0:X8}\r\n", hr);
             textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
+            textBoxRecMaxMB.Text = string.Format("{0}", DEFAULT_BUFFER_SIZE_MB);
 
             Closed += new EventHandler(MainWindow_Closed);
 
@@ -58,12 +61,12 @@ namespace RecPcmWin {
                 listBoxDevices.Items.Add(wasapi.GetDeviceName(i));
             }
 
-            buttonDeviceSelect.IsEnabled = true;
-            buttonDeselect.IsEnabled = false;
-            buttonRec.IsEnabled = false;
-            buttonStop.IsEnabled = false;
+            buttonDeviceSelect.IsEnabled     = true;
+            buttonDeselect.IsEnabled         = false;
+            buttonRec.IsEnabled              = false;
+            buttonStop.IsEnabled             = false;
             groupBoxWasapiSettings.IsEnabled = true;
-            buttonInspectDevice.IsEnabled = false;
+            buttonInspectDevice.IsEnabled    = false;
 
             if (0 < nDevices) {
                 if (0 <= selectedIndex && selectedIndex < listBoxDevices.Items.Count) {
@@ -112,6 +115,24 @@ namespace RecPcmWin {
                 textBoxLatency.Text = string.Format("{0}", DEFAULT_OUTPUT_LATENCY_MS);
             }
 
+            try {
+                m_bufferBytes = Int32.Parse(textBoxRecMaxMB.Text) * 1024 * 1024;
+            } catch (Exception ex) {
+                textBoxLog.Text += string.Format("{0}\r\n", ex);
+            }
+            if (m_bufferBytes < 0) {
+                m_bufferBytes = DEFAULT_BUFFER_SIZE_MB * 1024 * 1024;
+                textBoxRecMaxMB.Text = string.Format("{0}", DEFAULT_BUFFER_SIZE_MB);
+            }
+            try {
+                m_capturedPcmData = null;
+                m_capturedPcmData = new byte[m_bufferBytes];
+            } catch (Exception ex) {
+                textBoxLog.Text += string.Format("{0}\r\n", ex);
+                MessageBox.Show(string.Format("おそらくメモリ不足ですので、録音バッファーサイズを減らして下さい\r\n{0}", ex));
+                return;
+            }
+            
             int hr = wasapi.ChooseDevice(listBoxDevices.SelectedIndex);
             textBoxLog.Text += string.Format("wasapi.ChooseDevice({0}) {1:X8}\r\n",
                 listBoxDevices.SelectedItem.ToString(), hr);
@@ -164,15 +185,8 @@ namespace RecPcmWin {
         private int m_bufferBytes = -1;
 
         private void buttonRec_Click(object sender, RoutedEventArgs e) {
-            try {
-                m_bufferBytes = Int32.Parse(textBoxRecMaxMB.Text) * 1024 * 1024;
-            } catch (Exception ex) {
-                textBoxLog.Text += string.Format("{0}\r\n", ex);
-            }
-            if (m_bufferBytes < 0) {
-                m_bufferBytes = 1024*1024*1024;
-                textBoxRecMaxMB.Text = "1024";
-            }
+            
+
             wasapi.SetupCaptureBuffer(m_bufferBytes);
             textBoxLog.Text += string.Format("wasapi.SetupCaptureBuffer() {0:X8}\r\n", m_bufferBytes);
 
@@ -238,8 +252,7 @@ namespace RecPcmWin {
         }
 
         private void SaveRecordedData() {
-            byte[] capturedPcmData = new byte[m_bufferBytes];
-            int bytes = wasapi.GetCapturedData(capturedPcmData);
+            int bytes = wasapi.GetCapturedData(m_capturedPcmData);
             int nFrames = bytes / (m_samplingBitsPerSample / 8) / 2; // 2==2ch
 
             if (nFrames == 0) {
@@ -269,10 +282,10 @@ namespace RecPcmWin {
                     int pos = 0;
                     short v;
                     for (int i = 0; i < nFrames; ++i) {
-                        v = (short)(capturedPcmData[pos] + capturedPcmData[pos+1] * 256);
+                        v = (short)(m_capturedPcmData[pos] + m_capturedPcmData[pos+1] * 256);
                         pos += 2;
                         sL.Set16(i, v);
-                        v = (short)(capturedPcmData[pos] + capturedPcmData[pos + 1] * 256);
+                        v = (short)(m_capturedPcmData[pos] + m_capturedPcmData[pos + 1] * 256);
                         pos += 2;
                         sR.Set16(i, v);
                     }
@@ -282,16 +295,16 @@ namespace RecPcmWin {
                     int pos = 0;
                     int v;
                     for (int i = 0; i < nFrames; ++i) {
-                        v = capturedPcmData[pos]
-                            + capturedPcmData[pos + 1] * (1 << 8)
-                            + capturedPcmData[pos + 2] * (1 << 16)
-                            + capturedPcmData[pos + 3] * (1 << 24);
+                        v = m_capturedPcmData[pos]
+                            + m_capturedPcmData[pos + 1] * (1 << 8)
+                            + m_capturedPcmData[pos + 2] * (1 << 16)
+                            + m_capturedPcmData[pos + 3] * (1 << 24);
                         pos += 4;
                         sL.Set32(i, v);
-                        v = capturedPcmData[pos]
-                            + capturedPcmData[pos + 1] * (1 << 8)
-                            + capturedPcmData[pos + 2] * (1 << 16)
-                            + capturedPcmData[pos + 3] * (1 << 24);
+                        v = m_capturedPcmData[pos]
+                            + m_capturedPcmData[pos + 1] * (1 << 8)
+                            + m_capturedPcmData[pos + 2] * (1 << 16)
+                            + m_capturedPcmData[pos + 3] * (1 << 24);
                         pos += 4;
                         sR.Set32(i, v);
                     }
