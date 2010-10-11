@@ -3,6 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.84 ==
+機能追加
+  * CUEシートの演奏者情報の表示(Issue 10)対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=10&can=1
+  * 再生時間表示を時:分:秒形式に修正。
+
 ===!PlayPcmWin 1.0.83 ==
 機能追加
   * 対応フォーマット一覧のサンプリング周波数に352.8kHzと384kHzを追加 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1409&r=1408&format=side&path=/trunk/WasapiIODLL/WasapiUser.cpp
