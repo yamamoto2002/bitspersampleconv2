@@ -1555,6 +1555,14 @@ namespace PlayPcmWin
             //Console.WriteLine("PlayDoWork end");
         }
 
+        private string SecondToHMSString(int seconds) {
+            int h = seconds / 3600;
+            int m = seconds / 60 - h * 60;
+            int s = seconds - h * 3600 - m * 60;
+            return string.Format(
+                "{0:D2}:{1:D2}:{2:D2}", h, m, s);
+        }
+
         /// <summary>
         /// 再生の進行状況をUIに反映する。
         /// </summary>
@@ -1585,8 +1593,10 @@ namespace PlayPcmWin
 
                 slider1.Maximum = pcmData.NumFrames;
 
-                label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}",
-                    slider1.Value / pcmData.SampleRate, pcmData.NumFrames / pcmData.SampleRate);
+
+                label1.Content = string.Format("{0}/{1}",
+                    SecondToHMSString((int)(slider1.Value / pcmData.SampleRate)),
+                    SecondToHMSString((int)(pcmData.NumFrames / pcmData.SampleRate)));
             }
         }
 
