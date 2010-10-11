@@ -6,7 +6,7 @@
 ===!PlayPcmWin 1.0.84 ==
 機能追加
   * CUEシートの演奏者情報の表示(Issue 10)対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=10&can=1
-  * 再生時間表示を時:分:秒形式に修正。
+  * 再生時間表示を時:分:秒形式に修正。http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1412&r=1412&format=side&path=/trunk/PlayPcmWin/MainWindow.xaml.cs
 
 ===!PlayPcmWin 1.0.83 ==
 機能追加
