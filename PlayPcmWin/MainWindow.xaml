@@ -28,8 +28,8 @@
         <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="0,29,0,151" Name="groupBox2">
             <Grid>
                 <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
-                <ListBox Margin="6,6,6,37" Name="listBoxPlayFiles" SelectionChanged="listBoxPlayFiles_SelectionChanged" PreviewMouseDown="listBoxPlayFiles_PreviewMouseDown" PreviewMouseUp="listBoxPlayFiles_PreviewMouseUp" IsTextSearchEnabled="False" />
                 <Button Content="ここまで一括読み込み" Height="23" HorizontalAlignment="Left" Margin="191,0,0,6" Name="buttonReadSeparator" VerticalAlignment="Bottom" Width="177" Click="buttonReadSeparator_Click" />
+                <DataGrid ItemsSource="{Binding Path=PlayListCollection}" CanUserSortColumns="False" IsReadOnly="True" Margin="6,6,6,37" Name="dataGridPlayList" PreviewMouseDown="dataGridPlayList_PreviewMouseDown" PreviewMouseUp="dataGridPlayList_PreviewMouseUp" SelectionChanged="dataGridPlayList_SelectionChanged" />
             </Grid>
         </GroupBox>
         <GroupBox Header="ログ" Name="groupBoxLog" Height="115" VerticalAlignment="Bottom" Margin="6,0,0,30">

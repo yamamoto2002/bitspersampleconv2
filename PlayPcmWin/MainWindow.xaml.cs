@@ -18,30 +18,6 @@ using System.ComponentModel;
 
 namespace PlayPcmWin
 {
-    /// <summary>
-    /// プレイリスト1項目の情報。区切り線を1個と数える。
-    /// ListBoxPlayList.Itemsの項目と一対一に対応する。
-    /// </summary>
-    class PlayListItemInfo {
-        public enum ItemType {
-            Item,
-            Separator
-        }
-
-        public ItemType Type { get; set; }
-        public PcmDataLib.PcmData PcmData { get; set; }
-
-        public PlayListItemInfo() {
-            Type = ItemType.Item;
-            PcmData = null;
-        }
-
-        public PlayListItemInfo(ItemType type, PcmDataLib.PcmData pcmData) {
-            Type = type;
-            PcmData = pcmData;
-        }
-    }
-
     public partial class MainWindow : Window
     {
         const int PROGRESS_REPORT_INTERVAL_MS = 500;
@@ -54,6 +30,79 @@ namespace PlayPcmWin
         /// PcmDataのリスト。
         /// </summary>
         private List<PcmDataLib.PcmData> m_pcmDataList = new List<PcmDataLib.PcmData>();
+
+        /// <summary>
+        /// プレイリスト1項目の情報。区切り線を1個と数える。
+        /// ListBoxPlayList.Itemsの項目と一対一に対応する。
+        /// </summary>
+        class PlayListItemInfo {
+
+            public string Id {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.Id.ToString();
+                }
+            }
+
+            public string Title {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.DisplayName;
+                }
+            }
+
+            public string Performer {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.Performer;
+                }
+            }
+
+            public string AlbumTitle {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.AlbumTitle;
+                }
+            }
+
+            public enum ItemType {
+                AudioData,
+                ReadSeparator,
+                SampleRateChange
+            }
+
+            private ItemType m_type;
+            public ItemType Type { get { return m_type; } }
+
+            private PcmDataLib.PcmData m_pcmData;
+            public PcmDataLib.PcmData PcmData() { return m_pcmData; }
+
+            public PlayListItemInfo() {
+                m_type = ItemType.AudioData;
+                m_pcmData = null;
+            }
+
+            public PlayListItemInfo(ItemType type, PcmDataLib.PcmData pcmData) {
+                m_type = type;
+                m_pcmData = pcmData;
+            }
+        }
+
+        /// <summary>
+        /// プレイリストをDataGridに接続するクラス
+        /// </summary>
+        class PlayListViewModel {
+            public ICollectionView PlayListCollection { get; private set; }
+
+            public PlayListViewModel(List<PlayListItemInfo> playList) {
+                PlayListCollection = CollectionViewSource.GetDefaultView(playList);
+            }
+
+            public void RefreshCollection() {
+                PlayListCollection.Refresh();
+            }
+        }
+        private PlayListViewModel m_playListView;
 
         /// <summary>
         /// プレイリスト項目情報。
@@ -246,8 +295,8 @@ namespace PlayPcmWin
         /// <returns>プレイリスト位置番号(プレイリスト内のindex)。見つからないときは-1</returns>
         private int GetPlayListIndexOfWaveDataId(int wavDataId) {
             for (int i = 0; i < m_playListItems.Count(); ++i) {
-                if (m_playListItems[i].PcmData != null
-                    && m_playListItems[i].PcmData.Id == wavDataId) {
+                if (m_playListItems[i].PcmData() != null
+                    && m_playListItems[i].PcmData().Id == wavDataId) {
                     return i;
                 }
             }
@@ -279,6 +328,9 @@ namespace PlayPcmWin
             AddLogText(string.Format("PlayPcmWin {0} {1}\r\n",
                     AssemblyVersion,
                     IntPtr.Size == 8 ? "64bit" : "32bit"));
+
+            m_playListView = new PlayListViewModel(m_playListItems);
+            DataContext = m_playListView;
 
             m_readGroupId = 0;
 
@@ -719,7 +771,7 @@ namespace PlayPcmWin
             ChangeState(State.初期化完了);
 
             if (mode == PlayListClearMode.ClearWithUpdateUI) {
-                listBoxPlayFiles.Items.Clear();
+                m_playListView.RefreshCollection();
                 progressBar1.Value = 0;
                 UpdateUIStatus();
             }
@@ -751,9 +803,8 @@ namespace PlayPcmWin
             if (0 < m_pcmDataList.Count
                 && !m_pcmDataList[m_pcmDataList.Count - 1].IsSameFormat(pcmData)) {
                 // データフォーマットが変わった。
-                listBoxPlayFiles.Items.Add(
-                    string.Format("----------{0}Hz {1}bitに変更------------", pcmData.SampleRate, pcmData.BitsPerSample));
-                m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
+                m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.SampleRateChange, null));
+                m_playListView.RefreshCollection();
                 ++m_readGroupId;
             }
 
@@ -788,10 +839,10 @@ namespace PlayPcmWin
             }
 
             m_pcmDataList.Add(pcmData);
-            listBoxPlayFiles.Items.Add(pcmData.DisplayName);
             m_playListItems.Add(new PlayListItemInfo(
-                PlayListItemInfo.ItemType.Item,
+                PlayListItemInfo.ItemType.AudioData,
                 pcmData));
+            m_playListView.RefreshCollection();
 
             // 状態の更新。再生リストにファイル有り。
             ChangeState(State.プレイリストあり);
@@ -1372,8 +1423,8 @@ namespace PlayPcmWin
             m_preference.PreferredDeviceName = selectedItemName;
 
             int loadGroupId = 0;
-            if (0 < listBoxPlayFiles.SelectedIndex) {
-                PcmDataLib.PcmData w = m_playListItems[listBoxPlayFiles.SelectedIndex].PcmData;
+            if (0 < dataGridPlayList.SelectedIndex) {
+                PcmDataLib.PcmData w = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
                 if (null != w) {
                     loadGroupId = w.GroupId;
                 }
@@ -1398,8 +1449,8 @@ namespace PlayPcmWin
             }
 
             int wavDataId = 0;
-            if (0 < listBoxPlayFiles.SelectedIndex) {
-                PcmDataLib.PcmData pcmData = m_playListItems[listBoxPlayFiles.SelectedIndex].PcmData;
+            if (0 < dataGridPlayList.SelectedIndex) {
+                PcmDataLib.PcmData pcmData = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
                 if (null != pcmData) {
                     wavDataId = pcmData.Id;
                 }
@@ -1423,7 +1474,7 @@ namespace PlayPcmWin
                 UnsetupDevice();
 
                 if (!SetupDevice(pcmData.GroupId)) {
-                    listBoxPlayFiles.SelectedIndex = 0;
+                    dataGridPlayList.SelectedIndex = 0;
                     ChangeState(State.ファイル読み込み完了);
 
                     DeviceDeselect();
@@ -1442,7 +1493,7 @@ namespace PlayPcmWin
             UpdateNextTask();
 
             if (!SetupDevice(pcmData.GroupId)) {
-                listBoxPlayFiles.SelectedIndex = 0;
+                dataGridPlayList.SelectedIndex = 0;
                 ChangeState(State.ファイル読み込み完了);
 
                 DeviceDeselect();
@@ -1463,7 +1514,7 @@ namespace PlayPcmWin
                 // wasapiUserの中で自発的にループ再生する。
                 // ファイルの再生が終わった=停止。
                 m_task.Set(TaskType.None);
-                listBoxPlayFiles.SelectedIndex = 0;
+                dataGridPlayList.SelectedIndex = 0;
                 return;
             }
 
@@ -1490,7 +1541,7 @@ namespace PlayPcmWin
             }
 
             m_task.Set(TaskType.None);
-            listBoxPlayFiles.SelectedIndex = 0;
+            dataGridPlayList.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -1585,7 +1636,7 @@ namespace PlayPcmWin
                 textBoxFileName.Text = "";
                 label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
             } else {
-                listBoxPlayFiles.SelectedIndex
+                dataGridPlayList.SelectedIndex
                     = GetPlayListIndexOfWaveDataId(playingPcmDataId);
                 slider1.Value =wasapi.GetPosFrame();
                 PcmDataLib.PcmData pcmData = m_pcmDataList[playingPcmDataId];
@@ -1635,7 +1686,7 @@ namespace PlayPcmWin
 
             // 再生終了後に行うタスクがない。停止する。先頭の曲を選択状態にする。
             // 再生状態→ファイル読み込み完了状態。
-            listBoxPlayFiles.SelectedIndex = 0;
+            dataGridPlayList.SelectedIndex = 0;
             ChangeState(State.ファイル読み込み完了);
 
             // さらに、デバイスを選択解除し、デバイス一覧を更新する。
@@ -1750,6 +1801,16 @@ namespace PlayPcmWin
             }
         }
 
+#if false
+        private void listBoxPlayFiles_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = true;
+
+        }
+
+        private void listBoxPlayFiles_PreviewMouseUp(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = false;
+        }
+
         private void listBoxPlayFiles_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             // ところで、この再生リストに対するキーボード操作が全く効かないのは、
             // 何とかしたいところだ。
@@ -1768,11 +1829,42 @@ namespace PlayPcmWin
 
             // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
             // しかも、この曲を再生していない場合、この曲を再生する。
-            if (null != pli.PcmData &&
-                playingId != pli.PcmData.Id) {
-                ChangePlayWavDataById(pli.PcmData.Id);
+            if (null != pli.PcmData() &&
+                playingId != pli.PcmData().Id) {
+                ChangePlayWavDataById(pli.PcmData().Id);
             }
         }
+#else
+        private void dataGridPlayList_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = true;
+
+        }
+
+        private void dataGridPlayList_PreviewMouseUp(object sender, MouseButtonEventArgs e) {
+            m_playListMouseDown = false;
+        }
+
+        private void dataGridPlayList_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (m_state != State.再生中 || !m_playListMouseDown ||
+                dataGridPlayList.SelectedIndex < 0) {
+                return;
+            }
+
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            if (playingId < 0) {
+                return;
+            }
+
+            PlayListItemInfo pli = m_playListItems[dataGridPlayList.SelectedIndex];
+
+            // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
+            // しかも、この曲を再生していない場合、この曲を再生する。
+            if (null != pli.PcmData() &&
+                playingId != pli.PcmData().Id) {
+                ChangePlayWavDataById(pli.PcmData().Id);
+            }
+        }
+#endif
 
         /// <summary>
         /// 再生中に、再生曲をwavDataIdの曲に切り替える。
@@ -1802,15 +1894,6 @@ namespace PlayPcmWin
             }
         }
 
-        private void listBoxPlayFiles_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
-            m_playListMouseDown = true;
-
-        }
-
-        private void listBoxPlayFiles_PreviewMouseUp(object sender, MouseButtonEventArgs e) {
-            m_playListMouseDown = false;
-        }
-
         /// <summary>
         /// [ここまで一括読み込み]を追加できたら追加する。
         /// 
@@ -1818,7 +1901,7 @@ namespace PlayPcmWin
         /// ギャップ→ここまで変換からも呼び出される。
         /// </summary>
         private void AddKokomade() {
-            if (0 == listBoxPlayFiles.Items.Count) {
+            if (0 == m_playListItems.Count) {
                 return;
             }
 
@@ -1834,8 +1917,8 @@ namespace PlayPcmWin
                     dispNameOnPlayList + " ";
             }
 
-            listBoxPlayFiles.Items.Add(dispNameOnPlayList);
-            m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.Separator, null));
+            m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.ReadSeparator, null));
+            m_playListView.RefreshCollection();
             ++m_readGroupId;
         }
 
