@@ -71,7 +71,7 @@
             <Grid>
                 <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="67" IsEnabled="False" Click="buttonPlay_Click" />
                 <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="76,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="66" IsEnabled="False" Click="buttonStop_Click" />
-                <Label Content="0/0" Margin="260,4,6,0" Name="label1" Height="28" VerticalAlignment="Top" HorizontalContentAlignment="Right" />
+                <Label Content="0/0" Margin="204,30,6,0" Name="label1" Height="29" VerticalAlignment="Top" HorizontalContentAlignment="Right" />
                 <Slider Margin="6,0,7,0" Name="slider1" MouseMove="slider1_MouseMove" Height="23" VerticalAlignment="Bottom" />
                 <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
                 <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="148,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
