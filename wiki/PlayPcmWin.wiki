@@ -5,7 +5,7 @@
 
 !PlayPcmWinはWASAPI排他モードでWAVファイルを再生するプログラムです。
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin139.jpg
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin184.png
 
 =特徴=
   * 量子化ビット数16、24、32ビットの2チャンネルステレオ非圧縮WAVファイル再生に対応。
