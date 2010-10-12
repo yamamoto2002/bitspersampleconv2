@@ -13,11 +13,11 @@
   * 対応フォーマット一覧のサンプリング周波数に352.8kHzと384kHzを追加 http://code.google.com/p/bitspersampleconv2/source/diff?spec=svn1409&r=1408&format=side&path=/trunk/WasapiIODLL/WasapiUser.cpp
 
 バグ取り
-  * (Issue 11)を修正 http://code.google.com/p/bitspersampleconv2/issues/detail?id=11&can=1
+  * (Issue 11)を修正
 
 ===!PlayPcmWin 1.0.75 ==
 機能追加
-  * Issue 9対応 http://code.google.com/p/bitspersampleconv2/issues/detail?id=9&can=1
+  * Issue 9 対応
 
 ↓[詳細設定]画面
 
