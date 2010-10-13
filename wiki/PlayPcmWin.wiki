@@ -29,9 +29,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin184.png
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin184.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin184x64.zip
 
-非常にバグっぽい開発版 (バージョン1.0.86)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin186.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin186x64.zip
+非常にバグっぽい開発版 (バージョン1.0.87)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin187.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin187x64.zip
 
 
 || Windows  || !PlayPcmWin || 結果 ||
