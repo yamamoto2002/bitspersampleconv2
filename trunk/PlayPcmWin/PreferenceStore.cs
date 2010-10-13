@@ -51,6 +51,8 @@ namespace PlayPcmWin {
 
         public bool ManuallySetMainWindowDimension { get; set; }
 
+        public bool ParallelRead { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -68,6 +70,7 @@ namespace PlayPcmWin {
             PreferredDeviceName = "";
             ReplaceGapWithKokomade = false;
             ManuallySetMainWindowDimension = false;
+            ParallelRead = false;
         }
 
         /// <summary>
