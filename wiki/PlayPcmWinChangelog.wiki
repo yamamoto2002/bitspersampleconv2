@@ -3,6 +3,14 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 1.0.86 ==
+機能追加
+  * [読み込み処理を並列化し、高速化]設定を追加
+
+↓[詳細設定]画面
+
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin186.png
+
 ===!PlayPcmWin 1.0.84 ==
 機能追加
   * CUEシートの演奏者情報の表示(Issue 10)対応
