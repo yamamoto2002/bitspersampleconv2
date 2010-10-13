@@ -1135,7 +1135,7 @@ namespace PlayPcmWin
             } else if (0 == String.Compare(".aif", ext, true)) {
                 // AIFFファイル読み込み。
                 int ercd = -1;
-                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open))) {
+                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     AiffReader ar = new AiffReader();
                     AiffReader.ResultType result = ar.ReadHeaderAndPcmData(br);
                     if (result == AiffReader.ResultType.Success) {
@@ -1149,7 +1149,7 @@ namespace PlayPcmWin
             } else {
                 // WAVファイル読み込み。
 
-                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open))) {
+                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     WavData wavData = new WavData();
 
                     long startFrame = (long)(pcmData.StartTick) * pcmData.SampleRate / 75;
