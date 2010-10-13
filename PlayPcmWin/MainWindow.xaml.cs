@@ -15,6 +15,7 @@ using Wasapi;
 using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace PlayPcmWin
 {
@@ -385,6 +386,12 @@ namespace PlayPcmWin
 
             Closed += new EventHandler(MainWindow_Closed);
 
+            SetupBackgroundWorkers();
+
+            CreateDeviceList();
+        }
+
+        private void SetupBackgroundWorkers() {
             m_readFileWorker = new BackgroundWorker();
             m_readFileWorker.DoWork += new DoWorkEventHandler(ReadFileDoWork);
             m_readFileWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(ReadFileRunWorkerCompleted);
@@ -398,8 +405,6 @@ namespace PlayPcmWin
             m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
             m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
             m_playWorker.WorkerSupportsCancellation = true;
-
-            CreateDeviceList();
         }
 
         void MainWindow_Closed(object sender, EventArgs e) {
@@ -1161,14 +1166,28 @@ namespace PlayPcmWin
 
         }
 
+        private void ReadFileDoWork(object o, DoWorkEventArgs args) {
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+
+            if (m_preference.ParallelRead) {
+                ReadFileParallelDoWork(o, args);
+            } else {
+                ReadFileSingleDoWork(o, args);
+            }
+
+            sw.Stop();
+            Console.WriteLine("ReadFile elapsed time {0}", sw.Elapsed);
+        }
+
         /// <summary>
-        ///  バックグラウンド読み込み。
+        ///  バックグラウンド読み込み(1スレッドバージョン)。
         ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
         /// </summary>
-        private void ReadFileDoWork(object o, DoWorkEventArgs args) {
+        private void ReadFileSingleDoWork(object o, DoWorkEventArgs args) {
             BackgroundWorker bw = (BackgroundWorker)o;
             int readGroupId = (int)args.Argument;
-            Console.WriteLine("D: ReadFileDoWork({0}) started", readGroupId);
+            Console.WriteLine("D: ReadFileSingleDoWork({0}) started", readGroupId);
 
             ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
             try {
@@ -1183,7 +1202,7 @@ namespace PlayPcmWin
                     }
 
                     if (bw.CancellationPending) {
-                        Console.WriteLine("D: ReadFileDoWork() Cancelled");
+                        Console.WriteLine("D: ReadFileSingleDoWork() Cancelled");
                         args.Cancel = true;
                         return;
                     }
@@ -1197,7 +1216,7 @@ namespace PlayPcmWin
                         r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
                             pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
                         args.Result = r;
-                        Console.WriteLine("D: ReadFileDoWork() !readSuccess");
+                        Console.WriteLine("D: ReadFileSingleDoWork() !readSuccess");
                         return;
                     }
 
@@ -1212,7 +1231,7 @@ namespace PlayPcmWin
                             ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
                             r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
                             args.Result = r;
-                            Console.WriteLine("D: ReadFileDoWork() lowmemory");
+                            Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
                             return;
                         }
                     }
@@ -1233,11 +1252,107 @@ namespace PlayPcmWin
 
                 m_loadedGroupId = readGroupId;
 
-                Console.WriteLine("D: ReadFileDoWork({0}) done", readGroupId);
+                Console.WriteLine("D: ReadFileSingleDoWork({0}) done", readGroupId);
             } catch (Exception ex) {
                 r.message = ex.ToString();
                 args.Result = r;
-                Console.WriteLine("D: ReadFileDoWork() {0}", ex.ToString());
+                Console.WriteLine("D: ReadFileSingleDoWork() {0}", ex.ToString());
+            }
+        }
+
+        /// <summary>
+        ///  バックグラウンド読み込み(並列化バージョン)。
+        ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
+        ///  @todo メモリの利用効率に改善の余地あり。
+        /// </summary>
+        private void ReadFileParallelDoWork(object o, DoWorkEventArgs args) {
+            BackgroundWorker bw = (BackgroundWorker)o;
+            int readGroupId = (int)args.Argument;
+            Console.WriteLine("D: ReadFileParallelDoWork({0}) started", readGroupId);
+
+            ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
+            try {
+                r.hr = -1;
+
+                int count = 0;
+
+                wasapi.ClearPlayList();
+                wasapi.AddPlayPcmDataStart();
+                Parallel.For(0, m_pcmDataList.Count, delegate(int i) {
+                    ++count;
+                    PcmDataLib.PcmData pd = m_pcmDataList[i];
+                    if (pd.GroupId != readGroupId) {
+                        return;
+                    }
+
+                    if (bw.CancellationPending) {
+                        Console.WriteLine("D: ReadFileParallelDoWork() Cancelled");
+                        args.Cancel = true;
+                        return;
+                    }
+
+                    // どーなのよ、という感じがするが。
+                    // 効果絶大である。
+                    GC.Collect();
+
+                    int ercd = ReadPcmDataFromFile(pd);
+                    if (0 != ercd) {
+                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
+                            pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
+                        args.Result = r;
+                        Console.WriteLine("D: ReadFileParallelDoWork() !readSuccess");
+                        return;
+                    }
+
+                    // 必要に応じて量子化ビット数の変更を行う。
+                    pd = BitsPerSampleConvAsNeeded(pd);
+
+                    m_readFileWorker.ReportProgress(100 * count / m_pcmDataList.Count,
+                        string.Format("Read {0}, {1} frames\r\n", pd.Id, pd.NumFrames));
+                });
+
+                for (int i = 0; i < m_pcmDataList.Count; ++i) {
+                    if (bw.CancellationPending) {
+                        Console.WriteLine("D: ReadFileParallelDoWork() Cancelled 2");
+                        args.Cancel = true;
+                        return;
+                    }
+                    
+                    PcmDataLib.PcmData pd = m_pcmDataList[i];
+                    if (pd.GroupId != readGroupId) {
+                        continue;
+                    }
+
+                    if (pd.GetSampleArray() != null &&
+                        0 < pd.GetSampleArray().Length) {
+                        // サンプルが存在する場合だけWasapiにAddする。
+                        if (!wasapi.AddPlayPcmData(pd.Id, pd.GetSampleArray())) {
+                            ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
+                            r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                            args.Result = r;
+                            Console.WriteLine("D: ReadFileParallelDoWork() lowmemory");
+                            return;
+                        }
+                    }
+                    pd.ForgetDataPart();
+                }
+
+                // 使われていないメモリを開放する。
+                GC.Collect();
+                wasapi.AddPlayPcmDataEnd();
+
+                // 成功。
+                r.message = string.Format("再生グループ{0}番読み込み完了。\r\n", readGroupId);
+                r.hr = 0;
+                args.Result = r;
+
+                m_loadedGroupId = readGroupId;
+
+                Console.WriteLine("D: ReadFileParallelDoWork({0}) done", readGroupId);
+            } catch (Exception ex) {
+                r.message = ex.ToString();
+                args.Result = r;
+                Console.WriteLine("D: ReadFileParallelDoWork() {0}", ex.ToString());
             }
         }
 
@@ -1801,40 +1916,6 @@ namespace PlayPcmWin
             }
         }
 
-#if false
-        private void listBoxPlayFiles_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
-            m_playListMouseDown = true;
-
-        }
-
-        private void listBoxPlayFiles_PreviewMouseUp(object sender, MouseButtonEventArgs e) {
-            m_playListMouseDown = false;
-        }
-
-        private void listBoxPlayFiles_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-            // ところで、この再生リストに対するキーボード操作が全く効かないのは、
-            // 何とかしたいところだ。
-
-            if (m_state != State.再生中 || !m_playListMouseDown ||
-                listBoxPlayFiles.SelectedIndex < 0) {
-                return;
-            }
-            
-            int playingId = wasapi.GetNowPlayingPcmDataId();
-            if (playingId < 0) {
-                return;
-            }
-
-            PlayListItemInfo pli = m_playListItems[listBoxPlayFiles.SelectedIndex];
-
-            // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
-            // しかも、この曲を再生していない場合、この曲を再生する。
-            if (null != pli.PcmData() &&
-                playingId != pli.PcmData().Id) {
-                ChangePlayWavDataById(pli.PcmData().Id);
-            }
-        }
-#else
         private void dataGridPlayList_PreviewMouseDown(object sender, MouseButtonEventArgs e) {
             m_playListMouseDown = true;
 
@@ -1864,7 +1945,6 @@ namespace PlayPcmWin
                 ChangePlayWavDataById(pli.PcmData().Id);
             }
         }
-#endif
 
         /// <summary>
         /// 再生中に、再生曲をwavDataIdの曲に切り替える。

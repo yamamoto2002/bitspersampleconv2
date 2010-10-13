@@ -51,6 +51,9 @@ namespace PlayPcmWin {
 
             checkBoxManuallySetMainWindowDimension.IsChecked =
                 m_preference.ManuallySetMainWindowDimension;
+
+            checkBoxParallelRead.IsChecked =
+                m_preference.ParallelRead;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -72,6 +75,9 @@ namespace PlayPcmWin {
 
             m_preference.ManuallySetMainWindowDimension
                 = checkBoxManuallySetMainWindowDimension.IsChecked == true;
+
+            m_preference.ParallelRead
+                = checkBoxParallelRead.IsChecked == true;
 
             Close();
         }
