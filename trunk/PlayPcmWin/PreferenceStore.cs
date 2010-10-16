@@ -53,6 +53,8 @@ namespace PlayPcmWin {
 
         public bool ParallelRead { get; set; }
 
+        public bool PlayRepeat { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -71,6 +73,7 @@ namespace PlayPcmWin {
             ReplaceGapWithKokomade = false;
             ManuallySetMainWindowDimension = false;
             ParallelRead = false;
+            PlayRepeat = true;
         }
 
         /// <summary>

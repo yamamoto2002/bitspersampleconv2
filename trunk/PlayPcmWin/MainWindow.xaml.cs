@@ -384,6 +384,8 @@ namespace PlayPcmWin
                 break;
             }
 
+            checkBoxContinuous.IsChecked = m_preference.PlayRepeat;
+
             Closed += new EventHandler(MainWindow_Closed);
 
             SetupBackgroundWorkers();
@@ -654,6 +656,9 @@ namespace PlayPcmWin
 
                 // ウィンドウの位置とサイズを保存
                 m_preference.SetMainWindowLeftTopWidthHeight(Left, Top, Width, Height);
+
+                // 再生リピート設定を保存
+                m_preference.PlayRepeat = checkBoxContinuous.IsChecked == true;
 
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);
@@ -1121,6 +1126,7 @@ namespace PlayPcmWin
         private int ReadPcmDataFromFile(PcmDataLib.PcmData pcmData) {
             string ext = System.IO.Path.GetExtension(pcmData.FullPath);
             if (0 == String.Compare(".flac", ext, true)) {
+                // FLACファイル読み込み。
                 PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
                 FlacDecodeIF fdif = new FlacDecodeIF();
                 int ercd = fdif.ReadAll(pcmData.FullPath, out pd);
@@ -1135,7 +1141,8 @@ namespace PlayPcmWin
             } else if (0 == String.Compare(".aif", ext, true)) {
                 // AIFFファイル読み込み。
                 int ercd = -1;
-                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                using (BinaryReader br = new BinaryReader(
+                        File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     AiffReader ar = new AiffReader();
                     AiffReader.ResultType result = ar.ReadHeaderAndPcmData(br);
                     if (result == AiffReader.ResultType.Success) {
@@ -1148,8 +1155,8 @@ namespace PlayPcmWin
                 return ercd;
             } else {
                 // WAVファイル読み込み。
-
-                using (BinaryReader br = new BinaryReader(File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                using (BinaryReader br = new BinaryReader(
+                        File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     WavData wavData = new WavData();
 
                     long startFrame = (long)(pcmData.StartTick) * pcmData.SampleRate / 75;
