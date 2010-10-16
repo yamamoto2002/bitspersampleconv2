@@ -386,8 +386,6 @@ namespace PlayPcmWin
 
             checkBoxContinuous.IsChecked = m_preference.PlayRepeat;
 
-            Closed += new EventHandler(MainWindow_Closed);
-
             SetupBackgroundWorkers();
 
             CreateDeviceList();
@@ -409,8 +407,8 @@ namespace PlayPcmWin
             m_playWorker.WorkerSupportsCancellation = true;
         }
 
-        void MainWindow_Closed(object sender, EventArgs e) {
-            Exit();
+        private void Window_Closed(object sender, EventArgs e) {
+            Term();
         }
 
         private void MenuItemFileExit_Click(object sender, RoutedEventArgs e) {
@@ -626,7 +624,7 @@ namespace PlayPcmWin
             m_loadedGroupId = -1;
         }
 
-        private void Exit() {
+        private void Term() {
             if (wasapi != null) {
                 Stop(new Task(TaskType.None));
                 m_readFileWorker.CancelAsync();
@@ -663,8 +661,12 @@ namespace PlayPcmWin
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);
             }
+        }
 
-            Application.Current.Shutdown();
+        private void Exit() {
+            Term();
+            // Application.Current.Shutdown();
+            Close();
         }
 
         /// <summary>
@@ -1933,6 +1935,10 @@ namespace PlayPcmWin
         }
 
         private void dataGridPlayList_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (null == wasapi) {
+                return;
+            }
+
             if (m_state != State.再生中 || !m_playListMouseDown ||
                 dataGridPlayList.SelectedIndex < 0) {
                 return;
