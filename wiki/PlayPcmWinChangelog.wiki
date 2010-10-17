@@ -3,6 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.4 ==
+バグ取り
+  * Issue 16 修正
+  * 出力レイテンシーのデフォルト値を170msに変更
+
 ===!PlayPcmWin 1.0.89 ==
 バグ取り
   * Issue 13 修正したつもり
