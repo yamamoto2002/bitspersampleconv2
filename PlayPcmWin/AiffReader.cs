@@ -197,6 +197,7 @@ namespace PlayPcmWin {
             pcmData.SetFormat(
                 NumChannels,
                 BitsPerSample,
+                BitsPerSample,
                 SampleRate,
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
                 NumFrames);

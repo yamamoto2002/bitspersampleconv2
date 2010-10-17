@@ -295,10 +295,12 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
     result[0] = 0;
 
     int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000};
-    int bitsPerSampleList[] = {16, 32};
-    const wchar_t *bitFormatNameList[] = {
-        L"int",
-        L"float"};
+
+    // j
+    int bitsPerSampleList[] = {16, 24, 32};
+
+    // k
+    const wchar_t *bitFormatNameList[] = { L"int", L"float"}; 
 
     HRG(m_deviceCollection->Item(id, &m_deviceToUse));
 
@@ -308,13 +310,19 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
     // 汚いプログラムだなぁ～
     for (int k=0; k<2; ++k) {
         for (int j=0; j<sizeof bitsPerSampleList/sizeof bitsPerSampleList[0]; ++j) {
-            if (k==1 && j==0) {
-                // float16bit スキップする。
+            if (k==1 && j!=2) {
+                // float16bit float24bit スキップする。
                 continue;
             }
+
             for (int i=0; i<sizeof sampleRateList/sizeof sampleRateList[0]; ++i) {
                 int sampleRate    = sampleRateList[i];
                 int bitsPerSample = bitsPerSampleList[j];
+
+                int dataBitsPerSample = bitsPerSample;
+                if (bitsPerSample == 24) {
+                    dataBitsPerSample = 32;
+                }
 
                 assert(!waveFormat);
                 HRG(m_audioClient->GetMixFormat(&waveFormat));
@@ -338,11 +346,12 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
                 } else {
                     wfex->SubFormat = KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
                 }
-                wfex->Format.wBitsPerSample = (WORD)bitsPerSample;
+
+                wfex->Format.wBitsPerSample = (WORD)dataBitsPerSample;
                 wfex->Format.nSamplesPerSec = sampleRate;
 
                 wfex->Format.nBlockAlign = (WORD)(
-                    (bitsPerSample / 8) * waveFormat->nChannels);
+                    (dataBitsPerSample / 8) * waveFormat->nChannels);
                 wfex->Format.nAvgBytesPerSec =
                     wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
                 wfex->Samples.wValidBitsPerSample = (WORD)bitsPerSample;
@@ -454,6 +463,7 @@ WasapiUser::Setup(
     WWDataFeedMode mode,
     int sampleRate,
     int bitsPerSample,
+    int validBitsPerSample,
     WWBitFormatType bitFormatType,
     int latencyMillisec,
     int numChannels)
@@ -461,13 +471,14 @@ WasapiUser::Setup(
     HRESULT      hr          = 0;
     WAVEFORMATEX *waveFormat = NULL;
 
-    dprintf("D: %s(%d %d %d %d)\n", __FUNCTION__,
-        (int)mode, sampleRate, bitsPerSample, latencyMillisec);
+    dprintf("D: %s(%d %d %d %d %d)\n", __FUNCTION__,
+        (int)mode, sampleRate, bitsPerSample, validBitsPerSample, latencyMillisec);
 
     m_dataFeedMode        = mode;
     m_latencyMillisec     = latencyMillisec;
     m_sampleRate          = sampleRate;
     m_deviceBitsPerSample = bitsPerSample;
+    m_validBitsPerSample  = validBitsPerSample;
     m_bitFormatType       = bitFormatType;
     m_numChannels         = numChannels;
 
@@ -523,7 +534,7 @@ WasapiUser::Setup(
             (m_deviceBitsPerSample / 8) * waveFormat->nChannels);
         wfex->Format.nAvgBytesPerSec =
             wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-        wfex->Samples.wValidBitsPerSample = (WORD)m_deviceBitsPerSample;
+        wfex->Samples.wValidBitsPerSample = validBitsPerSample;
 
         dprintf("preferred Format:\n");
         WWWaveFormatDebug(waveFormat);

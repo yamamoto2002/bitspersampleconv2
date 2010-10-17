@@ -117,7 +117,11 @@ public:
     int  GetUseDeviceId(void);
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
-    HRESULT Setup(WWDataFeedMode mode, int sampleRate, int bitsPerSample,
+    /// @param bitsPerSample 1サンプルのビット数
+    /// @param validBitsPerSample 1サンプルの有効なビット数
+    ///        (bitsPerSample==32, validBitsPerSample==24という場合あり)
+    HRESULT Setup(WWDataFeedMode mode, int sampleRate,
+        int bitsPerSample, int validBitsPerSample,
         WWBitFormatType bitFormatType, int latencyMillisec, int numChannels);
     void Unsetup(void);
 
@@ -183,6 +187,7 @@ private:
     UINT32       m_bufferFrameNum;
 
     int          m_deviceBitsPerSample;
+    int          m_validBitsPerSample;
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
     WWBitFormatType m_bitFormatType;

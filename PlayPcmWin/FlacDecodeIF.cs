@@ -122,6 +122,7 @@ namespace PlayPcmWin {
             pcmData.SetFormat(
                 nChannels,
                 bitsPerSample,
+                bitsPerSample,
                 sampleRate,
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
                 numFrames);
@@ -183,6 +184,7 @@ namespace PlayPcmWin {
             if (0 == exitCode) {
                 pcmData.SetFormat(
                     nChannels,
+                    bitsPerSample,
                     bitsPerSample,
                     sampleRate,
                     PcmDataLib.PcmData.ValueRepresentationType.SInt,
