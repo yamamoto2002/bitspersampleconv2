@@ -33,7 +33,16 @@ namespace PcmDataLib {
 
         public int NumChannels { get; set; }
         public int SampleRate { get; set; }
+
+        /// <summary>
+        /// 1サンプルのビット数(無効な0埋めビット含む)
+        /// </summary>
         public int BitsPerSample { get; set; }
+
+        /// <summary>
+        /// サンプル値の有効なビット数
+        /// </summary>
+        public int ValidBitsPerSample { get; set; }
 
         public ValueRepresentationType
             SampleValueRepresentationType { get; set; }
@@ -104,6 +113,7 @@ namespace PcmDataLib {
             NumChannels   = rhs.NumChannels;
             SampleRate    = rhs.SampleRate;
             BitsPerSample = rhs.BitsPerSample;
+            ValidBitsPerSample = rhs.ValidBitsPerSample;
             SampleValueRepresentationType = rhs.SampleValueRepresentationType;
             m_numFrames = rhs.m_numFrames;
             m_sampleArray = null;
@@ -154,11 +164,13 @@ namespace PcmDataLib {
         public void SetFormat(
             int numChannels,
             int bitsPerSample,
+            int validBitsPerSample,
             int sampleRate,
             ValueRepresentationType sampleValueRepresentation,
             long numFrames) {
             NumChannels = numChannels;
             BitsPerSample = bitsPerSample;
+            ValidBitsPerSample = validBitsPerSample;
             SampleRate = sampleRate;
             SampleValueRepresentationType = sampleValueRepresentation;
             m_numFrames = numFrames;
@@ -167,10 +179,11 @@ namespace PcmDataLib {
         }
 
         /// <summary>
-        /// サンプリング周波数と量子化ビット数、チャンネル数、データ形式が同じならtrue
+        /// サンプリング周波数と量子化ビット数、有効なビット数、チャンネル数、データ形式が同じならtrue
         /// </summary>
         public bool IsSameFormat(PcmData other) {
-            return BitsPerSample == other.BitsPerSample
+            return BitsPerSample      == other.BitsPerSample
+                && ValidBitsPerSample == other.ValidBitsPerSample
                 && SampleRate    == other.SampleRate
                 && NumChannels   == other.NumChannels
                 && SampleValueRepresentationType == other.SampleValueRepresentationType;
@@ -239,7 +252,8 @@ namespace PcmDataLib {
         /// <param name="newBitsPerSample">新しい量子化ビット数</param>
         /// <returns>量子化ビット数変更後のPcmData</returns>
         public PcmData BitsPerSampleConvertTo(int newBitsPerSample, ValueRepresentationType newValueRepType) {
-            byte [] newSampleArray = null;
+            byte [] newSampleArray        = null;
+
             if (newBitsPerSample == 32) {
                 if (newValueRepType == ValueRepresentationType.SFloat) {
                     switch (BitsPerSample) {
@@ -326,9 +340,21 @@ namespace PcmDataLib {
                 return null;
             }
 
+            // 有効なビット数の計算
+            int newValidBitsPerSample = ValidBitsPerSample;
+            if (newBitsPerSample < newValidBitsPerSample) {
+                // 新しい量子化ビット数が、元の量子化ビット数よりも減った。
+                newValidBitsPerSample = newBitsPerSample;
+            }
+            if (newBitsPerSample == 32 &&
+                newValueRepType == ValueRepresentationType.SFloat) {
+                // FLOAT32は、全てのビット(=32)を有効にしないと意味ないデータになると思われる。
+                newValidBitsPerSample = 32;
+            }
+
             PcmData newPcmData = new PcmData();
             newPcmData.CopyHeaderInfoFrom(this);
-            newPcmData.SetFormat(NumChannels, newBitsPerSample, SampleRate, newValueRepType, NumFrames);
+            newPcmData.SetFormat(NumChannels, newBitsPerSample, newValidBitsPerSample, SampleRate, newValueRepType, NumFrames);
             newPcmData.SetSampleArray(NumFrames, newSampleArray);
 
             return newPcmData;

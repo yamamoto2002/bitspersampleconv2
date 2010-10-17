@@ -53,7 +53,8 @@ WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes);
 /// @param bitFormatType 0: SInt 1:SFloat
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Setup(int dataFeedMode, int sampleRate, int bitsPerSample,
+WasapiIO_Setup(int dataFeedMode, int sampleRate,
+    int bitsPerSample, int validBitsPerSample,
     int bitFormatType, int latencyMillisec, int numChannels);
 
 extern "C" __declspec(dllexport)

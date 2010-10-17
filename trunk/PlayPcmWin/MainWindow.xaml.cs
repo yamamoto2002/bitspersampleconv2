@@ -128,6 +128,7 @@ namespace PlayPcmWin
             bool setuped;
             int samplingRate;
             int bitsPerSample;
+            int validBitsPerSample;
             WasapiCS.BitFormatType bitFormatType;
             int latencyMillisec;
             WasapiDataFeedMode dfm;
@@ -136,6 +137,7 @@ namespace PlayPcmWin
 
             public bool Is(int samplingRate,
                 int bitsPerSample,
+                int validBitsPerSample,
                 WasapiCS.BitFormatType bitFormatType,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
@@ -144,6 +146,7 @@ namespace PlayPcmWin
                 return (this.setuped
                     && this.samplingRate == samplingRate
                     && this.bitsPerSample == bitsPerSample
+                    && this.validBitsPerSample == validBitsPerSample
                     && this.bitFormatType == bitFormatType
                     && this.latencyMillisec == latencyMillisec
                     && this.dfm == dfm
@@ -153,6 +156,7 @@ namespace PlayPcmWin
 
             public void Set(int samplingRate,
                 int bitsPerSample,
+                int validBitsPerSample,
                 WasapiCS.BitFormatType bitFormatType,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
@@ -161,6 +165,7 @@ namespace PlayPcmWin
                     this.setuped = true;
                 this.samplingRate = samplingRate;
                 this.bitsPerSample = bitsPerSample;
+                this.validBitsPerSample = validBitsPerSample;
                 this.bitFormatType = bitFormatType;
                 this.latencyMillisec = latencyMillisec;
                 this.dfm = dfm;
@@ -307,6 +312,7 @@ namespace PlayPcmWin
 
         struct SampleFormat {
             public int bitsPerSample;
+            public int validBitsPerSample;
             public WasapiCS.BitFormatType bitFormatType;
         };
 
@@ -702,12 +708,15 @@ namespace PlayPcmWin
 
             PcmDataLib.PcmData startPcmData = m_pcmDataList[startWavDataId];
 
-            SampleFormat sf = GetDeviceSampleFormat(startPcmData.BitsPerSample,
+            SampleFormat sf = GetDeviceSampleFormat(
+                startPcmData.BitsPerSample,
+                startPcmData.ValidBitsPerSample,
                 startPcmData.SampleValueRepresentationType);
 
             if (m_deviceSetupInfo.Is(
                 startPcmData.SampleRate,
                 sf.bitsPerSample,
+                sf.validBitsPerSample,
                 sf.bitFormatType,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
@@ -720,6 +729,7 @@ namespace PlayPcmWin
             m_deviceSetupInfo.Set(
                 startPcmData.SampleRate,
                 sf.bitsPerSample,
+                sf.validBitsPerSample,
                 sf.bitFormatType,
                 latencyMillisec,
                 m_preference.wasapiDataFeedMode,
@@ -738,18 +748,17 @@ namespace PlayPcmWin
 
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startPcmData.SampleRate, sf.bitsPerSample,
+                startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
                 sf.bitFormatType, latencyMillisec, 2);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
-                startPcmData.SampleRate, sf.bitsPerSample,
-                sf.bitFormatType,
-                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}, {5}) {6:X8}\r\n",
+                startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
+                sf.bitFormatType, latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{6:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {2}{1}bit レイテンシー{3}ms {4} {5}に対応していないのか、どちらかです。\r\n",
-                    startPcmData.SampleRate, sf.bitsPerSample, sf.bitFormatType,
-                    latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
+                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4} {5}) 失敗。{6:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {3}{1}bit (有効ビット数{2}bit) レイテンシー{4}ms {5} {6}に対応していないのか、どちらかです。\r\n",
+                    startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
+                    sf.bitFormatType, latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
                 AddLogText(s);
                 MessageBox.Show(s);
@@ -882,7 +891,7 @@ namespace PlayPcmWin
 
             if (readSuccess) {
                 PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
-                pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame,
+                pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame, wavData.BitsPerFrame,
                     wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
                 CheckAddPcmData(csr, csti, path, pd);
             } else {
@@ -1374,16 +1383,20 @@ namespace PlayPcmWin
         /// <returns>デバイスに設定されるビットフォーマット</returns>
         private SampleFormat GetDeviceSampleFormat(
                 int pcmDataBitsPerSample,
+                int pcmDataValidBitsPerSample,
                 PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
             SampleFormat sf = new SampleFormat();
 
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
-                sf.bitsPerSample = 32;
+                // 共有モード
+                sf.bitsPerSample      = 32;
+                sf.validBitsPerSample = 32;
                 sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
                 return sf;
             }
 
             // 排他モード
+            sf.validBitsPerSample = pcmDataValidBitsPerSample;
             switch (m_preference.bitsPerSampleFixType) {
             case BitsPerSampleFixType.Sint16:
                 sf.bitsPerSample = 16;
@@ -1403,7 +1416,7 @@ namespace PlayPcmWin
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                 } else {
                     System.Diagnostics.Debug.Assert(pcmDataVrt == PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                    sf.bitsPerSample = 16;
+                    sf.bitsPerSample      = 16;
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                 }
                 break;

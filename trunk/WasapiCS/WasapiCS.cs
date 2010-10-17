@@ -54,7 +54,8 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Setup(int mode, int sampleRate, int bitsPerSample,
+        WasapiIO_Setup(int mode, int sampleRate,
+            int bitsPerSample, int validBitsPerSample,
             int bitFormatType, int latencyMillisec, int numChannels);
 
         [DllImport("WasapiIODLL.dll")]
@@ -206,9 +207,11 @@ namespace Wasapi {
             TimerDriven,
         };
 
-        public int Setup(DataFeedMode mode, int sampleRate, int bitsPerSample,
+        public int Setup(DataFeedMode mode, int sampleRate,
+            int bitsPerSample, int validBitsPerSample,
             BitFormatType bft, int latencyMillisec, int numChannels) {
-            return WasapiIO_Setup((int)mode, sampleRate, bitsPerSample,
+            return WasapiIO_Setup((int)mode, sampleRate,
+                bitsPerSample, validBitsPerSample,
                 (int)bft, latencyMillisec, numChannels);
         }
 
