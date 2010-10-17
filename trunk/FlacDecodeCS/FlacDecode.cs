@@ -12,23 +12,23 @@ namespace FlacDecodeCS {
             Success = 0,
 
             /// ファイルの最後まで行き、デコードを完了した。もうデータはない。
-            Completed,
+            Completed = 1,
 
             // 以下、FLACデコードエラー。
-            DataNotReady,
-            WriteOpenFailed,
-            FlacStreamDecoderNewFailed,
+            DataNotReady               = -2,
+            WriteOpenFailed            = -3,
+            FlacStreamDecoderNewFailed = -4,
 
-            FlacStreamDecoderInitFailed,
-            FlacStreamDecorderProcessFailed,
-            LostSync,
-            BadHeader,
-            FrameCrcMismatch,
- 
-            Unparseable,
-            NumFrameIsNotAligned,
-            RecvBufferSizeInsufficient,
-            OtherError
+            FlacStreamDecoderInitFailed     = -5,
+            FlacStreamDecorderProcessFailed = -6,
+            LostSync                        = -7,
+            BadHeader                       = -8,
+            FrameCrcMismatch                = -9,
+
+            Unparseable                = -10,
+            NumFrameIsNotAligned       = -11,
+            RecvBufferSizeInsufficient = -12,
+            OtherError                 = -13
         };
 
         [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Ansi)]
@@ -37,31 +37,31 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        void FlacDecodeDLL_DecodeEnd();
+        void FlacDecodeDLL_DecodeEnd(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetNumOfChannels();
+        int FlacDecodeDLL_GetNumOfChannels(int id);
         
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetBitsPerSample();
+        int FlacDecodeDLL_GetBitsPerSample(int id);
         
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetSampleRate();
+        int FlacDecodeDLL_GetSampleRate(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        long FlacDecodeDLL_GetNumSamples();
+        long FlacDecodeDLL_GetNumSamples(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetLastResult();
+        int FlacDecodeDLL_GetLastResult(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetNextPcmData(int numFrame, byte [] buff);
+        int FlacDecodeDLL_GetNextPcmData(int id, int numFrame, byte [] buff);
 
         enum OperationType {
             DecodeAll,
@@ -88,7 +88,9 @@ namespace FlacDecodeCS {
 
         static private void LogOpen() {
 #if DEBUG == true
-            m_logFile = new System.IO.StreamWriter("logDecodeCS.txt");
+            m_logFile = new System.IO.StreamWriter(
+                string.Format("logDecodeCS{0}.txt",
+                    System.Diagnostics.Process.GetCurrentProcess().Id));
 #endif
         }
         static private void LogClose() {
@@ -159,16 +161,20 @@ namespace FlacDecodeCS {
 
             int rv = FlacDecodeDLL_DecodeStart(path);
             bw.Write(rv);
-            if (rv != 0) {
+            if (rv < 0) {
                 LogWriteLine(string.Format("FLACデコード開始エラー。{0}", rv));
-                FlacDecodeDLL_DecodeEnd();
+                FlacDecodeDLL_DecodeEnd(-1);
                 return rv;
             }
 
-            int nChannels     = FlacDecodeDLL_GetNumOfChannels();
-            int bitsPerSample = FlacDecodeDLL_GetBitsPerSample();
-            int sampleRate    = FlacDecodeDLL_GetSampleRate();
-            long numSamples   = FlacDecodeDLL_GetNumSamples();
+            int id = rv;
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne id={0}", id));
+
+            int nChannels     = FlacDecodeDLL_GetNumOfChannels(id);
+            int bitsPerSample = FlacDecodeDLL_GetBitsPerSample(id);
+            int sampleRate    = FlacDecodeDLL_GetSampleRate(id);
+            long numSamples   = FlacDecodeDLL_GetNumSamples(id);
 
             bw.Write(nChannels);
             bw.Write(bitsPerSample);
@@ -186,8 +192,8 @@ namespace FlacDecodeCS {
 
                 while (true) {
                     LogWriteLine("FlacDecodeDLL_GetNextPcmData 呼び出し");
-                    rv = FlacDecodeDLL_GetNextPcmData(numFramePerCall, buff);
-                    ercd = FlacDecodeDLL_GetLastResult();
+                    rv = FlacDecodeDLL_GetNextPcmData(id, numFramePerCall, buff);
+                    ercd = FlacDecodeDLL_GetLastResult(id);
                     LogWriteLine(string.Format("FlacDecodeDLL_GetNextPcmData rv={0} ercd={1}", rv, ercd));
 
                     if (0 < rv) {
@@ -209,7 +215,7 @@ namespace FlacDecodeCS {
             }
 
             LogWriteLine("FlacDecodeDLL_DecodeEnd 呼び出し");
-            FlacDecodeDLL_DecodeEnd();
+            FlacDecodeDLL_DecodeEnd(id);
             return ercd;
         }
 

@@ -118,6 +118,8 @@ namespace PlayPcmWin {
                 Console.WriteLine("Version mismatch {0} != {1}", Preference.CurrentVersion, p.Version);
                 return new Preference();
             }
+
+            p.ParallelRead = false;
             return p;
         }
 
