@@ -3,7 +3,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 1.0.87 ==
+===!PlayPcmWin 1.0.89 ==
 バグ取り
   * Issue 13 修正したつもり
   * Issue 14 修正
