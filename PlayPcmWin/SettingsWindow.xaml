@@ -25,7 +25,7 @@
         </GroupBox>
         <GroupBox Header="読み込み設定" Height="63" Margin="12,280,12,0" Name="groupBox4" VerticalAlignment="Top">
             <Grid>
-                <CheckBox Content="読み込み処理を並列化して高速化(読み込み時に一時的にメモリを大量消費します)" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="checkBoxParallelRead" VerticalAlignment="Top" />
+                <CheckBox Content="読み込み処理を並列化して高速化(読み込み時に一時的にメモリを大量消費します)" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="checkBoxParallelRead" VerticalAlignment="Top" IsEnabled="False" />
             </Grid>
         </GroupBox>
     </Grid>
