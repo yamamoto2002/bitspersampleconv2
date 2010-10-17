@@ -29,7 +29,7 @@ namespace PlayPcmWin {
     }
 
     public class Preference {
-        public const int DefaultLatencyMilliseconds = 200;
+        public const int DefaultLatencyMilliseconds = 170;
         public const int CurrentVersion = 3;
 
         public int Version { get; set; }
@@ -90,7 +90,7 @@ namespace PlayPcmWin {
     }
 
     sealed class PreferenceStore {
-        public static string fileName = "Preference.xml";
+        public static string fileName = "PlayPcmWinPreference.xml";
         private PreferenceStore() {
         }
 

@@ -295,12 +295,18 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
     result[0] = 0;
 
     int sampleRateList[]    = {44100, 48000, 88200, 96000, 176400, 192000, 352800, 384000};
+    const int I=8;
 
     // j
     int bitsPerSampleList[] = {16, 24, 32};
+    const int J=3;
 
     // k
-    const wchar_t *bitFormatNameList[] = { L"int", L"float"}; 
+    const wchar_t *bitFormatNameList[] = { L"int", L"float"};
+    const int K = 2;
+
+    bool oxList[I * J * K];
+    memset(oxList, 0, sizeof oxList);
 
     HRG(m_deviceCollection->Item(id, &m_deviceToUse));
 
@@ -308,10 +314,10 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
         __uuidof(IAudioClient), CLSCTX_INPROC_SERVER, NULL, (void**)&m_audioClient));
 
     // 汚いプログラムだなぁ～
-    for (int k=0; k<2; ++k) {
+    for (int k=0; k<K; ++k) {
         for (int j=0; j<sizeof bitsPerSampleList/sizeof bitsPerSampleList[0]; ++j) {
             if (k==1 && j!=2) {
-                // float16bit float24bit スキップする。
+                // float(k==1)の場合、32bit(j==2)以外はチェック不要。
                 continue;
             }
 
@@ -369,6 +375,7 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
                         L"  %6dHz %s%dbit: ok 0x%08x\r\n",
                         sampleRate, bitFormatNameList[k], bitsPerSample, hr);
                     wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+                    oxList[i + I * (j + J * k) ] = true;
                 } else {
                     wchar_t s[256];
                     StringCbPrintfW(s, sizeof s-1,
@@ -385,6 +392,13 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             }
         }
     }
+
+#if 0
+    for (int i=0; i<I*J*K; ++i) {
+        printf("%s", oxList[i] ? "||o" : "||x");
+    }
+    printf("||\n");
+#endif
 
     {
         wchar_t s[256];
