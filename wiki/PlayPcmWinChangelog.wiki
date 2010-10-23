@@ -3,6 +3,14 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.8 ==
+バグ取り
+  * USBオーディオの量子化ビット数24ビット再生対応 (Issue 18 修正したつもり)
+
+↓[詳細設定]画面
+
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin205.png
+
 ===!PlayPcmWin 2.0.4 ==
 バグ取り
   * Issue 16 修正
