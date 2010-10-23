@@ -1,31 +1,30 @@
 ﻿<Window x:Class="PlayPcmWin.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PlayPcmWin 詳細設定" Height="431" Width="574" Loaded="Window_Loaded">
+        Title="PlayPcmWin 詳細設定" Height="600" Width="800" Loaded="Window_Loaded">
     <Grid>
         <Button Content="OK" Margin="0,0,137,12" Name="buttonOK" Height="23" VerticalAlignment="Bottom" Click="buttonOK_Click" HorizontalAlignment="Right" Width="111" />
-        <GroupBox Header="WASAPIに渡すPCMデータの量子化ビット数(ファイルをメモリに読み込む際に変換します)" Height="131" Margin="12,12,12,0" Name="groupBox1" VerticalAlignment="Top">
+        <GroupBox Header="WASAPIに渡すPCMデータの量子化ビット数(ファイルをメモリに読み込む際に変換します)" Height="229" Margin="12,12,12,0" Name="groupBox1" VerticalAlignment="Top">
             <Grid>
-                <RadioButton Content="ファイルの量子化ビット数に応じてSint16,SInt24,SInt32を選択" Height="16" Margin="6,6,6,0" Name="radioButtonBpsVariable" VerticalAlignment="Top" IsChecked="False" />
-                <RadioButton Content="SInt16に固定する(24ビットのデータが来たら下位8ビットを切り捨てます)" Height="16" Margin="6,28,6,0" Name="radioButtonBpsSint16" VerticalAlignment="Top" />
-                <RadioButton Content="SInt32に固定する(余った下位ビットは0埋め)" Height="16" Margin="6,50,6,0" Name="radioButtonBpsSint32" VerticalAlignment="Top" />
-                <RadioButton Content="SFloat32に固定する(対応ハードウェアは非常に珍しい)" Height="16" Margin="6,72,6,0" Name="radioButtonBpsSfloat32" VerticalAlignment="Top" />
+                <RadioButton Content="ファイルの量子化ビット数に応じてSint16,SInt32V24,SInt32を選択(PCI、PCIe、1394オーディオデバイスに適する)" Height="16" Margin="6,6,6,0" Name="radioButtonBpsVariable" VerticalAlignment="Top" IsChecked="False" />
+                <RadioButton Content="ファイルの量子化ビット数に応じてSint16,SInt32V24を選択(32bps非対応のPCI、PCIe、1394オーディオデバイス用)" Height="16" IsChecked="False" Margin="6,28,6,0" Name="radioButtonBpsVariableSint16Sint32V24" VerticalAlignment="Top" />
+                <RadioButton Content="ファイルの量子化ビット数に応じてSint16,SInt24を選択(USBオーディオデバイスに適する)" Height="16" IsChecked="False" Margin="6,50,6,0" Name="radioButtonBpsVariableSint16Sint24" VerticalAlignment="Top" />
+                <RadioButton Content="SInt16に固定する(24bpsや32bpsのデータが来たら下位ビットを切り捨てます)" Height="16" Margin="6,72,6,0" Name="radioButtonBpsSint16" VerticalAlignment="Top" />
+                <RadioButton Content="SInt24に固定する(16bpsのデータは0埋めで水増し、32ビットのデータは下位8ビットを切り捨て)" Height="16" Margin="6,94,6,0" Name="radioButtonBpsSint24" VerticalAlignment="Top" />
+                <RadioButton Content="SInt32V24に固定する(SInt32ビット、有効ビット数24bps)" Height="16" Margin="6,116,6,0" Name="radioButtonSint32V24" VerticalAlignment="Top" />
+                <RadioButton Content="SInt32に固定する(下位ビットが余る場合は0埋め、有効ビット数32bps)" Height="16" Margin="6,138,6,0" Name="radioButtonBpsSint32" VerticalAlignment="Top" />
+                <RadioButton Content="SFloat32に固定する(IEEE754単精度浮動小数点数形式:対応ハードウェアは非常に珍しい)" Height="16" Margin="6,160,6,0" Name="radioButtonBpsSfloat32" VerticalAlignment="Top" />
             </Grid>
         </GroupBox>
         <Button Content="キャンセル" Margin="0,0,12,12" Name="buttonCancel" Height="23" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="119" Click="buttonCancel_Click" />
-        <GroupBox Header="CUEシート設定" Height="59" Margin="12,149,12,0" Name="groupBox2" VerticalAlignment="Top">
+        <GroupBox Header="CUEシート設定" Height="59" Margin="12,247,12,0" Name="groupBox2" VerticalAlignment="Top">
             <Grid>
                 <CheckBox Content="gapを[ここまで一括読み込み]に置き換える" Height="16" Margin="6,6,6,0" Name="checkBoxReplaceGapWithKokomade" VerticalAlignment="Top" />
             </Grid>
         </GroupBox>
-        <GroupBox Header="ウィンドウ設定" Height="64" Margin="12,214,12,0" Name="groupBox3" VerticalAlignment="Top">
+        <GroupBox Header="ウィンドウ設定" Height="57" Margin="12,312,12,0" Name="groupBox3" VerticalAlignment="Top">
             <Grid>
                 <CheckBox Content="起動時のウィンドウの位置とサイズを前回終了時の状態に合わせる" Height="16" Margin="6,6,6,0" Name="checkBoxManuallySetMainWindowDimension" VerticalAlignment="Top" />
-            </Grid>
-        </GroupBox>
-        <GroupBox Header="読み込み設定" Height="63" Margin="12,280,12,0" Name="groupBox4" VerticalAlignment="Top">
-            <Grid>
-                <CheckBox Content="読み込み処理を並列化して高速化(読み込み時に一時的にメモリを大量消費します)" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="checkBoxParallelRead" VerticalAlignment="Top" IsEnabled="False" />
             </Grid>
         </GroupBox>
     </Grid>

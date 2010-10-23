@@ -1399,25 +1399,60 @@ namespace PlayPcmWin
             sf.validBitsPerSample = pcmDataValidBitsPerSample;
             switch (m_preference.bitsPerSampleFixType) {
             case BitsPerSampleFixType.Sint16:
-                sf.bitsPerSample = 16;
                 sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                sf.bitsPerSample = 16;
+                sf.validBitsPerSample = 16;
+                break;
+            case BitsPerSampleFixType.Sint24:
+                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                sf.bitsPerSample = 24;
+                sf.validBitsPerSample = 24;
                 break;
             case BitsPerSampleFixType.Sint32:
-                sf.bitsPerSample = 32;
                 sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                sf.bitsPerSample = 32;
+                sf.validBitsPerSample = 32;
+                break;
+            case BitsPerSampleFixType.Sint32V24:
+                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                sf.bitsPerSample = 32;
+                sf.validBitsPerSample = 24;
                 break;
             case BitsPerSampleFixType.Sfloat32:
-                sf.bitsPerSample = 32;
                 sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
+                sf.bitsPerSample = 32;
                 break;
             case BitsPerSampleFixType.Variable:
                 if (pcmDataBitsPerSample != 16) {
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 32;
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                 } else {
-                    System.Diagnostics.Debug.Assert(pcmDataVrt == PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                    sf.bitsPerSample      = 16;
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = 16;
+                }
+                break;
+            case BitsPerSampleFixType.VariableSint16Sint32V24:
+                if (pcmDataBitsPerSample != 16) {
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = 32;
+                    if (24 < sf.validBitsPerSample) {
+                        sf.validBitsPerSample = 24;
+                    }
+                } else {
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = 16;
+                    sf.validBitsPerSample = 16;
+                }
+                break;
+            case BitsPerSampleFixType.VariableSint16Sint24:
+                if (pcmDataBitsPerSample != 16) {
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = 24;
+                    sf.validBitsPerSample = 24;
+                } else {
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = 16;
+                    sf.validBitsPerSample = 16;
                 }
                 break;
             default:
@@ -1452,10 +1487,26 @@ namespace PlayPcmWin
                 System.Console.WriteLine("Converting to SInt16bit...");
                 pd = pd.BitsPerSampleConvertTo(16, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 break;
+            case BitsPerSampleFixType.Sint24:
+                // Sint24に変換する。
+                // 変換元データの有効ビット数が24未満の場合は、嘘になる。
+                System.Console.WriteLine("Converting to SInt24bit...");
+                pd = pd.BitsPerSampleConvertTo(24, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 24;
+                break;
             case BitsPerSampleFixType.Sint32:
                 // Sint32に変換する。
+                // 変換元データの有効ビット数が32未満の場合は、嘘になる。
                 System.Console.WriteLine("Converting to SInt32bit...");
                 pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 32;
+                break;
+            case BitsPerSampleFixType.Sint32V24:
+                // Sint32(有効ビット数24)に変換する。
+                // 変換元データの有効ビット数が24未満の場合は、嘘になる。
+                System.Console.WriteLine("Converting to SInt32V24...");
+                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 24;
                 break;
             case BitsPerSampleFixType.Sfloat32:
                 // Sfloat32に変換する。
@@ -1468,6 +1519,24 @@ namespace PlayPcmWin
                 // SInt32、SFloat32、SInt24→SInt32に変換。
                 if (pd.BitsPerSample != 16) {
                     pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                }
+                break;
+            case BitsPerSampleFixType.VariableSint16Sint24:
+                // SInt16→SInt16のまま。
+                // SInt32、SFloat32→SInt24に変換。
+                if (pd.BitsPerSample != 16) {
+                    pd = pd.BitsPerSampleConvertTo(24, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                }
+                break;
+            case BitsPerSampleFixType.VariableSint16Sint32V24:
+                // SInt16→SInt16のまま。
+                // SInt24、SFloat32→SInt32に変換。
+                // 有効ビット数を24ビット以下にする。
+                if (pd.BitsPerSample != 16) {
+                    pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                }
+                if (24 < pd.ValidBitsPerSample) {
+                    pd.ValidBitsPerSample = 24;
                 }
                 break;
             default:
