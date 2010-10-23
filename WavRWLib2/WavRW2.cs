@@ -10,7 +10,7 @@ namespace WavRWLib2
         private uint   m_chunkSize;
         private byte[] m_format;
 
-        public void Create(int chunkSize)
+        public void Create(uint chunkSize)
         {
             m_chunkId = new byte[4];
             m_chunkId[0] = (byte)'R';
@@ -18,7 +18,7 @@ namespace WavRWLib2
             m_chunkId[2] = (byte)'F';
             m_chunkId[3] = (byte)'F';
 
-            m_chunkSize = (uint)chunkSize;
+            m_chunkSize = chunkSize;
 
             m_format = new byte[4];
             m_format[0] = (byte)'W';
@@ -179,70 +179,6 @@ namespace WavRWLib2
         }
     }
 
-    public class PcmSamples1Channel
-    {
-        private int     m_bitsPerSample;
-
-        private short[] m_data16;
-        private int[]   m_data32;
-
-        public PcmSamples1Channel(int numSamples, int bitsPerSample)
-        {
-            m_bitsPerSample = bitsPerSample;
-            switch (bitsPerSample) {
-            case 16:
-                m_data16 = new short[numSamples];
-                m_data32 = null;
-                break;
-            case 32:
-                m_data16 = null;
-                m_data32 = new int[numSamples];
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
-            }
-        }
-
-        public void Set16(int pos, short val)
-        {
-            m_data16[pos] = val;
-        }
-
-        public short Get16(int pos)
-        {
-            return m_data16[pos];
-        }
-
-        public void Set32(int pos, int val) {
-            m_data32[pos] = val;
-        }
-
-        public int Get32(int pos) {
-            return m_data32[pos];
-        }
-
-        public int NumSamples
-        {
-            get {
-                if (m_data16 != null) {
-                    return m_data16.Length;
-                }
-                if (m_data32 != null) {
-                    return m_data32.Length;
-                }
-                System.Diagnostics.Debug.Assert(false);
-                return 0;
-            }
-        }
-
-        public int BitsPerSample {
-            get {
-                return m_bitsPerSample;
-            }
-        }
-    }
-
     class DataSubChunk
     {
         private byte[] m_subChunk2Id;
@@ -250,7 +186,6 @@ namespace WavRWLib2
 
         private byte[] m_rawData;
 
-        // numSamplesにサンプル数が入っている。
         private long m_numFrames;
 
         public long NumFrames {
@@ -271,6 +206,16 @@ namespace WavRWLib2
         public void SetRawData(long numSamples, byte[] rawData) {
             m_numFrames = numSamples;
             m_rawData = rawData;
+        }
+
+        public void Create(long numSamples, byte[] rawData) {
+            SetRawData(numSamples, rawData);
+            m_subChunk2Id = new byte[4];
+            m_subChunk2Id[0] = (byte)'d';
+            m_subChunk2Id[1] = (byte)'a';
+            m_subChunk2Id[2] = (byte)'t';
+            m_subChunk2Id[3] = (byte)'a';
+            m_subChunk2Size = rawData.LongLength;
         }
 
         public void TrimRawData(long newNumSamples, long startBytes, long endBytes) {
@@ -311,10 +256,6 @@ namespace WavRWLib2
                     Console.WriteLine("D: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\". skipping.",
                         (char)m_subChunk2Id[0], (char)m_subChunk2Id[1], (char)m_subChunk2Id[2], (char)m_subChunk2Id[3]);
                     m_subChunk2Size = br.ReadUInt32();
-                    if (0x80000000 <= m_subChunk2Size) {
-                        Console.WriteLine("E: file too large to handle. {0} bytes", m_subChunk2Size);
-                        return false;
-                    }
 
                     // skip this header
                     br.ReadBytes((int)m_subChunk2Size);
@@ -509,5 +450,29 @@ namespace WavRWLib2
             return m_dsc.GetSampleArray();
         }
 
+        public bool Set(
+                int numChannels,
+                int bitsPerSample,
+                int validBitsPerSample,
+                int sampleRate,
+                PcmDataLib.PcmData.ValueRepresentationType sampleValueRepresentation,
+                long numFrames,
+                byte[] sampleArray) {
+            m_rcd = new RiffChunkDescriptor();
+
+            if (0xffffffffL < sampleArray.LongLength + 36) {
+                System.Diagnostics.Debug.Assert(false);
+                return false;
+            }
+            m_rcd.Create((uint)(36 + sampleArray.LongLength));
+
+            m_fsc = new FmtSubChunk();
+            m_fsc.Create(numChannels, sampleRate, bitsPerSample);
+
+            m_dsc = new DataSubChunk();
+            m_dsc.Create(numFrames, sampleArray);
+
+            return true;
+        }
     }
 }

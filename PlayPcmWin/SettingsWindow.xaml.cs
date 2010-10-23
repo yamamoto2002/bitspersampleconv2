@@ -32,14 +32,26 @@ namespace PlayPcmWin {
             case BitsPerSampleFixType.Variable:
                 radioButtonBpsVariable.IsChecked = true;
                 break;
+            case BitsPerSampleFixType.VariableSint16Sint24:
+                radioButtonBpsVariableSint16Sint24.IsChecked = true;
+                break;
+            case BitsPerSampleFixType.VariableSint16Sint32V24:
+                radioButtonBpsVariableSint16Sint32V24.IsChecked = true;
+                break;
             case BitsPerSampleFixType.Sint16:
                 radioButtonBpsSint16.IsChecked = true;
+                break;
+            case BitsPerSampleFixType.Sint24:
+                radioButtonBpsSint24.IsChecked = true;
                 break;
             case BitsPerSampleFixType.Sint32:
                 radioButtonBpsSint32.IsChecked = true;
                 break;
             case BitsPerSampleFixType.Sfloat32:
                 radioButtonBpsSfloat32.IsChecked = true;
+                break;
+            case BitsPerSampleFixType.Sint32V24:
+                radioButtonSint32V24.IsChecked = true;
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -51,23 +63,32 @@ namespace PlayPcmWin {
 
             checkBoxManuallySetMainWindowDimension.IsChecked =
                 m_preference.ManuallySetMainWindowDimension;
-
-            checkBoxParallelRead.IsChecked =
-                m_preference.ParallelRead;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
             if (true == radioButtonBpsVariable.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Variable;
             }
+            if (true == radioButtonBpsVariableSint16Sint24.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.VariableSint16Sint24;
+            }
+            if (true == radioButtonBpsVariableSint16Sint32V24.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.VariableSint16Sint32V24;
+            }
             if (true == radioButtonBpsSint16.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint16;
+            }
+            if (true == radioButtonBpsSint24.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint24;
             }
             if (true == radioButtonBpsSint32.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint32;
             }
             if (true == radioButtonBpsSfloat32.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sfloat32;
+            }
+            if (true == radioButtonSint32V24.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint32V24;
             }
 
             m_preference.ReplaceGapWithKokomade
@@ -76,8 +97,7 @@ namespace PlayPcmWin {
             m_preference.ManuallySetMainWindowDimension
                 = checkBoxManuallySetMainWindowDimension.IsChecked == true;
 
-            m_preference.ParallelRead
-                = checkBoxParallelRead.IsChecked == true;
+            m_preference.ParallelRead = false;
 
             Close();
         }

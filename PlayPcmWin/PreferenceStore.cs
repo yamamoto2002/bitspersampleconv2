@@ -26,6 +26,11 @@ namespace PlayPcmWin {
         Sint16,
         Sint32,
         Sfloat32,
+        Sint24,
+
+        Sint32V24,
+        VariableSint16Sint24,
+        VariableSint16Sint32V24
     }
 
     public class Preference {
