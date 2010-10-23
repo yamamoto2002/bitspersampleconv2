@@ -9,7 +9,7 @@
 
 ↓[詳細設定]画面
 
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin205.png
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin208Settings.png
 
 ===!PlayPcmWin 2.0.4 ==
 バグ取り
