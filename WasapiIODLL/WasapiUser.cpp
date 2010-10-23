@@ -414,6 +414,10 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
     int count = 0;
     for (int j=0; j<TEST_BIT_REPRESENTATION_NUM; ++j) {
+        wcsncat(result,
+            L"++-------------++-------------++-------------++-------------"
+            L"++-------------++-------------++-------------++-------------++\r\n",
+            resultBytes/2 - wcslen(result) -1);
         for (int i=0; i<TEST_SAMPLE_RATE_NUM; ++i) {
             const TestCaseInfo *tci = &g_testCases[count +i];
             wchar_t s[256];
@@ -427,8 +431,8 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
         for (int i=0; i<TEST_SAMPLE_RATE_NUM; ++i) {
             wchar_t s[256];
             StringCbPrintfW(s, sizeof s-1,
-                L"|| %s %08x ",
-                (S_OK==resultList[count + i]) ? L"ok" : L"na",
+                L"|| %s %8x ",
+                (S_OK==resultList[count + i]) ? L"OK" : L"NA",
                 resultList[count + i]);
             wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
         }
@@ -436,6 +440,10 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
         count += TEST_SAMPLE_RATE_NUM;
     }
+    wcsncat(result,
+        L"++-------------++-------------++-------------++-------------"
+        L"++-------------++-------------++-------------++-------------++\r\n",
+        resultBytes/2 - wcslen(result) -1);
 
     {
         wchar_t s[256];
