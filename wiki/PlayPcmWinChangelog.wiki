@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.10 ==
+  * Issue 3を修正しようとしたが、あまり直っていない(revision 1480)
+
 ===!PlayPcmWin 2.0.9 ==
   * [対応フォーマット]で出力される表を見やすくした　(revision 1465)
 
