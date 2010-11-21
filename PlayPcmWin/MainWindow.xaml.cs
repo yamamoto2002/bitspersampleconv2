@@ -310,10 +310,33 @@ namespace PlayPcmWin
             return -1;
         }
 
-        struct SampleFormat {
+        struct SampleFormatInfo {
             public int bitsPerSample;
             public int validBitsPerSample;
             public WasapiCS.BitFormatType bitFormatType;
+
+            public WasapiCS.SampleFormatType GetSampleFormatType() {
+                if (bitFormatType == WasapiCS.BitFormatType.SFloat) {
+                    System.Diagnostics.Debug.Assert(bitsPerSample == 32);
+                    System.Diagnostics.Debug.Assert(validBitsPerSample == 32);
+                    return WasapiCS.SampleFormatType.Sfloat;
+                }
+
+                switch (bitsPerSample) {
+                case 16:
+                    return WasapiCS.SampleFormatType.Sint16;
+                case 24:
+                    return WasapiCS.SampleFormatType.Sint24;
+                case 32:
+                    if (validBitsPerSample == 24) {
+                        return WasapiCS.SampleFormatType.Sint32V24;
+                    }
+                    return WasapiCS.SampleFormatType.Sint32;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    return WasapiCS.SampleFormatType.Sint16;
+                }
+            }
         };
 
         public MainWindow()
@@ -708,7 +731,7 @@ namespace PlayPcmWin
 
             PcmDataLib.PcmData startPcmData = m_pcmDataList[startWavDataId];
 
-            SampleFormat sf = GetDeviceSampleFormat(
+            SampleFormatInfo sf = GetDeviceSampleFormat(
                 startPcmData.BitsPerSample,
                 startPcmData.ValidBitsPerSample,
                 startPcmData.SampleValueRepresentationType);
@@ -748,17 +771,18 @@ namespace PlayPcmWin
 
             int hr = wasapi.Setup(
                 PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
-                sf.bitFormatType, latencyMillisec, 2);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}, {5}) {6:X8}\r\n",
-                startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
-                sf.bitFormatType, latencyMillisec, m_preference.wasapiDataFeedMode, hr));
+                startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec, 2);
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
+                startPcmData.SampleRate, sf.GetSampleFormatType(),
+                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4} {5}) 失敗。{6:X8}\nこのプログラムのバグか、オーディオデバイスが{0}Hz {3}{1}bit (有効ビット数{2}bit) レイテンシー{4}ms {5} {6}に対応していないのか、どちらかです。\r\n",
-                    startPcmData.SampleRate, sf.bitsPerSample, sf.validBitsPerSample,
-                    sf.bitFormatType, latencyMillisec, DfmToStr(m_preference.wasapiDataFeedMode),
+                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{5:X8}\n" +
+                    "このプログラムのバグか、オーディオデバイスが{0}Hz {1} レイテンシー{2}ms {3} {4}に対応していないのか、" +
+                    "どちらかです。\r\n",
+                    startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
+                    DfmToStr(m_preference.wasapiDataFeedMode),
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
                 AddLogText(s);
                 MessageBox.Show(s);
@@ -1191,7 +1215,7 @@ namespace PlayPcmWin
             if (m_preference.ParallelRead) {
                 ReadFileParallelDoWork(o, args);
             } else {
-                ReadFileSingleDoWork(o, args);
+                ReadFileSingleThreadDoWork(o, args);
             }
 
             sw.Stop();
@@ -1202,7 +1226,7 @@ namespace PlayPcmWin
         ///  バックグラウンド読み込み(1スレッドバージョン)。
         ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
         /// </summary>
-        private void ReadFileSingleDoWork(object o, DoWorkEventArgs args) {
+        private void ReadFileSingleThreadDoWork(object o, DoWorkEventArgs args) {
             BackgroundWorker bw = (BackgroundWorker)o;
             int readGroupId = (int)args.Argument;
             Console.WriteLine("D: ReadFileSingleDoWork({0}) started", readGroupId);
@@ -1381,11 +1405,11 @@ namespace PlayPcmWin
         /// 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
         /// </summary>
         /// <returns>デバイスに設定されるビットフォーマット</returns>
-        private SampleFormat GetDeviceSampleFormat(
+        private SampleFormatInfo GetDeviceSampleFormat(
                 int pcmDataBitsPerSample,
                 int pcmDataValidBitsPerSample,
                 PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
-            SampleFormat sf = new SampleFormat();
+            SampleFormatInfo sf = new SampleFormatInfo();
 
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
                 // 共有モード

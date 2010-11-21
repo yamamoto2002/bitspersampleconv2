@@ -141,11 +141,13 @@
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h" />
     <ClInclude Include="WasapiUser.h" />
+    <ClInclude Include="WWPcmData.h" />
     <ClInclude Include="WWUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="WasapiIOIF.cpp" />
     <ClCompile Include="WasapiUser.cpp" />
+    <ClCompile Include="WWPcmData.cpp" />
     <ClCompile Include="WWUtil.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -20,42 +20,6 @@ WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
     wcsncpy_s(this->name, name, WW_DEVICE_NAME_COUNT-1);
 }
 
-const char *
-WWPcmDataContentTypeToStr(WWPcmDataContentType w)
-{
-    switch (w) {
-    case WWPcmDataContentSilence: return "Silence";
-    case WWPcmDataContentPcmData: return "PcmData";
-    default: return "unknown";
-    }
-}
-
-void
-WWPcmData::Term(void)
-{
-    dprintf("D: %s() stream=%p\n", __FUNCTION__, stream);
-
-    free(stream);
-    stream = NULL;
-}
-
-WWPcmData::~WWPcmData(void)
-{
-}
-
-void
-WWPcmData::CopyFrom(WWPcmData *rhs)
-{
-    *this = *rhs;
-
-    next = NULL;
-
-    int bytes = nFrames * 4;
-
-    stream = (BYTE*)malloc(bytes);
-    CopyMemory(stream, rhs->stream, bytes);
-}
-
 static wchar_t*
 WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
 {
@@ -207,7 +171,7 @@ DeviceNameGet(
     HRG(ps->GetValue(PKEY_Device_FriendlyName, &pv));
     SafeRelease(&ps);
 
-    wcsncpy(name, pv.pwszVal, nameBytes/sizeof name[0] -1);
+    wcsncpy_s(name, nameBytes/2, pv.pwszVal, nameBytes/sizeof name[0] -1);
 
 end:
     PropVariantClear(&pv);
@@ -275,7 +239,7 @@ WasapiUser::GetDeviceName(int id, LPWSTR name, size_t nameBytes)
 {
     assert(0 <= id && id < (int)m_deviceInfo.size());
 
-    wcsncpy(name, m_deviceInfo[id].name, nameBytes/sizeof name[0] -1);
+    wcsncpy_s(name, nameBytes/2, m_deviceInfo[id].name, nameBytes/sizeof name[0] -1);
     return true;
 }
 
@@ -351,7 +315,6 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
     result[0] = 0;
 
-    const wchar_t *bitFormatNameList[] = { L"int", L"float"};
     const wchar_t *bitFormatNameShortList[] = { L"i", L"f"};
 
     HRESULT resultList[sizeof g_testCases/sizeof g_testCases[0]];
@@ -394,7 +357,7 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             (WORD)((tci->bitsPerSample / 8) * waveFormat->nChannels);
         wfex->Format.nAvgBytesPerSec =
             wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-        wfex->Samples.wValidBitsPerSample = tci->validBitsPerSample;
+        wfex->Samples.wValidBitsPerSample = (WORD)tci->validBitsPerSample;
 
         dprintf("preferred Format:\n");
         WWWaveFormatDebug(waveFormat);
@@ -414,7 +377,7 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
 
     int count = 0;
     for (int j=0; j<TEST_BIT_REPRESENTATION_NUM; ++j) {
-        wcsncat(result,
+        wcsncat_s(result, resultBytes/2,
             L"++-------------++-------------++-------------++-------------"
             L"++-------------++-------------++-------------++-------------++\r\n",
             resultBytes/2 - wcslen(result) -1);
@@ -425,22 +388,22 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
                 L"||%3dkHz %s%dV%d",
                 tci->sampleRate/1000, bitFormatNameShortList[tci->bitFormat],
                 tci->bitsPerSample, tci->validBitsPerSample);
-            wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+            wcsncat_s(result, resultBytes/2, s, resultBytes/2 - wcslen(result) -1);
         }
-        wcsncat(result, L"||\r\n", resultBytes/2 - wcslen(result) -1);
+        wcsncat_s(result, resultBytes/2, L"||\r\n", resultBytes/2 - wcslen(result) -1);
         for (int i=0; i<TEST_SAMPLE_RATE_NUM; ++i) {
             wchar_t s[256];
             StringCbPrintfW(s, sizeof s-1,
                 L"|| %s %8x ",
                 (S_OK==resultList[count + i]) ? L"OK" : L"NA",
                 resultList[count + i]);
-            wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+            wcsncat_s(result, resultBytes/2, s, resultBytes/2 - wcslen(result) -1);
         }
-        wcsncat(result, L"||\r\n", resultBytes/2 - wcslen(result) -1);
+        wcsncat_s(result, resultBytes/2, L"||\r\n", resultBytes/2 - wcslen(result) -1);
 
         count += TEST_SAMPLE_RATE_NUM;
     }
-    wcsncat(result,
+    wcsncat_s(result, resultBytes/2,
         L"++-------------++-------------++-------------++-------------"
         L"++-------------++-------------++-------------++-------------++\r\n",
         resultBytes/2 - wcslen(result) -1);
@@ -455,7 +418,7 @@ WasapiUser::InspectDevice(int id, LPWSTR result, size_t resultBytes)
             L"  Minimum scheduling period for a exclusive-mode stream: %f ms\r\n",
             ((double)hnsDefaultDevicePeriod)*0.0001,
             ((double)hnsMinimumDevicePeriod)*0.0001);
-        wcsncat(result, s, resultBytes/2 - wcslen(result) -1);
+        wcsncat_s(result, resultBytes/2, s, resultBytes/2 - wcslen(result) -1);
     }
 
 end:
@@ -513,39 +476,36 @@ WasapiUser::GetUseDeviceId(void)
 bool
 WasapiUser::GetUseDeviceName(LPWSTR name, size_t nameBytes)
 {
-    wcsncpy(name, m_useDeviceName, nameBytes/sizeof name[0] -1);
+    wcsncpy_s(name, nameBytes/2, m_useDeviceName, nameBytes/2 -1);
     return true;
 }
 
 HRESULT
 WasapiUser::Setup(
-    WWDataFeedMode mode,
-    int sampleRate,
-    int bitsPerSample,
-    int validBitsPerSample,
-    WWBitFormatType bitFormatType,
-    int latencyMillisec,
-    int numChannels)
+        WWDataFeedMode mode,
+        int sampleRate,
+        WWPcmDataFormatType format,
+        int latencyMillisec,
+        int numChannels)
 {
     HRESULT      hr          = 0;
     WAVEFORMATEX *waveFormat = NULL;
 
-    dprintf("D: %s(%d %d %d %d %d)\n", __FUNCTION__,
-        (int)mode, sampleRate, bitsPerSample, validBitsPerSample, latencyMillisec);
+    dprintf("D: %s(%d %d %s %d)\n", __FUNCTION__,
+        (int)mode, sampleRate, WWPcmDataFormatTypeToStr(format),
+        latencyMillisec);
 
     m_dataFeedMode        = mode;
     m_latencyMillisec     = latencyMillisec;
     m_sampleRate          = sampleRate;
-    m_deviceBitsPerSample = bitsPerSample;
-    m_validBitsPerSample  = validBitsPerSample;
-    m_bitFormatType       = bitFormatType;
+    m_format              = format;
     m_numChannels         = numChannels;
 
     // WasapiUserクラスが備えていたサンプルフォーマット変換機能は、廃止した。
     // 上のレイヤーでPCMデータを適切な形式に変換してから渡してください。
     if (WWSMShared == m_shareMode) {
-        assert(bitsPerSample == 32);
-        assert(bitFormatType == WWSFloat);
+        assert(WWPcmDataFormatTypeToBitsPerSample(m_format) == 32);
+        assert(WWPcmDataFormatTypeIsFloat(m_format));
     }
 
     m_audioSamplesReadyEvent =
@@ -583,17 +543,20 @@ WasapiUser::Setup(
     }
 
     if (WWSMExclusive == m_shareMode) {
-        if (WWSInt == m_bitFormatType) {
+        if (WWPcmDataFormatTypeIsInt(m_format)) {
             wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
         }
-        wfex->Format.wBitsPerSample = (WORD)m_deviceBitsPerSample;
+        wfex->Format.wBitsPerSample
+            = (WORD)WWPcmDataFormatTypeToBitsPerSample(m_format);
         wfex->Format.nSamplesPerSec = sampleRate;
 
-        wfex->Format.nBlockAlign = (WORD)(
-            (m_deviceBitsPerSample / 8) * waveFormat->nChannels);
-        wfex->Format.nAvgBytesPerSec =
-            wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
-        wfex->Samples.wValidBitsPerSample = validBitsPerSample;
+        wfex->Format.nBlockAlign
+            = (WORD)((WWPcmDataFormatTypeToBitsPerSample(m_format) / 8)
+                * waveFormat->nChannels);
+        wfex->Format.nAvgBytesPerSec
+            = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+        wfex->Samples.wValidBitsPerSample
+            = (WORD)WWPcmDataFormatTypeToValidBitsPerSample(m_format);
 
         dprintf("preferred Format:\n");
         WWWaveFormatDebug(waveFormat);
@@ -865,24 +828,10 @@ bool
 WasapiUser::AddPcmDataSilence(int nFrames)
 {
     WWPcmData pcmData;
-    pcmData.id       = -1;
-    pcmData.contentType = WWPcmDataContentSilence;
-    pcmData.next     = NULL;
-    pcmData.posFrame = 0;
-    pcmData.nFrames  = 0;
-    pcmData.stream   = NULL;
-
-    int bytes = nFrames * m_frameBytes;
-
-    BYTE *p = (BYTE *)malloc(bytes);
-    if (NULL == p) {
-        // 失敗…
+    if (!pcmData.Init(-1, m_format, nFrames, m_frameBytes, WWPcmDataContentSilence)) {
+        dprintf("E: %s(%d, %d) malloc failed\n", __FUNCTION__, nFrames);
         return false;
     }
-
-    memset(p, 0, bytes);
-    pcmData.nFrames = nFrames;
-    pcmData.stream = p;
     m_playPcmDataList.push_back(pcmData);
     return true;
 }
@@ -890,30 +839,20 @@ WasapiUser::AddPcmDataSilence(int nFrames)
 bool
 WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
 {
+    // サンプルフォーマット変換は上のレイヤーに任せた。
+    // ここでは、来たdataを中のメモリにそのままコピーする。
+    // Setupでセットアップした形式でdataを渡してください。
     if (data == NULL || 0 == bytes) {
         dprintf("E: %s(%d, %p, %d) arg check failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
 
     WWPcmData pcmData;
-    pcmData.id       = id;
-    pcmData.contentType = WWPcmDataContentPcmData;
-    pcmData.next     = NULL;
-    pcmData.posFrame = 0;
-    pcmData.nFrames  = 0;
-    pcmData.stream   = NULL;
-
-    // サンプルフォーマット変換は上のレイヤーに任せた。
-    // ここでは、来たdataを中のメモリにそのままコピーする。
-    // Setupでセットアップした形式でdataを渡してください。
-    BYTE *p = (BYTE *)malloc(bytes);
-    if (NULL == p) {
+    if (!pcmData.Init(id, m_format, bytes/m_frameBytes, m_frameBytes, WWPcmDataContentPcmData)) {
         dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
-    memcpy(p, data, bytes);
-    pcmData.nFrames = bytes/m_frameBytes;
-    pcmData.stream = p;
+    CopyMemory(pcmData.stream, data, (bytes/m_frameBytes) * m_frameBytes);
     m_playPcmDataList.push_back(pcmData);
     return true;
 }
@@ -923,7 +862,7 @@ WasapiUser::AddPlayPcmDataStart(void)
 {
     assert(m_playPcmDataList.size() == 0);
 
-    // バッファ1個分の無音を作って詰める。
+    // バッファ1個分の無音(再生開始前に送出する無音)を作って詰める。
     int nFrames = (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
     return AddPcmDataSilence(nFrames);
 }
@@ -931,9 +870,16 @@ WasapiUser::AddPlayPcmDataStart(void)
 bool
 WasapiUser::AddPlayPcmDataEnd(void)
 {
-    // バッファ4個分の無音を作って詰める。
+    // バッファ4個分の無音(再生終了後に送出する無音)を作って詰める。
     int nFrames = 4 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
-    return AddPcmDataSilence(nFrames);
+    if (!AddPcmDataSilence(nFrames)) {
+        return false;
+    }
+
+    // spliceバッファーを準備する。
+    // サイズは適当に選んだ。
+    m_spliceBuffer.Init(-1, m_format, m_sampleRate / 20, m_frameBytes, WWPcmDataContentSplice);
+    return true;
 }
 
 void
@@ -949,6 +895,8 @@ WasapiUser::ClearPlayPcmData(void)
         m_playPcmDataList[i].Term();
     }
     m_playPcmDataList.clear();
+
+    m_spliceBuffer.Term();
 
     m_nowPlayingPcmData = NULL;
 }
@@ -968,8 +916,8 @@ WasapiUser::SetPlayRepeat(bool repeat)
 {
     dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
 
-    // 最初の項目＝無音データ(バグ1修正のため)
-    // 最後の項目＝無音データ(バグ2修正のため)
+    // 最初の項目＝無音データ(Issue1修正のため)
+    // 最後の項目＝無音データ(Issue2修正のため)
 
     if (m_playPcmDataList.size() < 3) {
         dprintf("D: %s(%d) pcmDataList.size() == %d nothing to do\n",
@@ -1125,8 +1073,15 @@ WasapiUser::SetPosFrame(int v)
     {
         WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
-        if (nowPlaying) {
+        if (nowPlaying && nowPlaying->contentType == WWPcmDataContentPcmData) {
+            /* nowPlaying->posFrameをvに移動する。
+             * Issue3: いきなり移動するとブチッと言うのでsplice bufferを経由してなめらかにつなげる。
+             */
+            m_spliceBuffer.UpdateSpliceData(nowPlaying, nowPlaying->posFrame, nowPlaying, v);
+            m_spliceBuffer.next = nowPlaying;
             nowPlaying->posFrame = v;
+            nowPlaying = &m_spliceBuffer;
+            m_spliceBuffer.posFrame = 0;
         }
     }
     ReleaseMutex(m_mutex);

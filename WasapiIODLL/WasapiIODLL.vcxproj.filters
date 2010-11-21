@@ -10,6 +10,9 @@
     <ClCompile Include="WWUtil.cpp">
       <Filter>source files</Filter>
     </ClCompile>
+    <ClCompile Include="WWPcmData.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h">
@@ -19,6 +22,9 @@
       <Filter>header files</Filter>
     </ClInclude>
     <ClInclude Include="WasapiUser.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWPcmData.h">
       <Filter>header files</Filter>
     </ClInclude>
   </ItemGroup>
