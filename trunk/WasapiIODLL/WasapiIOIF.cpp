@@ -113,16 +113,13 @@ WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes)
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Setup(int dataFeedMode, int sampleRate,
-    int bitsPerSample, int validBitsPerSample,
-    int bitFormatType, int latencyMillisec,
+    int format, int latencyMillisec,
     int numChannels)
 {
     assert(g_pWasapi);
     assert(0 <= dataFeedMode && dataFeedMode < (int)WWDFMNum);
     return g_pWasapi->Setup((WWDataFeedMode)dataFeedMode, sampleRate,
-        bitsPerSample, validBitsPerSample,
-        (WWBitFormatType)bitFormatType, latencyMillisec,
-        numChannels);
+        (WWPcmDataFormatType)format, latencyMillisec, numChannels);
 }
 
 extern "C" __declspec(dllexport)

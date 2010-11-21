@@ -7,6 +7,7 @@
 #include <AudioClient.h>
 #include <AudioPolicy.h>
 #include <vector>
+#include "WWPcmData.h"
 
 #define WW_DEVICE_NAME_COUNT (256)
 
@@ -20,48 +21,6 @@ struct WWDeviceInfo {
     }
 
     WWDeviceInfo(int id, const wchar_t * name);
-};
-
-enum WWPcmDataContentType {
-    WWPcmDataContentSilence,
-    WWPcmDataContentPcmData
-};
-
-const char *
-WWPcmDataContentTypeToStr(WWPcmDataContentType w);
-
-/*
- * play
- *   pcmData->posFrame: playing position
- *   pcmData->nFrames: total frames to play (frame == sample point)
- * record
- *   pcmData->posFrame: available recorded frame num
- *   pcmData->nFrames: recording buffer size
- */
-struct WWPcmData {
-    int       id;
-    WWPcmData *next;
-    WWPcmDataContentType contentType;
-    int       nFrames;
-    int       posFrame;
-    BYTE      *stream;
-
-    WWPcmData(void) {
-        id       = 0;
-        next     = NULL;
-        contentType = WWPcmDataContentPcmData;
-        nFrames  = 0;
-        posFrame = 0;
-        stream   = NULL;
-    }
-
-    ~WWPcmData(void);
-
-    void Init(int samples);
-    void Term(void);
-
-
-    void CopyFrom(WWPcmData *rhs);
 };
 
 enum WWDataFeedMode {
@@ -117,12 +76,8 @@ public:
     int  GetUseDeviceId(void);
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
-    /// @param bitsPerSample 1サンプルのビット数
-    /// @param validBitsPerSample 1サンプルの有効なビット数
-    ///        (bitsPerSample==32, validBitsPerSample==24という場合あり)
     HRESULT Setup(WWDataFeedMode mode, int sampleRate,
-        int bitsPerSample, int validBitsPerSample,
-        WWBitFormatType bitFormatType, int latencyMillisec, int numChannels);
+        WWPcmDataFormatType format, int latencyMillisec, int numChannels);
     void Unsetup(void);
 
     // PCMデータのセット方法
@@ -141,6 +96,7 @@ public:
     bool AddPlayPcmDataStart(void);
 
     /// @param id WAVファイルID。
+    /// @param format データフォーマット。
     /// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
     /// @param bytes dataのバイト数。
     /// @return true: 追加成功。false: 追加失敗。
@@ -186,11 +142,14 @@ private:
     int          m_frameBytes;
     UINT32       m_bufferFrameNum;
 
-    int          m_deviceBitsPerSample;
-    int          m_validBitsPerSample;
     int          m_sampleRate;
     DWORD        m_latencyMillisec;
+    WWPcmDataFormatType m_format;
+    /*
+    int          m_deviceBitsPerSample;
+    int          m_validBitsPerSample;
     WWBitFormatType m_bitFormatType;
+    */
     int          m_numChannels;
 
     IAudioRenderClient  *m_renderClient;
@@ -216,6 +175,7 @@ private:
     WWPcmData    *m_nowPlayingPcmData;
     int          m_useDeviceId;
     wchar_t      m_useDeviceName[WW_DEVICE_NAME_COUNT];
+    WWPcmData    m_spliceBuffer;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);

@@ -524,9 +524,12 @@ LogOpen(FlacDecodeInfo *fdi)
     QueryPerformanceCounter(&performanceCount);
 
     char s[256];
-    sprintf(s, "log%d_%lld.txt", fdi->id, performanceCount.QuadPart);
+    sprintf_s(s, "log%d_%lld.txt", fdi->id, performanceCount.QuadPart);
 
-    fdi->logFP = fopen(s, "wb");
+    errno_t result = fopen_s(&fdi->logFP, s, "wb");
+    if (result != 0) {
+        fdi->logFP = NULL;
+    }
 }
 static void
 LogClose(FlacDecodeInfo *fdi)
