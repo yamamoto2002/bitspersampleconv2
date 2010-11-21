@@ -2,7 +2,7 @@
 #include "WWUtil.h"
 #include <assert.h>
 
-// “ú–{Œê UTF-8
+// æ—¥æœ¬èªž UTF-8
 
 const char *
 WWPcmDataContentTypeToStr(WWPcmDataContentType w)
@@ -122,7 +122,7 @@ WWPcmData::Init(
 
     BYTE *p = (BYTE *)malloc((size_t)bytes);
     if (NULL == p) {
-        // Ž¸”sc
+        // å¤±æ•—â€¦
         return false;
     }
 
@@ -152,7 +152,7 @@ WWPcmData::GetSampleValueInt(int posFrame)
         break;
     case WWPcmDataFormatSint24:
         {
-            // bus error‰ñ”ðBx86‚É‚Íbus error–³‚¢‚¯‚Çˆê‰žB
+            // bus errorå›žé¿ã€‚x86ã«ã¯bus errorç„¡ã„ã‘ã©ä¸€å¿œã€‚
             unsigned char *p = (unsigned char*)(&stream[posFrame*3]);
 
             result =
@@ -170,7 +170,7 @@ WWPcmData::GetSampleValueInt(int posFrame)
         break;
     case WWPcmDataFormatSint32:
         {
-            // malloc‚ÅŠm•Û‚µ‚½ƒoƒbƒtƒ@[‚È‚Ì‚ÅAbus error‚Í‹N‚«‚È‚¢B
+            // mallocã§ç¢ºä¿ã—ãŸãƒãƒƒãƒ•ã‚¡ãƒ¼ãªã®ã§ã€bus errorã¯èµ·ããªã„ã€‚
             int *p = (int*)(&stream[posFrame*4]);
             result = *p;
         }
@@ -216,7 +216,7 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
         break;
     case WWPcmDataFormatSint24:
         {
-            // bus error‰ñ”ðBx86‚É‚Íbus error–³‚¢‚¯‚Çˆê‰žB
+            // bus errorå›žé¿ã€‚x86ã«ã¯bus errorç„¡ã„ã‘ã©ä¸€å¿œã€‚
             unsigned char *p = (unsigned char*)(&stream[posFrame*3]);
             p[0] = (unsigned char)(value & 0xff);
             p[1] = (unsigned char)((value>>8) & 0xff);
@@ -234,7 +234,7 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
         break;
     case WWPcmDataFormatSint32:
         {
-            // malloc‚ÅŠm•Û‚µ‚½ƒoƒbƒtƒ@[‚È‚Ì‚ÅAbus error‚Í‹N‚«‚È‚¢B
+            // mallocã§ç¢ºä¿ã—ãŸãƒãƒƒãƒ•ã‚¡ãƒ¼ãªã®ã§ã€bus errorã¯èµ·ããªã„ã€‚
             int *p = (int*)(&stream[posFrame*4]);
             *p = value;
         }
@@ -272,7 +272,7 @@ WWPcmData::UpdateSpliceData(
     switch (fromPcmData->format) {
     case WWPcmDataFormatSfloat:
         {
-            // float‚ÍAŠÈ’PB
+            // floatã¯ã€ç°¡å˜ã€‚
             float y0 = fromPcmData->GetSampleValueFloat(fromPosFrame);
             float y1 = toPcmData->GetSampleValueFloat(toPosFrame);
             float dydx = (y1-y0)/(nFrames);
@@ -286,7 +286,7 @@ WWPcmData::UpdateSpliceData(
         break;
     default:
         {
-            // Bresenham's line algorithm“I‚È•¨
+            // Bresenham's line algorithmçš„ãªç‰©
             int y0 = fromPcmData->GetSampleValueInt(fromPosFrame);
             int y1 = toPcmData->GetSampleValueInt(toPosFrame);
             int deltaX = nFrames;
