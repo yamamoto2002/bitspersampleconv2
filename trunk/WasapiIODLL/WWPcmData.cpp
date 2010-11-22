@@ -1,6 +1,7 @@
 #include "WWPcmData.h"
 #include "WWUtil.h"
 #include <assert.h>
+#include <malloc.h>
 
 // 日本語 UTF-8
 
@@ -104,7 +105,7 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
 
 bool
 WWPcmData::Init(
-        int aId, WWPcmDataFormatType aFormat,
+        int aId, WWPcmDataFormatType aFormat, int anChannels,
         int anFrames, int aframeBytes, WWPcmDataContentType dataType)
 {
     id       = aId;
@@ -112,6 +113,8 @@ WWPcmData::Init(
     contentType = dataType;
     next     = NULL;
     posFrame = 0;
+    nChannels = anChannels;
+    // メモリ確保に成功してからフレーム数をセットする。
     nFrames  = 0;
     stream   = NULL;
 
@@ -133,9 +136,10 @@ WWPcmData::Init(
 }
 
 int
-WWPcmData::GetSampleValueInt(int posFrame)
+WWPcmData::GetSampleValueInt(int ch, int posFrame)
 {
     assert(format != WWPcmDataFormatSfloat);
+    assert(0 <= ch && ch < nChannels);
 
     if (posFrame < 0 ||
         nFrames <= posFrame) {
@@ -146,14 +150,15 @@ WWPcmData::GetSampleValueInt(int posFrame)
     switch (format) {
     case WWPcmDataFormatSint16:
         {
-            short *p = (short*)(&stream[posFrame*2]);
+            short *p = (short*)(&stream[2 * (nChannels * posFrame + ch)]);
             result = *p;
         }
         break;
     case WWPcmDataFormatSint24:
         {
             // bus error回避。x86にはbus error無いけど一応。
-            unsigned char *p = (unsigned char*)(&stream[posFrame*3]);
+            unsigned char *p =
+                (unsigned char*)(&stream[3 * (nChannels * posFrame + ch)]);
 
             result =
                 (((unsigned int)p[0])<<8) +
@@ -164,14 +169,14 @@ WWPcmData::GetSampleValueInt(int posFrame)
         break;
     case WWPcmDataFormatSint32V24:
         {
-            int *p = (int*)(&stream[posFrame*4]);
+            int *p = (int*)(&stream[4 * (nChannels * posFrame + ch)]);
             result = ((*p)/256);
         }
         break;
     case WWPcmDataFormatSint32:
         {
             // mallocで確保したバッファーなので、bus errorは起きない。
-            int *p = (int*)(&stream[posFrame*4]);
+            int *p = (int*)(&stream[4 * (nChannels * posFrame + ch)]);
             result = *p;
         }
         break;
@@ -184,23 +189,25 @@ WWPcmData::GetSampleValueInt(int posFrame)
 }
 
 float
-WWPcmData::GetSampleValueFloat(int posFrame)
+WWPcmData::GetSampleValueFloat(int ch, int posFrame)
 {
     assert(format == WWPcmDataFormatSfloat);
+    assert(0 <= ch && ch < nChannels);
 
     if (posFrame < 0 ||
         nFrames <= posFrame) {
         return 0;
     }
 
-    float *p = (float *)(&stream[posFrame * 4]);
+    float *p = (float *)(&stream[4 * (nChannels * posFrame + ch)]);
     return *p;
 }
 
 bool
-WWPcmData::SetSampleValueInt(int posFrame, int value)
+WWPcmData::SetSampleValueInt(int ch, int posFrame, int value)
 {
     assert(format != WWPcmDataFormatSfloat);
+    assert(0 <= ch && ch < nChannels);
 
     if (posFrame < 0 ||
         nFrames <= posFrame) {
@@ -210,14 +217,16 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
     switch (format) {
     case WWPcmDataFormatSint16:
         {
-            short *p = (short*)(&stream[posFrame*2]);
+            short *p =
+                (short*)(&stream[2 * (nChannels * posFrame + ch)]);
             *p = (short)value;
         }
         break;
     case WWPcmDataFormatSint24:
         {
             // bus error回避。x86にはbus error無いけど一応。
-            unsigned char *p = (unsigned char*)(&stream[posFrame*3]);
+            unsigned char *p =
+                (unsigned char*)(&stream[3 * (nChannels * posFrame + ch)]);
             p[0] = (unsigned char)(value & 0xff);
             p[1] = (unsigned char)((value>>8) & 0xff);
             p[2] = (unsigned char)((value>>16) & 0xff);
@@ -225,7 +234,8 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
         break;
     case WWPcmDataFormatSint32V24:
         {
-            unsigned char *p = (unsigned char*)(&stream[posFrame*4]);
+            unsigned char *p =
+                (unsigned char*)(&stream[4 * (nChannels * posFrame + ch)]);
             p[0] = 0;
             p[1] = (unsigned char)(value & 0xff);
             p[2] = (unsigned char)((value>>8) & 0xff);
@@ -235,7 +245,7 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
     case WWPcmDataFormatSint32:
         {
             // mallocで確保したバッファーなので、bus errorは起きない。
-            int *p = (int*)(&stream[posFrame*4]);
+            int *p = (int*)(&stream[4 * (nChannels * posFrame + ch)]);
             *p = value;
         }
         break;
@@ -248,19 +258,34 @@ WWPcmData::SetSampleValueInt(int posFrame, int value)
 }
 
 bool
-WWPcmData::SetSampleValueFloat(int posFrame, float value)
+WWPcmData::SetSampleValueFloat(int ch, int posFrame, float value)
 {
     assert(format == WWPcmDataFormatSfloat);
+    assert(0 <= ch && ch < nChannels);
 
     if (posFrame < 0 ||
         nFrames <= posFrame) {
         return false;
     }
 
-    float *p = (float *)(&stream[posFrame * 4]);
+    float *p = (float *)(&stream[4 * (nChannels * posFrame + ch)]);
     *p = value;
     return true;
 }
+
+struct PcmSpliceInfoFloat {
+    float dydx;
+    float y;
+};
+
+struct PcmSpliceInfoInt {
+    int deltaX;
+    int error;
+    int ystep;
+    int deltaError;
+    int deltaErrorDirection;
+    int y;
+};
 
 void
 WWPcmData::UpdateSpliceData(
@@ -273,42 +298,61 @@ WWPcmData::UpdateSpliceData(
     case WWPcmDataFormatSfloat:
         {
             // floatは、簡単。
-            float y0 = fromPcmData->GetSampleValueFloat(fromPosFrame);
-            float y1 = toPcmData->GetSampleValueFloat(toPosFrame);
-            float dydx = (y1-y0)/(nFrames);
+            PcmSpliceInfoFloat *p = (PcmSpliceInfoFloat*)_malloca(nChannels * sizeof(PcmSpliceInfoFloat));
+            assert(p);
 
-            float y = y0;
-            for (int x=0; x<nFrames; ++x) {
-                SetSampleValueFloat(x, y);
-                y += dydx;
+            for (int ch=0; ch<nChannels; ++ch) {
+                int y0 = fromPcmData->GetSampleValueFloat(ch, fromPosFrame);
+                int y1 = toPcmData->GetSampleValueFloat(ch, toPosFrame);
+                p[ch].dydx = (y1 - y0)/(nFrames);
+                p[ch].y = y0;
             }
+
+            for (int x=0; x<nFrames; ++x) {
+                for (int ch=0; ch<nChannels; ++ch) {
+                    SetSampleValueFloat(ch, x, p[ch].y);
+                    p[ch].y += p[ch].dydx;
+                }
+            }
+
+            _freea(p);
+            p = NULL;
         }
         break;
     default:
         {
             // Bresenham's line algorithm的な物
-            int y0 = fromPcmData->GetSampleValueInt(fromPosFrame);
-            int y1 = toPcmData->GetSampleValueInt(toPosFrame);
-            int deltaX = nFrames;
-            int error  = deltaX/2;
-            int ystep  = (y1-y0)/deltaX;
-            int deltaError = abs(y1-y0) - abs(ystep*deltaX);
-            int deltaErrorDirection = (y1-y0) >= 0 ? 1 : -1;
+            PcmSpliceInfoInt *p = (PcmSpliceInfoInt*)_malloca(nChannels * sizeof(PcmSpliceInfoInt));
+            assert(p);
 
-            int y = y0;
+            for (int ch=0; ch<nChannels; ++ch) {
+                int y0 = fromPcmData->GetSampleValueInt(ch, fromPosFrame);
+                int y1 = toPcmData->GetSampleValueInt(ch, toPosFrame);
+                p[ch].deltaX = nFrames;
+                p[ch].error  = p[ch].deltaX/2;
+                p[ch].ystep  = (y1 - y0)/p[ch].deltaX;
+                p[ch].deltaError = abs(y1 - y0) - abs(p[ch].ystep * p[ch].deltaX);
+                p[ch].deltaErrorDirection = (y1-y0) >= 0 ? 1 : -1;
+                p[ch].y = y0;
+            }
+
             for (int x=0; x<nFrames; ++x) {
-                SetSampleValueInt(x, y);
-                // printf("(%d %d)", x, y);
-                y += ystep;
-                error -= deltaError;
-                if (error < 0) {
-                    y += deltaErrorDirection;
-                    error += deltaX;
+                for (int ch=0; ch<nChannels; ++ch) {
+                    SetSampleValueInt(ch, x, p[ch].y);
+                    // printf("(%d %d)", x, y);
+                    p[ch].y += p[ch].ystep;
+                    p[ch].error -= p[ch].deltaError;
+                    if (p[ch].error < 0) {
+                        p[ch].y += p[ch].deltaErrorDirection;
+                        p[ch].error += p[ch].deltaX;
+                    }
                 }
             }
             // printf("\n");
+
+            _freea(p);
+            p = NULL;
         }
         break;
     }
-
 }

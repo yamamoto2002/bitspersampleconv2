@@ -828,7 +828,7 @@ bool
 WasapiUser::AddPcmDataSilence(int nFrames)
 {
     WWPcmData pcmData;
-    if (!pcmData.Init(-1, m_format, nFrames, m_frameBytes, WWPcmDataContentSilence)) {
+    if (!pcmData.Init(-1, m_format, m_numChannels, nFrames, m_frameBytes, WWPcmDataContentSilence)) {
         dprintf("E: %s(%d, %d) malloc failed\n", __FUNCTION__, nFrames);
         return false;
     }
@@ -848,7 +848,7 @@ WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
     }
 
     WWPcmData pcmData;
-    if (!pcmData.Init(id, m_format, bytes/m_frameBytes, m_frameBytes, WWPcmDataContentPcmData)) {
+    if (!pcmData.Init(id, m_format, m_numChannels, bytes/m_frameBytes, m_frameBytes, WWPcmDataContentPcmData)) {
         dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
@@ -877,8 +877,8 @@ WasapiUser::AddPlayPcmDataEnd(void)
     }
 
     // spliceバッファーを準備する。
-    // サイズは適当に選んだ。
-    m_spliceBuffer.Init(-1, m_format, m_sampleRate / 20, m_frameBytes, WWPcmDataContentSplice);
+    // サイズは100分の1秒=10ms 適当に選んだ。
+    m_spliceBuffer.Init(-1, m_format, m_numChannels, m_sampleRate / 100, m_frameBytes, WWPcmDataContentSplice);
     return true;
 }
 
@@ -1071,17 +1071,19 @@ WasapiUser::SetPosFrame(int v)
     assert(m_mutex);
     WaitForSingleObject(m_mutex, INFINITE);
     {
-        WWPcmData *nowPlaying = m_nowPlayingPcmData;
-
-        if (nowPlaying && nowPlaying->contentType == WWPcmDataContentPcmData) {
+        if (m_nowPlayingPcmData &&
+            m_nowPlayingPcmData->contentType == WWPcmDataContentPcmData) {
             /* nowPlaying->posFrameをvに移動する。
              * Issue3: いきなり移動するとブチッと言うのでsplice bufferを経由してなめらかにつなげる。
              */
-            m_spliceBuffer.UpdateSpliceData(nowPlaying, nowPlaying->posFrame, nowPlaying, v);
-            m_spliceBuffer.next = nowPlaying;
-            nowPlaying->posFrame = v;
-            nowPlaying = &m_spliceBuffer;
+            m_spliceBuffer.UpdateSpliceData(
+                m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame, m_nowPlayingPcmData, v);
             m_spliceBuffer.posFrame = 0;
+            m_spliceBuffer.next = m_nowPlayingPcmData;
+
+            m_nowPlayingPcmData->posFrame = v;
+
+            m_nowPlayingPcmData = &m_spliceBuffer;
         }
     }
     ReleaseMutex(m_mutex);
