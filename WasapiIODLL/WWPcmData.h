@@ -44,6 +44,7 @@ struct WWPcmData {
     WWPcmData *next;
     WWPcmDataFormatType format;
     WWPcmDataContentType contentType;
+    int       nChannels;
     int       nFrames;
     int       posFrame;
     BYTE      *stream;
@@ -52,6 +53,7 @@ struct WWPcmData {
         id       = 0;
         next     = NULL;
         contentType = WWPcmDataContentPcmData;
+        nChannels = 0;
         nFrames  = 0;
         posFrame = 0;
         stream   = NULL;
@@ -59,8 +61,8 @@ struct WWPcmData {
 
     ~WWPcmData(void);
 
-    bool Init(int id, WWPcmDataFormatType format, int nFrames,
-        int frameBytes, WWPcmDataContentType dataType);
+    bool Init(int id, WWPcmDataFormatType format, int nChannels,
+        int nFrames, int frameBytes, WWPcmDataContentType dataType);
     void Term(void);
 
     void CopyFrom(WWPcmData *rhs);
@@ -74,10 +76,10 @@ private:
     /** get sample value on posFrame.
      * 24 bit signed int value is returned when Sint32V24
      */
-    int GetSampleValueInt(int posFrame);
-    float GetSampleValueFloat(int posFrame);
+    int GetSampleValueInt(int ch, int posFrame);
+    float GetSampleValueFloat(int ch, int posFrame);
 
-    bool SetSampleValueInt(int posFrame, int value);
-    bool SetSampleValueFloat(int posFrame, float value);
+    bool SetSampleValueInt(int ch, int posFrame, int value);
+    bool SetSampleValueFloat(int ch, int posFrame, float value);
 };
 
