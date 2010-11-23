@@ -1,10 +1,10 @@
+// 日本語 UTF-8
+
 #include "WWPcmData.h"
 #include "WWUtil.h"
 #include <assert.h>
 #include <malloc.h>
 #include <stdint.h>
-
-// 日本語 UTF-8
 
 const char *
 WWPcmDataContentTypeToStr(WWPcmDataContentType w)
@@ -299,7 +299,8 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
     case WWPcmDataFormatSfloat:
         {
             // floatは、簡単。
-            PcmSpliceInfoFloat *p = (PcmSpliceInfoFloat*)_malloca(nChannels * sizeof(PcmSpliceInfoFloat));
+            PcmSpliceInfoFloat *p =
+                (PcmSpliceInfoFloat*)_malloca(nChannels * sizeof(PcmSpliceInfoFloat));
             assert(p);
 
             for (int ch=0; ch<nChannels; ++ch) {
@@ -323,7 +324,8 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
     default:
         {
             // Bresenham's line algorithm的な物
-            PcmSpliceInfoInt *p = (PcmSpliceInfoInt*)_malloca(nChannels * sizeof(PcmSpliceInfoInt));
+            PcmSpliceInfoInt *p =
+                (PcmSpliceInfoInt*)_malloca(nChannels * sizeof(PcmSpliceInfoInt));
             assert(p);
 
             for (int ch=0; ch<nChannels; ++ch) {
