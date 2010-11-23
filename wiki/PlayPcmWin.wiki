@@ -25,9 +25,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin184.png
 
 =ダウンロード=
 
-安定版　(バージョン2.0.14)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin214.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin214x64.zip
+安定版　(バージョン2.0.15)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin215.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin215x64.zip
 
 非常にバグっぽい開発版
   * なし
