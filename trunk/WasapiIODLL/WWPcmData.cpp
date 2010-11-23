@@ -2,6 +2,7 @@
 #include "WWUtil.h"
 #include <assert.h>
 #include <malloc.h>
+#include <stdint.h>
 
 // 日本語 UTF-8
 
@@ -288,7 +289,7 @@ struct PcmSpliceInfoInt {
 };
 
 void
-WWPcmData::UpdateSpliceData(
+WWPcmData::UpdateSpliceDataWithStraightLine(
         WWPcmData *fromPcmData, int fromPosFrame,
         WWPcmData *toPcmData,   int toPosFrame)
 {
@@ -302,8 +303,8 @@ WWPcmData::UpdateSpliceData(
             assert(p);
 
             for (int ch=0; ch<nChannels; ++ch) {
-                int y0 = fromPcmData->GetSampleValueFloat(ch, fromPosFrame);
-                int y1 = toPcmData->GetSampleValueFloat(ch, toPosFrame);
+                float y0 = fromPcmData->GetSampleValueFloat(ch, fromPosFrame);
+                float y1 = toPcmData->GetSampleValueFloat(ch, toPosFrame);
                 p[ch].dydx = (y1 - y0)/(nFrames);
                 p[ch].y = y0;
             }
@@ -330,7 +331,7 @@ WWPcmData::UpdateSpliceData(
                 int y1 = toPcmData->GetSampleValueInt(ch, toPosFrame);
                 p[ch].deltaX = nFrames;
                 p[ch].error  = p[ch].deltaX/2;
-                p[ch].ystep  = (y1 - y0)/p[ch].deltaX;
+                p[ch].ystep  = ((int64_t)y1 - y0)/p[ch].deltaX;
                 p[ch].deltaError = abs(y1 - y0) - abs(p[ch].ystep * p[ch].deltaX);
                 p[ch].deltaErrorDirection = (y1-y0) >= 0 ? 1 : -1;
                 p[ch].y = y0;

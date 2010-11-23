@@ -1014,12 +1014,25 @@ WasapiUser::SetNowPlayingPcmDataId(int id)
             dprintf("D: %s(%d) id not found\n", __FUNCTION__, id);
             goto end;
         }
-
         WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
         if (nowPlaying) {
-            nowPlaying->posFrame = 0;
+            // m_nowPlayingPcmDataをpの先頭に移動する。
+#if 1
+            /* Issue3: いきなり移動するとブチッと言うのでsplice bufferを経由してなめらかにつなげる。
+             */
+            m_spliceBuffer.UpdateSpliceDataWithStraightLine(
+                m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame, p, 0);
+            m_spliceBuffer.posFrame = 0;
+            m_spliceBuffer.next = p;
+            //m_spliceBuffer.id = p->id;
+
+            m_nowPlayingPcmData->posFrame = 0;
             m_nowPlayingPcmData = p;
+#else
+            m_nowPlayingPcmData->posFrame = 0;
+            m_nowPlayingPcmData = p;
+#endif
         }
     }
 
@@ -1076,13 +1089,13 @@ WasapiUser::SetPosFrame(int v)
             /* nowPlaying->posFrameをvに移動する。
              * Issue3: いきなり移動するとブチッと言うのでsplice bufferを経由してなめらかにつなげる。
              */
-            m_spliceBuffer.UpdateSpliceData(
+            m_spliceBuffer.UpdateSpliceDataWithStraightLine(
                 m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame, m_nowPlayingPcmData, v);
             m_spliceBuffer.posFrame = 0;
             m_spliceBuffer.next = m_nowPlayingPcmData;
+            //m_spliceBuffer.id = m_nowPlayingPcmData->id;
 
             m_nowPlayingPcmData->posFrame = v;
-
             m_nowPlayingPcmData = &m_spliceBuffer;
         }
     }
