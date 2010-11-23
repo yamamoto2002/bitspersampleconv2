@@ -68,7 +68,7 @@ struct WWPcmData {
     void CopyFrom(WWPcmData *rhs);
 
     /** create splice data from the two adjacent sample data */
-    void UpdateSpliceData(
+    void UpdateSpliceDataWithStraightLine(
         WWPcmData *fromPcmData, int fromPosFrame,
         WWPcmData *toPcmData,   int toPosFrame);
 
