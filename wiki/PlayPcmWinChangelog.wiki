@@ -3,7 +3,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 2.0.12 ==
+===!PlayPcmWin 2.0.14 ==
   * Issue 3 量子化ビット数32ビットのデータで、直線補間処理がバグることがあるのを修正。
 
 ===!PlayPcmWin 2.0.12 ==
