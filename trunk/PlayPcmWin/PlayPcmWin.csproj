@@ -76,7 +76,7 @@
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>PlayPcmWin.ico</ApplicationIcon>
+    <ApplicationIcon>PlayPcmWin64.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -190,7 +190,7 @@
     <Resource Include="libFlacLicense.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="PlayPcmWin.ico" />
+    <Resource Include="PlayPcmWin64.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
