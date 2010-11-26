@@ -11,7 +11,7 @@
 4, 0
 }}}
 
-gnuplot command
+_gnuplot commands_
 {{{
 gnuplot> unset key
 gnuplot> unset border
