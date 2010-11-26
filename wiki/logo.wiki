@@ -1,4 +1,4 @@
-#summary re: logo image
+#summary logo image
 
 00.dat
 {{{
