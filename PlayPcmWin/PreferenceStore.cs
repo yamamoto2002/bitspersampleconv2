@@ -30,7 +30,8 @@ namespace PlayPcmWin {
 
         Sint32V24,
         VariableSint16Sint24,
-        VariableSint16Sint32V24
+        VariableSint16Sint32V24,
+        AutoSelect
     }
 
     public class Preference {
@@ -73,7 +74,7 @@ namespace PlayPcmWin {
             wasapiSharedOrExclusive = WasapiSharedOrExclusive.Exclusive;
             wasapiDataFeedMode = WasapiDataFeedMode.EventDriven;
             renderThreadTaskType = RenderThreadTaskType.ProAudio;
-            bitsPerSampleFixType = BitsPerSampleFixType.Variable;
+            bitsPerSampleFixType = BitsPerSampleFixType.AutoSelect;
             PreferredDeviceName = "";
             ReplaceGapWithKokomade = false;
             ManuallySetMainWindowDimension = false;

@@ -21,6 +21,9 @@ namespace PlayPcmWin
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 再生の進捗状況を取りに行き表示を更新する時間間隔
+        /// </summary>
         const int PROGRESS_REPORT_INTERVAL_MS = 500;
 
         private WasapiCS wasapi;
@@ -127,46 +130,73 @@ namespace PlayPcmWin
         struct DeviceSetupInfo {
             bool setuped;
             int samplingRate;
-            int bitsPerSample;
-            int validBitsPerSample;
-            WasapiCS.BitFormatType bitFormatType;
+            WasapiCS.SampleFormatType sampleFormat;
             int latencyMillisec;
             WasapiDataFeedMode dfm;
             WasapiSharedOrExclusive shareMode;
             RenderThreadTaskType threadTaskType;
 
-            public bool Is(int samplingRate,
-                int bitsPerSample,
-                int validBitsPerSample,
-                WasapiCS.BitFormatType bitFormatType,
-                int latencyMillisec,
-                WasapiDataFeedMode dfm,
-                WasapiSharedOrExclusive shareMode,
-                RenderThreadTaskType threadTaskType) {
+            public int SampleRate { get { return samplingRate; } }
+            public WasapiCS.SampleFormatType SampleFormat { get { return sampleFormat; } }
+            public int LatencyMillisec { get { return latencyMillisec; } }
+            public WasapiDataFeedMode DataFeedMode { get { return dfm; } }
+            public WasapiSharedOrExclusive SharedOrExclusive { get { return shareMode; } }
+            public RenderThreadTaskType ThreadTaskType { get { return threadTaskType; } }
+
+            public bool Is(
+                    int samplingRate,
+                    WasapiCS.SampleFormatType fmt,
+                    int latencyMillisec,
+                    WasapiDataFeedMode dfm,
+                    WasapiSharedOrExclusive shareMode,
+                    RenderThreadTaskType threadTaskType) {
                 return (this.setuped
                     && this.samplingRate == samplingRate
-                    && this.bitsPerSample == bitsPerSample
-                    && this.validBitsPerSample == validBitsPerSample
-                    && this.bitFormatType == bitFormatType
+                    && this.sampleFormat == fmt
                     && this.latencyMillisec == latencyMillisec
                     && this.dfm == dfm
                     && this.shareMode == shareMode
                     && this.threadTaskType == threadTaskType);
             }
 
+            public bool CompatibleTo(
+                    int samplingRate,
+                    WasapiCS.SampleFormatType fmt,
+                    int latencyMillisec,
+                    WasapiDataFeedMode dfm,
+                    WasapiSharedOrExclusive shareMode,
+                    RenderThreadTaskType threadTaskType) {
+                return (this.setuped
+                    && this.samplingRate == samplingRate
+                    && SampleFormatIsCompatible(this.sampleFormat,fmt)
+                    && this.latencyMillisec == latencyMillisec
+                    && this.dfm == dfm
+                    && this.shareMode == shareMode
+                    && this.threadTaskType == threadTaskType);
+            }
+
+            private bool SampleFormatIsCompatible(
+                    WasapiCS.SampleFormatType lhs,
+                    WasapiCS.SampleFormatType rhs) {
+                switch (lhs) {
+                case WasapiCS.SampleFormatType.Sint24:
+                case WasapiCS.SampleFormatType.Sint32V24:
+                    return rhs == WasapiCS.SampleFormatType.Sint24 ||
+                        rhs == WasapiCS.SampleFormatType.Sint32V24;
+                default:
+                    return lhs == rhs;
+                }
+            }
+
             public void Set(int samplingRate,
-                int bitsPerSample,
-                int validBitsPerSample,
-                WasapiCS.BitFormatType bitFormatType,
+                WasapiCS.SampleFormatType fmt,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
                 WasapiSharedOrExclusive shareMode,
                 RenderThreadTaskType threadTaskType) {
                     this.setuped = true;
                 this.samplingRate = samplingRate;
-                this.bitsPerSample = bitsPerSample;
-                this.validBitsPerSample = validBitsPerSample;
-                this.bitFormatType = bitFormatType;
+                this.sampleFormat = fmt;
                 this.latencyMillisec = latencyMillisec;
                 this.dfm = dfm;
                 this.shareMode = shareMode;
@@ -311,6 +341,7 @@ namespace PlayPcmWin
         }
 
         struct SampleFormatInfo {
+            public bool autoSelect;
             public int bitsPerSample;
             public int validBitsPerSample;
             public WasapiCS.BitFormatType bitFormatType;
@@ -719,6 +750,46 @@ namespace PlayPcmWin
         }
 
         /// <summary>
+        /// m_deviceSetupInfoにしたがってWasapiをSetupする。
+        /// </summary>
+        /// <returns>WasapiのSetup HRESULT。</returns>
+        private int WasapiSetup1() {
+            wasapi.SetShareMode(
+                PreferenceShareModeToWasapiCSShareMode(
+                    m_deviceSetupInfo.SharedOrExclusive));
+            AddLogText(string.Format("wasapi.SetShareMode({0})\r\n",
+                m_deviceSetupInfo.SharedOrExclusive));
+
+            wasapi.SetSchedulerTaskType(
+                PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
+                    m_deviceSetupInfo.ThreadTaskType));
+            AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
+                m_deviceSetupInfo.ThreadTaskType));
+
+            int hr = wasapi.Setup(
+                PreferenceDataFeedModeToWasapiCS(m_deviceSetupInfo.DataFeedMode),
+                m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
+                m_deviceSetupInfo.LatencyMillisec, 2);
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
+                m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
+                m_deviceSetupInfo.LatencyMillisec,
+                m_deviceSetupInfo.DataFeedMode,
+                ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr));
+            if (hr < 0) {
+                UnsetupDevice();
+
+                string s = string.Format("wasapi.Setup({0} {1} {2} {3} {4}) failed {5:X8}\r\n",
+                    m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
+                    m_deviceSetupInfo.LatencyMillisec,
+                    m_deviceSetupInfo.DataFeedMode,
+                    ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
+                AddLogText(s);
+                return hr;
+            }
+            return hr;
+        }
+
+        /// <summary>
         /// デバイスSetupを行う。
         /// すでに同一フォーマットのSetupがなされている場合は空振りする。
         /// </summary>
@@ -737,62 +808,52 @@ namespace PlayPcmWin
 
             PcmDataLib.PcmData startPcmData = m_pcmDataList[startWavDataId];
 
-            SampleFormatInfo sf = GetDeviceSampleFormat(
-                startPcmData.BitsPerSample,
+            // 1つのフォーマットに対して複数のデバイス設定選択肢がありうる。
+
+            int candidateNum = GetDeviceSampleFormatCandidateNum(
                 startPcmData.ValidBitsPerSample,
                 startPcmData.SampleValueRepresentationType);
+            for (int i = 0; i < candidateNum; ++i) {
+                SampleFormatInfo sf = GetDeviceSampleFormat(
+                    startPcmData.ValidBitsPerSample,
+                    startPcmData.SampleValueRepresentationType, i);
 
-            if (m_deviceSetupInfo.Is(
-                startPcmData.SampleRate,
-                sf.bitsPerSample,
-                sf.validBitsPerSample,
-                sf.bitFormatType,
-                latencyMillisec,
-                m_preference.wasapiDataFeedMode,
-                m_preference.wasapiSharedOrExclusive,
-                m_preference.renderThreadTaskType)) {
-                // すでにこのフォーマットでSetup完了している。
-                return true;
+                if (m_deviceSetupInfo.Is(
+                    startPcmData.SampleRate,
+                    sf.GetSampleFormatType(),
+                    latencyMillisec,
+                    m_preference.wasapiDataFeedMode,
+                    m_preference.wasapiSharedOrExclusive,
+                    m_preference.renderThreadTaskType)) {
+                    // すでにこのフォーマットでSetup完了している。
+                    return true;
+                }
             }
 
-            m_deviceSetupInfo.Set(
-                startPcmData.SampleRate,
-                sf.bitsPerSample,
-                sf.validBitsPerSample,
-                sf.bitFormatType,
-                latencyMillisec,
-                m_preference.wasapiDataFeedMode,
-                m_preference.wasapiSharedOrExclusive,
-                m_preference.renderThreadTaskType);
+            for (int i = 0; i < candidateNum; ++i) {
+                SampleFormatInfo sf = GetDeviceSampleFormat(
+                    startPcmData.ValidBitsPerSample,
+                    startPcmData.SampleValueRepresentationType, i);
 
-            wasapi.SetShareMode(
-                PreferenceShareModeToWasapiCSShareMode(m_preference.wasapiSharedOrExclusive));
-            AddLogText(string.Format("wasapi.SetShareMode({0})\r\n",
-                m_preference.wasapiSharedOrExclusive));
+                m_deviceSetupInfo.Set(
+                    startPcmData.SampleRate,
+                    sf.GetSampleFormatType(),
+                    latencyMillisec,
+                    m_preference.wasapiDataFeedMode,
+                    m_preference.wasapiSharedOrExclusive,
+                    m_preference.renderThreadTaskType);
 
-            wasapi.SetSchedulerTaskType(
-                PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(m_preference.renderThreadTaskType));
-            AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
-                m_preference.renderThreadTaskType));
-
-            int hr = wasapi.Setup(
-                PreferenceDataFeedModeToWasapiCS(m_preference.wasapiDataFeedMode),
-                startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec, 2);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}) {4:X8}\r\n",
-                startPcmData.SampleRate, sf.GetSampleFormatType(),
-                latencyMillisec, m_preference.wasapiDataFeedMode, hr));
-            if (hr < 0) {
-                UnsetupDevice();
-
-                string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{5:X8}\n" +
-                    "このプログラムのバグか、オーディオデバイスが{0}Hz {1} レイテンシー{2}ms {3} {4}に対応していないのか、" +
-                    "どちらかです。\r\n",
-                    startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
-                    DfmToStr(m_preference.wasapiDataFeedMode),
-                    ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
-                AddLogText(s);
-                MessageBox.Show(s);
-                return false;
+                int hr = WasapiSetup1();
+                if (hr < 0 && i == (candidateNum-1)) {
+                    string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{5:X8}\n" +
+                        "このプログラムのバグか、オーディオデバイスが{0}Hz {1} レイテンシー{2}ms {3} {4}に対応していないのか、" +
+                        "どちらかです。\r\n",
+                        startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
+                        DfmToStr(m_preference.wasapiDataFeedMode),
+                        ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
+                    MessageBox.Show(s);
+                    return false;
+                }
             }
 
             ChangeState(State.デバイスSetup完了);
@@ -1405,6 +1466,24 @@ namespace PlayPcmWin
         }
 
         /// <summary>
+        /// フォーマット設定から、
+        /// デバイスに設定されうるビットフォーマットの候補の数を数えて戻す。
+        /// </summary>
+        /// <returns>デバイスに設定されうるビットフォーマットの候補の数</returns>
+        private int GetDeviceSampleFormatCandidateNum(
+                int pcmDataValidBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
+            if (m_preference.bitsPerSampleFixType != BitsPerSampleFixType.AutoSelect ||
+                pcmDataValidBitsPerSample != 24 ||
+                m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
+                return 1;
+            }
+
+            // AutoSelect 24bit 排他モードの場合Sint32V24とSint24を試す。
+            return 2;
+        }
+
+        /// <summary>
         /// PcmDataの形式と、(共有・排他)、フォーマット固定設定から、
         /// デバイスに設定されるビットフォーマットを取得。
         /// 
@@ -1412,9 +1491,9 @@ namespace PlayPcmWin
         /// </summary>
         /// <returns>デバイスに設定されるビットフォーマット</returns>
         private SampleFormatInfo GetDeviceSampleFormat(
-                int pcmDataBitsPerSample,
-                int pcmDataValidBitsPerSample,
-                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
+                int validBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt,
+                int candidateId) {
             SampleFormatInfo sf = new SampleFormatInfo();
 
             if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
@@ -1426,7 +1505,6 @@ namespace PlayPcmWin
             }
 
             // 排他モード
-            sf.validBitsPerSample = pcmDataValidBitsPerSample;
             switch (m_preference.bitsPerSampleFixType) {
             case BitsPerSampleFixType.Sint16:
                 sf.bitFormatType = WasapiCS.BitFormatType.SInt;
@@ -1451,21 +1529,25 @@ namespace PlayPcmWin
             case BitsPerSampleFixType.Sfloat32:
                 sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
                 sf.bitsPerSample = 32;
+                sf.validBitsPerSample = 32;
                 break;
             case BitsPerSampleFixType.Variable:
-                if (pcmDataBitsPerSample != 16) {
+                if (validBitsPerSample != 16) {
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 32;
+                    sf.validBitsPerSample = validBitsPerSample;
                 } else {
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 16;
+                    sf.validBitsPerSample = 16;
                 }
                 break;
             case BitsPerSampleFixType.VariableSint16Sint32V24:
-                if (pcmDataBitsPerSample != 16) {
+                if (validBitsPerSample != 16) {
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 32;
-                    if (24 < sf.validBitsPerSample) {
+                    sf.validBitsPerSample = validBitsPerSample;
+                    if (24 < validBitsPerSample) {
                         sf.validBitsPerSample = 24;
                     }
                 } else {
@@ -1475,7 +1557,7 @@ namespace PlayPcmWin
                 }
                 break;
             case BitsPerSampleFixType.VariableSint16Sint24:
-                if (pcmDataBitsPerSample != 16) {
+                if (validBitsPerSample != 16) {
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 24;
                     sf.validBitsPerSample = 24;
@@ -1483,6 +1565,34 @@ namespace PlayPcmWin
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = 16;
                     sf.validBitsPerSample = 16;
+                }
+                break;
+            case BitsPerSampleFixType.AutoSelect:
+                if (validBitsPerSample == 16 ||
+                    validBitsPerSample == 32) {
+                    // 32や16の場合、1通りしか無い。
+                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                    sf.bitsPerSample = validBitsPerSample;
+                    sf.validBitsPerSample = validBitsPerSample;
+                } else if (validBitsPerSample == 24) {
+                    // Sint32V24とSint24を試す。
+                    switch (candidateId) {
+                    case 0:
+                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                        sf.bitsPerSample = 32;
+                        sf.validBitsPerSample = 24;
+                        break;
+                    case 1:
+                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
+                        sf.bitsPerSample = 24;
+                        sf.validBitsPerSample = 24;
+                        break;
+                    default:
+                        System.Diagnostics.Debug.Assert(false);
+                        break;
+                    }
+                } else {
+                    System.Diagnostics.Debug.Assert(false);
                 }
                 break;
             default:

@@ -25,11 +25,11 @@
                 <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="198,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
             </Grid>
         </GroupBox>
-        <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="0,20,0,151" Name="groupBox2">
+        <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="0,29,0,151" Name="groupBox2">
             <Grid>
                 <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
                 <Button Content="ここまで一括読み込み" Height="23" HorizontalAlignment="Left" Margin="191,0,0,6" Name="buttonReadSeparator" VerticalAlignment="Bottom" Width="177" Click="buttonReadSeparator_Click" />
-                <DataGrid ItemsSource="{Binding Path=PlayListCollection}" CanUserSortColumns="False" IsReadOnly="True" Margin="6,6,6,37" Name="dataGridPlayList" PreviewMouseDown="dataGridPlayList_PreviewMouseDown" PreviewMouseUp="dataGridPlayList_PreviewMouseUp" SelectionChanged="dataGridPlayList_SelectionChanged" GridLinesVisibility="None" CanUserReorderColumns="False" CanUserResizeColumns="False" SelectionMode="Single" />
+                <DataGrid ItemsSource="{Binding Path=PlayListCollection}" CanUserSortColumns="False" IsReadOnly="True" Margin="6,6,6,37" Name="dataGridPlayList" PreviewMouseDown="dataGridPlayList_PreviewMouseDown" PreviewMouseUp="dataGridPlayList_PreviewMouseUp" SelectionChanged="dataGridPlayList_SelectionChanged" GridLinesVisibility="None" CanUserReorderColumns="True" CanUserResizeColumns="True" SelectionMode="Single" Background="White" />
             </Grid>
         </GroupBox>
         <GroupBox Header="ログ" Name="groupBoxLog" Height="115" VerticalAlignment="Bottom" Margin="6,0,0,30">
@@ -65,7 +65,7 @@
                         <RadioButton Content="タイマー駆動" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonTimerDriven" VerticalAlignment="Top"  Checked="radioButtonTimerDriven_Checked" />
                     </Grid>
                 </GroupBox>
-                <TextBox Height="24" HorizontalAlignment="Left" Margin="144,148,0,0" Name="textBoxWasapiStatus" VerticalAlignment="Top" Width="212" IsReadOnly="True" IsTabStop="False" />
+                <TextBox Height="24" HorizontalAlignment="Left" Margin="144,148,0,0" Name="textBoxWasapiStatus" VerticalAlignment="Top" Width="212" IsReadOnly="True" IsTabStop="False" Text="wasapi status" />
             </Grid>
         </GroupBox>
         <GroupBox Grid.Column="1" Header="再生制御" Margin="8,0,12,30" Name="groupBox7" Height="133" VerticalAlignment="Bottom">

@@ -53,6 +53,9 @@ namespace PlayPcmWin {
             case BitsPerSampleFixType.Sint32V24:
                 radioButtonSint32V24.IsChecked = true;
                 break;
+            case BitsPerSampleFixType.AutoSelect:
+                radioButtonBpsAutoSelect.IsChecked = true;
+                break;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 break;
@@ -89,6 +92,9 @@ namespace PlayPcmWin {
             }
             if (true == radioButtonSint32V24.IsChecked) {
                 m_preference.bitsPerSampleFixType = BitsPerSampleFixType.Sint32V24;
+            }
+            if (true == radioButtonBpsAutoSelect.IsChecked) {
+                m_preference.bitsPerSampleFixType = BitsPerSampleFixType.AutoSelect;
             }
 
             m_preference.ReplaceGapWithKokomade
