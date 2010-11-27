@@ -30,7 +30,48 @@ WWPcmDataFormatTypeToStr(WWPcmDataFormatType w)
     }
 }
 
-int WWPcmDataFormatTypeToBitsPerSample(WWPcmDataFormatType t)
+WWPcmDataFormatType
+WWPcmDataBitsPerSamplesToFormatType(int bitsPerSample, int validBitsPerSample, GUID subFormat)
+{
+    if (subFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) {
+        if (bitsPerSample == 32 &&
+            validBitsPerSample == 32) {
+            return WWPcmDataFormatSfloat;
+        }
+        return WWPcmDataFormatUnknown;
+    }
+    
+    if (subFormat == KSDATAFORMAT_SUBTYPE_PCM) {
+        switch (bitsPerSample) {
+        case 16:
+            if (validBitsPerSample == 16) {
+                return WWPcmDataFormatSint16;
+            }
+            break;
+        case 24:
+            if (validBitsPerSample == 24) {
+                return WWPcmDataFormatSint24;
+            }
+            break;
+        case 32:
+            if (validBitsPerSample == 24) {
+                return WWPcmDataFormatSint32V24;
+            }
+            if (validBitsPerSample == 32) {
+                return WWPcmDataFormatSint32;
+            }
+            break;
+        default:
+            break;
+        }
+        return WWPcmDataFormatUnknown;
+    }
+
+    return WWPcmDataFormatUnknown;
+}
+
+int
+WWPcmDataFormatTypeToBitsPerSample(WWPcmDataFormatType t)
 {
     static const int result[WWPcmDataFormatNUM]
         = { 16, 24, 32, 32, 32 };
@@ -42,7 +83,8 @@ int WWPcmDataFormatTypeToBitsPerSample(WWPcmDataFormatType t)
     return result[t];
 }
 
-int WWPcmDataFormatTypeToValidBitsPerSample(WWPcmDataFormatType t)
+int
+WWPcmDataFormatTypeToValidBitsPerSample(WWPcmDataFormatType t)
 {
     static const int result[WWPcmDataFormatNUM]
         = { 16, 24, 24, 32, 32 };
@@ -54,7 +96,8 @@ int WWPcmDataFormatTypeToValidBitsPerSample(WWPcmDataFormatType t)
     return result[t];
 }
 
-bool WWPcmDataFormatTypeIsFloat(WWPcmDataFormatType t)
+bool
+WWPcmDataFormatTypeIsFloat(WWPcmDataFormatType t)
 {
     static const bool result[WWPcmDataFormatNUM]
         = { false, false, false, false, true };
@@ -66,7 +109,8 @@ bool WWPcmDataFormatTypeIsFloat(WWPcmDataFormatType t)
     return result[t];
 }
 
-bool WWPcmDataFormatTypeIsInt(WWPcmDataFormatType t)
+bool
+WWPcmDataFormatTypeIsInt(WWPcmDataFormatType t)
 {
     static const bool result[WWPcmDataFormatNUM]
         = { true, true, true, true, false };
@@ -359,3 +403,4 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
         break;
     }
 }
+

@@ -463,6 +463,7 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled    = true;
                 buttonSettings.IsEnabled = true;
+                textBoxWasapiStatus.Text = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
@@ -478,6 +479,7 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled    = false;
                 buttonSettings.IsEnabled = true;
+                textBoxWasapiStatus.Text = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
@@ -494,6 +496,10 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled = false;
                 buttonSettings.IsEnabled = false;
+                textBoxWasapiStatus.Text =
+                    string.Format("WASAPI {0}Hz {1}",
+                        wasapi.GetBufferFormatSampleRate(),
+                        wasapi.GetBufferFormatType());
                 statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
                 break;
             case State.ファイル読み込み完了:
@@ -2084,8 +2090,8 @@ namespace PlayPcmWin
             int groupId = m_pcmDataList[wavDataId].GroupId;
             if (m_pcmDataList[playingId].GroupId == groupId) {
                 // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
-                wasapi.SetNowPlayingPcmDataId(wavDataId);
-                AddLogText(string.Format("wasapi.SetNowPlayingPcmDataId({0})\r\n",
+                wasapi.UpdatePlayPcmDataById(wavDataId);
+                AddLogText(string.Format("wasapi.UpdatePlayPcmDataById({0})\r\n",
                     wavDataId));
             } else {
                 // ファイルグループが違う場合、再生を停止し、グループを読み直し、再生を再開する。

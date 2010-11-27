@@ -119,3 +119,12 @@ WasapiIO_GetPosFrame(void);
 extern "C" __declspec(dllexport)
 int __stdcall
 WasapiIO_GetTotalFrameNum(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetMixFormatSampleRate(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetMixFormatType(void);
+

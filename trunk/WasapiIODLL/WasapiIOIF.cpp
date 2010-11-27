@@ -183,7 +183,7 @@ void __stdcall
 WasapiIO_SetNowPlayingPcmDataId(int id)
 {
     assert(g_pWasapi);
-    g_pWasapi->SetNowPlayingPcmDataId(id);
+    g_pWasapi->UpdatePlayPcmDataById(id);
 }
 
 extern "C" __declspec(dllexport)
@@ -258,3 +258,20 @@ WasapiIO_SetPosFrame(int v)
     assert(g_pWasapi);
     return g_pWasapi->SetPosFrame(v);
 }
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetMixFormatSampleRate(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetBufferFormatSampleRate();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetMixFormatType(void)
+{
+    assert(g_pWasapi);
+    return g_pWasapi->GetBufferFormatType();
+}
+

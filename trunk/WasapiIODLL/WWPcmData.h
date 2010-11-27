@@ -3,6 +3,8 @@
 // 日本語 UTF-8
 
 #include <Windows.h>
+#include <mmsystem.h>
+#include <MMReg.h>
 
 /// PCMデータの用途。
 enum WWPcmDataContentType {
@@ -30,6 +32,9 @@ int WWPcmDataFormatTypeToBitsPerSample(WWPcmDataFormatType t);
 int WWPcmDataFormatTypeToValidBitsPerSample(WWPcmDataFormatType t);
 bool WWPcmDataFormatTypeIsFloat(WWPcmDataFormatType t);
 bool WWPcmDataFormatTypeIsInt(WWPcmDataFormatType t);
+
+WWPcmDataFormatType
+WWPcmDataBitsPerSamplesToFormatType(int bitsPerSample, int validBitsPerSample, GUID subFormat);
 
 /*
  * play
