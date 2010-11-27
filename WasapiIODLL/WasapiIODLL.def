@@ -31,3 +31,5 @@ EXPORTS
 	WasapiIO_GetPosFrame
 	WasapiIO_GetTotalFrameNum
 	WasapiIO_SetPosFrame
+	WasapiIO_GetMixFormatSampleRate
+	WasapiIO_GetMixFormatType

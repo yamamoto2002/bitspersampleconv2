@@ -124,6 +124,14 @@ namespace Wasapi {
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
         WasapiIO_SetPosFrame(int v);
+        
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetMixFormatSampleRate();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetMixFormatType();
 
         public int Init() {
             return WasapiIO_Init();
@@ -207,6 +215,7 @@ namespace Wasapi {
         };
 
         public enum SampleFormatType {
+            Unknown = -1,
             Sint16,
             Sint24,
             Sint32V24,
@@ -254,7 +263,7 @@ namespace Wasapi {
         /// 再生中に呼ぶ必要がある。再生中でない場合、空振りする。
         /// </summary>
         /// <param name="id">曲番号</param>
-        public void SetNowPlayingPcmDataId(int id) {
+        public void UpdatePlayPcmDataById(int id) {
             WasapiIO_SetNowPlayingPcmDataId(id);
         }
 
@@ -294,5 +303,12 @@ namespace Wasapi {
             return WasapiIO_SetPosFrame(v);
         }
 
+        public int GetBufferFormatSampleRate() {
+            return WasapiIO_GetMixFormatSampleRate();
+        }
+
+        public SampleFormatType GetBufferFormatType() {
+            return (SampleFormatType)WasapiIO_GetMixFormatType();
+        }
     }
 }

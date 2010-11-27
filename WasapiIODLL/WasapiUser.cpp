@@ -59,6 +59,7 @@ WasapiUser::WasapiUser(void)
     m_audioClockAdjustment = NULL;
     m_nowPlayingPcmData = NULL;
     m_useDeviceId    = -1;
+    m_deviceSampleRate  = 0;
 
     memset(m_useDeviceName, 0, sizeof m_useDeviceName);
 }
@@ -590,6 +591,8 @@ WasapiUser::Setup(
 
     bool needClockAdjustmentOnSharedMode = false;
 
+    m_deviceSampleRate = waveFormat->nSamplesPerSec;
+
     if (WWSMShared == m_shareMode) {
         // 共有モードでデバイスサンプルレートと
         // WAVファイルのサンプルレートが異なる場合、
@@ -1002,7 +1005,7 @@ WasapiUser::PlayPcmDataListDebug(void)
 }
 
 bool
-WasapiUser::SetNowPlayingPcmDataId(int id)
+WasapiUser::UpdatePlayPcmDataById(int id)
 {
     dprintf("D: %s(%d)\n", __FUNCTION__, id);
 
@@ -1489,5 +1492,39 @@ WasapiUser::AudioSamplesRecvProc(void)
 end:
     ReleaseMutex(m_mutex);
     return result;
+}
+
+int
+WasapiUser::GetBufferFormatSampleRate(void)
+{
+#if 1
+    return m_deviceSampleRate;
+#else
+    HRESULT      hr          = 0;
+    WAVEFORMATEX *waveFormat = NULL;
+    int          sampleRate  = 0;
+
+    if (NULL == m_audioClient) {
+        return 0;
+    }
+
+    HRG(m_audioClient->GetMixFormat(&waveFormat));
+    assert(waveFormat);
+
+    sampleRate = (int)waveFormat->nSamplesPerSec;
+
+end:
+    if (waveFormat) {
+        CoTaskMemFree(waveFormat);
+        waveFormat = NULL;
+    }
+    return sampleRate;
+#endif
+}
+
+WWPcmDataFormatType
+WasapiUser::GetBufferFormatType(void)
+{
+    return m_format;
 }
 

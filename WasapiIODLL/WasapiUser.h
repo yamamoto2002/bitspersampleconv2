@@ -80,6 +80,10 @@ public:
         WWPcmDataFormatType format, int latencyMillisec, int numChannels);
     void Unsetup(void);
 
+    /// Setup後に呼ぶ
+    int GetBufferFormatSampleRate(void);
+    WWPcmDataFormatType GetBufferFormatType(void);
+
     // PCMデータのセット方法
     //     1. ClearPlayList()を呼ぶ。
     //     2. AddPlayPcmDataStart()を呼ぶ。
@@ -108,7 +112,7 @@ public:
 
     /// -1: not playing
     int GetNowPlayingPcmDataId(void);
-    bool SetNowPlayingPcmDataId(int id);
+    bool UpdatePlayPcmDataById(int id);
 
     // recording
     void SetupCaptureBuffer(int bytes);
@@ -176,6 +180,7 @@ private:
     int          m_useDeviceId;
     wchar_t      m_useDeviceName[WW_DEVICE_NAME_COUNT];
     WWPcmData    m_spliceBuffer;
+    int          m_deviceSampleRate;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
