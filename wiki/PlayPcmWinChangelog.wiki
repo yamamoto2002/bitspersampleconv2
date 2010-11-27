@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.20 ==
+  * WASAPIフォーマットの画面表示 見た目を変更。
+
 ===!PlayPcmWin 2.0.19 ==
   * Windowsクラシックテーマ表示で画面表示が崩れる問題を修正。
 
