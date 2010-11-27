@@ -494,7 +494,7 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled    = true;
                 buttonSettings.IsEnabled = true;
-                textBoxWasapiStatus.Text = "WASAPI 停止中";
+                labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
@@ -510,7 +510,7 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled    = false;
                 buttonSettings.IsEnabled = true;
-                textBoxWasapiStatus.Text = "WASAPI 停止中";
+                labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
@@ -527,7 +527,7 @@ namespace PlayPcmWin
 
                 buttonInspectDevice.IsEnabled = false;
                 buttonSettings.IsEnabled = false;
-                textBoxWasapiStatus.Text =
+                labelWasapiStatus.Content =
                     string.Format("WASAPI {0}Hz {1}",
                         wasapi.GetBufferFormatSampleRate(),
                         wasapi.GetBufferFormatType());
