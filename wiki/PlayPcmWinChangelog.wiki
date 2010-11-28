@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.22 ==
+  * ABX Test機能新規作成。
+
 ===!PlayPcmWin 2.0.21 ==
   * Issue 26 量子化ビット数24ビットフォーマットの自動選択のバグを修正。(Sint32V24に対応しているデバイスで再生失敗)
 
