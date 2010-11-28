@@ -391,7 +391,7 @@ namespace PlayPcmWin {
             PcmData pcmData = ReadWavFile(textBoxPathB.Text);
             if (null == pcmData) {
                 MessageBox.Show(
-                    string.Format("WAVファイル A 読み込み失敗: {0}", textBoxPathB.Text));
+                    string.Format("WAVファイル B 読み込み失敗: {0}", textBoxPathB.Text));
                 return;
             }
 
