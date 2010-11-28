@@ -472,7 +472,7 @@ namespace PlayPcmWin {
                 }
 
                 ++answered;
-                s += string.Format("{0}回目 {1} 正解 X={2},Y={3}\r\n",
+                s += string.Format("テスト{0}回目 {1} 正解は X={2},Y={3}\r\n",
                     i, ti.x == ti.answer ? "○" : "×",
                     ti.x == AB.A ? "A" : "B",
                     ti.x == AB.A ? "B" : "A");
