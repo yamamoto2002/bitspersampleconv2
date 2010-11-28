@@ -341,7 +341,6 @@ namespace PlayPcmWin
         }
 
         struct SampleFormatInfo {
-            public bool autoSelect;
             public int bitsPerSample;
             public int validBitsPerSample;
             public WasapiCS.BitFormatType bitFormatType;
@@ -844,7 +843,13 @@ namespace PlayPcmWin
                     m_preference.renderThreadTaskType);
 
                 int hr = WasapiSetup1();
-                if (hr < 0 && i == (candidateNum-1)) {
+                if (0 <= hr) {
+                    // 成功
+                    break;
+                }
+
+                // 失敗
+                if (i == (candidateNum-1)) {
                     string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{5:X8}\n" +
                         "このプログラムのバグか、オーディオデバイスが{0}Hz {1} レイテンシー{2}ms {3} {4}に対応していないのか、" +
                         "どちらかです。\r\n",
@@ -1175,7 +1180,16 @@ namespace PlayPcmWin
                 UpdateUIStatus();
             }
         }
-        
+
+        private void MenuItemToolAbx_Click(object sender, RoutedEventArgs e) {
+            UnsetupDevice();
+
+            ABX abx = new ABX();
+            abx.Prepare(wasapi);
+
+            abx.ShowDialog();
+        }
+
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
                 string.Format("PlayPcmWin バージョン {0}\r\n\r\n" +
@@ -1330,7 +1344,7 @@ namespace PlayPcmWin
                     }
 
                     // 必要に応じて量子化ビット数の変更を行う。
-                    pd = BitsPerSampleConvAsNeeded(pd);
+                    pd = BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
 
                     if (pd.GetSampleArray() != null &&
                         0 < pd.GetSampleArray().Length) {
@@ -1414,7 +1428,7 @@ namespace PlayPcmWin
                     }
 
                     // 必要に応じて量子化ビット数の変更を行う。
-                    pd = BitsPerSampleConvAsNeeded(pd);
+                    pd = BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
 
                     m_readFileWorker.ReportProgress(100 * count / m_pcmDataList.Count,
                         string.Format("Read {0}, {1} frames\r\n", pd.Id, pd.NumFrames));
@@ -1487,7 +1501,7 @@ namespace PlayPcmWin
         /// PcmDataの形式と、(共有・排他)、フォーマット固定設定から、
         /// デバイスに設定されるビットフォーマットを取得。
         /// 
-        /// 似たようなプログラムがBitsPerSampleConvAsNeeded()にコピペされている。
+        /// これは、内容的にテーブルなので、テーブルにまとめたほうが良い。
         /// </summary>
         /// <returns>デバイスに設定されるビットフォーマット</returns>
         private SampleFormatInfo GetDeviceSampleFormat(
@@ -1605,85 +1619,40 @@ namespace PlayPcmWin
 
         /// <summary>
         /// 量子化ビット数を、もし必要なら変更する。
-        /// 
-        /// 似たようなプログラムがGetDeviceBitFormat()にコピペされている。
         /// </summary>
-        /// <param name="pd">入力WavData</param>
-        /// <returns>変更後WavData</returns>
-        private PcmDataLib.PcmData BitsPerSampleConvAsNeeded(PcmDataLib.PcmData pd) {
-            if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
-                // 共有モードの場合Sfloat32に変換する。
-                // 元データがSint32の場合、切り捨てによって情報が失われる。
+        /// <param name="pd">入力PcmData</param>
+        /// <returns>変更後PcmData</returns>
+        static public PcmDataLib.PcmData BitsPerSampleConvAsNeeded(PcmDataLib.PcmData pd, WasapiCS.SampleFormatType fmt) {
+            switch (fmt) {
+            case WasapiCS.SampleFormatType.Sfloat:
                 System.Console.WriteLine("Converting to Sfloat32bit...");
                 pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SFloat);
-                return pd;
-            }
-
-            // 排他モード。
-            switch (m_preference.bitsPerSampleFixType) {
-            case BitsPerSampleFixType.Sint16:
-                // Sint16に変換する。
-                // この場合は、元データが24ビット以上の場合、切り捨てによって情報が失われる。
+                pd.ValidBitsPerSample = 32;
+                break;
+            case WasapiCS.SampleFormatType.Sint16:
                 System.Console.WriteLine("Converting to SInt16bit...");
                 pd = pd.BitsPerSampleConvertTo(16, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 16;
                 break;
-            case BitsPerSampleFixType.Sint24:
-                // Sint24に変換する。
-                // 変換元データの有効ビット数が24未満の場合は、嘘になる。
-                System.Console.WriteLine("Converting to SInt24bit...");
+            case WasapiCS.SampleFormatType.Sint24:
+                System.Console.WriteLine("Converting to SInt24...");
                 pd = pd.BitsPerSampleConvertTo(24, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 pd.ValidBitsPerSample = 24;
                 break;
-            case BitsPerSampleFixType.Sint32:
-                // Sint32に変換する。
-                // 変換元データの有効ビット数が32未満の場合は、嘘になる。
-                System.Console.WriteLine("Converting to SInt32bit...");
-                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                pd.ValidBitsPerSample = 32;
-                break;
-            case BitsPerSampleFixType.Sint32V24:
-                // Sint32(有効ビット数24)に変換する。
-                // 変換元データの有効ビット数が24未満の場合は、嘘になる。
+            case WasapiCS.SampleFormatType.Sint32V24:
                 System.Console.WriteLine("Converting to SInt32V24...");
                 pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
                 pd.ValidBitsPerSample = 24;
                 break;
-            case BitsPerSampleFixType.Sfloat32:
-                // Sfloat32に変換する。
-                // この場合は、元データがSint32の場合、切り捨てによって情報が失われる。
-                System.Console.WriteLine("Converting to Sfloat32bit...");
-                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SFloat);
-                break;
-            case BitsPerSampleFixType.Variable:
-                // SInt16→SInt16のまま。
-                // SInt32、SFloat32、SInt24→SInt32に変換。
-                if (pd.BitsPerSample != 16) {
-                    pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                }
-                break;
-            case BitsPerSampleFixType.VariableSint16Sint24:
-                // SInt16→SInt16のまま。
-                // SInt32、SFloat32→SInt24に変換。
-                if (pd.BitsPerSample != 16) {
-                    pd = pd.BitsPerSampleConvertTo(24, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                }
-                break;
-            case BitsPerSampleFixType.VariableSint16Sint32V24:
-                // SInt16→SInt16のまま。
-                // SInt24、SFloat32→SInt32に変換。
-                // 有効ビット数を24ビット以下にする。
-                if (pd.BitsPerSample != 16) {
-                    pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                }
-                if (24 < pd.ValidBitsPerSample) {
-                    pd.ValidBitsPerSample = 24;
-                }
+            case WasapiCS.SampleFormatType.Sint32:
+                System.Console.WriteLine("Converting to SInt32bit...");
+                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 32;
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 break;
             }
-
             return pd;
         }
 
