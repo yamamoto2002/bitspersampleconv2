@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.23 ==
+  * ABX Test 結果発表の文を修正(「正解 X=A, Y=B」→「正解は X=A, Y=B」)。
+
 ===!PlayPcmWin 2.0.22 ==
   * ABX Test機能新規作成。
 
