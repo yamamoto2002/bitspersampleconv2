@@ -104,6 +104,7 @@
     <Compile Include="AiffReader.cs" />
     <Compile Include="CueSheetReader.cs" />
     <Compile Include="FlacDecodeIF.cs" />
+    <Compile Include="PcmUtil.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
