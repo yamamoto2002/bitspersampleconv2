@@ -340,35 +340,6 @@ namespace PlayPcmWin
             return -1;
         }
 
-        struct SampleFormatInfo {
-            public int bitsPerSample;
-            public int validBitsPerSample;
-            public WasapiCS.BitFormatType bitFormatType;
-
-            public WasapiCS.SampleFormatType GetSampleFormatType() {
-                if (bitFormatType == WasapiCS.BitFormatType.SFloat) {
-                    System.Diagnostics.Debug.Assert(bitsPerSample == 32);
-                    System.Diagnostics.Debug.Assert(validBitsPerSample == 32);
-                    return WasapiCS.SampleFormatType.Sfloat;
-                }
-
-                switch (bitsPerSample) {
-                case 16:
-                    return WasapiCS.SampleFormatType.Sint16;
-                case 24:
-                    return WasapiCS.SampleFormatType.Sint24;
-                case 32:
-                    if (validBitsPerSample == 24) {
-                        return WasapiCS.SampleFormatType.Sint32V24;
-                    }
-                    return WasapiCS.SampleFormatType.Sint32;
-                default:
-                    System.Diagnostics.Debug.Assert(false);
-                    return WasapiCS.SampleFormatType.Sint16;
-                }
-            }
-        };
-
         public MainWindow()
         {
             InitializeComponent();
@@ -492,6 +463,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = true;
+                menuItemToolAbx.IsEnabled = true;
+
                 buttonSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作って下さい。";
@@ -508,6 +481,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
@@ -525,6 +500,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = false;
                 labelWasapiStatus.Content =
                     string.Format("WASAPI {0}Hz {1}",
@@ -544,6 +521,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "ファイル読み込み完了。再生できます。";
 
@@ -563,6 +542,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生中";
 
@@ -580,6 +561,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生停止開始";
                 break;
@@ -595,6 +578,8 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
+                menuItemToolAbx.IsEnabled = false;
+
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生グループ読み込み中";
                 break;
@@ -809,13 +794,15 @@ namespace PlayPcmWin
 
             // 1つのフォーマットに対して複数のデバイス設定選択肢がありうる。
 
-            int candidateNum = GetDeviceSampleFormatCandidateNum(
-                startPcmData.ValidBitsPerSample,
-                startPcmData.SampleValueRepresentationType);
+            int candidateNum = SampleFormatInfo.GetDeviceSampleFormatCandidateNum(
+                m_preference.wasapiSharedOrExclusive,
+                m_preference.bitsPerSampleFixType,
+                startPcmData.ValidBitsPerSample);
             for (int i = 0; i < candidateNum; ++i) {
-                SampleFormatInfo sf = GetDeviceSampleFormat(
-                    startPcmData.ValidBitsPerSample,
-                    startPcmData.SampleValueRepresentationType, i);
+                SampleFormatInfo sf = SampleFormatInfo.GetDeviceSampleFormat(
+                    m_preference.wasapiSharedOrExclusive,
+                    m_preference.bitsPerSampleFixType,
+                    startPcmData.ValidBitsPerSample, i);
 
                 if (m_deviceSetupInfo.Is(
                     startPcmData.SampleRate,
@@ -830,9 +817,10 @@ namespace PlayPcmWin
             }
 
             for (int i = 0; i < candidateNum; ++i) {
-                SampleFormatInfo sf = GetDeviceSampleFormat(
-                    startPcmData.ValidBitsPerSample,
-                    startPcmData.SampleValueRepresentationType, i);
+                SampleFormatInfo sf = SampleFormatInfo.GetDeviceSampleFormat(
+                    m_preference.wasapiSharedOrExclusive,
+                    m_preference.bitsPerSampleFixType,
+                    startPcmData.ValidBitsPerSample, i);
 
                 m_deviceSetupInfo.Set(
                     startPcmData.SampleRate,
@@ -1188,6 +1176,7 @@ namespace PlayPcmWin
             abx.Prepare(wasapi);
 
             abx.ShowDialog();
+
         }
 
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
@@ -1344,7 +1333,7 @@ namespace PlayPcmWin
                     }
 
                     // 必要に応じて量子化ビット数の変更を行う。
-                    pd = BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
+                    pd = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
 
                     if (pd.GetSampleArray() != null &&
                         0 < pd.GetSampleArray().Length) {
@@ -1428,7 +1417,7 @@ namespace PlayPcmWin
                     }
 
                     // 必要に応じて量子化ビット数の変更を行う。
-                    pd = BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
+                    pd = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
 
                     m_readFileWorker.ReportProgress(100 * count / m_pcmDataList.Count,
                         string.Format("Read {0}, {1} frames\r\n", pd.Id, pd.NumFrames));
@@ -1477,183 +1466,6 @@ namespace PlayPcmWin
                 args.Result = r;
                 Console.WriteLine("D: ReadFileParallelDoWork() {0}", ex.ToString());
             }
-        }
-
-        /// <summary>
-        /// フォーマット設定から、
-        /// デバイスに設定されうるビットフォーマットの候補の数を数えて戻す。
-        /// </summary>
-        /// <returns>デバイスに設定されうるビットフォーマットの候補の数</returns>
-        private int GetDeviceSampleFormatCandidateNum(
-                int pcmDataValidBitsPerSample,
-                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt) {
-            if (m_preference.bitsPerSampleFixType != BitsPerSampleFixType.AutoSelect ||
-                pcmDataValidBitsPerSample != 24 ||
-                m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
-                return 1;
-            }
-
-            // AutoSelect 24bit 排他モードの場合Sint32V24とSint24を試す。
-            return 2;
-        }
-
-        /// <summary>
-        /// PcmDataの形式と、(共有・排他)、フォーマット固定設定から、
-        /// デバイスに設定されるビットフォーマットを取得。
-        /// 
-        /// これは、内容的にテーブルなので、テーブルにまとめたほうが良い。
-        /// </summary>
-        /// <returns>デバイスに設定されるビットフォーマット</returns>
-        private SampleFormatInfo GetDeviceSampleFormat(
-                int validBitsPerSample,
-                PcmDataLib.PcmData.ValueRepresentationType pcmDataVrt,
-                int candidateId) {
-            SampleFormatInfo sf = new SampleFormatInfo();
-
-            if (m_preference.wasapiSharedOrExclusive == WasapiSharedOrExclusive.Shared) {
-                // 共有モード
-                sf.bitsPerSample      = 32;
-                sf.validBitsPerSample = 32;
-                sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
-                return sf;
-            }
-
-            // 排他モード
-            switch (m_preference.bitsPerSampleFixType) {
-            case BitsPerSampleFixType.Sint16:
-                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                sf.bitsPerSample = 16;
-                sf.validBitsPerSample = 16;
-                break;
-            case BitsPerSampleFixType.Sint24:
-                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                sf.bitsPerSample = 24;
-                sf.validBitsPerSample = 24;
-                break;
-            case BitsPerSampleFixType.Sint32:
-                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                sf.bitsPerSample = 32;
-                sf.validBitsPerSample = 32;
-                break;
-            case BitsPerSampleFixType.Sint32V24:
-                sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                sf.bitsPerSample = 32;
-                sf.validBitsPerSample = 24;
-                break;
-            case BitsPerSampleFixType.Sfloat32:
-                sf.bitFormatType = WasapiCS.BitFormatType.SFloat;
-                sf.bitsPerSample = 32;
-                sf.validBitsPerSample = 32;
-                break;
-            case BitsPerSampleFixType.Variable:
-                if (validBitsPerSample != 16) {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 32;
-                    sf.validBitsPerSample = validBitsPerSample;
-                } else {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 16;
-                    sf.validBitsPerSample = 16;
-                }
-                break;
-            case BitsPerSampleFixType.VariableSint16Sint32V24:
-                if (validBitsPerSample != 16) {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 32;
-                    sf.validBitsPerSample = validBitsPerSample;
-                    if (24 < validBitsPerSample) {
-                        sf.validBitsPerSample = 24;
-                    }
-                } else {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 16;
-                    sf.validBitsPerSample = 16;
-                }
-                break;
-            case BitsPerSampleFixType.VariableSint16Sint24:
-                if (validBitsPerSample != 16) {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 24;
-                    sf.validBitsPerSample = 24;
-                } else {
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = 16;
-                    sf.validBitsPerSample = 16;
-                }
-                break;
-            case BitsPerSampleFixType.AutoSelect:
-                if (validBitsPerSample == 16 ||
-                    validBitsPerSample == 32) {
-                    // 32や16の場合、1通りしか無い。
-                    sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                    sf.bitsPerSample = validBitsPerSample;
-                    sf.validBitsPerSample = validBitsPerSample;
-                } else if (validBitsPerSample == 24) {
-                    // Sint32V24とSint24を試す。
-                    switch (candidateId) {
-                    case 0:
-                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                        sf.bitsPerSample = 32;
-                        sf.validBitsPerSample = 24;
-                        break;
-                    case 1:
-                        sf.bitFormatType = WasapiCS.BitFormatType.SInt;
-                        sf.bitsPerSample = 24;
-                        sf.validBitsPerSample = 24;
-                        break;
-                    default:
-                        System.Diagnostics.Debug.Assert(false);
-                        break;
-                    }
-                } else {
-                    System.Diagnostics.Debug.Assert(false);
-                }
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
-            }
-
-            return sf;
-        }
-
-        /// <summary>
-        /// 量子化ビット数を、もし必要なら変更する。
-        /// </summary>
-        /// <param name="pd">入力PcmData</param>
-        /// <returns>変更後PcmData</returns>
-        static public PcmDataLib.PcmData BitsPerSampleConvAsNeeded(PcmDataLib.PcmData pd, WasapiCS.SampleFormatType fmt) {
-            switch (fmt) {
-            case WasapiCS.SampleFormatType.Sfloat:
-                System.Console.WriteLine("Converting to Sfloat32bit...");
-                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SFloat);
-                pd.ValidBitsPerSample = 32;
-                break;
-            case WasapiCS.SampleFormatType.Sint16:
-                System.Console.WriteLine("Converting to SInt16bit...");
-                pd = pd.BitsPerSampleConvertTo(16, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                pd.ValidBitsPerSample = 16;
-                break;
-            case WasapiCS.SampleFormatType.Sint24:
-                System.Console.WriteLine("Converting to SInt24...");
-                pd = pd.BitsPerSampleConvertTo(24, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                pd.ValidBitsPerSample = 24;
-                break;
-            case WasapiCS.SampleFormatType.Sint32V24:
-                System.Console.WriteLine("Converting to SInt32V24...");
-                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                pd.ValidBitsPerSample = 24;
-                break;
-            case WasapiCS.SampleFormatType.Sint32:
-                System.Console.WriteLine("Converting to SInt32bit...");
-                pd = pd.BitsPerSampleConvertTo(32, PcmDataLib.PcmData.ValueRepresentationType.SInt);
-                pd.ValidBitsPerSample = 32;
-                break;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                break;
-            }
-            return pd;
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
