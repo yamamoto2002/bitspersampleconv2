@@ -98,12 +98,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ABX.xaml.cs">
+      <DependentUpon>ABX.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AiffReader.cs" />
     <Compile Include="CueSheetReader.cs" />
     <Compile Include="FlacDecodeIF.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="ABX.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

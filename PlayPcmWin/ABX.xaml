@@ -1,0 +1,94 @@
+﻿<Window x:Class="PlayPcmWin.ABX"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ABX Test" Height="600" Width="800" ResizeMode="CanMinimize">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="389*" />
+            <ColumnDefinition Width="389*" />
+        </Grid.ColumnDefinitions>
+        <GroupBox Header="A" Height="265" HorizontalAlignment="Left" Margin="12,12,0,0" Name="groupBoxA" VerticalAlignment="Top" Width="377">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130*" />
+                    <ColumnDefinition Width="235*" />
+                </Grid.ColumnDefinitions>
+                <Button Content="Aを再生" HorizontalAlignment="Left" Margin="6,7,0,0" Name="buttonPlayA" Width="124" Height="23" VerticalAlignment="Top" Grid.Row="5" Click="buttonPlayA_Click" />
+                <Label Content="再生するファイル" Margin="0,0,0,0" Name="label2" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" />
+                <Label Content="再生デバイス" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="label3" Grid.Row="1" VerticalContentAlignment="Center" />
+                <Label Content="排他/共有" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="label4" Grid.Row="2" VerticalContentAlignment="Center" />
+                <Label Content="出力レイテンシー" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="label5" Grid.Row="3" VerticalContentAlignment="Center" />
+                <Label Content="データ供給モード" HorizontalContentAlignment="Right" Name="label6" Grid.Row="4" Margin="0,0,0,0" VerticalContentAlignment="Center" />
+                <Button Content="参照..." Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="6,36,0,0" Name="buttonBrowseA" VerticalAlignment="Top" Width="75" Click="buttonBrowseA_Click" />
+                <ComboBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="6,4,0,0" Name="comboBoxDeviceA" VerticalAlignment="Top" Width="223" />
+                <RadioButton Content="排他" Grid.Column="1" Grid.Row="2" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonExclusiveA" VerticalAlignment="Top" IsChecked="True" GroupName="SharedOrExclusive" />
+                <RadioButton Content="共有" Height="16" HorizontalAlignment="Left" Margin="112,7,0,0" Name="radioButtonSharedA" VerticalAlignment="Top" Grid.Column="1" Grid.Row="2" GroupName="SharedOrExclusive" />
+                <RadioButton Content="イベント" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonEventDrivenA" VerticalAlignment="Top" Grid.Column="1" Grid.Row="4" GroupName="DataFeedMode" />
+                <RadioButton Content="タイマー" Height="16" HorizontalAlignment="Left" Margin="112,7,0,0" Name="radioButtonTimerDrivenA" VerticalAlignment="Top" Grid.Column="1" Grid.Row="4" GroupName="DataFeedMode" />
+                <TextBox Grid.Column="1" Grid.Row="3" Height="24" HorizontalAlignment="Left" Margin="6,4,0,0" Name="textBoxLatencyA" VerticalAlignment="Top" Width="157" Text="100" />
+                <Label Content="ms" Grid.Column="1" Grid.Row="3" Grid.RowSpan="2" Height="28" HorizontalAlignment="Left" Margin="169,5,0,0" Name="label7" VerticalAlignment="Top" Width="66" />
+                <TextBox Grid.Column="1" Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxPathA" VerticalAlignment="Top" Width="223" Text="" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="X" Height="64" HorizontalAlignment="Left" Margin="12,324,0,0" Name="groupBoxX" VerticalAlignment="Top" Width="161">
+            <Grid>
+                <Button Content="Xを再生" Height="23" Margin="6,6,6,0" Name="buttonPlayX" VerticalAlignment="Top" Click="buttonPlayX_Click" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="Y" Height="64" HorizontalAlignment="Left" Margin="197,324,0,0" Name="groupBox1" VerticalAlignment="Top" Width="161">
+            <Grid>
+                <Button Content="Yを再生" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlayY" Width="137" Click="buttonPlayY_Click" Height="23" VerticalAlignment="Top" />
+            </Grid>
+        </GroupBox>
+        <Button Content="テストを中断し、結果を見る" Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="156,526,0,0" Name="buttonFinish" VerticalAlignment="Top" Width="227" Click="buttonFinish_Click" />
+        <GroupBox Header="答案" Height="167" HorizontalAlignment="Left" Margin="6,281,0,0" Name="groupBox2" VerticalAlignment="Top" Width="377" Grid.Column="1">
+            <Grid>
+                <Button Content="回答を確定し、次のテストに進む" HorizontalAlignment="Left" Margin="8,113,0,0" Name="buttonConfirm" Width="269" Height="23" VerticalAlignment="Top" Click="buttonConfirm_Click" />
+                <RadioButton Content="A=X, B=Y" Height="16" HorizontalAlignment="Left" Margin="39,56,0,0" Name="radioButtonAXBY" VerticalAlignment="Top" Width="215" IsChecked="True" />
+                <RadioButton Content="A=Y, B=X" Height="16" HorizontalAlignment="Left" Margin="39,79,0,0" Name="radioButtonAYBX" VerticalAlignment="Top" Width="215" />
+                <Label Content="LabelGuide" Height="28" Margin="8,11,6,0" Name="labelGuide" VerticalAlignment="Top" />
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="B" Height="265" HorizontalAlignment="Left" Margin="6,12,0,0" Name="groupBox3" VerticalAlignment="Top" Width="377" Grid.Column="1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="130*" />
+                    <ColumnDefinition Width="235*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                    <RowDefinition Height="32*" />
+                </Grid.RowDefinitions>
+                <Button Content="Bを再生" Grid.Row="5" Height="23" HorizontalAlignment="Left" Margin="8,6,0,0" Name="buttonPlayB" VerticalAlignment="Top" Width="122" Click="buttonPlayB_Click" />
+                <Label Content="再生するファイル" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="labelTitlePlayFile" VerticalContentAlignment="Center" />
+                <Label Content="再生デバイス" Grid.Row="1" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="labelTitleDevice" VerticalContentAlignment="Center" />
+                <Label Content="排他/共有" Grid.Row="2" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="labelTitleSharedOrExclusive" VerticalContentAlignment="Center" />
+                <Label Content="出力レイテンシー" Grid.Row="3" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="label10" VerticalContentAlignment="Center" />
+                <Label Content="データ供給モード" Grid.Row="4" HorizontalContentAlignment="Right" Margin="0,0,0,0" Name="label11" VerticalContentAlignment="Center" />
+                <Button Content="参照..." Grid.Column="1" Height="23" HorizontalAlignment="Left" Margin="6,36,0,0" Name="buttonBrowseB" VerticalAlignment="Top" Width="75" Click="buttonBrowseB_Click" />
+                <ComboBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="6,4,0,0" Name="comboBoxDeviceB" VerticalAlignment="Top" Width="223" />
+                <RadioButton Content="排他" Grid.Column="1" Grid.Row="2" GroupName="SharedOrExclusiveB" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonExclusiveB" VerticalAlignment="Top" />
+                <RadioButton Content="共有" Grid.Column="1" Grid.Row="2" GroupName="SharedOrExclusiveB" Height="16" HorizontalAlignment="Left" Margin="112,7,0,0" Name="radioButtonSharedB" VerticalAlignment="Top" />
+                <RadioButton Content="イベント" Grid.Column="1" Grid.Row="4" GroupName="DataFeedModeB" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonEventDrivenB" VerticalAlignment="Top" />
+                <RadioButton Content="タイマー" Grid.Column="1" Grid.Row="4" GroupName="DataFeedModeB" Height="16" HorizontalAlignment="Left" Margin="112,7,0,0" Name="radioButtonTimerDrivenB" VerticalAlignment="Top" />
+                <TextBox Grid.Column="1" Grid.Row="3" Height="24" HorizontalAlignment="Left" Margin="6,4,0,0" Name="textBoxLatencyB" Text="100" VerticalAlignment="Top" Width="157" />
+                <Label Content="ms" Grid.Column="1" Grid.Row="3" Grid.RowSpan="2" Height="28" HorizontalAlignment="Left" Margin="169,5,0,0" Name="label13" VerticalAlignment="Top" Width="66" />
+                <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxB" VerticalAlignment="Top" Width="223" Grid.Column="1" Text="" />
+            </Grid>
+        </GroupBox>
+        <Slider Height="23" Margin="18,0,31,109" Name="sliderX" VerticalAlignment="Bottom" />
+        <Button Content="停止" Height="23" HorizontalAlignment="Left" Margin="133,491,0,0" Name="buttonStop" VerticalAlignment="Top" Width="105" IsEnabled="False" Click="buttonStop_Click" />
+    </Grid>
+</Window>

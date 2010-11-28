@@ -13,6 +13,9 @@
                 <Separator />
                 <MenuItem Header="終了(_X)" Click="MenuItemFileExit_Click" />
             </MenuItem>
+            <MenuItem Header="ツール(_T)">
+                <MenuItem Header="ABXテスト(_A)" Click="MenuItemToolAbx_Click" IsEnabled="False" />
+            </MenuItem>
             <MenuItem Header="ヘルプ(_H)">
                 <MenuItem Header="バージョン情報(_V)" Click="MenuItemHelpAbout_Click" />
                 <MenuItem Header="PlayPcmWinのWebページ(_W)" Click="MenuItemHelpWeb_Click" />
