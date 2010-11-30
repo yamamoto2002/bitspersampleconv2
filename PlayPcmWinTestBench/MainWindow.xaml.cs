@@ -1,4 +1,6 @@
-﻿using System;
+﻿// 日本語UTF-8
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,19 +11,18 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Wasapi;
 using System.Security.Cryptography;
+using System.ComponentModel;
+using Wasapi;
+using PcmDataLib;
 using System.IO;
 using WavRWLib2;
-using PcmDataLib;
-using System.ComponentModel;
+using WasapiPcmUtil;
 
-namespace PlayPcmWin {
-    /// <summary>
-    /// ABX.xaml の相互作用ロジック
-    /// </summary>
-    public partial class ABX : Window {
+namespace PlayPcmWinTestBench {
+    public partial class MainWindow : Window {
         Wasapi.WasapiCS wasapi;
         RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
         private BackgroundWorker m_playWorker;
@@ -75,9 +76,31 @@ namespace PlayPcmWin {
         }
 
 
-        public ABX() {
+        public MainWindow() {
             InitializeComponent();
+
+            wasapi = new WasapiCS();
+            wasapi.Init();
+
+            Prepare();
         }
+
+        private void Prepare() {
+            ListDevices();
+
+            m_testInfoList.Clear();
+            PrepareNextTest();
+
+            UpdateUIStatus();
+
+            m_playWorker = new BackgroundWorker();
+            m_playWorker.WorkerReportsProgress = true;
+            m_playWorker.DoWork += new DoWorkEventHandler(PlayDoWork);
+            m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
+            m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
+            m_playWorker.WorkerSupportsCancellation = true;
+        }
+
         
         private void Window_Closed(object sender, EventArgs e) {
             if (wasapi != null) {
@@ -96,6 +119,8 @@ namespace PlayPcmWin {
                 }
 
                 wasapi.UnchooseDevice();
+                wasapi.Term();
+                wasapi = null;
             }
 
         }
@@ -123,24 +148,6 @@ namespace PlayPcmWin {
             
             ComboBoxDeviceInit(comboBoxDeviceA);
             ComboBoxDeviceInit(comboBoxDeviceB);
-        }
-
-        public void Prepare(Wasapi.WasapiCS wasapi) {
-            this.wasapi = wasapi;
-            ListDevices();
-
-
-            m_testInfoList.Clear();
-            PrepareNextTest();
-
-            UpdateUIStatus();
-
-            m_playWorker = new BackgroundWorker();
-            m_playWorker.WorkerReportsProgress = true;
-            m_playWorker.DoWork += new DoWorkEventHandler(PlayDoWork);
-            m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
-            m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
-            m_playWorker.WorkerSupportsCancellation = true;
         }
 
         /// <summary>

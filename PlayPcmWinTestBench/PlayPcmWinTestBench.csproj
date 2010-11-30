@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{23DC272C-B67B-41C5-9622-A35BFA3B9D1E}</ProjectGuid>
+    <ProjectGuid>{79AD7BD1-3D9C-4089-B400-C3FE187F97A8}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PlayPcmWin</RootNamespace>
-    <AssemblyName>PlayPcmWin</AssemblyName>
+    <RootNamespace>PlayPcmWinTestBench</RootNamespace>
+    <AssemblyName>PlayPcmWinTestBench</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <FileAlignment>512</FileAlignment>
@@ -40,7 +40,6 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <PlatformTarget>x86</PlatformTarget>
@@ -50,10 +49,6 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -62,7 +57,9 @@
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
+    <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -71,9 +68,9 @@
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
-    <CodeAnalysisIgnoreBuiltInRuleSets>false</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
+    <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <CodeAnalysisFailOnMissingRules>false</CodeAnalysisFailOnMissingRules>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>PlayPcmWin64.ico</ApplicationIcon>
@@ -98,12 +95,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AiffReader.cs" />
-    <Compile Include="CueSheetReader.cs" />
-    <Compile Include="FlacDecodeIF.cs" />
-    <Compile Include="SettingsWindow.xaml.cs">
-      <DependentUpon>SettingsWindow.xaml</DependentUpon>
-    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -116,13 +107,8 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SettingsWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PreferenceStore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -147,6 +133,27 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\PcmData\PcmDataLib.csproj">
+      <Project>{7AF36E7B-839D-4C2F-AAFD-6D8319714D66}</Project>
+      <Name>PcmDataLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
+      <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>
+      <Name>WasapiCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WasapiPcmUtil\WasapiPcmUtil.csproj">
+      <Project>{C51CEE2E-D264-4A27-8E9E-C2F127A37AEE}</Project>
+      <Name>WasapiPcmUtil</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WavRWLib2\WavRWLib2.csproj">
+      <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
+      <Name>WavRWLib2</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PlayPcmWin64.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 および x64%29</ProductName>
@@ -168,38 +175,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FlacDecodeCS\FlacDecodeCS.csproj">
-      <Project>{2148EF2A-38E0-4E85-8459-386F55DB7015}</Project>
-      <Name>FlacDecodeCS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\PcmData\PcmDataLib.csproj">
-      <Project>{7AF36E7B-839D-4C2F-AAFD-6D8319714D66}</Project>
-      <Name>PcmDataLib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WasapiCS\WasapiCS.csproj">
-      <Project>{0D9C1283-4DA5-4C3F-8A4E-AD8194381DE4}</Project>
-      <Name>WasapiCS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WasapiPcmUtil\WasapiPcmUtil.csproj">
-      <Project>{C51CEE2E-D264-4A27-8E9E-C2F127A37AEE}</Project>
-      <Name>WasapiPcmUtil</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\WavRWLib2\WavRWLib2.csproj">
-      <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
-      <Name>WavRWLib2</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="libFlacLicense.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="PlayPcmWin64.ico" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y $(ProjectDir)..\FlacDecodeDLL\bin\x86\$(ConfigurationName)\* $(TargetDir);
-copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

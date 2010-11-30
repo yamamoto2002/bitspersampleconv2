@@ -5,8 +5,38 @@ using System.Text;
 using Wasapi;
 using PcmDataLib;
 
-namespace PlayPcmWin {
-    struct SampleFormatInfo {
+namespace WasapiPcmUtil {
+    public enum RenderThreadTaskType {
+        None,
+        Audio,
+        ProAudio,
+        Playback
+    };
+
+    public enum BitsPerSampleFixType {
+        Variable,
+        Sint16,
+        Sint32,
+        Sfloat32,
+        Sint24,
+
+        Sint32V24,
+        VariableSint16Sint24,
+        VariableSint16Sint32V24,
+        AutoSelect
+    }
+
+    public enum WasapiSharedOrExclusive {
+        Shared,
+        Exclusive
+    };
+
+    public enum WasapiDataFeedMode {
+        EventDriven,
+        TimerDriven
+    };
+
+    public struct SampleFormatInfo {
         public int bitsPerSample;
         public int validBitsPerSample;
         public WasapiCS.BitFormatType bitFormatType;
@@ -175,7 +205,7 @@ namespace PlayPcmWin {
         }
     };
 
-    class PcmUtil {
+    public class PcmUtil {
 
         /// <summary>
         /// 量子化ビット数を、もし必要なら変更する。

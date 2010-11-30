@@ -16,6 +16,8 @@ using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using PcmDataLib;
+using WasapiPcmUtil;
 
 namespace PlayPcmWin
 {
@@ -463,7 +465,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = true;
-                menuItemToolAbx.IsEnabled = true;
 
                 buttonSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
@@ -481,7 +482,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
@@ -500,7 +500,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 labelWasapiStatus.Content =
@@ -521,7 +520,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "ファイル読み込み完了。再生できます。";
@@ -542,7 +540,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生中";
@@ -561,7 +558,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生停止開始";
@@ -578,7 +574,6 @@ namespace PlayPcmWin
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
-                menuItemToolAbx.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 statusBarText.Content = "再生グループ読み込み中";
@@ -1167,16 +1162,6 @@ namespace PlayPcmWin
                 }
                 UpdateUIStatus();
             }
-        }
-
-        private void MenuItemToolAbx_Click(object sender, RoutedEventArgs e) {
-            UnsetupDevice();
-
-            ABX abx = new ABX();
-            abx.Prepare(wasapi);
-
-            abx.ShowDialog();
-
         }
 
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
