@@ -2,38 +2,10 @@
 using System.Text;
 using System.IO.IsolatedStorage;
 using System.Xml.Serialization;
+using PcmDataLib;
+using WasapiPcmUtil;
 
 namespace PlayPcmWin {
-    public enum WasapiSharedOrExclusive {
-        Shared,
-        Exclusive
-    };
-
-    public enum WasapiDataFeedMode {
-        EventDriven,
-        TimerDriven
-    };
-    
-    public enum RenderThreadTaskType {
-        None,
-        Audio,
-        ProAudio,
-        Playback
-    };
-
-    public enum BitsPerSampleFixType {
-        Variable,
-        Sint16,
-        Sint32,
-        Sfloat32,
-        Sint24,
-
-        Sint32V24,
-        VariableSint16Sint24,
-        VariableSint16Sint32V24,
-        AutoSelect
-    }
-
     public class Preference {
         public const int DefaultLatencyMilliseconds = 170;
         public const int CurrentVersion = 3;
