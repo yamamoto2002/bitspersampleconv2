@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.24 ==
+  * PlayPcmWinから実験プログラムを分離独立し、PlayPcmWinTestBench.exeを作成。
+
 ===!PlayPcmWin 2.0.23 ==
   * ABX Test 結果発表の文を修正(「正解 X=A, Y=B」→「正解は X=A, Y=B」)。
 
