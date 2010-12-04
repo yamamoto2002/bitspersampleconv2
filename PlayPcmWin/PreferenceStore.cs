@@ -33,6 +33,10 @@ namespace PlayPcmWin {
 
         public bool PlayRepeat { get; set; }
 
+        public int PlayingTimeSize { get; set; }
+
+        public double WindowScale { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -52,6 +56,8 @@ namespace PlayPcmWin {
             ManuallySetMainWindowDimension = false;
             ParallelRead = false;
             PlayRepeat = true;
+            PlayingTimeSize = 16;
+            WindowScale = 1.0f;
         }
 
         /// <summary>

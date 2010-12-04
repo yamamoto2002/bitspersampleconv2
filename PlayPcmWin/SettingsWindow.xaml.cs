@@ -67,6 +67,12 @@ namespace PlayPcmWin {
 
             checkBoxManuallySetMainWindowDimension.IsChecked =
                 m_preference.ManuallySetMainWindowDimension;
+
+            textBoxPlayingTimeSize.Text =
+                m_preference.PlayingTimeSize.ToString();
+
+            sliderWindowScaling.Value =
+                m_preference.WindowScale;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -106,11 +112,31 @@ namespace PlayPcmWin {
 
             m_preference.ParallelRead = false;
 
+            int playingTimeSize = Int32.Parse(textBoxPlayingTimeSize.Text);
+            if (playingTimeSize <= 0) {
+                MessageBox.Show("再生時間表示文字の大きさは 1以上の数字を入力してください。");
+                return;
+            } else {
+                m_preference.PlayingTimeSize = playingTimeSize;
+            }
+
+            m_preference.WindowScale = sliderWindowScaling.Value;
+
             Close();
         }
 
         private void buttonCancel_Click(object sender, RoutedEventArgs e) {
             Close();
+        }
+
+        private void buttonScale1X_Click(object sender, RoutedEventArgs e) {
+            sliderWindowScaling.Value = 1.0;
+        }
+
+        private void sliderWindowScaling_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (null != labelWindowScale) {
+                labelWindowScale.Content = string.Format("{0:0.00}", e.NewValue);
+            }
         }
 
     }

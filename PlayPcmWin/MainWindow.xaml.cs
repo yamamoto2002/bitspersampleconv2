@@ -74,14 +74,14 @@ namespace PlayPcmWin
             public string SampleRate {
                 get {
                     if (m_pcmData == null) { return "-"; }
-                    return m_pcmData.SampleRate.ToString();
+                    return m_pcmData.SampleRate.ToString() + " Hz";
                 }
             }
 
             public string QuantizationBitRate {
                 get {
                     if (m_pcmData == null) { return "-"; }
-                    return m_pcmData.BitsPerSample.ToString();
+                    return m_pcmData.BitsPerSample.ToString() + " bit";
                 }
             }
 
@@ -371,6 +371,7 @@ namespace PlayPcmWin
                 Width  = m_preference.MainWindowWidth;
                 Height = m_preference.MainWindowHeight;
             }
+            UpdateWindowSettings();
 
             AddLogText(string.Format("PlayPcmWin {0} {1}\r\n",
                     AssemblyVersion,
@@ -481,6 +482,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled    = true;
 
                 buttonSettings.IsEnabled = true;
+                menuToolSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
@@ -498,6 +500,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled    = false;
 
                 buttonSettings.IsEnabled = true;
+                menuToolSettings.IsEnabled = true;
                 labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
@@ -516,6 +519,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
                 labelWasapiStatus.Content =
                     string.Format("WASAPI {0}Hz {1}",
                         wasapi.GetBufferFormatSampleRate(),
@@ -536,11 +540,12 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
                 statusBarText.Content = "ファイル読み込み完了。再生できます。";
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 slider1.Value = 0;
-                label1.Content = "0/0";
+                labelPlayingTime.Content = "0/0";
                 break;
             case State.再生中:
                 menuItemFileOpen.IsEnabled = false;
@@ -556,6 +561,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
                 statusBarText.Content = "再生中";
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
@@ -574,6 +580,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
                 statusBarText.Content = "再生停止開始";
                 break;
             case State.再生グループ切り替え中:
@@ -590,6 +597,7 @@ namespace PlayPcmWin
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
                 statusBarText.Content = "再生グループ読み込み中";
                 break;
             default:
@@ -712,7 +720,11 @@ namespace PlayPcmWin
                 wasapi = null;
 
                 // ウィンドウの位置とサイズを保存
-                m_preference.SetMainWindowLeftTopWidthHeight(Left, Top, Width, Height);
+                m_preference.SetMainWindowLeftTopWidthHeight(
+                    Left,
+                    Top,
+                    Width,
+                    Height);
 
                 // 再生リピート設定を保存
                 m_preference.PlayRepeat = checkBoxContinuous.IsChecked == true;
@@ -1766,7 +1778,7 @@ namespace PlayPcmWin
 
             if (playingPcmDataId < 0) {
                 textBoxFileName.Text = "";
-                label1.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
+                labelPlayingTime.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
             } else {
                 dataGridPlayList.SelectedIndex
                     = GetPlayListIndexOfWaveDataId(playingPcmDataId);
@@ -1777,7 +1789,7 @@ namespace PlayPcmWin
                 slider1.Maximum = pcmData.NumFrames;
 
 
-                label1.Content = string.Format("{0}/{1}",
+                labelPlayingTime.Content = string.Format("{0}/{1}",
                     SecondToHMSString((int)(slider1.Value / pcmData.SampleRate)),
                     SecondToHMSString((int)(pcmData.NumFrames / pcmData.SampleRate)));
             }
@@ -1861,10 +1873,20 @@ namespace PlayPcmWin
             AddLogText(string.Format("wasapi.InspectDevice()\r\n{0}\r\n{1}\r\n", dn, s));
         }
 
+        /// <summary>
+        /// SettingsWindowによって変更された表示情報をUIに反映する。
+        /// </summary>
+        void UpdateWindowSettings() {
+            labelPlayingTime.FontSize = m_preference.PlayingTimeSize;
+            sliderWindowScale.Value = m_preference.WindowScale;
+        }
+
         private void buttonSettings_Click(object sender, RoutedEventArgs e) {
             SettingsWindow sw = new SettingsWindow();
             sw.SetPreference(m_preference);
             sw.ShowDialog();
+
+            UpdateWindowSettings();
         }
 
         private void radioButtonTaskAudio_Checked(object sender, RoutedEventArgs e) {
@@ -2093,6 +2115,41 @@ namespace PlayPcmWin
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return WasapiCS.BitFormatType.SInt;
+            }
+        }
+
+        private void buttonClose_Click(object sender, RoutedEventArgs e) {
+            Exit();
+        }
+
+        private void buttonMinimize_Click(object sender, RoutedEventArgs e) {
+            WindowState = System.Windows.WindowState.Minimized;
+        }
+
+        Point m_prevPos;
+
+        private bool IsWindowMoveMode(MouseEventArgs e) {
+            if (e.LeftButton != MouseButtonState.Pressed) {
+                return false;
+            }
+
+            foreach (MenuItem mi in menu1.Items) {
+                if (mi.IsMouseOver) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private void menu1_MouseMove(object sender, MouseEventArgs e) {
+            if (IsWindowMoveMode(e)) {
+                Point pos = e.GetPosition(this);
+                Point delta = new Point(pos.X - m_prevPos.X, pos.Y - m_prevPos.Y);
+
+                Left += delta.X;
+                Top += delta.Y;
+            } else {
+                m_prevPos = e.GetPosition(this);
             }
         }
     }
