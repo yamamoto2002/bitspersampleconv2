@@ -71,6 +71,20 @@ namespace PlayPcmWin
                 }
             }
 
+            public string SampleRate {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.SampleRate.ToString();
+                }
+            }
+
+            public string QuantizationBitRate {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.BitsPerSample.ToString();
+                }
+            }
+
             public enum ItemType {
                 AudioData,
                 ReadSeparator,
