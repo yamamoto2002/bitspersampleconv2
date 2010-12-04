@@ -138,6 +138,8 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
 {
     FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
 
+    (void)decoder;
+
     dprintf(fdi->logFP, "%s fdi->totalSamples=%lld errorCode=%d\n", __FUNCTION__,
         fdi->totalSamples, fdi->errorCode);
 
@@ -178,7 +180,7 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
     // データが来た。ブロック数は frame->header.blocksize
     dprintf(fdi->logFP, "%s fdi->numFramesPerBlock=%d frame->header.blocksize=%d\n", __FUNCTION__,
         fdi->numFramesPerBlock, frame->header.blocksize);
-    if (fdi->numFramesPerBlock != frame->header.blocksize) {
+    if (fdi->numFramesPerBlock != (int)frame->header.blocksize) {
         dprintf(fdi->logFP, "%s fdi->numFramesPerBlock changed %d to %d\n",
             __FUNCTION__, fdi->numFramesPerBlock, frame->header.blocksize);
         fdi->numFramesPerBlock = frame->header.blocksize;
@@ -251,6 +253,8 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
 {
     FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
 
+    (void)decoder;
+
     dprintf(fdi->logFP, "%s type=%d\n", __FUNCTION__, metadata->type);
 
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
@@ -266,6 +270,8 @@ ErrorCallback(const FLAC__StreamDecoder *decoder,
     FLAC__StreamDecoderErrorStatus status, void *clientData)
 {
     FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
+
+    (void)decoder;
 
     dprintf(fdi->logFP, "%s status=%d\n", __FUNCTION__, status);
 
@@ -369,12 +375,8 @@ end:
 static DWORD WINAPI
 DecodeEntry(LPVOID param)
 {
-    dprintf(NULL, "%s\n", __FUNCTION__);
-
     FlacDecodeInfo *fdi = (FlacDecodeInfo*)param;
     DecodeMain(fdi);
-
-    dprintf(NULL, "%s end\n", __FUNCTION__);
     return 0;
 }
 
@@ -554,7 +556,7 @@ FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoNew();
     if (NULL == fdi) {
-        dprintf1(NULL, "%s out of memory\n", __FUNCTION__);
+        assert(0);
         return FDRT_OtherError;
     }
 
@@ -613,13 +615,12 @@ void __stdcall
 FlacDecodeDLL_DecodeEnd(int id)
 {
     if (id < 0) {
-        dprintf1(NULL, "%s id=%d done.\n", __FUNCTION__, id);
+        assert(0);
         return;
     }
 
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     if (NULL == fdi) {
-        dprintf1(NULL, "%s id=%d not found!\n", __FUNCTION__, id);
         assert(0);
         return;
     }
@@ -678,9 +679,6 @@ FlacDecodeDLL_GetNextPcmData(int id, int numFrame, char *buff_return)
     assert(fdi->commandMutex);
     assert(fdi->commandEvent);
     assert(fdi->commandCompleteEvent);
-
-    const int bytesPerFrame
-        = fdi->channels * fdi->bitsPerSample/8;
 
     {   // FlacDecodeThreadにGetFramesコマンドを伝える
         WaitForSingleObject(fdi->commandMutex, INFINITE);

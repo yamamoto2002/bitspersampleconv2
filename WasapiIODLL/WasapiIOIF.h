@@ -10,13 +10,24 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WasapiIO_Term(void);
 
+/// @param type WWSchedulerTaskType
 extern "C" __declspec(dllexport)
 void __stdcall
 WasapiIO_SetSchedulerTaskType(int type);
 
+/// @param sm WWShareMode
 extern "C" __declspec(dllexport)
 void __stdcall
 WasapiIO_SetShareMode(int sm);
+
+/// @param dfm WWDataFeedMode
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetDataFeedMode(int dfm);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetLatencyMillisec(int ms);
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
@@ -50,11 +61,10 @@ extern "C" __declspec(dllexport)
 bool __stdcall
 WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes);
 
-/// @param format: WWPcmDataFormatType
+/// @param format WWPcmDataFormatType
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Setup(int dataFeedMode, int sampleRate,
-    int format, int latencyMillisec, int numChannels);
+WasapiIO_Setup(int sampleRate, int format, int numChannels);
 
 extern "C" __declspec(dllexport)
 void __stdcall

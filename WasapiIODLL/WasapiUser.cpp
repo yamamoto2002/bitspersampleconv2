@@ -145,6 +145,24 @@ WasapiUser::SetShareMode(WWShareMode sm)
     }
 }
 
+void
+WasapiUser::SetDataFeedMode(WWDataFeedMode mode)
+{
+    assert(0 <= mode && mode < WWDFMNum);
+
+    dprintf("D: %s() mode=%d\n", __FUNCTION__, (int)mode);
+
+    m_dataFeedMode = mode;
+}
+
+void
+WasapiUser::SetLatencyMillisec(DWORD millisec)
+{
+    dprintf("D: %s() latencyMillisec=%u\n", __FUNCTION__, millisec);
+
+    m_latencyMillisec = millisec;
+}
+
 static HRESULT
 DeviceNameGet(
     IMMDeviceCollection *dc, UINT id, wchar_t *name, size_t nameBytes)
@@ -483,21 +501,16 @@ WasapiUser::GetUseDeviceName(LPWSTR name, size_t nameBytes)
 
 HRESULT
 WasapiUser::Setup(
-        WWDataFeedMode mode,
         int sampleRate,
         WWPcmDataFormatType format,
-        int latencyMillisec,
         int numChannels)
 {
     HRESULT      hr          = 0;
     WAVEFORMATEX *waveFormat = NULL;
 
-    dprintf("D: %s(%d %d %s %d)\n", __FUNCTION__,
-        (int)mode, sampleRate, WWPcmDataFormatTypeToStr(format),
-        latencyMillisec);
+    dprintf("D: %s(%d %s %d)\n", __FUNCTION__,
+        sampleRate, WWPcmDataFormatTypeToStr(format), numChannels);
 
-    m_dataFeedMode        = mode;
-    m_latencyMillisec     = latencyMillisec;
     m_sampleRate          = sampleRate;
     m_format              = format;
     m_numChannels         = numChannels;
@@ -586,7 +599,7 @@ WasapiUser::Setup(
         break;
     }
 
-    REFERENCE_TIME bufferPeriodicity = latencyMillisec * 10000;
+    REFERENCE_TIME bufferPeriodicity = m_latencyMillisec * 10000;
     REFERENCE_TIME bufferDuration    = bufferPeriodicity * periodsPerBuffer;
 
     bool needClockAdjustmentOnSharedMode = false;
@@ -993,6 +1006,7 @@ WasapiUser::FindPlayPcmDataById(int id)
 void
 WasapiUser::PlayPcmDataListDebug(void)
 {
+#ifdef _DEBUG
     dprintf("D: %s() count=%u\n", __FUNCTION__, m_playPcmDataList.size());
     dprintf("  m_nowPlayingPcmData=%p\n", m_nowPlayingPcmData);
     for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
@@ -1002,6 +1016,7 @@ WasapiUser::PlayPcmDataListDebug(void)
             p, p->next, i, p->id, p->nFrames, p->posFrame,
             WWPcmDataContentTypeToStr(p->contentType), p->stream);
     }
+#endif
 }
 
 bool

@@ -745,10 +745,13 @@ namespace PlayPcmWin
             AddLogText(string.Format("wasapi.SetSchedulerTaskType({0})\r\n",
                 m_deviceSetupInfo.ThreadTaskType));
 
+            wasapi.SetDataFeedMode(PreferenceDataFeedModeToWasapiCS(m_deviceSetupInfo.DataFeedMode));
+            wasapi.SetLatencyMillisec(m_deviceSetupInfo.LatencyMillisec);
+
             int hr = wasapi.Setup(
-                PreferenceDataFeedModeToWasapiCS(m_deviceSetupInfo.DataFeedMode),
-                m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
-                m_deviceSetupInfo.LatencyMillisec, 2);
+                m_deviceSetupInfo.SampleRate,
+                m_deviceSetupInfo.SampleFormat,
+                2);
             AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
                 m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
                 m_deviceSetupInfo.LatencyMillisec,

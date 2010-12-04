@@ -74,6 +74,8 @@ WWStereo16ToStereoFloat32(BYTE *data, int bytes)
 void
 WWWaveFormatDebug(WAVEFORMATEX *v)
 {
+    (void)v;
+
     dprintf(
         "  cbSize=%d\n"
         "  nAvgBytesPerSec=%d\n"
@@ -94,6 +96,8 @@ WWWaveFormatDebug(WAVEFORMATEX *v)
 void
 WWWFEXDebug(WAVEFORMATEXTENSIBLE *v)
 {
+    (void)v;
+
     dprintf(
         "  dwChannelMask=0x%x\n"
         "  Samples.wValidBitsPerSample=%d\n"

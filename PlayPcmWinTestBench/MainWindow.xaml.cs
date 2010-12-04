@@ -335,9 +335,15 @@ namespace PlayPcmWinTestBench {
                     BitsPerSampleFixType.AutoSelect,
                     pcmDataValidBitsPerSample, i);
 
+                wasapi.SetDataFeedMode(
+                    isEventDriven ?
+                        WasapiCS.DataFeedMode.EventDriven :
+                        WasapiCS.DataFeedMode.TimerDriven);
+
+                wasapi.SetLatencyMillisec(latencyMillisec);
+
                 hr = wasapi.Setup(
-                    isEventDriven ? WasapiCS.DataFeedMode.EventDriven : WasapiCS.DataFeedMode.TimerDriven,
-                    sampleRate, sf.GetSampleFormatType(), latencyMillisec, 2);
+                    sampleRate, sf.GetSampleFormatType(), 2);
                 if (0 <= hr) {
                     m_sampleFormat = sf;
                     return hr;

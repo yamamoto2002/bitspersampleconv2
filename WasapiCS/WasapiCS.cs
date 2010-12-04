@@ -21,6 +21,14 @@ namespace Wasapi {
         WasapiIO_SetShareMode(int sm);
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetDataFeedMode(int dfm);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_SetLatencyMillisec(int ms);
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int 
         WasapiIO_DoDeviceEnumeration(int deviceType);
 
@@ -54,8 +62,7 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int 
-        WasapiIO_Setup(int mode, int sampleRate,
-            int format, int latencyMillisec, int numChannels);
+        WasapiIO_Setup(int sampleRate, int format, int numChannels);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void 
@@ -161,6 +168,19 @@ namespace Wasapi {
             WasapiIO_SetShareMode((int)t);
         }
 
+        public enum DataFeedMode {
+            EventDriven,
+            TimerDriven,
+        };
+
+        public void SetDataFeedMode(DataFeedMode t) {
+            WasapiIO_SetDataFeedMode((int)t);
+        }
+
+        public void SetLatencyMillisec(int ms) {
+            WasapiIO_SetLatencyMillisec(ms);
+        }
+
         public enum DeviceType {
             Play,
             Rec
@@ -209,11 +229,6 @@ namespace Wasapi {
             return buf.ToString();
         }
 
-        public enum DataFeedMode {
-            EventDriven,
-            TimerDriven,
-        };
-
         public enum SampleFormatType {
             Unknown = -1,
             Sint16,
@@ -223,10 +238,8 @@ namespace Wasapi {
             Sfloat,
         };
 
-        public int Setup(DataFeedMode mode, int sampleRate,
-            SampleFormatType format, int latencyMillisec, int numChannels) {
-            return WasapiIO_Setup((int)mode, sampleRate,
-                (int)format, latencyMillisec, numChannels);
+        public int Setup(int sampleRate, SampleFormatType format, int numChannels) {
+            return WasapiIO_Setup(sampleRate, (int)format, numChannels);
         }
 
         public void Unsetup() {
