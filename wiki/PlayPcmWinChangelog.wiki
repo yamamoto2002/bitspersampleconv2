@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.27 ==
+  * 再生時間表示の文字の大きさを16ポイントに変更。
+  * ウィンドウスケーリング機能。
+
 ===!PlayPcmWin 2.0.24 ==
   * PlayPcmWin.exeから実験プログラムを分離独立し、PlayPcmWinTestBench.exeを作成。
 
