@@ -760,21 +760,24 @@ namespace PlayPcmWin
                 m_deviceSetupInfo.ThreadTaskType));
 
             wasapi.SetDataFeedMode(PreferenceDataFeedModeToWasapiCS(m_deviceSetupInfo.DataFeedMode));
+            AddLogText(string.Format("wasapi.SetDataFeedMode({0})\r\n",
+                PreferenceDataFeedModeToWasapiCS(m_deviceSetupInfo.DataFeedMode)));
+
             wasapi.SetLatencyMillisec(m_deviceSetupInfo.LatencyMillisec);
+            AddLogText(string.Format("wasapi.SetLatencyMillisec({0})\r\n",
+                m_deviceSetupInfo.LatencyMillisec));
 
             int hr = wasapi.Setup(
                 m_deviceSetupInfo.SampleRate,
                 m_deviceSetupInfo.SampleFormat,
                 2);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}, {3}, {4}) {5:X8}\r\n",
+            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}) {3:X8}\r\n",
                 m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
-                m_deviceSetupInfo.LatencyMillisec,
-                m_deviceSetupInfo.DataFeedMode,
                 ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr));
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("wasapi.Setup({0} {1} {2} {3} {4}) failed {5:X8}\r\n",
+                string s = string.Format("wasapi.Setup() {0} {1} {2} {3} {4} failed {5:X8}\r\n",
                     m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
                     m_deviceSetupInfo.LatencyMillisec,
                     m_deviceSetupInfo.DataFeedMode,
