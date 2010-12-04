@@ -46,6 +46,22 @@ WasapiIO_SetShareMode(int sm)
 }
 
 extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetDataFeedMode(int dfm)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetDataFeedMode((WWDataFeedMode)dfm);
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_SetLatencyMillisec(int ms)
+{
+    assert(g_pWasapi);
+    g_pWasapi->SetLatencyMillisec((DWORD)ms);
+}
+
+extern "C" __declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_DoDeviceEnumeration(int deviceType)
 {
@@ -112,14 +128,11 @@ WasapiIO_GetUseDeviceName(LPWSTR name, int nameBytes)
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
-WasapiIO_Setup(int dataFeedMode, int sampleRate,
-    int format, int latencyMillisec,
-    int numChannels)
+WasapiIO_Setup(int sampleRate, int format, int numChannels)
 {
     assert(g_pWasapi);
-    assert(0 <= dataFeedMode && dataFeedMode < (int)WWDFMNum);
-    return g_pWasapi->Setup((WWDataFeedMode)dataFeedMode, sampleRate,
-        (WWPcmDataFormatType)format, latencyMillisec, numChannels);
+    return g_pWasapi->Setup(
+        sampleRate, (WWPcmDataFormatType)format, numChannels);
 }
 
 extern "C" __declspec(dllexport)

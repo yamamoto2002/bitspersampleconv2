@@ -62,9 +62,6 @@ public:
     HRESULT Init(void);
     void Term(void);
 
-    void SetSchedulerTaskType(WWSchedulerTaskType t);
-    void SetShareMode(WWShareMode sm);
-
     // device enumeration
     HRESULT DoDeviceEnumeration(WWDeviceType t);
     int GetDeviceCount(void);
@@ -76,8 +73,14 @@ public:
     int  GetUseDeviceId(void);
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
-    HRESULT Setup(WWDataFeedMode mode, int sampleRate,
-        WWPcmDataFormatType format, int latencyMillisec, int numChannels);
+    void SetSchedulerTaskType(WWSchedulerTaskType t);
+    void SetShareMode(WWShareMode sm);
+    void SetDataFeedMode(WWDataFeedMode mode);
+    void SetLatencyMillisec(DWORD millisec);
+
+    HRESULT Setup(
+        int sampleRate, WWPcmDataFormatType format, int numChannels);
+
     void Unsetup(void);
 
     /// Setup後に呼ぶ
@@ -147,13 +150,7 @@ private:
     UINT32       m_bufferFrameNum;
 
     int          m_sampleRate;
-    DWORD        m_latencyMillisec;
     WWPcmDataFormatType m_format;
-    /*
-    int          m_deviceBitsPerSample;
-    int          m_validBitsPerSample;
-    WWBitFormatType m_bitFormatType;
-    */
     int          m_numChannels;
 
     IAudioRenderClient  *m_renderClient;
@@ -164,15 +161,15 @@ private:
     HANDLE       m_mutex;
     int          m_footerCount;
     bool         m_coInitializeSuccess;
-    WWDataFeedMode m_dataFeedMode;
     int          m_footerNeedSendCount;
 
     EDataFlow    m_dataFlow;
     int          m_glitchCount;
 
+    WWDataFeedMode m_dataFeedMode;
     WWSchedulerTaskType m_schedulerTaskType;
-
     AUDCLNT_SHAREMODE m_shareMode;
+    DWORD        m_latencyMillisec;
 
     IAudioClockAdjustment *m_audioClockAdjustment;
 

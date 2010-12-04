@@ -5,6 +5,8 @@ EXPORTS
 	WasapiIO_Term
 	WasapiIO_SetSchedulerTaskType
 	WasapiIO_SetShareMode
+	WasapiIO_SetDataFeedMode
+	WasapiIO_SetLatencyMillisec
 	WasapiIO_DoDeviceEnumeration
 	WasapiIO_GetDeviceCount
 	WasapiIO_GetDeviceName
