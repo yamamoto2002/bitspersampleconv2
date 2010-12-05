@@ -1877,9 +1877,145 @@ namespace PlayPcmWin
         /// SettingsWindowによって変更された表示情報をUIに反映する。
         /// </summary>
         void UpdateWindowSettings() {
+            FontFamilyConverter ffc = new FontFamilyConverter();
+            FontFamily ff = ffc.ConvertFromString(m_preference.PlayingTimeFontName) as FontFamily;
+            if (null != ff) {
+                labelPlayingTime.FontFamily = ff;
+            }
             labelPlayingTime.FontSize = m_preference.PlayingTimeSize;
+            labelPlayingTime.FontWeight = m_preference.PlayingTimeFontBold
+                ? FontWeights.Bold
+                : FontWeights.Normal;
+
             sliderWindowScaling.Value = m_preference.WindowScale;
         }
+
+        /// <summary>
+        /// ログを追加する。
+        /// </summary>
+        /// <param name="s">追加するログ。行末に\r\nを入れる必要あり。</param>
+        private void AddLogText(string s) {
+            System.Console.Write(s);
+            textBoxLog.Text += s;
+            textBoxLog.ScrollToEnd();
+        }
+
+        /// <summary>
+        /// 再生中に、再生曲をwavDataIdの曲に切り替える。
+        /// wavDataIdの曲がロードされていたら、直ちに再生曲切り替え。
+        /// ロードされていなければ、グループをロードしてから再生。
+        /// 
+        /// 再生中に呼ぶ。再生中でない場合は何も起きない。
+        /// </summary>
+        /// <param name="wavDataId">再生曲</param>
+        private void ChangePlayWavDataById(int wavDataId) {
+            System.Diagnostics.Debug.Assert(0 <= wavDataId);
+
+            int playingId = wasapi.GetNowPlayingPcmDataId();
+            if (playingId < 0) {
+                return;
+            }
+
+            int groupId = m_pcmDataList[wavDataId].GroupId;
+            if (m_pcmDataList[playingId].GroupId == groupId) {
+                // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
+                wasapi.UpdatePlayPcmDataById(wavDataId);
+                AddLogText(string.Format("wasapi.UpdatePlayPcmDataById({0})\r\n",
+                    wavDataId));
+            } else {
+                // ファイルグループが違う場合、再生を停止し、グループを読み直し、再生を再開する。
+                Stop(new Task(TaskType.PlaySpecifiedGroup, groupId, wavDataId));
+            }
+        }
+
+        /// <summary>
+        /// [ここまで一括読み込み]を追加できたら追加する。
+        /// 
+        /// [ここまで一括読み込み]ボタン押下以外にも、
+        /// ギャップ→ここまで変換からも呼び出される。
+        /// </summary>
+        private void AddKokomade() {
+            if (0 == m_playListItems.Count) {
+                return;
+            }
+
+            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_readGroupId) {
+                // 既にグループ区切り線が入れられている。
+                return;
+            }
+
+            // 同じ名前の項目を複数入れると選択状態が変になるので
+            string dispNameOnPlayList = "----------ここまで一括読み込み------------";
+            for (int i = 0; i < m_readGroupId; ++i) {
+                dispNameOnPlayList =
+                    dispNameOnPlayList + " ";
+            }
+
+            m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.ReadSeparator, null));
+            m_playListView.RefreshCollection();
+            ++m_readGroupId;
+        }
+
+        // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
+
+        private WasapiCS.SchedulerTaskType
+        PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
+            RenderThreadTaskType t) {
+            switch (t) {
+            case RenderThreadTaskType.None:
+                return WasapiCS.SchedulerTaskType.None;
+            case RenderThreadTaskType.Audio:
+                return WasapiCS.SchedulerTaskType.Audio;
+            case RenderThreadTaskType.ProAudio:
+                return WasapiCS.SchedulerTaskType.ProAudio;
+            case RenderThreadTaskType.Playback:
+                return WasapiCS.SchedulerTaskType.Playback;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.SchedulerTaskType.None; ;
+            }
+        }
+
+        private WasapiCS.ShareMode
+        PreferenceShareModeToWasapiCSShareMode(WasapiSharedOrExclusive t) {
+            switch (t) {
+            case WasapiSharedOrExclusive.Shared:
+                return WasapiCS.ShareMode.Shared;
+            case WasapiSharedOrExclusive.Exclusive:
+                return WasapiCS.ShareMode.Exclusive;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.ShareMode.Exclusive;
+            }
+        }
+
+        private WasapiCS.DataFeedMode
+        PreferenceDataFeedModeToWasapiCS(WasapiDataFeedMode t) {
+            switch (t) {
+            case WasapiDataFeedMode.EventDriven:
+                return WasapiCS.DataFeedMode.EventDriven;
+            case WasapiDataFeedMode.TimerDriven:
+                return WasapiCS.DataFeedMode.TimerDriven;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.DataFeedMode.EventDriven;
+            }
+        }
+
+        private WasapiCS.BitFormatType
+        VrtToBft(PcmDataLib.PcmData.ValueRepresentationType vrt) {
+            switch (vrt) {
+            case PcmDataLib.PcmData.ValueRepresentationType.SInt:
+                return WasapiCS.BitFormatType.SInt;
+            case PcmDataLib.PcmData.ValueRepresentationType.SFloat:
+                return WasapiCS.BitFormatType.SFloat;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.BitFormatType.SInt;
+            }
+        }
+
+        // イベント処理 /////////////////////////////////////////////////////
 
         private void buttonSettings_Click(object sender, RoutedEventArgs e) {
             SettingsWindow sw = new SettingsWindow();
@@ -1989,133 +2125,8 @@ namespace PlayPcmWin
             }
         }
 
-        /// <summary>
-        /// 再生中に、再生曲をwavDataIdの曲に切り替える。
-        /// wavDataIdの曲がロードされていたら、直ちに再生曲切り替え。
-        /// ロードされていなければ、グループをロードしてから再生。
-        /// 
-        /// 再生中に呼ぶ。再生中でない場合は何も起きない。
-        /// </summary>
-        /// <param name="wavDataId">再生曲</param>
-        private void ChangePlayWavDataById(int wavDataId) {
-            System.Diagnostics.Debug.Assert(0 <= wavDataId);
-
-            int playingId = wasapi.GetNowPlayingPcmDataId();
-            if (playingId < 0) {
-                return;
-            }
-
-            int groupId = m_pcmDataList[wavDataId].GroupId;
-            if (m_pcmDataList[playingId].GroupId == groupId) {
-                // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
-                wasapi.UpdatePlayPcmDataById(wavDataId);
-                AddLogText(string.Format("wasapi.UpdatePlayPcmDataById({0})\r\n",
-                    wavDataId));
-            } else {
-                // ファイルグループが違う場合、再生を停止し、グループを読み直し、再生を再開する。
-                Stop(new Task(TaskType.PlaySpecifiedGroup, groupId, wavDataId));
-            }
-        }
-
-        /// <summary>
-        /// [ここまで一括読み込み]を追加できたら追加する。
-        /// 
-        /// [ここまで一括読み込み]ボタン押下以外にも、
-        /// ギャップ→ここまで変換からも呼び出される。
-        /// </summary>
-        private void AddKokomade() {
-            if (0 == m_playListItems.Count) {
-                return;
-            }
-
-            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_readGroupId) {
-                // 既にグループ区切り線が入れられている。
-                return;
-            }
-
-            // 同じ名前の項目を複数入れると選択状態が変になるので
-            string dispNameOnPlayList = "----------ここまで一括読み込み------------";
-            for (int i = 0; i < m_readGroupId; ++i) {
-                dispNameOnPlayList =
-                    dispNameOnPlayList + " ";
-            }
-
-            m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.ReadSeparator, null));
-            m_playListView.RefreshCollection();
-            ++m_readGroupId;
-        }
-
         private void buttonReadSeparator_Click(object sender, RoutedEventArgs e) {
             AddKokomade();
-        }
-
-        /// <summary>
-        /// ログを追加する。
-        /// </summary>
-        /// <param name="s">追加するログ。行末に\r\nを入れる必要あり。</param>
-        private void AddLogText(string s) {
-            System.Console.Write(s);
-            textBoxLog.Text += s;
-            textBoxLog.ScrollToEnd();
-        }
-
-        // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
-
-        private WasapiCS.SchedulerTaskType
-        PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
-            RenderThreadTaskType t) {
-            switch (t) {
-            case RenderThreadTaskType.None:
-                return WasapiCS.SchedulerTaskType.None;
-            case RenderThreadTaskType.Audio:
-                return WasapiCS.SchedulerTaskType.Audio;
-            case RenderThreadTaskType.ProAudio:
-                return WasapiCS.SchedulerTaskType.ProAudio;
-            case RenderThreadTaskType.Playback:
-                return WasapiCS.SchedulerTaskType.Playback;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return WasapiCS.SchedulerTaskType.None; ;
-            }
-        }
-
-        private WasapiCS.ShareMode
-        PreferenceShareModeToWasapiCSShareMode(WasapiSharedOrExclusive t) {
-            switch (t) {
-            case WasapiSharedOrExclusive.Shared:
-                return WasapiCS.ShareMode.Shared;
-            case WasapiSharedOrExclusive.Exclusive:
-                return WasapiCS.ShareMode.Exclusive;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return WasapiCS.ShareMode.Exclusive;
-            }
-        }
-
-        private WasapiCS.DataFeedMode
-        PreferenceDataFeedModeToWasapiCS(WasapiDataFeedMode t) {
-            switch (t) {
-            case WasapiDataFeedMode.EventDriven:
-                return WasapiCS.DataFeedMode.EventDriven;
-            case WasapiDataFeedMode.TimerDriven:
-                return WasapiCS.DataFeedMode.TimerDriven;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return WasapiCS.DataFeedMode.EventDriven;
-            }
-        }
-
-        private WasapiCS.BitFormatType
-        VrtToBft(PcmDataLib.PcmData.ValueRepresentationType vrt) {
-            switch (vrt) {
-            case PcmDataLib.PcmData.ValueRepresentationType.SInt:
-                return WasapiCS.BitFormatType.SInt;
-            case PcmDataLib.PcmData.ValueRepresentationType.SFloat:
-                return WasapiCS.BitFormatType.SFloat;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return WasapiCS.BitFormatType.SInt;
-            }
         }
 
         private void buttonClose_Click(object sender, RoutedEventArgs e) {

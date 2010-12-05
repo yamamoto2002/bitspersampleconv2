@@ -26,10 +26,8 @@ namespace PlayPcmWin {
             m_preference = preference;
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e) {
-            System.Diagnostics.Debug.Assert(null != m_preference);
-
-            switch (m_preference.bitsPerSampleFixType) {
+        private void UpdateUIFromPreference(Preference preference) {
+            switch (preference.bitsPerSampleFixType) {
             case BitsPerSampleFixType.Variable:
                 radioButtonBpsVariable.IsChecked = true;
                 break;
@@ -63,16 +61,43 @@ namespace PlayPcmWin {
             }
 
             checkBoxReplaceGapWithKokomade.IsChecked =
-                m_preference.ReplaceGapWithKokomade;
+                preference.ReplaceGapWithKokomade;
 
             checkBoxManuallySetMainWindowDimension.IsChecked =
-                m_preference.ManuallySetMainWindowDimension;
+                preference.ManuallySetMainWindowDimension;
 
             textBoxPlayingTimeSize.Text =
-                m_preference.PlayingTimeSize.ToString();
+                preference.PlayingTimeSize.ToString();
 
             sliderWindowScaling.Value =
-                m_preference.WindowScale;
+                preference.WindowScale;
+
+            checkBoxPlayingTimeBold.IsChecked =
+                preference.PlayingTimeFontBold;
+
+            var fontFamilies = new Dictionary<string, FontFamily>();
+
+            foreach (FontFamily fontFamily in Fonts.SystemFontFamilies) {
+                if (!fontFamilies.ContainsKey(fontFamily.ToString())) {
+                    fontFamilies.Add(fontFamily.ToString(), fontFamily);
+                }
+            }
+
+            foreach (var kvp in fontFamilies) {
+                var item = new ComboBoxItem();
+                item.Content = kvp.Value;
+                //item.FontFamily = fontFamily;
+                comboBoxPlayingTimeFontNames.Items.Add(item);
+                if (kvp.Key.Equals(preference.PlayingTimeFontName)) {
+                    comboBoxPlayingTimeFontNames.SelectedItem = item;
+                }
+            }
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e) {
+            System.Diagnostics.Debug.Assert(null != m_preference);
+
+            UpdateUIFromPreference(m_preference);
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -112,15 +137,25 @@ namespace PlayPcmWin {
 
             m_preference.ParallelRead = false;
 
-            int playingTimeSize = Int32.Parse(textBoxPlayingTimeSize.Text);
-            if (playingTimeSize <= 0) {
-                MessageBox.Show("再生時間表示文字の大きさは 1以上の数字を入力してください。");
-                return;
-            } else {
-                m_preference.PlayingTimeSize = playingTimeSize;
+            m_preference.WindowScale = sliderWindowScaling.Value;
+
+            int playingTimeSize;
+            if (Int32.TryParse(textBoxPlayingTimeSize.Text, out playingTimeSize)) {
+                if (playingTimeSize <= 0 || 100 < playingTimeSize) {
+                    MessageBox.Show("再生時間表示文字の大きさは 1～100の範囲の数字を入力してください。");
+                    return;
+                }
             }
 
-            m_preference.WindowScale = sliderWindowScaling.Value;
+            m_preference.PlayingTimeSize = playingTimeSize;
+
+            m_preference.PlayingTimeFontBold = (checkBoxPlayingTimeBold.IsChecked==true);
+
+            if (null != comboBoxPlayingTimeFontNames.SelectedItem) {
+                ComboBoxItem item = (ComboBoxItem)comboBoxPlayingTimeFontNames.SelectedItem;
+                FontFamily ff = (FontFamily)item.Content;
+                m_preference.PlayingTimeFontName = ff.ToString();
+            }
 
             Close();
         }
@@ -153,6 +188,54 @@ namespace PlayPcmWin {
                 }
                 sliderWindowScaling.Value = scaling;
             }
+        }
+
+        private void comboBoxPlayingTimeFontNames_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (null == labelPlayingTime) {
+                return;
+            }
+
+            ComboBox cb = sender as ComboBox;
+            if (null == cb) {
+                return;
+            }
+            ComboBoxItem item = cb.SelectedItem as ComboBoxItem;
+            if (null == item) {
+                return;
+            }
+
+            labelPlayingTime.FontFamily = (FontFamily)item.Content;
+        }
+
+        private void checkBoxPlayingTimeBold_Checked(object sender, RoutedEventArgs e) {
+            if (null != labelPlayingTime) {
+                labelPlayingTime.FontWeight = FontWeights.Bold;
+            }
+        }
+
+        private void checkBoxPlayingTimeBold_Unchecked(object sender, RoutedEventArgs e) {
+            if (null != labelPlayingTime) {
+                labelPlayingTime.FontWeight = FontWeights.Normal;
+            }
+        }
+
+        private void textBoxPlayingTimeSize_TextChanged(object sender, TextChangedEventArgs e) {
+            if (null == labelPlayingTime) {
+                return;
+            }
+
+            int fontSize;
+            if (!Int32.TryParse(textBoxPlayingTimeSize.Text, out fontSize)) {
+                return;
+            }
+            if (0 < fontSize && fontSize <= 100) {
+                labelPlayingTime.FontSize = fontSize;
+            }
+        }
+
+        private void buttonReset_Click(object sender, RoutedEventArgs e) {
+            var preference = new Preference();
+            UpdateUIFromPreference(preference);
         }
     }
 }
