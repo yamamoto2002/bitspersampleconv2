@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.29 ==
-  * CTRL + マウスホイールでズームするようにした。
+  * CTRL + マウスホイールでズームするようにした(Internet ExplorerやFirefoxと同様)。
 
 ===!PlayPcmWin 2.0.28 ==
   * 再生時間表示の文字の大きさを16ポイントに変更。
