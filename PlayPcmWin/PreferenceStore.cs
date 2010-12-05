@@ -35,6 +35,10 @@ namespace PlayPcmWin {
 
         public int PlayingTimeSize { get; set; }
 
+        public bool PlayingTimeFontBold { get; set; }
+
+        public string PlayingTimeFontName { get; set; }
+
         public double WindowScale { get; set; }
 
         public Preference() {
@@ -57,6 +61,8 @@ namespace PlayPcmWin {
             ParallelRead = false;
             PlayRepeat = true;
             PlayingTimeSize = 16;
+            PlayingTimeFontBold = true;
+            PlayingTimeFontName = "Courier New";
             WindowScale = 1.0f;
         }
 
