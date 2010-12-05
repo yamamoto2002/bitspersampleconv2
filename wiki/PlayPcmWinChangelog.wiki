@@ -6,6 +6,7 @@
 ===!PlayPcmWin 2.0.31 ==
   * 詳細設定[すべてリセット]ボタン。
   * 再生時間表示の文字設定機能。
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin231.png
 
 ===!PlayPcmWin 2.0.29 ==
   * CTRL + マウスホイールでズームするようにした(Internet ExplorerやFirefoxと同様)。
