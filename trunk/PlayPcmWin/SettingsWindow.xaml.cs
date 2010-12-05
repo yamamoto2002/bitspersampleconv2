@@ -134,10 +134,25 @@ namespace PlayPcmWin {
         }
 
         private void sliderWindowScaling_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
-            if (null != labelWindowScale) {
-                labelWindowScale.Content = string.Format("{0:0.00}", e.NewValue);
+            if (null != labelWindowScaling) {
+                labelWindowScaling.Content = string.Format("{0:0.00}", e.NewValue);
             }
         }
 
+        private void Window_MouseWheel(object sender, MouseWheelEventArgs e) {
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
+                Keyboard.IsKeyDown(Key.RightCtrl)) {
+                // CTRL + マウスホイールで画面のスケーリング
+
+                double scaling = sliderWindowScaling.Value;
+                if (e.Delta < 0) {
+                    // 1.25の128乗根
+                    scaling /= 1.001744829441175331741294013303;
+                } else {
+                    scaling *= 1.001744829441175331741294013303;
+                }
+                sliderWindowScaling.Value = scaling;
+            }
+        }
     }
 }
