@@ -1878,7 +1878,7 @@ namespace PlayPcmWin
         /// </summary>
         void UpdateWindowSettings() {
             labelPlayingTime.FontSize = m_preference.PlayingTimeSize;
-            sliderWindowScale.Value = m_preference.WindowScale;
+            sliderWindowScaling.Value = m_preference.WindowScale;
         }
 
         private void buttonSettings_Click(object sender, RoutedEventArgs e) {
@@ -2150,6 +2150,23 @@ namespace PlayPcmWin
                 Top += delta.Y;
             } else {
                 m_prevPos = e.GetPosition(this);
+            }
+        }
+
+        private void Window_MouseWheel(object sender, MouseWheelEventArgs e) {
+            if (Keyboard.IsKeyDown(Key.LeftCtrl) ||
+                Keyboard.IsKeyDown(Key.RightCtrl)) {
+                // CTRL + マウスホイールで画面のスケーリング
+
+                double scaling = sliderWindowScaling.Value;
+                if (e.Delta < 0) {
+                    // 1.25の128乗根 = 1.001744829441175331741294013303
+                    scaling /= 1.001744829441175331741294013303;
+                } else {
+                    scaling *= 1.001744829441175331741294013303;
+                }
+                sliderWindowScaling.Value = scaling;
+                m_preference.WindowScale = scaling;
             }
         }
     }
