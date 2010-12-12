@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.34 ==
-  * 周期ジッターを増やす機能作成。
+  * PlayPcmWinテストベンチに[音質劣化]タブを追加。周期ジッターを増やす機能作成。
 
 ===!PlayPcmWin 2.0.32 ==
   * WasapiUser.cppからプレイリスト管理プログラムを分離しWWPlayGroup.cppを作成。
