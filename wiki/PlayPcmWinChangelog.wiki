@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.32 ==
+  * WasapiUser.cppからプレイリスト管理プログラムを分離しWWPlayGroup.cppを作成。
+  * Issue 6 を修正しようとして失敗。
+
 ===!PlayPcmWin 2.0.31 ==
   * 詳細設定[すべてリセット]ボタン。
   * 再生時間表示の文字設定機能。
