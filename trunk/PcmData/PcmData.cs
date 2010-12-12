@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics;
 
 namespace PcmDataLib {
     /// <summary>
@@ -129,6 +128,11 @@ namespace PcmDataLib {
             Performer   = rhs.Performer;
         }
 
+        public void CopyFrom(PcmData rhs) {
+            CopyHeaderInfoFrom(rhs);
+            m_sampleArray = (byte[])rhs.m_sampleArray.Clone();
+        }
+
         // プロパティIO /////////////////////////////////////////////////////
 
         public long NumFrames {
@@ -224,12 +228,12 @@ namespace PcmDataLib {
             long startBytes = startFrame * BitsPerFrame / 8;
             long endBytes = endFrame * BitsPerFrame / 8;
 
-            System.Diagnostics.Debug.Assert(0 <= startBytes);
-            System.Diagnostics.Debug.Assert(0 <= endBytes);
-            System.Diagnostics.Debug.Assert(startBytes <= endBytes);
-            System.Diagnostics.Debug.Assert(null != m_sampleArray);
-            System.Diagnostics.Debug.Assert(startBytes <= m_sampleArray.Length);
-            System.Diagnostics.Debug.Assert(endBytes <= m_sampleArray.Length);
+            Debug.Assert(0 <= startBytes);
+            Debug.Assert(0 <= endBytes);
+            Debug.Assert(startBytes <= endBytes);
+            Debug.Assert(null != m_sampleArray);
+            Debug.Assert(startBytes <= m_sampleArray.Length);
+            Debug.Assert(endBytes <= m_sampleArray.Length);
 
             long newNumSamples = endFrame - startFrame;
             m_numFrames = newNumSamples;
@@ -243,6 +247,49 @@ namespace PcmDataLib {
                 m_sampleArray = null;
                 m_sampleArray = newArray;
             }
+        }
+
+        /// <summary>
+        /// サンプル値取得。フォーマットがSFloatの場合のみ使用可能。
+        /// </summary>
+        /// <param name="ch">チャンネル番号</param>
+        /// <param name="pos">サンプル番号</param>
+        /// <returns>サンプル値。-1.0～+1.0位</returns>
+        public float GetSampleValueInFloat(int ch, long pos) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 32);
+            Debug.Assert(0 <= ch && ch < NumChannels);
+
+            if (pos < 0 || NumFrames <= pos) {
+                return 0.0f;
+            }
+
+            long offset = pos * BitsPerFrame/8 + ch * BitsPerSample/8;
+            Debug.Assert(offset <= 0x7fffffffL);
+
+            return BitConverter.ToSingle(m_sampleArray, (int)offset);
+        }
+
+        /// <summary>
+        /// サンプル値セット。フォーマットがSFloatの場合のみ使用可能。
+        /// </summary>
+        /// <param name="ch"></param>
+        /// <param name="pos"></param>
+        /// <param name="val"></param>
+        public void SetSampleValueInFloat(int ch, long pos, float val) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 32);
+            Debug.Assert(0 <= ch && ch < NumChannels);
+
+            if (pos < 0 || NumFrames <= pos) {
+                return;
+            }
+
+            long offset = pos * BitsPerFrame / 8 + ch * BitsPerSample / 8;
+            Debug.Assert(offset <= 0x7fffffffL);
+
+            var byteArray = BitConverter.GetBytes(val);
+            Buffer.BlockCopy(byteArray, 0, m_sampleArray, (int)offset, 4);
         }
 
         /// <summary>
@@ -271,7 +318,7 @@ namespace PcmDataLib {
                         }
                         break;
                     default:
-                        System.Diagnostics.Debug.Assert(false);
+                        Debug.Assert(false);
                         return null;
                     }
                 } else if (newValueRepType == ValueRepresentationType.SInt) {
@@ -290,11 +337,11 @@ namespace PcmDataLib {
                         }
                         break;
                     default:
-                        System.Diagnostics.Debug.Assert(false);
+                        Debug.Assert(false);
                         return null;
                     }
                 } else {
-                    System.Diagnostics.Debug.Assert(false);
+                    Debug.Assert(false);
                     return null;
                 }
             } else if (newBitsPerSample == 24) {
@@ -313,7 +360,7 @@ namespace PcmDataLib {
                     }
                     break;
                 default:
-                    System.Diagnostics.Debug.Assert(false);
+                    Debug.Assert(false);
                     return null;
                 }
             } else if (newBitsPerSample == 16) {
@@ -332,11 +379,11 @@ namespace PcmDataLib {
                     }
                     break;
                 default:
-                    System.Diagnostics.Debug.Assert(false);
+                    Debug.Assert(false);
                     return null;
                 }
             } else {
-                System.Diagnostics.Debug.Assert(false);
+                Debug.Assert(false);
                 return null;
             }
 
