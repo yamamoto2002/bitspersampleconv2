@@ -599,7 +599,7 @@ namespace PlayPcmWinTestBench {
                 return;
             }
 
-            m_AQworker.ReportProgress(10);
+            m_AQworker.ReportProgress(1);
 
             pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
             PcmData pcmDataOut = new PcmData();
@@ -631,6 +631,8 @@ namespace PlayPcmWinTestBench {
             double thetaCoefficient     = 2.0 * Math.PI * args.jitterFrequency / pcmDataIn.SampleRate;
             double a = 1.0e-12 * pcmDataIn.SampleRate * args.jitterPicoseconds;
 
+            float maxValueAbs = 0.0f;
+
             long count = 0;
             Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
                 //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
@@ -647,7 +649,7 @@ namespace PlayPcmWinTestBench {
                         } else {
                             double theta2 = pos % (2.0 * Math.PI);
                             double sinx = Math.Sin(theta2);
-                            double acc = sinx / (Math.PI * pos) * pcmDataIn.GetSampleValueInFloat(ch, i + offset);
+                            double acc = sinx / pos * pcmDataIn.GetSampleValueInFloat(ch, i + offset);
                             v += acc;
 
                             /*
@@ -659,6 +661,9 @@ namespace PlayPcmWinTestBench {
                         }
                     }
                     pcmDataOut.SetSampleValueInFloat(ch, i, (float)v);
+                    if (maxValueAbs < Math.Abs(v)) {
+                        maxValueAbs = (float)Math.Abs(v);
+                    }
                     /*
                     if (ch == 0) {
                         System.Console.WriteLine("i={0} in={1} out={2}",
@@ -670,9 +675,13 @@ namespace PlayPcmWinTestBench {
 
                 ++count;
                 if (0 == (count % pcmDataIn.SampleRate)) {
-                    m_AQworker.ReportProgress((int)(10 + 80 * count / pcmDataIn.NumFrames));
+                    m_AQworker.ReportProgress((int)(1 + 98 * count / pcmDataIn.NumFrames));
                 }
             });
+
+            if (1.0f < maxValueAbs) {
+                pcmDataOut.Scale(1.0f / maxValueAbs);
+            }
 
             WriteWavFile(pcmDataOut, args.outputPath);
             e.Result = string.Format("WAVファイル 書き込み成功: {0}", args.outputPath);
