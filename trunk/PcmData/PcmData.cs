@@ -292,6 +292,17 @@ namespace PcmDataLib {
             Buffer.BlockCopy(byteArray, 0, m_sampleArray, (int)offset, 4);
         }
 
+        public void Scale(float scale) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 32);
+            for (int i = 0; i < NumFrames * NumChannels; ++i) {
+                float v = BitConverter.ToSingle(m_sampleArray, i * 4);
+                v *= scale;
+                var byteArray = BitConverter.GetBytes(v);
+                Buffer.BlockCopy(byteArray, 0, m_sampleArray, i * 4, 4);
+            }
+        }
+
         /// <summary>
         /// 量子化ビット数をbitsPerSampleに変更した、新しいPcmDataを戻す。
         /// 自分自身の内容は変更しない。
@@ -612,5 +623,6 @@ namespace PcmDataLib {
             }
             return to;
         }
+
     }
 }
