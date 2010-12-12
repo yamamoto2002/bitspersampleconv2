@@ -679,8 +679,10 @@ namespace PlayPcmWinTestBench {
                 }
             });
 
-            if (1.0f < maxValueAbs) {
-                pcmDataOut.Scale(1.0f / maxValueAbs);
+            // 1.0 - (1/8388608)
+            // -1が出てこなくなるが…
+            if (0.99999988079071044921875f < maxValueAbs) {
+                pcmDataOut.Scale(0.99999988079071044921875f / maxValueAbs);
             }
 
             WriteWavFile(pcmDataOut, args.outputPath);
