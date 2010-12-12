@@ -138,3 +138,15 @@ extern "C" __declspec(dllexport)
 int __stdcall
 WasapiIO_GetMixFormatType(void);
 
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetPcmDataSampleRate(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetPcmDataFrameBytes(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_GetPcmDataNumChannels(void);
+

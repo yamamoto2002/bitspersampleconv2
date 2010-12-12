@@ -13,6 +13,9 @@
     <ClCompile Include="WWPcmData.cpp">
       <Filter>source files</Filter>
     </ClCompile>
+    <ClCompile Include="WWPlayPcmGroup.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h">
@@ -25,6 +28,9 @@
       <Filter>header files</Filter>
     </ClInclude>
     <ClInclude Include="WWPcmData.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWPlayPcmGroup.h">
       <Filter>header files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -674,6 +674,17 @@ WasapiUser::Setup(
     switch (m_dataFlow) {
     case eRender:
         HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_renderClient)));
+        // 再生前無音、再生後無音の準備。
+        m_startSilenceBuffer.Init(-1, m_format, m_numChannels,
+            1 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000),
+            m_frameBytes, WWPcmDataContentSilence);
+        m_endSilenceBuffer.Init(-1, m_format, m_numChannels,
+            4 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000),
+            m_frameBytes, WWPcmDataContentSilence);
+        // spliceバッファー。サイズは100分の1秒=10ms 適当に選んだ。
+        m_spliceBuffer.Init(-1, m_format, m_numChannels,
+            m_sampleRate / 100,
+            m_frameBytes, WWPcmDataContentSplice);
         break;
     case eCapture:
         HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_captureClient)));
@@ -705,6 +716,8 @@ WasapiUser::Unsetup(void)
         m_audioSamplesReadyEvent = NULL;
     }
 
+    ClearPlayPcmData();
+
     SafeRelease(&m_audioClockAdjustment);
     SafeRelease(&m_captureClient);
     SafeRelease(&m_renderClient);
@@ -712,7 +725,7 @@ WasapiUser::Unsetup(void)
 }
 
 HRESULT
-WasapiUser::Start(int wavDataId)
+WasapiUser::Start(void)
 {
     HRESULT hr      = 0;
     BYTE    *pData  = NULL;
@@ -721,13 +734,7 @@ WasapiUser::Start(int wavDataId)
 
     dprintf("D: %s()\n", __FUNCTION__);
 
-    assert(m_playPcmDataList.size());
-
-    // 再生開始するに当たり、リンクリストをつなげなおす。
-    // 先頭の項目→最初に再生したい曲
-    SetFirstPlayPcmData(FindPlayPcmDataById(wavDataId));
-
-    PlayPcmDataListDebug();
+    assert(m_nowPlayingPcmData);
 
     HRG(m_audioClient->Reset());
 
@@ -738,6 +745,7 @@ WasapiUser::Start(int wavDataId)
 
     switch (m_dataFlow) {
     case eRender:
+        assert(NULL == m_thread);
         m_thread = CreateThread(NULL, 0, RenderEntry, this, 0, NULL);
         assert(m_thread);
 
@@ -770,7 +778,7 @@ WasapiUser::Start(int wavDataId)
         assert(m_thread);
 
         hr = m_captureClient->GetBuffer(
-            &pData, &nFrames,&flags, NULL, NULL);
+            &pData, &nFrames, &flags, NULL, NULL);
         if (SUCCEEDED(hr)) {
             m_captureClient->ReleaseBuffer(nFrames);
         } else {
@@ -837,82 +845,12 @@ WasapiUser::Run(int millisec)
     return true;
 }
 
-////////////////////////////////////////////////////////////////////////////
-// PCMデータバッファ管理
-
-bool
-WasapiUser::AddPcmDataSilence(int nFrames)
-{
-    WWPcmData pcmData;
-    if (!pcmData.Init(-1, m_format, m_numChannels, nFrames, m_frameBytes, WWPcmDataContentSilence)) {
-        dprintf("E: %s(%d, %d) malloc failed\n", __FUNCTION__, nFrames);
-        return false;
-    }
-    m_playPcmDataList.push_back(pcmData);
-    return true;
-}
-
-bool
-WasapiUser::AddPlayPcmData(int id, BYTE *data, int bytes)
-{
-    // サンプルフォーマット変換は上のレイヤーに任せた。
-    // ここでは、来たdataを中のメモリにそのままコピーする。
-    // Setupでセットアップした形式でdataを渡してください。
-    if (data == NULL || 0 == bytes) {
-        dprintf("E: %s(%d, %p, %d) arg check failed\n", __FUNCTION__, id, data, bytes);
-        return false;
-    }
-
-    WWPcmData pcmData;
-    if (!pcmData.Init(id, m_format, m_numChannels, bytes/m_frameBytes, m_frameBytes, WWPcmDataContentPcmData)) {
-        dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
-        return false;
-    }
-    CopyMemory(pcmData.stream, data, (bytes/m_frameBytes) * m_frameBytes);
-    m_playPcmDataList.push_back(pcmData);
-    return true;
-}
-
-bool
-WasapiUser::AddPlayPcmDataStart(void)
-{
-    assert(m_playPcmDataList.size() == 0);
-
-    // バッファ1個分の無音(再生開始前に送出する無音)を作って詰める。
-    int nFrames = (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
-    return AddPcmDataSilence(nFrames);
-}
-
-bool
-WasapiUser::AddPlayPcmDataEnd(void)
-{
-    // バッファ4個分の無音(再生終了後に送出する無音)を作って詰める。
-    int nFrames = 4 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000);
-    if (!AddPcmDataSilence(nFrames)) {
-        return false;
-    }
-
-    // spliceバッファーを準備する。
-    // サイズは100分の1秒=10ms 適当に選んだ。
-    m_spliceBuffer.Init(-1, m_format, m_numChannels, m_sampleRate / 100, m_frameBytes, WWPcmDataContentSplice);
-    return true;
-}
-
-void
-WasapiUser::ClearPlayList(void)
-{
-    ClearPlayPcmData();
-}
-
 void
 WasapiUser::ClearPlayPcmData(void)
 {
-    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
-        m_playPcmDataList[i].Term();
-    }
-    m_playPcmDataList.clear();
-
     m_spliceBuffer.Term();
+    m_startSilenceBuffer.Term();
+    m_endSilenceBuffer.Term();
 
     m_nowPlayingPcmData = NULL;
 }
@@ -927,57 +865,33 @@ WasapiUser::ClearCapturedPcmData(void)
     }
 }
 
+/// 再生開始直後は、Start無音を再生する。
+/// その後startPcmDataを再生する。
+/// endPcmDataの次に、End無音を再生する。
+/// リピート再生の場合はendPcmData==NULLを渡す。
 void
-WasapiUser::SetPlayRepeat(bool repeat)
+WasapiUser::SetupPlayPcmDataLinklist(
+        bool repeat, WWPcmData *startPcmData, WWPcmData *endPcmData)
 {
-    dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
+    UpdatePlayRepeat(repeat, startPcmData, endPcmData);
 
-    // 最初の項目＝無音データ(Issue1修正のため)
-    // 最後の項目＝無音データ(Issue2修正のため)
-
-    if (m_playPcmDataList.size() < 3) {
-        dprintf("D: %s(%d) pcmDataList.size() == %d nothing to do\n",
-            __FUNCTION__, (int)repeat, m_playPcmDataList.size());
-        return;
-    }
-
-    // 最初のpcmDataから、最後のpcmDataまでnextでつなげる。
-    // リピートフラグが立っていたら最後から2個目のpcmDataのnextを最初のpcmDataにする。
-
-    // このループは最初の項目～最後から2個目までループする。
-    for (size_t i=0; i<m_playPcmDataList.size()-1; ++i) {
-        if (i == m_playPcmDataList.size()-2) {
-            // 最後から2個目→最初から2個目に接続。
-            if (repeat) {
-                m_playPcmDataList[i].next = 
-                    &m_playPcmDataList[1];
-            } else {
-                // 最後から2個目→最後の項目→NULL
-                m_playPcmDataList[i].next =
-                    &m_playPcmDataList[i+1];
-
-                m_playPcmDataList[i+1].next = NULL;
-            }
-        } else {
-            // 最後のあたりの項目以外は、連続にnextをつなげる。
-            m_playPcmDataList[i].next = 
-                &m_playPcmDataList[i+1];
-        }
-    }
+    m_nowPlayingPcmData = &m_startSilenceBuffer;
+    m_nowPlayingPcmData->next = startPcmData;
 }
 
 void
-WasapiUser::SetFirstPlayPcmData(WWPcmData *pcmData)
+WasapiUser::UpdatePlayRepeat(bool repeat,
+        WWPcmData *startPcmData, WWPcmData *endPcmData)
 {
-    if (pcmData == NULL) {
-        dprintf("D: %s pcmData == NULL. nothing to do\n", __FUNCTION__);
-        return;
-    }
+    assert(startPcmData != &m_startSilenceBuffer);
+    assert(startPcmData != &m_endSilenceBuffer);
+    assert(endPcmData != &m_startSilenceBuffer);
+    assert(endPcmData != &m_endSilenceBuffer);
 
-    // 再生開始直後は、無音を再生する。
-    // その後pcmDataを再生する。
-    m_nowPlayingPcmData = &m_playPcmDataList[0];
-    m_playPcmDataList[0].next = pcmData;
+    if (!repeat) {
+        endPcmData->next = &m_endSilenceBuffer;
+    }
+    m_endSilenceBuffer.next = NULL;
 }
 
 int
@@ -991,72 +905,60 @@ WasapiUser::GetNowPlayingPcmDataId(void)
     return nowPlaying->id;
 }
 
-WWPcmData *
-WasapiUser::FindPlayPcmDataById(int id)
+void
+WasapiUser::UpdatePlayPcmData(WWPcmData &pcmData)
 {
-    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
-        if (m_playPcmDataList[i].id == id) {
-            return &m_playPcmDataList[i];
-        }
+    if (m_thread != NULL) {
+        UpdatePlayPcmDataWhenPlaying(pcmData);
+    } else {
+        UpdatePlayPcmDataWhenNotPlaying(pcmData);
     }
-
-    return NULL;
 }
 
 void
-WasapiUser::PlayPcmDataListDebug(void)
+WasapiUser::UpdatePlayPcmDataWhenNotPlaying(WWPcmData &playPcmData)
 {
-#ifdef _DEBUG
-    dprintf("D: %s() count=%u\n", __FUNCTION__, m_playPcmDataList.size());
-    dprintf("  m_nowPlayingPcmData=%p\n", m_nowPlayingPcmData);
-    for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
-        WWPcmData *p = &m_playPcmDataList[i];
-
-        dprintf("  %p next=%p i=%d id=%d nFrames=%d posFrame=%d contentType=%s stream=%p\n",
-            p, p->next, i, p->id, p->nFrames, p->posFrame,
-            WWPcmDataContentTypeToStr(p->contentType), p->stream);
-    }
-#endif
+    m_nowPlayingPcmData = &m_startSilenceBuffer;
+    m_nowPlayingPcmData->next = &playPcmData;
 }
 
-bool
-WasapiUser::UpdatePlayPcmDataById(int id)
+void
+WasapiUser::UpdatePlayPcmDataWhenPlaying(WWPcmData &pcmData)
 {
-    dprintf("D: %s(%d)\n", __FUNCTION__, id);
+    dprintf("D: %s(%d)\n", __FUNCTION__, pcmData.id);
 
     assert(m_mutex);
     WaitForSingleObject(m_mutex, INFINITE);
     {
-        WWPcmData *p = FindPlayPcmDataById(id);
-        if (NULL == p) {
-            dprintf("D: %s(%d) id not found\n", __FUNCTION__, id);
-            goto end;
-        }
         WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
         if (nowPlaying) {
-            // m_nowPlayingPcmDataをpの先頭に移動する。
+            // m_nowPlayingPcmDataをpcmDataに移動する。
 #if 1
-            /* Issue3: いきなり移動するとブチッと言うのでsplice bufferを経由してなめらかにつなげる。
-             */
+            // Issue3: いきなり移動するとブチッと言うので
+            // splice bufferを経由してなめらかにつなげる。
             m_spliceBuffer.UpdateSpliceDataWithStraightLine(
-                m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame, p, 0);
-            m_spliceBuffer.posFrame = 0;
-            m_spliceBuffer.next = p;
-            //m_spliceBuffer.id = p->id;
+                m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame,
+                &pcmData, pcmData.posFrame);
 
-            m_nowPlayingPcmData->posFrame = 0;
-            m_nowPlayingPcmData = p;
+            if (m_nowPlayingPcmData != &pcmData) {
+                // 別の再生曲に移動した場合、
+                // それまで再生していた曲は頭出ししておく。
+                m_nowPlayingPcmData->posFrame = 0;
+            }
+
+            m_spliceBuffer.posFrame = 0;
+            m_spliceBuffer.next = &pcmData;
+
+            m_nowPlayingPcmData = &m_spliceBuffer;
 #else
             m_nowPlayingPcmData->posFrame = 0;
-            m_nowPlayingPcmData = p;
+            m_nowPlayingPcmData = &pcmData;
 #endif
         }
     }
 
-end:
     ReleaseMutex(m_mutex);
-    return true;
 }
 
 int
@@ -1509,8 +1411,17 @@ end:
     return result;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// 設定取得
+
 int
-WasapiUser::GetBufferFormatSampleRate(void)
+WasapiUser::GetPcmDataSampleRate(void)
+{
+    return m_sampleRate;
+}
+
+int
+WasapiUser::GetMixFormatSampleRate(void)
 {
 #if 1
     return m_deviceSampleRate;
@@ -1538,8 +1449,20 @@ end:
 }
 
 WWPcmDataFormatType
-WasapiUser::GetBufferFormatType(void)
+WasapiUser::GetMixFormatType(void)
 {
     return m_format;
+}
+
+int
+WasapiUser::GetPcmDataNumChannels(void)
+{
+    return m_numChannels;
+}
+
+int
+WasapiUser::GetPcmDataFrameBytes(void)
+{
+    return m_frameBytes;
 }
 

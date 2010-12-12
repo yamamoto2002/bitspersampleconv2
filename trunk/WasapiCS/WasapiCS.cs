@@ -29,15 +29,15 @@ namespace Wasapi {
         WasapiIO_SetLatencyMillisec(int ms);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_DoDeviceEnumeration(int deviceType);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_GetDeviceCount();
 
         [DllImport("WasapiIODLL.dll", CharSet = CharSet.Auto)]
-        private extern static bool 
+        private extern static bool
         WasapiIO_GetDeviceName(int id, System.Text.StringBuilder name, int nameBytes);
 
         [DllImport("WasapiIODLL.dll", CharSet = CharSet.Auto)]
@@ -45,7 +45,7 @@ namespace Wasapi {
         WasapiIO_InspectDevice(int id, System.Text.StringBuilder result, int resultBytes);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_ChooseDevice(int id);
 
         [DllImport("WasapiIODLL.dll")]
@@ -61,15 +61,15 @@ namespace Wasapi {
         WasapiIO_GetUseDeviceName(System.Text.StringBuilder name, int nameBytes);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_Setup(int sampleRate, int format, int numChannels);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void 
+        private extern static void
         WasapiIO_Unsetup();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static bool 
+        private extern static bool
         WasapiIO_AddPlayPcmDataStart();
 
         [DllImport("WasapiIODLL.dll")]
@@ -81,7 +81,7 @@ namespace Wasapi {
         WasapiIO_AddPlayPcmDataEnd();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void 
+        private extern static void
         WasapiIO_ClearPlayList();
 
         [DllImport("WasapiIODLL.dll")]
@@ -109,23 +109,23 @@ namespace Wasapi {
         WasapiIO_GetCaptureGlitchCount();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_Start(int wavDataId);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static bool 
+        private extern static bool
         WasapiIO_Run(int millisec);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void 
+        private extern static void
         WasapiIO_Stop();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_GetPosFrame();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int 
+        private extern static int
         WasapiIO_GetTotalFrameNum();
 
         [DllImport("WasapiIODLL.dll")]
@@ -140,6 +140,18 @@ namespace Wasapi {
         private extern static int
         WasapiIO_GetMixFormatType();
 
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetPcmDataSampleRate();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetPcmDataFrameBytes();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetPcmDataNumChannels();
+        
         public int Init() {
             return WasapiIO_Init();
         }
@@ -322,6 +334,26 @@ namespace Wasapi {
 
         public SampleFormatType GetBufferFormatType() {
             return (SampleFormatType)WasapiIO_GetMixFormatType();
+        }
+
+        public struct PcmFormat {
+            public int sampleRate;
+            public SampleFormatType sampleFormat;
+            public int numChannels;
+            public int frameBytes;
+        }
+
+        /// <summary>
+        /// @todo WasapiIOから、構造体を引き揚げられるようにする
+        /// </summary>
+        /// <returns></returns>
+        public PcmFormat GetPcmFormat() {
+            PcmFormat pf = new PcmFormat();
+            pf.sampleRate = WasapiIO_GetPcmDataSampleRate();
+            pf.sampleFormat = (SampleFormatType)WasapiIO_GetMixFormatType();
+            pf.numChannels = WasapiIO_GetPcmDataNumChannels();
+            pf.frameBytes = WasapiIO_GetPcmDataFrameBytes();
+            return pf;
         }
     }
 }

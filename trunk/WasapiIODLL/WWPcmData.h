@@ -50,22 +50,29 @@ struct WWPcmData {
     WWPcmDataFormatType format;
     WWPcmDataContentType contentType;
     int       nChannels;
+
     int       nFrames;
+    int       frameBytes;
     int       posFrame;
     BYTE      *stream;
 
     WWPcmData(void) {
         id       = 0;
         next     = NULL;
+        format   = WWPcmDataFormatUnknown;
         contentType = WWPcmDataContentPcmData;
         nChannels = 0;
-        nFrames  = 0;
-        posFrame = 0;
-        stream   = NULL;
+
+        nFrames    = 0;
+        frameBytes = 0;
+        posFrame   = 0;
+        stream     = NULL;
     }
 
     ~WWPcmData(void);
 
+    /// @param frameBytes 1フレームのバイト数。
+    ///     (1サンプル1チャンネルのバイト数×チャンネル数)
     bool Init(int id, WWPcmDataFormatType format, int nChannels,
         int nFrames, int frameBytes, WWPcmDataContentType dataType);
     void Term(void);
