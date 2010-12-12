@@ -1532,14 +1532,8 @@ namespace PlayPcmWin
 
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 // ファイル読み込み完了後、再生を開始する。
-                // 再生するファイルは、現在選択されているファイル。
+                // 再生するファイルは、タスクで指定されたファイル。
                 int wavDataId = m_task.WavDataId;
-                if (0 < dataGridPlayList.SelectedIndex) {
-                    PcmDataLib.PcmData pcmData = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
-                    if (null != pcmData) {
-                        wavDataId = pcmData.Id;
-                    }
-                }
                 ReadStartPlayByWavDataId(wavDataId);
                 return;
             }
@@ -1585,7 +1579,7 @@ namespace PlayPcmWin
             m_preference.PreferredDeviceName = selectedItemName;
 
             int loadGroupId = 0;
-            if (0 < dataGridPlayList.SelectedIndex) {
+            if (0 <= dataGridPlayList.SelectedIndex) {
                 PcmDataLib.PcmData w = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
                 if (null != w) {
                     loadGroupId = w.GroupId;
@@ -1613,7 +1607,7 @@ namespace PlayPcmWin
             }
 
             int wavDataId = 0;
-            if (0 < dataGridPlayList.SelectedIndex) {
+            if (0 <= dataGridPlayList.SelectedIndex) {
                 PcmDataLib.PcmData pcmData = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
                 if (null != pcmData) {
                     wavDataId = pcmData.Id;
@@ -1678,7 +1672,6 @@ namespace PlayPcmWin
                 // wasapiUserの中で自発的にループ再生する。
                 // ファイルの再生が終わった=停止。
                 m_task.Set(TaskType.None);
-                dataGridPlayList.SelectedIndex = 0;
                 return;
             }
 
@@ -1705,7 +1698,6 @@ namespace PlayPcmWin
             }
 
             m_task.Set(TaskType.None);
-            dataGridPlayList.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -1794,7 +1786,6 @@ namespace PlayPcmWin
             }
 
             int playingPcmDataId = wasapi.GetNowPlayingPcmDataId();
-            int maximum = wasapi.GetNowPlayingPcmDataId();
 
             if (playingPcmDataId < 0) {
                 textBoxFileName.Text = "";
@@ -1802,6 +1793,7 @@ namespace PlayPcmWin
             } else {
                 dataGridPlayList.SelectedIndex
                     = GetPlayListIndexOfWaveDataId(playingPcmDataId);
+
                 slider1.Value =wasapi.GetPosFrame();
                 PcmDataLib.PcmData pcmData = m_pcmDataList[playingPcmDataId];
                 textBoxFileName.Text = pcmData.FileName;
@@ -1943,6 +1935,12 @@ namespace PlayPcmWin
                     // ファイルグループが違う場合。無視！
                     /// @todo 直す
                 }
+                return;
+            }
+
+            if (playingId < 0) {
+                // 再生中でなく、ロード中でもない場合。
+                wasapi.UpdatePlayPcmDataById(wavDataId);
                 return;
             }
 
@@ -2109,7 +2107,7 @@ namespace PlayPcmWin
             if (m_pcmDataList.Count <= wavDataId) {
                 wavDataId = 0;
             }
-
+            
             ChangePlayWavDataById(wavDataId);
         }
 
