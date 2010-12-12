@@ -134,11 +134,19 @@ namespace PlayPcmWin
         private System.Diagnostics.Stopwatch m_sw = new System.Diagnostics.Stopwatch();
         private bool m_playListMouseDown = false;
 
-        // プレイリストにAddしたファイルに振られるGroupId。
-        private int m_readGroupId = 0;
+        // 次にプレイリストにAddしたファイルに振られるGroupId。
+        private int m_groupIdNextAdd = 0;
 
-        // メモリ上に読み込まれているGroupId。
+        /// <summary>
+        /// メモリ上に読み込まれているGroupId。
+        /// </summary>
         private int m_loadedGroupId = -1;
+        
+        /// <summary>
+        /// PCMデータ読み込み中グループIDまたは読み込み完了したグループID
+        /// </summary>
+        private int m_loadingGroupId = -1;
+
 
         /// <summary>
         /// デバイスのセットアップ情報
@@ -380,7 +388,7 @@ namespace PlayPcmWin
             m_playListView = new PlayListViewModel(m_playListItems);
             DataContext = m_playListView;
 
-            m_readGroupId = 0;
+            m_groupIdNextAdd = 0;
 
             int hr = 0;
             wasapi = new WasapiCS();
@@ -689,6 +697,7 @@ namespace PlayPcmWin
             AddLogText("wasapi.UnchooseDevice()\r\n");
 
             m_loadedGroupId = -1;
+            m_loadingGroupId = -1;
         }
 
         private void Term() {
@@ -895,8 +904,9 @@ namespace PlayPcmWin
             m_playListItems.Clear();
             wasapi.ClearPlayList();
 
-            m_readGroupId = 0;
+            m_groupIdNextAdd = 0;
             m_loadedGroupId = -1;
+            m_loadingGroupId = -1;
 
             GC.Collect();
 
@@ -937,13 +947,13 @@ namespace PlayPcmWin
                 // データフォーマットが変わった。
                 m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.SampleRateChange, null));
                 m_playListView.RefreshCollection();
-                ++m_readGroupId;
+                ++m_groupIdNextAdd;
             }
 
             pcmData.FullPath = path;
             pcmData.FileName = System.IO.Path.GetFileName(path);
             pcmData.Id = m_pcmDataList.Count();
-            pcmData.GroupId = m_readGroupId;
+            pcmData.GroupId = m_groupIdNextAdd;
 
             // CUEシートの情報をセットする。
             if (null == csti) {
@@ -1491,7 +1501,7 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// WasapiCSに、リピート設定できるかどうかの判定。
+        /// リピート設定。
         /// </summary>
         private void UpdatePlayRepeat() {
             bool repeat = false;
@@ -1522,7 +1532,15 @@ namespace PlayPcmWin
 
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 // ファイル読み込み完了後、再生を開始する。
-                ReadStartPlayByWavDataId(m_task.WavDataId);
+                // 再生するファイルは、現在選択されているファイル。
+                int wavDataId = m_task.WavDataId;
+                if (0 < dataGridPlayList.SelectedIndex) {
+                    PcmDataLib.PcmData pcmData = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
+                    if (null != pcmData) {
+                        wavDataId = pcmData.Id;
+                    }
+                }
+                ReadStartPlayByWavDataId(wavDataId);
                 return;
             }
 
@@ -1584,6 +1602,8 @@ namespace PlayPcmWin
             progressBar1.Visibility = System.Windows.Visibility.Visible;
             progressBar1.Value = 0;
 
+            m_loadingGroupId = loadGroupId;
+            
             m_readFileWorker.RunWorkerAsync(loadGroupId);
         }
 
@@ -1905,20 +1925,29 @@ namespace PlayPcmWin
         /// wavDataIdの曲がロードされていたら、直ちに再生曲切り替え。
         /// ロードされていなければ、グループをロードしてから再生。
         /// 
-        /// 再生中に呼ぶ。再生中でない場合は何も起きない。
+        /// 再生中でない場合は、最初に再生する曲をwavDataIdの曲に変更する。
         /// </summary>
         /// <param name="wavDataId">再生曲</param>
         private void ChangePlayWavDataById(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
+            int groupId = m_pcmDataList[wavDataId].GroupId;
+
             int playingId = wasapi.GetNowPlayingPcmDataId();
-            if (playingId < 0) {
+            if (playingId < 0 && 0 <= m_loadingGroupId) {
+                // 再生中でなく、ロード中の場合。
+                if (groupId == m_loadingGroupId) {
+                    // 同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
+                    wasapi.UpdatePlayPcmDataById(wavDataId);
+                } else {
+                    // ファイルグループが違う場合。無視！
+                    /// @todo 直す
+                }
                 return;
             }
 
-            int groupId = m_pcmDataList[wavDataId].GroupId;
             if (m_pcmDataList[playingId].GroupId == groupId) {
-                // 再生中で、同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
+                // 同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
                 wasapi.UpdatePlayPcmDataById(wavDataId);
                 AddLogText(string.Format("wasapi.UpdatePlayPcmDataById({0})\r\n",
                     wavDataId));
@@ -1939,21 +1968,21 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_readGroupId) {
+            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_groupIdNextAdd) {
                 // 既にグループ区切り線が入れられている。
                 return;
             }
 
             // 同じ名前の項目を複数入れると選択状態が変になるので
             string dispNameOnPlayList = "----------ここまで一括読み込み------------";
-            for (int i = 0; i < m_readGroupId; ++i) {
+            for (int i = 0; i < m_groupIdNextAdd; ++i) {
                 dispNameOnPlayList =
                     dispNameOnPlayList + " ";
             }
 
             m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.ReadSeparator, null));
             m_playListView.RefreshCollection();
-            ++m_readGroupId;
+            ++m_groupIdNextAdd;
         }
 
         // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
@@ -2105,17 +2134,24 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (m_state != State.再生中 || !m_playListMouseDown ||
+            if (!m_playListMouseDown ||
                 dataGridPlayList.SelectedIndex < 0) {
                 return;
             }
+
+            PlayListItemInfo pli = m_playListItems[dataGridPlayList.SelectedIndex];
+
+            if (m_state != State.再生中) {
+                ChangePlayWavDataById(pli.PcmData().Id);
+                return;
+            }
+
+            // 再生中の場合。
 
             int playingId = wasapi.GetNowPlayingPcmDataId();
             if (playingId < 0) {
                 return;
             }
-
-            PlayListItemInfo pli = m_playListItems[dataGridPlayList.SelectedIndex];
 
             // 再生中で、しかも、マウス押下中にこのイベントが来た場合で、
             // しかも、この曲を再生していない場合、この曲を再生する。

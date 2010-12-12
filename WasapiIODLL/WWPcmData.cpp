@@ -133,6 +133,9 @@ WWPcmData::Term(void)
 
 WWPcmData::~WWPcmData(void)
 {
+    // ここでstreamをfreeする必要はない。
+    // streamがNULLでなくても問題ない！
+    // メモリリークしないように呼び出し側が気をつける。
 }
 
 void
@@ -142,7 +145,8 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
 
     next = NULL;
 
-    int bytes = nFrames * 4;
+    long bytes = nFrames * frameBytes;
+    assert(0 < bytes && bytes < 0xffffffffL);
 
     stream = (BYTE*)malloc(bytes);
     CopyMemory(stream, rhs->stream, bytes);
@@ -153,6 +157,8 @@ WWPcmData::Init(
         int aId, WWPcmDataFormatType aFormat, int anChannels,
         int anFrames, int aframeBytes, WWPcmDataContentType dataType)
 {
+    assert(stream == NULL);
+
     id       = aId;
     format   = aFormat;
     contentType = dataType;
@@ -161,6 +167,7 @@ WWPcmData::Init(
     nChannels = anChannels;
     // メモリ確保に成功してからフレーム数をセットする。
     nFrames  = 0;
+    frameBytes = aframeBytes;
     stream   = NULL;
 
     long bytes = anFrames * aframeBytes;

@@ -35,3 +35,6 @@ EXPORTS
 	WasapiIO_SetPosFrame
 	WasapiIO_GetMixFormatSampleRate
 	WasapiIO_GetMixFormatType
+	WasapiIO_GetPcmDataSampleRate
+	WasapiIO_GetPcmDataFrameBytes
+	WasapiIO_GetPcmDataNumChannels

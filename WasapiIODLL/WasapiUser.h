@@ -68,11 +68,13 @@ public:
     bool GetDeviceName(int id, LPWSTR name, size_t nameBytes);
     bool InspectDevice(int id, LPWSTR result, size_t resultBytes);
 
+    // set use device
     HRESULT ChooseDevice(int id);
     void UnchooseDevice(void);
     int  GetUseDeviceId(void);
     bool GetUseDeviceName(LPWSTR name, size_t nameBytes);
 
+    // wasapi configuration parameters
     void SetSchedulerTaskType(WWSchedulerTaskType t);
     void SetShareMode(WWShareMode sm);
     void SetDataFeedMode(WWDataFeedMode mode);
@@ -83,49 +85,39 @@ public:
 
     void Unsetup(void);
 
-    /// Setup後に呼ぶ
-    int GetBufferFormatSampleRate(void);
-    WWPcmDataFormatType GetBufferFormatType(void);
+    // Setup後に呼ぶ(Setup()で決定するので)
+    int GetPcmDataSampleRate(void);
+    int GetPcmDataNumChannels(void);
+    int GetPcmDataFrameBytes(void);
 
-    // PCMデータのセット方法
-    //     1. ClearPlayList()を呼ぶ。
-    //     2. AddPlayPcmDataStart()を呼ぶ。
-    //     3. PCMデータの数だけAddPlayPcmData()を呼ぶ。
-    //     4. AddPlayPcmDataEnd()を呼ぶ。
-    // 注1: サンプルフォーマット変換は上のレイヤーに任せた。
-    //      ここでは、来たdataを中のメモリにそのままコピーする。
-    //      Setupでセットアップした形式でdataを渡してください。
-    // 注2: AddPlayPcmDataEnd()後に、
-    //      ClearPlayList()をしないでAddPlayPcmData()することはできません。
+    /// エンドポイントバッファーのデータフォーマット。
+    WWPcmDataFormatType GetMixFormatType(void);
 
-    void ClearPlayList(void);
+    /// ミックスフォーマットサンプルレート
+    /// (WASAPI共有の場合、PcmDataSampleRateとは異なる値になることがある)
+    int GetMixFormatSampleRate(void);
 
-    bool AddPlayPcmDataStart(void);
-
-    /// @param id WAVファイルID。
-    /// @param format データフォーマット。
-    /// @param data WAVファイルのPCMデータ。LRLRLR…で、リトルエンディアン。
-    /// @param bytes dataのバイト数。
-    /// @return true: 追加成功。false: 追加失敗。
-    bool AddPlayPcmData(int id, BYTE *data, int bytes);
-
-    bool AddPlayPcmDataEnd(void);
-
-    void SetPlayRepeat(bool b);
+    /// 再生データをpcmDataに切り替える。
+    void UpdatePlayPcmData(WWPcmData &pcmData);
 
     /// -1: not playing
     int GetNowPlayingPcmDataId(void);
-    bool UpdatePlayPcmDataById(int id);
 
-    // recording
+    // recording buffer setup
     void SetupCaptureBuffer(int bytes);
     int GetCapturedData(BYTE *data, int bytes);
     int GetCaptureGlitchCount(void);
 
-    HRESULT Start(int wavDataId);
+    /// 再生リピートの更新。
+    void UpdatePlayRepeat(
+        bool repeat, WWPcmData *startPcmData, WWPcmData *endPcmData);
 
+    HRESULT Start(void);
+
+    /// 再生スレッドが終了したかどうかを調べる。
     bool Run(int millisec);
 
+    /// 停止。
     void Stop(void);
 
     /// negative number returns when playing pregap
@@ -136,6 +128,10 @@ public:
 
     /// v must be 0 or greater number
     bool SetPosFrame(int v);
+
+    EDataFlow GetDataFlow(void) const {
+        return m_dataFlow;
+    }
 
 private:
     std::vector<WWDeviceInfo> m_deviceInfo;
@@ -150,34 +146,38 @@ private:
     UINT32       m_bufferFrameNum;
 
     int          m_sampleRate;
+
+    /// has different value from m_sampleRate on wasapi shared mode
+    int          m_deviceSampleRate;
+
     WWPcmDataFormatType m_format;
     int          m_numChannels;
-
-    IAudioRenderClient  *m_renderClient;
-    IAudioCaptureClient *m_captureClient;
-    HANDLE       m_thread;
-    WWPcmData    *m_capturedPcmData;
-    std::vector<WWPcmData> m_playPcmDataList;
-    HANDLE       m_mutex;
-    int          m_footerCount;
-    bool         m_coInitializeSuccess;
-    int          m_footerNeedSendCount;
-
-    EDataFlow    m_dataFlow;
-    int          m_glitchCount;
 
     WWDataFeedMode m_dataFeedMode;
     WWSchedulerTaskType m_schedulerTaskType;
     AUDCLNT_SHAREMODE m_shareMode;
     DWORD        m_latencyMillisec;
 
+    IAudioRenderClient  *m_renderClient;
+    IAudioCaptureClient *m_captureClient;
     IAudioClockAdjustment *m_audioClockAdjustment;
+    HANDLE       m_thread;
+    HANDLE       m_mutex;
+    bool         m_coInitializeSuccess;
+    int          m_footerNeedSendCount;
 
-    WWPcmData    *m_nowPlayingPcmData;
+    EDataFlow    m_dataFlow;
+    int          m_glitchCount;
+    int          m_footerCount;
+
     int          m_useDeviceId;
     wchar_t      m_useDeviceName[WW_DEVICE_NAME_COUNT];
+
+    WWPcmData    *m_capturedPcmData;
+    WWPcmData    *m_nowPlayingPcmData;
     WWPcmData    m_spliceBuffer;
-    int          m_deviceSampleRate;
+    WWPcmData    m_startSilenceBuffer;
+    WWPcmData    m_endSilenceBuffer;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
@@ -190,16 +190,19 @@ private:
 
     void ClearCapturedPcmData(void);
     void ClearPlayPcmData(void);
-    void ClearAllPcmData(void);
 
     int CreateWritableFrames(BYTE *pData_return, int wantFrames);
 
-    WWPcmData *FindPlayPcmDataById(int id);
+    /// 再生リンクリストをつなげる。
+    void SetupPlayPcmDataLinklist(
+        bool repeat, WWPcmData *startPcmData, WWPcmData *endPcmData);
 
-    void PlayPcmDataListDebug(void);
+    /// 停止中に再生するpcmDataをセットする。
+    /// 1フレームの無音の後にpcmDataを再生する。
+    void UpdatePlayPcmDataWhenNotPlaying(WWPcmData &playPcmData);
 
-    bool AddPcmDataSilence(int nFrames);
-
-    void SetFirstPlayPcmData(WWPcmData *pcmData);
+    /// 再生中に再生するPcmDataをセットする。
+    /// サンプル値をなめらかに補間する。
+    void UpdatePlayPcmDataWhenPlaying(WWPcmData &playPcmData);
 };
 
