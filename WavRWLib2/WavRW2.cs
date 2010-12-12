@@ -74,7 +74,9 @@ namespace WavRWLib2
         private ushort m_blockAlign;
         public ushort BitsPerFrame { get; set; }
 
-        public bool Create(int numChannels, int sampleRate, int bitsPerSample)
+        public bool Create(
+                int numChannels, int sampleRate, int bitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType sampleValueRepresentation)
         {
             m_subChunk1Id = new byte[4];
             m_subChunk1Id[0] = (byte)'f';
@@ -95,7 +97,14 @@ namespace WavRWLib2
 
             BitsPerFrame = (ushort)bitsPerSample;
 
-            SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
+            SampleValueRepresentationType = sampleValueRepresentation;
+            if (sampleValueRepresentation == PcmDataLib.PcmData.ValueRepresentationType.SInt) {
+                m_audioFormat = 1;
+            } else if (sampleValueRepresentation == PcmDataLib.PcmData.ValueRepresentationType.SFloat) {
+                m_audioFormat = 3;
+            } else {
+                System.Diagnostics.Debug.Assert(false);
+            }
 
             return true;
         }
@@ -467,7 +476,7 @@ namespace WavRWLib2
             m_rcd.Create((uint)(36 + sampleArray.LongLength));
 
             m_fsc = new FmtSubChunk();
-            m_fsc.Create(numChannels, sampleRate, bitsPerSample);
+            m_fsc.Create(numChannels, sampleRate, bitsPerSample, sampleValueRepresentation);
 
             m_dsc = new DataSubChunk();
             m_dsc.Create(numFrames, sampleArray);

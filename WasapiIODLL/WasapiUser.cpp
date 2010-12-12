@@ -889,8 +889,13 @@ WasapiUser::UpdatePlayRepeat(bool repeat,
     assert(endPcmData != &m_endSilenceBuffer);
 
     if (!repeat) {
+        // リピートなし。endPcmData→endSilence→NULL
         endPcmData->next = &m_endSilenceBuffer;
+    } else {
+        // リピートあり。endPcmData→startPcmData
+        endPcmData->next = startPcmData;
     }
+
     m_endSilenceBuffer.next = NULL;
 }
 

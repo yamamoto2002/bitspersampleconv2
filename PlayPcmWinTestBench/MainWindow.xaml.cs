@@ -2,30 +2,23 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.ComponentModel;
+using System.IO;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Security.Cryptography;
-using System.ComponentModel;
-using Wasapi;
 using PcmDataLib;
-using System.IO;
-using WavRWLib2;
+using Wasapi;
 using WasapiPcmUtil;
+using WavRWLib2;
+using System.Threading.Tasks;
 
 namespace PlayPcmWinTestBench {
     public partial class MainWindow : Window {
         Wasapi.WasapiCS wasapi;
         RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
         private BackgroundWorker m_playWorker;
+        private BackgroundWorker m_AQworker;
 
         enum AB {
             Unknown = -1,
@@ -99,6 +92,13 @@ namespace PlayPcmWinTestBench {
             m_playWorker.ProgressChanged += new ProgressChangedEventHandler(PlayProgressChanged);
             m_playWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PlayRunWorkerCompleted);
             m_playWorker.WorkerSupportsCancellation = true;
+
+            m_AQworker = new BackgroundWorker();
+            m_AQworker.WorkerReportsProgress = true;
+            m_AQworker.DoWork += new DoWorkEventHandler(m_AQworker_DoWork);
+            m_AQworker.ProgressChanged += new ProgressChangedEventHandler(m_AQworker_ProgressChanged);
+            m_AQworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_AQworker_RunWorkerCompleted);
+            m_AQworker.WorkerSupportsCancellation = false;
         }
 
         
@@ -254,7 +254,7 @@ namespace PlayPcmWinTestBench {
             Close();
         }
 
-        private string BrowseFile() {
+        private string BrowseOpenFile() {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Filter =
                 "WAVEファイル|*.wav";
@@ -267,8 +267,20 @@ namespace PlayPcmWinTestBench {
             return dlg.FileName;
         }
 
+        private string BrowseSaveFile() {
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.Filter =
+                "WAVEファイル|*.wav";
+
+            Nullable<bool> result = dlg.ShowDialog();
+            if (result != true) {
+                return "";
+            }
+            return dlg.FileName;
+        }
+
         private void buttonBrowseA_Click(object sender, RoutedEventArgs e) {
-            string fileName = BrowseFile();
+            string fileName = BrowseOpenFile();
             if (0 < fileName.Length) {
                 textBoxPathA.Text = fileName;
                 UpdateUIStatus();
@@ -276,7 +288,7 @@ namespace PlayPcmWinTestBench {
         }
 
         private void buttonBrowseB_Click(object sender, RoutedEventArgs e) {
-            string fileName = BrowseFile();
+            string fileName = BrowseOpenFile();
             if (0 < fileName.Length) {
                 textBoxPathB.Text = fileName;
                 UpdateUIStatus();
@@ -301,7 +313,7 @@ namespace PlayPcmWinTestBench {
             PcmData pcmData = new PcmData();
 
             using (BinaryReader br = new BinaryReader(
-                                    File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                    File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                 WavData wavData = new WavData();
                 bool readSuccess = wavData.ReadAll(br, 0, -1);
                 if (!readSuccess) {
@@ -313,6 +325,18 @@ namespace PlayPcmWinTestBench {
             }
 
             return pcmData;
+        }
+
+        private bool WriteWavFile(PcmData pcmData, string path) {
+            using (BinaryWriter bw = new BinaryWriter(
+                    File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Write))) {
+                WavData wavData = new WavData();
+                wavData.Set(pcmData.NumChannels, pcmData.BitsPerSample, pcmData.ValidBitsPerSample, pcmData.SampleRate,
+                    pcmData.SampleValueRepresentationType, pcmData.NumFrames, pcmData.GetSampleArray());
+                wavData.Write(bw);
+            }
+
+            return true;
         }
 
         private SampleFormatInfo m_sampleFormat;
@@ -496,5 +520,164 @@ namespace PlayPcmWinTestBench {
             s += string.Format("\r\n{0}回中{1}回正解", answered, correct);
             MessageBox.Show(s);
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////
+        /// 音質劣化
+
+        private void buttonAQBrowseOpen_Click(object sender, RoutedEventArgs e) {
+            string fileName = BrowseOpenFile();
+            if (0 < fileName.Length) {
+                textBoxAQInputFilePath.Text = fileName;
+                UpdateUIStatus();
+            }
+        }
+
+        private void buttonAQBrowseSaveAs_Click(object sender, RoutedEventArgs e) {
+            string fileName = BrowseSaveFile();
+            if (0 < fileName.Length) {
+                textBoxAQOutputFilePath.Text = fileName;
+                UpdateUIStatus();
+            }
+        }
+
+        struct AQWorkerArgs {
+            public string inputPath;
+            public string outputPath;
+            public double jitterFrequency;
+            public double jitterPicoseconds;
+        };
+
+        private void m_AQworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            progressBar1.Value = 0;
+            buttonAQOutputStart.IsEnabled  = true;
+            buttonAQBrowseOpen.IsEnabled   = true;
+            buttonAQBrowseSaveAs.IsEnabled = true;
+
+            string result = (string)e.Result;
+
+            labelAQResult.Content = string.Format("結果: {0}", result);
+        }
+
+        private void m_AQworker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+            progressBar1.Value = e.ProgressPercentage;
+        }
+
+        private void buttonAQOutputStart_Click(object sender, RoutedEventArgs e) {
+            AQWorkerArgs args = new AQWorkerArgs();
+            args.inputPath = textBoxAQInputFilePath.Text;
+            args.outputPath = textBoxAQOutputFilePath.Text;
+            if (!System.IO.File.Exists(args.inputPath)) {
+                MessageBox.Show("エラー。入力ファイルが存在しません");
+                return;
+            }
+            if (!Double.TryParse(textBoxJitterFrequency.Text, out args.jitterFrequency) ||
+                    args.jitterFrequency < 0.0) {
+                MessageBox.Show("エラー。周期ジッター周波数に0以上の数値を入力してください");
+                return;
+            }
+            if (!Double.TryParse(textBoxJitterPicoseconds.Text, out args.jitterPicoseconds) ||
+                    args.jitterPicoseconds < 0.0) {
+                MessageBox.Show("エラー。周期ジッター最大ずれ量に0以上の数値を入力してください");
+                return;
+            }
+
+            buttonAQOutputStart.IsEnabled = false;
+            buttonAQBrowseOpen.IsEnabled = false;
+            buttonAQBrowseSaveAs.IsEnabled = false;
+            progressBar1.Value = 0;
+            labelAQResult.Content = "処理中…";
+
+            m_AQworker.RunWorkerAsync(args);
+        }
+
+        private void m_AQworker_DoWork(object sender, DoWorkEventArgs e) {
+            AQWorkerArgs args = (AQWorkerArgs)e.Argument;
+
+            PcmData pcmDataIn = ReadWavFile(args.inputPath);
+            if (null == pcmDataIn) {
+                e.Result = string.Format("WAVファイル 読み込み失敗: {0}", args.inputPath);
+                return;
+            }
+
+            m_AQworker.ReportProgress(10);
+
+            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
+            PcmData pcmDataOut = new PcmData();
+            pcmDataOut.CopyFrom(pcmDataIn);
+
+            /*
+             sampleRate        == 96000 Hz
+             jitterFrequency   == 50 Hz
+             jitterPicoseconds == 1 ps の場合
+
+             サンプル位置posのθ= 2 * PI * pos * 50 / 96000 (ラジアン)
+
+             サンプル間隔= 1/96000秒 = 10.4 μs
+             
+             1ms = 10^-3秒
+             1μs= 10^-6秒
+             1ns = 10^-9秒
+             1ps = 10^-12秒
+
+              1psのずれ           x サンプルのずれ
+             ──────── ＝ ─────────
+              10.4 μsのずれ      1 サンプルのずれ
+
+             1psのサンプルずれA ＝ 10^-12 ÷ 1/96000 (サンプルのずれ)
+             
+             サンプルを採取する位置= pos + Asin(θ)
+            */
+
+            double thetaCoefficient     = 2.0 * Math.PI * args.jitterFrequency / pcmDataIn.SampleRate;
+            double a = 1.0e-12 * pcmDataIn.SampleRate * args.jitterPicoseconds;
+
+            long count = 0;
+            Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
+                //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
+                for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                    double v = 0.0;
+
+                    double jitter = a * Math.Sin((thetaCoefficient * i) % (2.0 * Math.PI));
+
+                    for (int offset = -128; offset < 128; ++offset) {
+                        double pos = Math.PI * offset + jitter;
+
+                        if (-double.Epsilon < pos && pos < double.Epsilon) {
+                            v += pcmDataIn.GetSampleValueInFloat(ch, i + offset);
+                        } else {
+                            double theta2 = pos % (2.0 * Math.PI);
+                            double sinx = Math.Sin(theta2);
+                            double acc = sinx / (Math.PI * pos) * pcmDataIn.GetSampleValueInFloat(ch, i + offset);
+                            v += acc;
+
+                            /*
+                            if (0.01 < Math.Abs(acc)) {
+                                System.Console.WriteLine("i={0} offset={1} pos={2} theta2={3} sinx={4} sampleV={5} acc={6}",
+                                    i, offset, pos, theta2, sinx, pcmDataIn.GetSampleValueInFloat(ch, i + offset), acc);
+                            }
+                            */
+                        }
+                    }
+                    pcmDataOut.SetSampleValueInFloat(ch, i, (float)v);
+                    /*
+                    if (ch == 0) {
+                        System.Console.WriteLine("i={0} in={1} out={2}",
+                            i, pcmDataIn.GetSampleValueInFloat(ch, i),
+                            v);
+                    }
+                    */
+                }
+
+                ++count;
+                if (0 == (count % pcmDataIn.SampleRate)) {
+                    m_AQworker.ReportProgress((int)(10 + 80 * count / pcmDataIn.NumFrames));
+                }
+            });
+
+            WriteWavFile(pcmDataOut, args.outputPath);
+            e.Result = string.Format("WAVファイル 書き込み成功: {0}", args.outputPath);
+            m_AQworker.ReportProgress(100);
+        }
+
     }
 }
