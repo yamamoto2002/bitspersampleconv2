@@ -118,7 +118,7 @@ namespace sqwave2
                     if (truncFreq <= harmonics * freq) {
                         break;
                     }
-                    double x = amplitude / harmonics * Math.Sin(step * i * harmonics);
+                    double x = amplitude / harmonics * Math.Sin((step * i * harmonics) % (2.0 * Math.PI));
                     v += x;
                 }
 
@@ -157,7 +157,7 @@ namespace sqwave2
                     if (truncFreq <= harmonics * freq) {
                         break;
                     }
-                    double x = ampWithPhase / harmonics * Math.Sin(step * i * harmonics);
+                    double x = ampWithPhase / harmonics * Math.Sin((step * i * harmonics) % (2.0 * Math.PI));
                     v += x;
                 }
 
@@ -192,7 +192,7 @@ namespace sqwave2
                     if (truncFreq <= harmonics * freq) {
                         break;
                     }
-                    double x = amplitude / harmonics / harmonics * Math.Sin(step * i * harmonics);
+                    double x = amplitude / harmonics / harmonics * Math.Sin((step * i * harmonics) % (2.0 * Math.PI));
                     if ((h & 1) == 0) {
                         // hが偶数のときは-1倍する
                         x = -x;

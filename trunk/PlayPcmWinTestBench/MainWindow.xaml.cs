@@ -628,8 +628,8 @@ namespace PlayPcmWinTestBench {
              サンプルを採取する位置= pos + Asin(θ)
             */
 
-            double thetaCoefficient     = 2.0 * Math.PI * args.jitterFrequency / pcmDataIn.SampleRate;
-            double a = 1.0e-12 * pcmDataIn.SampleRate * args.jitterPicoseconds;
+            double thetaCoefficient = 2.0 * Math.PI * args.jitterFrequency / pcmDataIn.SampleRate;
+            double amplitude = 1.0e-12 * pcmDataIn.SampleRate * args.jitterPicoseconds;
 
             float maxValueAbs = 0.0f;
 
@@ -639,7 +639,7 @@ namespace PlayPcmWinTestBench {
                 for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
                     double v = 0.0;
 
-                    double jitter = a * Math.Sin((thetaCoefficient * i) % (2.0 * Math.PI));
+                    double jitter = amplitude * Math.Sin((thetaCoefficient * i) % (2.0 * Math.PI));
 
                     for (int offset = -128; offset < 128; ++offset) {
                         double pos = Math.PI * offset + jitter;
@@ -681,12 +681,18 @@ namespace PlayPcmWinTestBench {
 
             // 1.0 - (1/8388608)
             // -1が出てこなくなるが…
+            double scale = 1.0;
             if (0.99999988079071044921875f < maxValueAbs) {
-                pcmDataOut.Scale(0.99999988079071044921875f / maxValueAbs);
+                scale = 0.99999988079071044921875f / maxValueAbs;
+                pcmDataOut.Scale((float)scale);
             }
 
             WriteWavFile(pcmDataOut, args.outputPath);
-            e.Result = string.Format("WAVファイル 書き込み成功: {0}", args.outputPath);
+            e.Result = string.Format("書き込み成功。");
+            if (scale < 1.0) {
+                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{1}dB({0}倍)しました",
+                    20.0 * Math.Log10(scale), scale);
+            }
             m_AQworker.ReportProgress(100);
         }
 
