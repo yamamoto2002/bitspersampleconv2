@@ -5,6 +5,7 @@
 
 ===!PlayPcmWin 2.0.35 ==
   * PlayPcmWinテストベンチの[音質劣化]タブの周期ジッターを増やす機能のリミッター処理バグ修正。
+http://bitspersampleconv2.googlecode.com/files/jitterss.png
 
 ===!PlayPcmWin 2.0.34 ==
   * PlayPcmWinテストベンチに[音質劣化]タブを追加。周期ジッターを増やす機能作成。(リミッター処理がバグっている)
