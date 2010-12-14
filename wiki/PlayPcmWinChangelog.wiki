@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.37 ==
+  * PlayPcmWinテストベンチの[音質劣化]タブに、ランダムジッターを増やす機能を追加。
+
 ===!PlayPcmWin 2.0.35 ==
   * PlayPcmWinテストベンチの[音質劣化]タブの周期ジッターを増やす機能のリミッター処理バグ修正。
 http://bitspersampleconv2.googlecode.com/files/jitterss.png
