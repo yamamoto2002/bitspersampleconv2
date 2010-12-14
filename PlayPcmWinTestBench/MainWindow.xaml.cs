@@ -543,8 +543,10 @@ namespace PlayPcmWinTestBench {
         struct AQWorkerArgs {
             public string inputPath;
             public string outputPath;
-            public double jitterFrequency;
-            public double jitterPicoseconds;
+            public double sequentialJitterFrequency;
+            public double sequentialJitterPicoseconds;
+            public double tpdfJitterPicoseconds;
+            public double rpdfJitterPicoseconds;
         };
 
         private void m_AQworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
@@ -570,14 +572,24 @@ namespace PlayPcmWinTestBench {
                 MessageBox.Show("エラー。入力ファイルが存在しません");
                 return;
             }
-            if (!Double.TryParse(textBoxJitterFrequency.Text, out args.jitterFrequency) ||
-                    args.jitterFrequency < 0.0) {
+            if (!Double.TryParse(textBoxSequentialJitterFrequency.Text, out args.sequentialJitterFrequency) ||
+                    args.sequentialJitterFrequency < 0.0) {
                 MessageBox.Show("エラー。周期ジッター周波数に0以上の数値を入力してください");
                 return;
             }
-            if (!Double.TryParse(textBoxJitterPicoseconds.Text, out args.jitterPicoseconds) ||
-                    args.jitterPicoseconds < 0.0) {
+            if (!Double.TryParse(textBoxSequentialJitterPicoseconds.Text, out args.sequentialJitterPicoseconds) ||
+                    args.sequentialJitterPicoseconds < 0.0) {
                 MessageBox.Show("エラー。周期ジッター最大ずれ量に0以上の数値を入力してください");
+                return;
+            }
+            if (!Double.TryParse(textBoxTpdfJitterPicoseconds.Text, out args.tpdfJitterPicoseconds) ||
+                    args.tpdfJitterPicoseconds < 0.0) {
+                MessageBox.Show("エラー。三角分布ジッター最大ずれ量に0以上の数値を入力してください");
+                return;
+            }
+            if (!Double.TryParse(textBoxRpdfJitterPicoseconds.Text, out args.rpdfJitterPicoseconds) ||
+                    args.rpdfJitterPicoseconds < 0.0) {
+                MessageBox.Show("エラー。一様分布ジッター最大ずれ量に0以上の数値を入力してください");
                 return;
             }
 
@@ -588,6 +600,18 @@ namespace PlayPcmWinTestBench {
             labelAQResult.Content = "処理中…";
 
             m_AQworker.RunWorkerAsync(args);
+        }
+
+        /// <summary>
+        ///  仮数部が32bitぐらいまで値が埋まっているランダムの0～1
+        /// </summary>
+        /// <returns></returns>
+        private double GenRandom0to1(RNGCryptoServiceProvider gen) {
+            byte[] bytes = new byte[4];
+            gen.GetBytes(bytes);
+            uint u = BitConverter.ToUInt32(bytes, 0);
+            double d = (double)u / uint.MaxValue;
+            return d;
         }
 
         private void m_AQworker_DoWork(object sender, DoWorkEventArgs e) {
@@ -628,8 +652,13 @@ namespace PlayPcmWinTestBench {
              サンプルを採取する位置= pos + Asin(θ)
             */
 
-            double thetaCoefficient = 2.0 * Math.PI * args.jitterFrequency / pcmDataIn.SampleRate;
-            double amplitude = 1.0e-12 * pcmDataIn.SampleRate * args.jitterPicoseconds;
+            double thetaCoefficientSeqJitter = 2.0 * Math.PI * args.sequentialJitterFrequency / pcmDataIn.SampleRate;
+            double ampSeqJitter = 1.0e-12 * pcmDataIn.SampleRate * args.sequentialJitterPicoseconds;
+
+            double ampTpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.tpdfJitterPicoseconds;
+            double ampRpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.rpdfJitterPicoseconds;
+
+            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
 
             float maxValueAbs = 0.0f;
 
@@ -639,7 +668,17 @@ namespace PlayPcmWinTestBench {
                 for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
                     double v = 0.0;
 
-                    double jitter = amplitude * Math.Sin((thetaCoefficient * i) % (2.0 * Math.PI));
+                    // generate jitter
+                    double seqJitter = ampSeqJitter * Math.Sin((thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
+                    double tpdfJitter = 0.0;
+                    double rpdfJitter = 0.0;
+                    if (0.0 < args.tpdfJitterPicoseconds) {
+                        tpdfJitter = ampTpdfJitter * (GenRandom0to1(gen) + GenRandom0to1(gen))/2.0;
+                    }
+                    if (0.0 < args.rpdfJitterPicoseconds) {
+                        rpdfJitter = ampRpdfJitter * GenRandom0to1(gen);
+                    }
+                    double jitter = seqJitter + tpdfJitter + rpdfJitter;
 
                     for (int offset = -128; offset < 128; ++offset) {
                         double pos = Math.PI * offset + jitter;
