@@ -613,7 +613,7 @@ namespace PlayPcmWinTestBench {
             double d = (double)u / uint.MaxValue;
             return d;
         }
-
+        
         private void m_AQworker_DoWork(object sender, DoWorkEventArgs e) {
             AQWorkerArgs args = (AQWorkerArgs)e.Argument;
 
@@ -673,10 +673,11 @@ namespace PlayPcmWinTestBench {
                     double tpdfJitter = 0.0;
                     double rpdfJitter = 0.0;
                     if (0.0 < args.tpdfJitterPicoseconds) {
-                        tpdfJitter = ampTpdfJitter * (GenRandom0to1(gen) + GenRandom0to1(gen))/2.0;
+                        double r = GenRandom0to1(gen) + GenRandom0to1(gen) - 1.0;
+                        tpdfJitter = ampTpdfJitter * r;
                     }
                     if (0.0 < args.rpdfJitterPicoseconds) {
-                        rpdfJitter = ampRpdfJitter * GenRandom0to1(gen);
+                        rpdfJitter = ampRpdfJitter * (GenRandom0to1(gen)*2.0 - 1.0);
                     }
                     double jitter = seqJitter + tpdfJitter + rpdfJitter;
 
