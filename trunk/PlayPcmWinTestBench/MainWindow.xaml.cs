@@ -620,6 +620,8 @@ namespace PlayPcmWinTestBench {
         }
         
         private void m_AQworker_DoWork(object sender, DoWorkEventArgs e) {
+            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
+
             AQWorkerArgs args = (AQWorkerArgs)e.Argument;
 
             PcmData pcmDataIn = ReadWavFile(args.inputPath);
@@ -655,6 +657,8 @@ namespace PlayPcmWinTestBench {
              1psのサンプルずれA ＝ 10^-12 ÷ 1/96000 (サンプルのずれ)
              
              サンプルを採取する位置= pos + Asin(θ)
+             
+             96000Hzの場合、1/96000秒＝10.4マイクロ秒以上のジッターを加えると隣りのサンプル値よりも向こう側になってしまうので制限をかける。
             */
 
             double thetaCoefficientSeqJitter = 2.0 * Math.PI * args.sequentialJitterFrequency / pcmDataIn.SampleRate;
@@ -662,6 +666,18 @@ namespace PlayPcmWinTestBench {
 
             double ampTpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.tpdfJitterPicoseconds;
             double ampRpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.rpdfJitterPicoseconds;
+
+            if (pcmDataIn.SampleRate <
+                1.0 / args.sequentialJitterPicoseconds * 1.0e-12 +
+                1.0 / args.tpdfJitterPicoseconds * 1.0e-12 +
+                1.0 / args.rpdfJitterPicoseconds * 1.0e-12) {
+                e.Result = string.Format(
+                    "エラー: 計算方法に起因する制限により、" +
+                    "{0}Hzサンプリングの入力データに、合計" +
+                    "{1}ピコ秒以上のジッターを加えることはできません。ジッターの総量を減らして下さい。",
+                    pcmDataIn.SampleRate, (int)((1.0 / pcmDataIn.SampleRate) * 1000 * 1000 * 1000 * 1000));
+                return;
+            }
 
             RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
 
