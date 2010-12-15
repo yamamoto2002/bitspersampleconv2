@@ -547,6 +547,7 @@ namespace PlayPcmWinTestBench {
             public double sequentialJitterPicoseconds;
             public double tpdfJitterPicoseconds;
             public double rpdfJitterPicoseconds;
+            public int convolutionN;
         };
 
         private void m_AQworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
@@ -557,7 +558,7 @@ namespace PlayPcmWinTestBench {
 
             string result = (string)e.Result;
 
-            labelAQResult.Content = string.Format("結果: {0}", result);
+            textBoxAQResult.Text += string.Format("結果: {0}\r\n", result);
         }
 
         private void m_AQworker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -592,12 +593,16 @@ namespace PlayPcmWinTestBench {
                 MessageBox.Show("エラー。一様分布ジッター最大ずれ量に0以上の数値を入力してください");
                 return;
             }
+            args.convolutionN = 256;
+            if (radioButtonConvolution65536.IsChecked == true) {
+                args.convolutionN = 65536;
+            }
 
             buttonAQOutputStart.IsEnabled = false;
             buttonAQBrowseOpen.IsEnabled = false;
             buttonAQBrowseSaveAs.IsEnabled = false;
             progressBar1.Value = 0;
-            labelAQResult.Content = "処理中…";
+            textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}…\r\n", args.inputPath, args.outputPath);
 
             m_AQworker.RunWorkerAsync(args);
         }
@@ -681,7 +686,7 @@ namespace PlayPcmWinTestBench {
                     }
                     double jitter = seqJitter + tpdfJitter + rpdfJitter;
 
-                    for (int offset = -128; offset < 128; ++offset) {
+                    for (int offset = -args.convolutionN; offset < args.convolutionN; ++offset) {
                         double pos = Math.PI * offset + jitter;
 
                         if (-double.Epsilon < pos && pos < double.Epsilon) {
@@ -730,7 +735,7 @@ namespace PlayPcmWinTestBench {
             WriteWavFile(pcmDataOut, args.outputPath);
             e.Result = string.Format("書き込み成功。");
             if (scale < 1.0) {
-                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{1}dB({0}倍)しました",
+                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{1}dB({0}倍)しました。",
                     20.0 * Math.Log10(scale), scale);
             }
             m_AQworker.ReportProgress(100);
