@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.38 ==
+  * PlayPcmWinテストベンチの[音質劣化]機能 リサンプリングの精度選択肢を追加。
+
 ===!PlayPcmWin 2.0.37 ==
   * PlayPcmWinテストベンチの[音質劣化]タブに、ランダムジッターを増やす機能を追加。
 
