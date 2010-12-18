@@ -583,6 +583,9 @@ namespace PlayPcmWinTestBench {
                 MessageBox.Show("エラー。周期ジッター最大ずれ量に0以上の数値を入力してください");
                 return;
             }
+            // sequential jitter RMS⇒peak
+            args.sequentialJitterPicoseconds *= Math.Sqrt(2.0);
+
             if (!Double.TryParse(textBoxTpdfJitterPicoseconds.Text, out args.tpdfJitterPicoseconds) ||
                     args.tpdfJitterPicoseconds < 0.0) {
                 MessageBox.Show("エラー。三角分布ジッター最大ずれ量に0以上の数値を入力してください");
@@ -598,6 +601,7 @@ namespace PlayPcmWinTestBench {
                 args.convolutionN = 65536;
             }
 
+
             buttonAQOutputStart.IsEnabled = false;
             buttonAQBrowseOpen.IsEnabled = false;
             buttonAQBrowseSaveAs.IsEnabled = false;
@@ -611,7 +615,7 @@ namespace PlayPcmWinTestBench {
         ///  仮数部が32bitぐらいまで値が埋まっているランダムの0～1
         /// </summary>
         /// <returns></returns>
-        private double GenRandom0to1(RNGCryptoServiceProvider gen) {
+        private static double GenRandom0to1(RNGCryptoServiceProvider gen) {
             byte[] bytes = new byte[4];
             gen.GetBytes(bytes);
             uint u = BitConverter.ToUInt32(bytes, 0);
@@ -658,8 +662,7 @@ namespace PlayPcmWinTestBench {
              
              サンプルを採取する位置= pos + Asin(θ)
              
-             96000Hzの場合、1/96000秒＝10.4マイクロ秒以上のジッターを加えると隣りのサンプル値よりも向こう側になってしまうので制限をかける。
-            */
+             */
 
             double thetaCoefficientSeqJitter = 2.0 * Math.PI * args.sequentialJitterFrequency / pcmDataIn.SampleRate;
             double ampSeqJitter = 1.0e-12 * pcmDataIn.SampleRate * args.sequentialJitterPicoseconds;
@@ -667,27 +670,16 @@ namespace PlayPcmWinTestBench {
             double ampTpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.tpdfJitterPicoseconds;
             double ampRpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.rpdfJitterPicoseconds;
 
-            if (pcmDataIn.SampleRate <
-                1.0 / args.sequentialJitterPicoseconds * 1.0e-12 +
-                1.0 / args.tpdfJitterPicoseconds * 1.0e-12 +
-                1.0 / args.rpdfJitterPicoseconds * 1.0e-12) {
-                e.Result = string.Format(
-                    "エラー: 計算方法に起因する制限により、" +
-                    "{0}Hzサンプリングの入力データに、合計" +
-                    "{1}ピコ秒以上のジッターを加えることはできません。ジッターの総量を減らして下さい。",
-                    pcmDataIn.SampleRate, (int)((1.0 / pcmDataIn.SampleRate) * 1000 * 1000 * 1000 * 1000));
-                return;
-            }
-
             RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
 
-            float maxValueAbs = 0.0f;
+            float maxValue = 0.0f;
+            float minValue = 0.0f;
 
             long count = 0;
             Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
                 //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
                 for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
-                    double v = 0.0;
+                    double acc = 0.0;
 
                     // generate jitter
                     double seqJitter = ampSeqJitter * Math.Sin((thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
@@ -698,40 +690,34 @@ namespace PlayPcmWinTestBench {
                         tpdfJitter = ampTpdfJitter * r;
                     }
                     if (0.0 < args.rpdfJitterPicoseconds) {
-                        rpdfJitter = ampRpdfJitter * (GenRandom0to1(gen)*2.0 - 1.0);
+                        rpdfJitter = ampRpdfJitter * (GenRandom0to1(gen) * 2.0 - 1.0);
                     }
                     double jitter = seqJitter + tpdfJitter + rpdfJitter;
 
+                    double sinTheta = Math.Sin(jitter % (2.0 * Math.PI));
+
                     for (int offset = -args.convolutionN; offset < args.convolutionN; ++offset) {
                         double pos = Math.PI * offset + jitter;
+                        double v = pcmDataIn.GetSampleValueInFloat(ch, i + offset);
 
-                        if (-double.Epsilon < pos && pos < double.Epsilon) {
-                            v += pcmDataIn.GetSampleValueInFloat(ch, i + offset);
-                        } else {
-                            double theta2 = pos % (2.0 * Math.PI);
-                            double sinx = Math.Sin(theta2);
-                            double acc = sinx / pos * pcmDataIn.GetSampleValueInFloat(ch, i + offset);
-                            v += acc;
-
-                            /*
-                            if (0.01 < Math.Abs(acc)) {
-                                System.Console.WriteLine("i={0} offset={1} pos={2} theta2={3} sinx={4} sampleV={5} acc={6}",
-                                    i, offset, pos, theta2, sinx, pcmDataIn.GetSampleValueInFloat(ch, i + offset), acc);
-                            }
-                            */
+                        if (pos < -double.Epsilon || double.Epsilon < pos) {
+                            v *= sinTheta / pos;
                         }
+
+                        acc += v;
                     }
-                    pcmDataOut.SetSampleValueInFloat(ch, i, (float)v);
-                    if (maxValueAbs < Math.Abs(v)) {
-                        maxValueAbs = (float)Math.Abs(v);
+                    pcmDataOut.SetSampleValueInFloat(ch, i, (float)acc);
+                    if (maxValue < acc) {
+                        maxValue = (float)acc;
                     }
-                    /*
-                    if (ch == 0) {
-                        System.Console.WriteLine("i={0} in={1} out={2}",
+                    if (acc < minValue) {
+                        minValue = (float)acc;
+                    }
+                    if (ch == 0 && i < 256) {
+                        System.Console.WriteLine("{0}, {1}, {2}",
                             i, pcmDataIn.GetSampleValueInFloat(ch, i),
-                            v);
+                            acc);
                     }
-                    */
                 }
 
                 ++count;
@@ -740,18 +726,24 @@ namespace PlayPcmWinTestBench {
                 }
             });
 
-            // 1.0 - (1/8388608)
-            // -1が出てこなくなるが…
+            // 音量制限
             double scale = 1.0;
-            if (0.99999988079071044921875f < maxValueAbs) {
-                scale = 0.99999988079071044921875f / maxValueAbs;
+            if (0.99999988079071044921875f < maxValue) {
+                // 最大値は 1.0 - (1/8388608)
+                scale = 0.99999988079071044921875 / maxValue;
+            }
+            if (minValue < -1.0f) {
+                // 最小値は-1.0
+                scale = -1.0 / minValue;
+            }
+            if (scale != 1.0) {
                 pcmDataOut.Scale((float)scale);
             }
 
             WriteWavFile(pcmDataOut, args.outputPath);
             e.Result = string.Format("書き込み成功。");
             if (scale < 1.0) {
-                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{1}dB({0}倍)しました。",
+                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{0}dB({1}倍)しました。",
                     20.0 * Math.Log10(scale), scale);
             }
             m_AQworker.ReportProgress(100);
