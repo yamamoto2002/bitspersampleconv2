@@ -677,7 +677,7 @@ namespace PlayPcmWinTestBench {
 
             long count = 0;
             Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
-                //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
+            //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
                 for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
                     double acc = 0.0;
 
@@ -713,11 +713,13 @@ namespace PlayPcmWinTestBench {
                     if (acc < minValue) {
                         minValue = (float)acc;
                     }
-                    if (ch == 0 && i < 256) {
+                    /*
+                    if (ch == 0 && i < 1024) {
                         System.Console.WriteLine("{0}, {1}, {2}",
                             i, pcmDataIn.GetSampleValueInFloat(ch, i),
                             acc);
                     }
+                    */
                 }
 
                 ++count;
