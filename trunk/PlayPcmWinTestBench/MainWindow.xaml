@@ -101,21 +101,16 @@
                         <RowDefinition Height="107" />
                         <RowDefinition Height="74" />
                     </Grid.RowDefinitions>
-                    <GroupBox Header="周期ジッターを増やす" Height="133" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox4" VerticalAlignment="Top" Width="259" Grid.Row="1">
+                    <GroupBox Header="周期ジッターを増やす" Height="97" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox4" VerticalAlignment="Top" Width="281" Grid.Row="1">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="190*" />
                                 <ColumnDefinition Width="113*" />
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="37*" />
-                                <RowDefinition Height="71*" />
-                            </Grid.RowDefinitions>
-                            <Label Content="周波数(Hz)" Name="label1" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="127" Height="37" VerticalAlignment="Top" />
-                            <TextBox Margin="0,7" Name="textBoxSequentialJitterFrequency" HorizontalAlignment="Left" Width="79" Grid.Column="1" Text="100" HorizontalContentAlignment="Right" />
-                            <Label Content="最大ずれ量(ピコ秒)" Grid.Row="1" Name="label8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="0,6,0,0" HorizontalAlignment="Right" Width="127" Height="32" VerticalAlignment="Top" />
-                            <TextBox Margin="0,10,0,0" Name="textBoxSequentialJitterPicoseconds" Grid.Row="1" HorizontalAlignment="Left" Width="79" Height="24" VerticalAlignment="Top" Grid.Column="1" Text="10000" HorizontalContentAlignment="Right" />
-                            <Label Content="※1000ピコ秒=1ナノ秒です" Grid.Row="1" Height="28" HorizontalAlignment="Left" Margin="6,37,0,0" Name="label14" VerticalAlignment="Top" Grid.ColumnSpan="2" Width="235" />
+                            <Label Content="周波数(Hz)" Name="label1" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="158" Height="24" VerticalAlignment="Top" Margin="0,6,5,0" />
+                            <Label Content="量(ピコ秒RMS)" Name="label8" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="0,36,0,0" HorizontalAlignment="Right" Width="163" Height="24" VerticalAlignment="Top" />
+                            <TextBox Margin="0,36,0,0" Name="textBoxSequentialJitterPicoseconds" HorizontalAlignment="Left" Width="79" Height="24" VerticalAlignment="Top" Text="1000" HorizontalContentAlignment="Right" Grid.Column="1" />
+                            <TextBox Margin="0,6,0,0" Name="textBoxSequentialJitterFrequency" HorizontalAlignment="Left" Width="79" Text="100" HorizontalContentAlignment="Right" Height="24" VerticalAlignment="Top" Grid.Column="1" />
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox5" VerticalAlignment="Top" Width="474">
@@ -131,7 +126,7 @@
                         </Grid>
                     </GroupBox>
                     <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,9,0,0" Name="buttonAQOutputStart" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQOutputStart_Click" />
-                    <GroupBox Header="三角分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" Margin="271,0,0,0" Name="groupBox7" VerticalAlignment="Top" Width="249" Grid.Row="1" IsEnabled="True">
+                    <GroupBox Header="三角分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" Margin="388,6,0,0" Name="groupBox7" VerticalAlignment="Top" Width="249" Grid.Row="1" IsEnabled="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="190*" />
@@ -145,22 +140,8 @@
                             <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="0,10,0,0" Name="textBoxTpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" HorizontalContentAlignment="Right" />
                         </Grid>
                     </GroupBox>
-                    <GroupBox Header="データエラー発生" Height="82" HorizontalAlignment="Left" Margin="6,139,0,0" Name="groupBox8" VerticalAlignment="Top" Width="376" Grid.Row="1" IsEnabled="False">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="253*" />
-                                <ColumnDefinition Width="111*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="0*" />
-                                <RowDefinition Height="93*" />
-                            </Grid.RowDefinitions>
-                            <Label Content="1ビットのデータ化け発生頻度(回/秒)" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Name="label9" VerticalContentAlignment="Center" Width="253" Grid.Row="1" Margin="0,10,0,0" Height="35" VerticalAlignment="Top" />
-                            <TextBox Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="6,16,0,0" Name="textBoxBitErrorFrequency" Text="0" VerticalAlignment="Top" Width="79" Grid.Column="1" HorizontalContentAlignment="Right" />
-                        </Grid>
-                    </GroupBox>
                     <ProgressBar Grid.Row="3" Height="23" Margin="6,0,0,8" Name="progressBar1" VerticalAlignment="Bottom" Width="120" HorizontalAlignment="Left" />
-                    <GroupBox Grid.Row="1" Header="一様分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" IsEnabled="True" Margin="271,75,0,0" Name="groupBox9" VerticalAlignment="Top" Width="249">
+                    <GroupBox Grid.Row="1" Header="一様分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" IsEnabled="True" Margin="388,81,0,0" Name="groupBox9" VerticalAlignment="Top" Width="249">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="190*" />
@@ -174,7 +155,7 @@
                             <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="0,10,0,0" Name="textBoxRpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" />
                         </Grid>
                     </GroupBox>
-                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="86" HorizontalAlignment="Left" IsEnabled="True" Margin="382,148,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
+                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="127" HorizontalAlignment="Left" IsEnabled="True" Margin="6,107,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="0*" />
@@ -185,6 +166,7 @@
                         </Grid>
                     </GroupBox>
                     <TextBox Grid.Row="3" Margin="133,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
+                    <Label Content="※1000ピコ秒=1ナノ秒です" Grid.Row="1" Height="28" HorizontalAlignment="Left" Margin="416,169,0,0" Name="label14" VerticalAlignment="Top" Width="235" />
                 </Grid>
             </TabItem>
         </TabControl>
