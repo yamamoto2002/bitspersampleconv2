@@ -2138,6 +2138,10 @@ namespace PlayPcmWin
             }
 
             PlayListItemInfo pli = m_playListItems[dataGridPlayList.SelectedIndex];
+            if (pli.PcmData() == null) {
+                // 曲じゃない部分を選択したら無視。
+                return;
+            }
 
             if (m_state != State.再生中) {
                 ChangePlayWavDataById(pli.PcmData().Id);
