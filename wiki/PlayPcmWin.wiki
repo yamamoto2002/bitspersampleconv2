@@ -67,7 +67,7 @@ http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 =既知のバグ一覧=
 
 こちらをご覧下さい。
-http://code.google.com/p/bitspersampleconv2/issues/list?can=1&q=&colspec=ID+Type+Status+Summary&cells=tiles
+http://code.google.com/p/bitspersampleconv2/issues/list?can=1&q=&sort=-id&colspec=ID%20Type%20Status%20Summary
 
 =▲▼▲【よくある質問】複数ファイルをエクスプローラーから!PlayPcmWinにドラッグアンドドロップする際、エクスプローラーに並んでいる順番に再生リストに並べる方法▲▼▲=
 
