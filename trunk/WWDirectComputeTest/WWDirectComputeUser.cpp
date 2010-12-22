@@ -11,24 +11,12 @@ WWDirectComputeUser::WWDirectComputeUser(void)
 {
     m_pDevice = NULL;
     m_pContext = NULL;
-
-    m_pBufIn = NULL;
-    m_pBufOut = NULL;
-
-    m_pBufInSRV = NULL;
-    m_pBufOutUAV = NULL;
 }
 
 WWDirectComputeUser::~WWDirectComputeUser(void)
 {
     assert(NULL == m_pDevice);
     assert(NULL == m_pContext);
-
-    assert(NULL == m_pBufIn);
-    assert(NULL == m_pBufOut);
-
-    assert(NULL == m_pBufInSRV);
-    assert(NULL == m_pBufOutUAV);
 }
 
 HRESULT
@@ -45,14 +33,11 @@ end:
 void
 WWDirectComputeUser::Term(void)
 {
-    SafeRelease( &m_pBufOutUAV );
-    SafeRelease( &m_pBufInSRV );
-
-    SafeRelease( &m_pBufOut );
-    SafeRelease( &m_pBufIn );
-
     SafeRelease( &m_pContext );
     SafeRelease( &m_pDevice );
+
+    assert(m_rwGpuBufInfo.size() == 0);
+    assert(m_readGpuBufInfo.size() == 0);
 }
 
 static HRESULT
@@ -197,7 +182,9 @@ end:
 
 HRESULT
 WWDirectComputeUser::CreateComputeShader(
-        LPCWSTR path, LPCSTR entryPoint, ID3D11ComputeShader **ppCS)
+        LPCWSTR path,
+        LPCSTR entryPoint,
+        ID3D11ComputeShader **ppCS)
 {
     HRESULT hr;
     ID3DBlob * pErrorBlob = NULL;
@@ -239,7 +226,8 @@ WWDirectComputeUser::CreateComputeShader(
 
     assert(pBlob);
 
-    hr = m_pDevice->CreateComputeShader( pBlob->GetBufferPointer(), pBlob->GetBufferSize(), NULL, ppCS);
+    hr = m_pDevice->CreateComputeShader(
+        pBlob->GetBufferPointer(), pBlob->GetBufferSize(), NULL, ppCS);
 
 #if defined(DEBUG) || defined(PROFILE)
     if (*ppCS) {
@@ -254,7 +242,8 @@ end:
 }
 
 void
-WWDirectComputeUser::DestroyComputeShader(ID3D11ComputeShader *pCS)
+WWDirectComputeUser::DestroyComputeShader(
+        ID3D11ComputeShader *pCS)
 {
     SAFE_RELEASE(pCS);
 }
@@ -264,6 +253,7 @@ WWDirectComputeUser::CreateStructuredBuffer(
         unsigned int uElementSize,
         unsigned int uCount,
         void * pInitData,
+        const char *name,
         ID3D11Buffer ** ppBufOut)
 {
     HRESULT hr = S_OK;
@@ -271,6 +261,8 @@ WWDirectComputeUser::CreateStructuredBuffer(
     assert(m_pDevice);
     assert(uElementSize);
     assert(0 < uCount);
+    // name==NULL‚Å‚à‰ÂB
+    // pInitData==NULL‚Å‚à‰ÂB
 
     *ppBufOut = NULL;
 
@@ -291,12 +283,318 @@ WWDirectComputeUser::CreateStructuredBuffer(
         hr = m_pDevice->CreateBuffer(&desc, NULL, ppBufOut);
     }
 
+    if (FAILED(hr)) {
+        goto end;
+    }
+
+#   if defined(DEBUG) || defined(PROFILE)
+    if (NULL != name) {
+            assert(*ppBufOut);
+            (*ppBufOut)->SetPrivateData( WKPDID_D3DDebugObjectName, lstrlenA(name), name);
+    }
+#   endif
+
+end:
+
+    return hr;
+}
+
+HRESULT
+WWDirectComputeUser::CreateBufferShaderResourceView(
+        ID3D11Buffer * pBuffer,
+        const char *name,
+        ID3D11ShaderResourceView ** ppSrvOut)
+{
+    HRESULT hr = S_OK;
+
+    assert(m_pDevice);
+    assert(pBuffer);
+    assert(name);
+    assert(ppSrvOut);
+    *ppSrvOut = NULL;
+
+    D3D11_BUFFER_DESC descBuf;
+    ZeroMemory(&descBuf, sizeof descBuf);
+    pBuffer->GetDesc(&descBuf);
+
+    assert(descBuf.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC desc;
+    ZeroMemory( &desc, sizeof desc);
+    desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+    desc.BufferEx.FirstElement = 0;
+    desc.Format = DXGI_FORMAT_UNKNOWN;
+    desc.BufferEx.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+
+    HRG(m_pDevice->CreateShaderResourceView(pBuffer, &desc, ppSrvOut));
+
+#if defined(DEBUG) || defined(PROFILE)
+    if (*ppSrvOut) {
+        (*ppSrvOut)->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
+    }
+#else
+    (void)name;
+#endif
+
+end:
+    return hr;
+}
+
+HRESULT
+WWDirectComputeUser::CreateBufferUnorderedAccessView(
+        ID3D11Buffer * pBuffer,
+        const char *name,
+        ID3D11UnorderedAccessView ** ppUavOut)
+{
+    HRESULT hr = S_OK;
+
+    assert(m_pDevice);
+    assert(pBuffer);
+    assert(name);
+    assert(ppUavOut);
+    *ppUavOut = NULL;
+
+    D3D11_BUFFER_DESC descBuf;
+    ZeroMemory(&descBuf, sizeof descBuf);
+    pBuffer->GetDesc(&descBuf);
+
+    assert(descBuf.MiscFlags & D3D11_RESOURCE_MISC_BUFFER_STRUCTURED);
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC desc;
+    ZeroMemory(&desc, sizeof desc);
+    desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+    desc.Buffer.FirstElement = 0;
+    // Format must be DXGI_FORMAT_UNKNOWN, when creating a View of a Structured Buffer
+    desc.Format = DXGI_FORMAT_UNKNOWN;
+    desc.Buffer.NumElements = descBuf.ByteWidth / descBuf.StructureByteStride;
+    
+    HRG(m_pDevice->CreateUnorderedAccessView(pBuffer, &desc, ppUavOut));
+
+#if defined(DEBUG) || defined(PROFILE)
+    if (*ppUavOut) {
+        (*ppUavOut)->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
+    }
+#else
+    (void)name;
+#endif
+
+end:
+    return hr;
+}
+
+HRESULT
+WWDirectComputeUser::SendReadOnlyDataAndCreateShaderResourceView(
+        unsigned int uElementSize,
+        unsigned int uCount,
+        void * pSendData,
+        const char *name,
+        ID3D11ShaderResourceView **ppSrv)
+{
+    HRESULT hr = S_OK;
+    ID3D11Buffer *pBuf = NULL;
+
+    assert(ppSrv);
+    *ppSrv = NULL;
+
+    HRG(CreateStructuredBuffer(uElementSize, uCount, pSendData, NULL, &pBuf));
+    assert(pBuf);
+
+    HRG(CreateBufferShaderResourceView(pBuf, name, ppSrv));
+    assert(*ppSrv);
+
+    WWReadOnlyGpuBufferInfo info;
+    info.pBuf = pBuf;
+    info.pSrv = *ppSrv;
+
+    m_readGpuBufInfo[info.pSrv] = info;
+
+end:
+    if (FAILED(hr)) {
+        SafeRelease(&pBuf);
+    }
+
     return hr;
 }
 
 void
-WWDirectComputeUser::DestroyStructuredBuffer(ID3D11Buffer * pBuf)
+WWDirectComputeUser::DestroyDataAndShaderResourceView(
+        ID3D11ShaderResourceView *pSrv)
 {
-    SAFE_RELEASE(pBuf);
+    std::map<ID3D11ShaderResourceView *, WWReadOnlyGpuBufferInfo>::iterator
+        ite = m_readGpuBufInfo.find(pSrv);
+    if (ite == m_readGpuBufInfo.end()) {
+        return;
+    }
+
+    SAFE_RELEASE(ite->second.pSrv);
+    SAFE_RELEASE(ite->second.pBuf);
+
+    m_readGpuBufInfo.erase(pSrv);
+}
+
+HRESULT
+WWDirectComputeUser::CreateBufferAndUnorderedAccessView(
+        unsigned int uElementSize,
+        unsigned int uCount,
+        void *pSendData,
+        const char *name,
+        ID3D11UnorderedAccessView **ppUav)
+{
+    HRESULT hr = S_OK;
+    ID3D11Buffer *pBuf = NULL;
+
+    assert(ppUav);
+    *ppUav = NULL;
+
+    HRG(CreateStructuredBuffer(uElementSize, uCount, pSendData, NULL, &pBuf));
+    assert(pBuf);
+
+    HRG(CreateBufferUnorderedAccessView(pBuf, name, ppUav));
+    assert(*ppUav);
+
+    WWReadWriteGpuBufferInfo info;
+    info.pBuf = pBuf;
+    info.pUav = *ppUav;
+
+    m_rwGpuBufInfo[info.pUav] = info;
+
+end:
+    if (FAILED(hr)) {
+        SafeRelease(&pBuf);
+    }
+
+    return hr;
+}
+
+void
+WWDirectComputeUser::DestroyDataAndUnorderedAccessView(
+        ID3D11UnorderedAccessView * pUav)
+{
+    std::map<ID3D11UnorderedAccessView *, WWReadWriteGpuBufferInfo>::iterator
+        ite = m_rwGpuBufInfo.find(pUav);
+    if (ite == m_rwGpuBufInfo.end()) {
+        return;
+    }
+
+    SAFE_RELEASE(ite->second.pUav);
+    SAFE_RELEASE(ite->second.pBuf);
+
+    m_rwGpuBufInfo.erase(pUav);
+}
+
+HRESULT
+WWDirectComputeUser::RecvResultToCpuMemory(
+        ID3D11UnorderedAccessView * pUav,
+        void *dest,
+        int bytes)
+{
+    HRESULT hr = S_OK;
+    ID3D11Buffer * pBuffer = NULL;
+    ID3D11Buffer * pReturn = NULL;
+    D3D11_BUFFER_DESC desc;
+    D3D11_MAPPED_SUBRESOURCE mr;
+
+    assert(m_pDevice);
+    assert(m_pContext);
+    assert(pUav);
+    assert(dest);
+
+    std::map<ID3D11UnorderedAccessView *, WWReadWriteGpuBufferInfo>::iterator
+        ite = m_rwGpuBufInfo.find(pUav);
+    if (ite == m_rwGpuBufInfo.end()) {
+        hr = E_FAIL;
+        goto end;
+    }
+
+    pBuffer = ite->second.pBuf;
+
+    assert(pBuffer);
+
+    ZeroMemory(&desc, sizeof desc);
+
+    pBuffer->GetDesc(&desc);
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    desc.Usage = D3D11_USAGE_STAGING;
+    desc.BindFlags = 0;
+    desc.MiscFlags = 0;
+
+    HRG(m_pDevice->CreateBuffer(&desc, NULL, &pReturn));
+
+#if defined(DEBUG) || defined(PROFILE)
+    if (pReturn) {
+        const char *name = "ResultRecv";
+        pReturn->SetPrivateData(WKPDID_D3DDebugObjectName, lstrlenA(name), name);
+    }
+#endif
+
+    m_pContext->CopyResource(pReturn, pBuffer);
+    assert(pReturn);
+
+    ZeroMemory(&mr, sizeof mr);
+    HRG(m_pContext->Map(pReturn, 0, D3D11_MAP_READ, 0, &mr));
+    assert(mr.pData);
+    // Unmap‚µ‚È‚¢‚Ågoto end‚µ‚Ä‚Í‚¢‚¯‚È‚¢
+
+    memcpy(dest, mr.pData, bytes);
+
+    m_pContext->Unmap(pReturn, 0);
+
+end:
+    SafeRelease(&pReturn);
+
+    return hr;
+}
+
+HRESULT
+WWDirectComputeUser::Run(
+        ID3D11ComputeShader * pComputeShader,
+        UINT nNumViews,
+        ID3D11ShaderResourceView ** pShaderResourceViews,
+        ID3D11Buffer * pCBCS,
+        void * pCSData,
+        DWORD dwNumDataBytes,
+        ID3D11UnorderedAccessView * pUnorderedAccessView,
+        UINT X,
+        UINT Y,
+        UINT Z)
+{
+    HRESULT hr = S_OK;
+
+    assert(m_pDevice);
+    assert(m_pContext);
+    assert(pComputeShader);
+    assert(pShaderResourceViews);
+    assert(pUnorderedAccessView);
+    // pCBCS==NULL‚Å‚à‰ÂB
+
+    m_pContext->CSSetShader(pComputeShader, NULL, 0);
+    m_pContext->CSSetShaderResources(0, nNumViews, pShaderResourceViews);
+    m_pContext->CSSetUnorderedAccessViews(0, 1, &pUnorderedAccessView, NULL);
+
+    if (pCBCS) {
+        D3D11_MAPPED_SUBRESOURCE mr;
+
+        m_pContext->Map(pCBCS, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr);
+        memcpy(mr.pData, pCSData, dwNumDataBytes);
+        m_pContext->Unmap(pCBCS, 0);
+
+        ID3D11Buffer* ppCB[1] = { pCBCS };
+        m_pContext->CSSetConstantBuffers(0, 1, ppCB);
+    }
+
+    m_pContext->Dispatch(X, Y, Z);
+
+    m_pContext->CSSetShader(NULL, NULL, 0);
+
+    ID3D11UnorderedAccessView * ppUAViewNULL[1] = { NULL };
+    m_pContext->CSSetUnorderedAccessViews(0, 1, ppUAViewNULL, NULL);
+
+    ID3D11ShaderResourceView * ppSRVNULL[2] = { NULL, NULL };
+    m_pContext->CSSetShaderResources(0, 2, ppSRVNULL);
+
+    ID3D11Buffer * ppCBNULL[1] = { NULL };
+    m_pContext->CSSetConstantBuffers(0, 1, ppCBNULL);
+
+    return hr;
 }
 
