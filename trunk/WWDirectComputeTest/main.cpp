@@ -1,4 +1,7 @@
 // 日本語UTF-8
+// データをGPUメモリーに送ってGPUで計算。
+// 結果をCPUメモリーに戻して確認する。
+// DirectX11 ComputeShader 5.0 double-precision supportが必要。
 
 #include "WWDirectComputeUser.h"
 #include "WWUtil.h"
@@ -19,7 +22,7 @@ int main(void)
     ID3D11ShaderResourceView*   pBuf1Srv = NULL;
     ID3D11UnorderedAccessView*  pBufResultUav = NULL;
 
-    /* データ準備 */
+    // データ準備
     int dataCount = 16;
     double *from = new double[dataCount];
     assert(from);
@@ -33,9 +36,6 @@ int main(void)
         coef[i] = (double)i;
     }
 
-    // データをGPUメモリーに送ってGPUで計算。
-    // 結果をCPUメモリーに戻して確認する。
-
     pDCU = new WWDirectComputeUser();
     assert(pDCU);
 
@@ -44,7 +44,7 @@ int main(void)
     HRG(pDCU->CreateComputeShader(L"SincConvolution.hlsl", "CSMain", &pCS));
     assert(pCS);
 
-    /* データをGPUメモリーに送る */
+    // 入力データをGPUメモリーに送る
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
         sizeof(double), dataCount, from, "SampleDataFrom", &pBuf0Srv));
     assert(pBuf0Srv);
@@ -53,14 +53,17 @@ int main(void)
         sizeof(double), dataCount, coef, "CoefSrv", &pBuf1Srv));
     assert(pBuf1Srv);
 
+    // 結果出力領域をGPUに作成。
     HRG(pDCU->CreateBufferAndUnorderedAccessView(
         sizeof(double), dataCount, NULL, "ResultUav", &pBufResultUav));
     assert(pBufResultUav);
 
+    // 実行。
     ID3D11ShaderResourceView* aRViews[2] = { pBuf0Srv, pBuf1Srv };
+    HRG(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews,
+        NULL, NULL, 0, pBufResultUav, dataCount, 1, 1));
 
-    HRG(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, NULL, NULL, 0, pBufResultUav, dataCount, 1, 1));
-
+    // 計算結果をCPUメモリーに持ってくる。
     HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, to, dataCount * sizeof(double)));
 
     for (int i=0; i<dataCount; ++i) {
