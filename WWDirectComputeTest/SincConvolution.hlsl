@@ -36,39 +36,76 @@ OutputBuffer[0]～OutputBuffer[sampleN-1]
 
 */
 
-struct BufTypeD
+struct BufTypeF
 {
-    double d;
+    float f;
 };
 
-StructuredBuffer<BufTypeD>   SampleDataBuffer : register(t0);
-StructuredBuffer<BufTypeD>   SinxBuffer       : register(t1);
-StructuredBuffer<BufTypeD>   XBuffer          : register(t2);
-RWStructuredBuffer<BufTypeD> OutputBuffer     : register(u0);
+StructuredBuffer<BufTypeF>   SampleDataBuffer : register(t0);
+StructuredBuffer<BufTypeF>   SinxBuffer       : register(t1);
+StructuredBuffer<BufTypeF>   XBuffer          : register(t2);
+RWStructuredBuffer<BufTypeF> OutputBuffer     : register(u0);
 
-inline double Sinc(double sinx, float x)
+#ifdef HIGH_PRECISION
+
+// 主にdoubleで計算。
+
+inline double
+SincD(float sinx, float x)
 {
-    if (-0.000000001 < x && x < 0.000000001) {
+    if (-0.000000001f < x && x < 0.000000001f) {
         return 1.0;
     } else {
-        float  odxf = 1.0f / x;
-        double odxd = odxf;
-
-        return sinx * odxd;
+        return ((double)sinx) * ((double)rcp(x));
     }
 }
 
 [numthreads(1, 1, 1)]
-void CSMain(uint3 DTid : SV_DispatchThreadID)
+void
+CSMain(uint3 DTid : SV_DispatchThreadID)
 {
     double r = 0.0;
-    double sinx = SinxBuffer[DTid.x].d;
-    double offs = XBuffer[DTid.x].d;
+    float pi = 3.141592653589793238462643;
+    float sinx = SinxBuffer[DTid.x].f;
+    float offs = XBuffer[DTid.x].f;
     int i;
 
     for (i=CONV_START; i<CONV_END; ++i) {
-        double x = 3.141592653589793238 * i + offs;
-        r += SampleDataBuffer[DTid.x+i+CONV_N].d * Sinc(sinx, x);
+        float x = mad(pi, i, offs);
+        r += ((double)SampleDataBuffer[DTid.x+i+CONV_N].f) * SincD(sinx, x);
     }
-    OutputBuffer[DTid.x].d = r;
+    OutputBuffer[DTid.x].f = (float)r;
 }
+
+#else
+
+// 主にfloatで計算。
+
+inline float
+SincF(float sinx, float x)
+{
+    if (-0.000000001f < x && x < 0.000000001f) {
+        return 1.0f;
+    } else {
+        return sinx * rcp(x);
+    }
+}
+
+[numthreads(1, 1, 1)]
+void
+CSMain(uint3 DTid : SV_DispatchThreadID)
+{
+    float r = 0.0f;
+    float pi = 3.141592653589793238462643f;
+    float sinx = SinxBuffer[DTid.x].f;
+    float offs = XBuffer[DTid.x].f;
+    int i;
+
+    for (i=CONV_START; i<CONV_END; ++i) {
+        float x = mad(pi, i, offs);
+        r = mad(SampleDataBuffer[DTid.x+i+CONV_N].f, SincF(sinx, x), r);
+    }
+    OutputBuffer[DTid.x].f = r;
+}
+
+#endif
