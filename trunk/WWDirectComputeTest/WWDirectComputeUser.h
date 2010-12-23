@@ -27,7 +27,10 @@ public:
 
     // ComputeShaderをコンパイルしてGPUに送る
     HRESULT CreateComputeShader(
-        LPCWSTR path, LPCSTR entryPoint, ID3D11ComputeShader **ppCS);
+        LPCWSTR path,
+        LPCSTR entryPoint,
+        const D3D_SHADER_MACRO *defines,
+        ID3D11ComputeShader **ppCS);
 
     void DestroyComputeShader(ID3D11ComputeShader *pCS);
 

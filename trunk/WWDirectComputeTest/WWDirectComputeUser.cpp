@@ -184,6 +184,7 @@ HRESULT
 WWDirectComputeUser::CreateComputeShader(
         LPCWSTR path,
         LPCSTR entryPoint,
+        const D3D_SHADER_MACRO *defines,
         ID3D11ComputeShader **ppCS)
 {
     HRESULT hr;
@@ -198,13 +199,6 @@ WWDirectComputeUser::CreateComputeShader(
     // 最適化はされるし、RELEASEと同等の動作をし、性能が落ちない…らしい。
     dwShaderFlags |= D3DCOMPILE_DEBUG;
 #endif
-
-    // こういう感じでHLSL内で使用する定数の#defineができる
-    const D3D_SHADER_MACRO defines[] = {
-        "USE_STRUCTURED_BUFFERS", "1",
-        "TEST_DOUBLE", "1",
-        NULL, NULL
-    };
 
     // CSシェーダープロファイル5.0を指定。
     LPCSTR pProfile = "cs_5_0";
