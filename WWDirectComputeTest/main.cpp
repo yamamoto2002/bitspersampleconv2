@@ -58,7 +58,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
         "CONV_END", convEndStr,
         "CONV_N", convEndStr,
         "SAMPLE_N", sampleNStr,
-        "HIGH_PRECISION", "1",
+        // "HIGH_PRECISION", "1",
         NULL, NULL
     };
 
@@ -141,7 +141,7 @@ main(void)
     HRESULT hr = S_OK;
 
     // データ準備
-    int convolutionN = 16777216;
+    int convolutionN = 65536 * 256;
     int sampleN = 1024;
 
     float *sampleData = new float[sampleN];

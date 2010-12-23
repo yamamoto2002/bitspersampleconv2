@@ -45,6 +45,7 @@ StructuredBuffer<BufTypeF>   SampleDataBuffer : register(t0);
 StructuredBuffer<BufTypeF>   SinxBuffer       : register(t1);
 StructuredBuffer<BufTypeF>   XBuffer          : register(t2);
 RWStructuredBuffer<BufTypeF> OutputBuffer     : register(u0);
+RWStructuredBuffer<BufTypeF> ScratchBuffer    : register(u1);
 
 #ifdef HIGH_PRECISION
 
@@ -101,10 +102,25 @@ CSMain(uint3 DTid : SV_DispatchThreadID)
     float offs = XBuffer[DTid.x].f;
     int i;
 
+#if 0
+    // これは、速くならない。
+    for (i=CONV_START; i<CONV_END; i+=4) {
+        float x0 = mad(pi, i  , offs);
+        float x1 = mad(pi, i+1, offs);
+        float x2 = mad(pi, i+2, offs);
+        float x3 = mad(pi, i+3, offs);
+        float r0 = SampleDataBuffer[DTid.x+i  +CONV_N].f * SincF(sinx, x0);
+        float r1 = SampleDataBuffer[DTid.x+i+1+CONV_N].f * SincF(sinx, x1);
+        float r2 = SampleDataBuffer[DTid.x+i+2+CONV_N].f * SincF(sinx, x2);
+        float r3 = SampleDataBuffer[DTid.x+i+3+CONV_N].f * SincF(sinx, x3);
+        r += r0 + r1 + r2 + r3;
+    }
+#else
     for (i=CONV_START; i<CONV_END; ++i) {
-        float x = mad(pi, i, offs);
+        float x = mad(pi, i  , offs);
         r = mad(SampleDataBuffer[DTid.x+i+CONV_N].f, SincF(sinx, x), r);
     }
+#endif
     OutputBuffer[DTid.x].f = r;
 }
 
