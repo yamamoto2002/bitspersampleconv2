@@ -1,19 +1,16 @@
 // 日本語UTF-8
 // データをGPUメモリーに送ってGPUで計算。
 // 結果をCPUメモリーに戻して確認する。
-// DirectX11 ComputeShader 5.0 double-precision supportが必要。
+// DirectX11 ComputeShader 5.0 float-precision supportが必要。
 
 #include "WWDirectComputeUser.h"
 #include "WWUtil.h"
 #include <assert.h>
 #include <crtdbg.h>
 
-int main(void)
+static HRESULT
+JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *result)
 {
-#if defined(DEBUG) || defined(_DEBUG)
-    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-
     HRESULT             hr    = S_OK;
     WWDirectComputeUser *pDCU = NULL;
     ID3D11ComputeShader *pCS  = NULL;
@@ -23,25 +20,24 @@ int main(void)
     ID3D11ShaderResourceView*   pBuf2Srv = NULL;
     ID3D11UnorderedAccessView*  pBufResultUav = NULL;
 
+    assert(0 < sampleN);
+    assert(0 < convolutionN);
+    assert(sampleData);
+    assert(jitterX);
+    assert(result);
+
     // データ準備
-    int convolutionN = 1;
-    int sampleN = 16;
-
-    double *from = new double[convolutionN + sampleN + convolutionN];
+    float *from = new float[convolutionN + sampleN + convolutionN];
     assert(from);
-    double *sinx = new double[sampleN];
-    assert(sinx);
-    double *xb = new double[sampleN];
-    assert(xb);
-    double *to = new double[sampleN];
-    assert(to);
-
-    ZeroMemory(from, sizeof(double)* (convolutionN + sampleN + convolutionN));
-
+    ZeroMemory(from, sizeof(float)* (convolutionN + sampleN + convolutionN));
     for (int i=0; i<sampleN; ++i) {
-        from[i+convolutionN] = (double)(i-4);
-        xb[i]   = (double)i/sampleN;
-        sinx[i] = sin(xb[i]);
+        from[i+convolutionN] = sampleData[i];
+    }
+
+    float *sinx = new float[sampleN];
+    assert(sinx);
+    for (int i=0; i<sampleN; ++i) {
+        sinx[i] = sinf(jitterX[i]);
     }
 
     pDCU = new WWDirectComputeUser();
@@ -62,44 +58,48 @@ int main(void)
         "CONV_END", convEndStr,
         "CONV_N", convEndStr,
         "SAMPLE_N", sampleNStr,
+        "HIGH_PRECISION", "1",
         NULL, NULL
     };
 
+    // HLSL ComputeShaderをコンパイルしてGPUに送る。
     HRG(pDCU->CreateComputeShader(L"SincConvolution.hlsl", "CSMain", defines, &pCS));
     assert(pCS);
 
     // 入力データをGPUメモリーに送る
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(double), convolutionN + sampleN + convolutionN, from, "SampleDataFrom", &pBuf0Srv));
+        sizeof(float), convolutionN + sampleN + convolutionN, from, "SampleDataBuffer", &pBuf0Srv));
     assert(pBuf0Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(double), sampleN, sinx, "Sinx", &pBuf1Srv));
+        sizeof(float), sampleN, sinx, "SinxBuffer", &pBuf1Srv));
     assert(pBuf1Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(double), sampleN, xb, "XBuffer", &pBuf2Srv));
+        sizeof(float), sampleN, jitterX, "XBuffer", &pBuf2Srv));
     assert(pBuf1Srv);
 
     // 結果出力領域をGPUに作成。
     HRG(pDCU->CreateBufferAndUnorderedAccessView(
-        sizeof(double), sampleN, NULL, "ResultUav", &pBufResultUav));
+        sizeof(float), sampleN, NULL, "OutputBuffer", &pBufResultUav));
     assert(pBufResultUav);
 
-    // 実行。
+    // GPU上でComputeShader実行。
     ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
+
     HRG(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews,
         NULL, NULL, 0, pBufResultUav, sampleN, 1, 1));
 
     // 計算結果をCPUメモリーに持ってくる。
-    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, to, sampleN * sizeof(double)));
-
-    for (int i=0; i<sampleN; ++i) {
-        printf("%d from=%f sinx=%f xb=%f result=%f\n", i, from[i+convolutionN], sinx[i], xb[i], to[i]);
-    }
+    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, result, sampleN * sizeof(float)));
 
 end:
     if (pDCU) {
+        if (hr == DXGI_ERROR_DEVICE_REMOVED) {
+            dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
+                pDCU->GetDevice()->GetDeviceRemovedReason());
+        }
+
         pDCU->DestroyDataAndUnorderedAccessView(pBufResultUav);
         pBufResultUav = NULL;
 
@@ -122,17 +122,73 @@ end:
 
     SAFE_DELETE(pDCU);
 
-    delete[] to;
-    to = NULL;
-
-    delete[] xb;
-    xb = NULL;
-
     delete[] sinx;
     sinx = NULL;
 
     delete[] from;
     from = NULL;
+
+    return hr;
+}
+
+int
+main(void)
+{
+#if defined(DEBUG) || defined(_DEBUG)
+    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
+    HRESULT hr = S_OK;
+
+    // データ準備
+    int convolutionN = 16777216;
+    int sampleN = 1024;
+
+    float *sampleData = new float[sampleN];
+    assert(sampleData);
+
+    float *jitterX = new float[sampleN];
+    assert(jitterX);
+
+    float *result = new float[sampleN];
+    assert(result);
+
+    for (int i=0; i<sampleN; ++i) {
+        sampleData[i] = ((float)(i))/sampleN;
+        jitterX[i]    = 0;
+    }
+
+    DWORD t0 = GetTickCount();
+
+    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, result));
+
+    DWORD t1 = GetTickCount();
+
+    for (int i=0; i<sampleN; ++i) {
+        printf("%7d sampleData=%f jitterX=%f result=%f\n", i, sampleData[i], jitterX[i], result[i]);
+    }
+
+    if (0 < (t1-t0)) {
+        /*
+            1 (秒)       x(サンプル/秒)
+          ───── ＝ ────────
+           14 (秒)       256(サンプル)
+
+             x = 256 ÷ 14
+         */
+
+        printf("%dms %fsamples/s\n", (t1-t0),  sampleN / ((t1-t0)/1000.0));
+    }
+
+end:
+    delete[] result;
+    result = NULL;
+
+    delete[] jitterX;
+    jitterX = NULL;
+
+    delete[] sampleData;
+    sampleData = NULL;
 
     return 0;
 }

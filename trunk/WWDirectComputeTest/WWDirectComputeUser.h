@@ -76,6 +76,8 @@ public:
             void *dest,
             int bytes);
 
+    ID3D11Device *GetDevice(void) { return m_pDevice; }
+
 private:
     ID3D11Device*               m_pDevice;
     ID3D11DeviceContext*        m_pContext;
