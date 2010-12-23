@@ -26,14 +26,14 @@ int main(void)
     int dataCount = 16;
     double *from = new double[dataCount];
     assert(from);
-    double *coef = new double[dataCount];
-    assert(coef);
+    double *sinx = new double[dataCount];
+    assert(sinx);
     double *to = new double[dataCount];
     assert(to);
 
     for (int i=0; i<dataCount; ++i) {
-        from[i] = 2.0;
-        coef[i] = (double)i;
+        from[i] = (double)(i-4);
+        sinx[i] = from[i] / dataCount;
     }
 
     pDCU = new WWDirectComputeUser();
@@ -50,7 +50,7 @@ int main(void)
     assert(pBuf0Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(double), dataCount, coef, "CoefSrv", &pBuf1Srv));
+        sizeof(double), dataCount, sinx, "Sinx", &pBuf1Srv));
     assert(pBuf1Srv);
 
     // 結果出力領域をGPUに作成。
@@ -67,7 +67,7 @@ int main(void)
     HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, to, dataCount * sizeof(double)));
 
     for (int i=0; i<dataCount; ++i) {
-        printf("%d %f %f %f\n", i, from[i], coef[i], to[i]);
+        printf("%d %f %f %f\n", i, from[i], sinx[i], to[i]);
     }
 
 end:
@@ -94,8 +94,8 @@ end:
     delete[] to;
     to = NULL;
 
-    delete[] coef;
-    coef = NULL;
+    delete[] sinx;
+    sinx = NULL;
 
     delete[] from;
     from = NULL;
