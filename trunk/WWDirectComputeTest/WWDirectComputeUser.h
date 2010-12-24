@@ -62,10 +62,10 @@ public:
         ID3D11ComputeShader * pComputeShader,
         UINT nNumViews,
         ID3D11ShaderResourceView ** pShaderResourceViews,
+        ID3D11UnorderedAccessView * pUnorderedAccessView,
         ID3D11Buffer * pCBCS,
         void * pCSData,
         DWORD dwNumDataBytes,
-        ID3D11UnorderedAccessView * pUnorderedAccessView,
         UINT X,
         UINT Y,
         UINT Z);
