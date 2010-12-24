@@ -11,6 +11,7 @@
 #  define dprintf(x, ...)
 #endif
 
+// 正常時もdprintfが出るバージョン。HRGRも参照。
 #define HRG(x)                                    \
 {                                                 \
     dprintf("D: %s\n", #x);                       \
@@ -22,6 +23,7 @@
     }                                             \
 }                                                 \
 
+// エラー時にgoto end;ではなくreturn hr;するHRG。
 #define HRR(x)                                    \
 {                                                 \
     dprintf("D: %s\n", #x);                       \
@@ -33,6 +35,7 @@
     }                                             \
 }                                                 \
 
+// 正常時のdprintfを抑制したHRG。失敗するとresult=false;する。
 #define HRGR(x)                                   \
 {                                                 \
     hr = x;                                       \

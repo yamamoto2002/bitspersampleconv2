@@ -8,6 +8,11 @@
 #include <assert.h>
 #include <crtdbg.h>
 
+/// 1スレッドグループに所属するスレッドの数。TGSMを共有する。
+/// 2の乗数。
+/// この数値を書き換えたらシェーダーも書き換える必要あり。
+#define GROUP_THREAD_COUNT 1024
+
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
     unsigned int pos;
@@ -15,8 +20,9 @@ struct ConstShaderParams {
 };
 
 static HRESULT
-JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *result)
+JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
 {
+    bool result = true;
     HRESULT             hr    = S_OK;
     WWDirectComputeUser *pDCU = NULL;
     ID3D11ComputeShader *pCS  = NULL;
@@ -31,7 +37,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     assert(0 < convolutionN);
     assert(sampleData);
     assert(jitterX);
-    assert(result);
+    assert(outF);
 
     // データ準備
     float *from = new float[convolutionN + sampleN + convolutionN];
@@ -55,16 +61,21 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     // HLSLの#defineを作る。
     char convStartStr[32];
     char convEndStr[32];
+    char convCountStr[32];
     char sampleNStr[32];
+    char groupThreadCountStr[32];
     sprintf_s(convStartStr, "%d", -convolutionN);
     sprintf_s(convEndStr,   "%d", convolutionN);
+    sprintf_s(convCountStr,   "%d", convolutionN*2);
     sprintf_s(sampleNStr,   "%d", sampleN);
+    sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
 
     const D3D_SHADER_MACRO defines[] = {
         "CONV_START", convStartStr,
         "CONV_END", convEndStr,
-        "CONV_N", convEndStr,
+        "CONV_COUNT", convCountStr,
         "SAMPLE_N", sampleNStr,
+        "GROUP_THREAD_COUNT", groupThreadCountStr,
         // "HIGH_PRECISION", "1",
         NULL, NULL
     };
@@ -97,19 +108,19 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     HRG(pDCU->CreateConstantBuffer(sizeof shaderParams, 1, "ConstShaderParams", &pBufConst));
 
     // GPU上でComputeShader実行。
-    ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
-    HRG(pDCU->SetupDispatch(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav));
+    for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
+        ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
+        HRGR(pDCU->SetupDispatch(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav));
 
-    for (int i=0; i<sampleN; ++i) {
-        shaderParams.pos = i;
-        HRG(pDCU->Dispatch(pBufConst, &shaderParams, sizeof shaderParams, 1, 1, 1));
+        shaderParams.pos = i * GROUP_THREAD_COUNT;
+        HRGR(pDCU->Dispatch(pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
+
+        pDCU->UnsetupDispatch();
     }
 
-    dprintf("pDCU->UnsetupDispatch()\n");
-    pDCU->UnsetupDispatch();
 
     // 計算結果をCPUメモリーに持ってくる。
-    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, result, sampleN * sizeof(float)));
+    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, outF, sampleN * sizeof(float)));
 
 end:
     if (pDCU) {
@@ -162,8 +173,8 @@ main(void)
     HRESULT hr = S_OK;
 
     // データ準備
-    int convolutionN = 65536 * 256;
-    int sampleN = 2;
+    int convolutionN = 65536;
+    int sampleN      = 256;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -171,8 +182,8 @@ main(void)
     float *jitterX = new float[sampleN];
     assert(jitterX);
 
-    float *result = new float[sampleN];
-    assert(result);
+    float *outputF = new float[sampleN];
+    assert(outputF);
 
     for (int i=0; i<sampleN; ++i) {
         sampleData[i] = ((float)(i))/sampleN;
@@ -181,12 +192,12 @@ main(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, result));
+    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, outputF));
 
     DWORD t1 = GetTickCount();
 
     for (int i=0; i<sampleN; ++i) {
-        printf("%7d sampleData=%f jitterX=%f result=%f\n", i, sampleData[i], jitterX[i], result[i]);
+        printf("%7d sampleData=%f jitterX=%f outputF=%f\n", i, sampleData[i], jitterX[i], outputF[i]);
     }
 
     if (0 < (t1-t0)) {
@@ -202,8 +213,8 @@ main(void)
     }
 
 end:
-    delete[] result;
-    result = NULL;
+    delete[] outputF;
+    outputF = NULL;
 
     delete[] jitterX;
     jitterX = NULL;
