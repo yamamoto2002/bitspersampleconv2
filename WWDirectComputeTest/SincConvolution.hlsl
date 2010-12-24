@@ -76,7 +76,7 @@ SincF(float sinx, float x)
 
 // TGSM
 groupshared float s_scratch[GROUP_THREAD_COUNT];
-groupshared float s_sinx;
+groupshared float s_sinX;
 groupshared float s_xOffs;
 groupshared float s_acc;
 
@@ -87,7 +87,7 @@ ConvolutionElemValue(int pos, int tid)
 {
     int tmpi = c_convOffs + tid;
     float x = mad(PI_F, tmpi + CONV_START, s_xOffs);
-    return g_SampleDataBuffer[tmpi + pos] * SincF(s_sinx, x);
+    return g_SampleDataBuffer[tmpi + pos] * SincF(s_sinX, x);
 }
 
 #if 1
@@ -104,7 +104,7 @@ CSMain(
         uint3 groupIdXYZ: SV_GroupID)
 {
     if (tid == 0) {
-        s_sinx  = g_SinxBuffer[groupIdXYZ.x];
+        s_sinX  = g_SinxBuffer[groupIdXYZ.x];
         s_xOffs = g_XBuffer[groupIdXYZ.x];
         s_acc   = g_OutputBuffer[groupIdXYZ.x];
     }
