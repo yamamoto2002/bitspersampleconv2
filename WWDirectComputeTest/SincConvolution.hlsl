@@ -52,7 +52,8 @@ RWStructuredBuffer<float> g_OutputBuffer     : register(u0);
 cbuffer consts {
     /// 畳み込み要素オフセット値。n * GROUP_THREAD_COUNTの飛び飛びの値が渡る。
     uint c_convOffs;
-    uint c_reserved0;
+    /// Dispatch繰り返し回数。
+    uint c_dispatchCount;
     uint c_reserved1;
     uint c_reserved2;
 };
@@ -83,14 +84,96 @@ groupshared float s_acc;
 /// 畳み込み計算1回実行。
 /// sample[t+x] * sinc(πx + XBuffer[t])
 inline float
-ConvolutionElemValue(int pos, int tid)
+ConvolutionElemValue(int pos, int convOffs)
 {
-    int tmpi = c_convOffs + tid;
-    float x = mad(PI_F, tmpi + CONV_START, s_xOffs);
-    return g_SampleDataBuffer[tmpi + pos] * SincF(s_sinX, x);
+    int offs = c_convOffs + convOffs;
+    float x = mad(PI_F, offs + CONV_START, s_xOffs);
+    return g_SampleDataBuffer[offs + pos] * SincF(s_sinX, x);
 }
 
 #if 1
+
+// スレッドグループとTGSMを使用して、GPUメモリからの読み出し回数を減らす最適化。
+
+// groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
+// スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
+[numthreads(GROUP_THREAD_COUNT, 1, 1)]
+void
+CSMain(
+        uint  tid:        SV_GroupIndex,
+        uint3 groupIdXYZ: SV_GroupID)
+{
+    uint offs = tid;
+
+    if (tid == 0) {
+        s_sinX  = g_SinxBuffer[groupIdXYZ.x];
+        s_xOffs = g_XBuffer[groupIdXYZ.x];
+    }
+    s_scratch[tid] = 0;
+
+    GroupMemoryBarrierWithGroupSync();
+
+    do {
+        s_scratch[tid] += ConvolutionElemValue(groupIdXYZ.x, offs);
+        // s_scratch[tid] += 1;
+        offs += GROUP_THREAD_COUNT;
+    } while (offs < CONV_COUNT);
+
+    GroupMemoryBarrierWithGroupSync();
+
+#if 1024 <= GROUP_THREAD_COUNT
+    if (tid < 512) { s_scratch[tid] += s_scratch[tid + 512]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 512 <= GROUP_THREAD_COUNT
+    if (tid < 256) { s_scratch[tid] += s_scratch[tid + 256]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 256 <= GROUP_THREAD_COUNT
+    if (tid < 128) { s_scratch[tid] += s_scratch[tid + 128]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 128 <= GROUP_THREAD_COUNT
+    if (tid < 64) { s_scratch[tid] += s_scratch[tid + 64]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 64 <= GROUP_THREAD_COUNT
+    if (tid < 32) { s_scratch[tid] += s_scratch[tid + 32]; }
+    //GroupMemoryBarrierWithGroupSync(); // これ以降要らないらしい。2260_GTC2010.pdf参照。
+#endif
+
+#if 32 <= GROUP_THREAD_COUNT
+    if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
+    //GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 16 <= GROUP_THREAD_COUNT
+    if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
+    //GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 8 <= GROUP_THREAD_COUNT
+    if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
+   // GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 4 <= GROUP_THREAD_COUNT
+    if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
+    //GroupMemoryBarrierWithGroupSync();
+#endif
+
+    if (tid == 0) {
+        s_scratch[0] += s_scratch[1];
+        g_OutputBuffer[groupIdXYZ.x] = s_scratch[0];
+    }
+}
+#endif
+
+#if 0
 
 // スレッドグループとTGSMを使用して、GPUメモリからの読み出し回数を減らす最適化。
 // 10倍ぐらい速くなった。
@@ -165,8 +248,9 @@ CSMain(
     }
 }
 
-#else
+#endif
 
+#if 0
 // 最適化前
 [numthreads(1, 1, 1)]
 void

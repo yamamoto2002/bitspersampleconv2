@@ -16,7 +16,7 @@
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
     unsigned int c_convOffs;
-    unsigned int c_reserved0;
+    unsigned int c_dispatchCount;
     unsigned int c_reserved1;
     unsigned int c_reserved2;
 };
@@ -66,11 +66,13 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     char convEndStr[32];
     char convCountStr[32];
     char sampleNStr[32];
+    char iterateNStr[32];
     char groupThreadCountStr[32];
     sprintf_s(convStartStr, "%d", -convolutionN);
     sprintf_s(convEndStr,   "%d", convolutionN);
-    sprintf_s(convCountStr,   "%d", convolutionN*2);
+    sprintf_s(convCountStr, "%d", convolutionN*2);
     sprintf_s(sampleNStr,   "%d", sampleN);
+    sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
     sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
 
     const D3D_SHADER_MACRO defines[] = {
@@ -78,6 +80,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
         "CONV_END", convEndStr,
         "CONV_COUNT", convCountStr,
         "SAMPLE_N", sampleNStr,
+        "ITERATE_N", iterateNStr,
         "GROUP_THREAD_COUNT", groupThreadCountStr,
         // "HIGH_PRECISION", "1",
         NULL, NULL
@@ -112,17 +115,30 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
 
     // GPU上でComputeShader実行。
     ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
+    DWORD t0 = GetTickCount();
+#if 1
+    // すこしだけ速い。中でループするようにした。
+    shaderParams.c_convOffs = 0;
+    shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
+    HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
+        pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
+#else
+    // 遅い
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
-
+        shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
         HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
             pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
     }
+#endif
 
     // 計算結果をCPUメモリーに持ってくる。
     HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, outF, sampleN * sizeof(float)));
-
 end:
+
+    DWORD t1 = GetTickCount();
+    printf("RunGpu=%dms ###################################\n", t1-t0);
+
     if (pDCU) {
         if (hr == DXGI_ERROR_DEVICE_REMOVED) {
             dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
@@ -218,8 +234,8 @@ main(void)
     HRESULT hr = S_OK;
 
     // データ準備
-    int convolutionN = 16777216;
-    int sampleN      = 1024;
+    int convolutionN = 65536 * 256;
+    int sampleN      = 256;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -233,7 +249,7 @@ main(void)
     float *outputCpu = new float[sampleN];
     assert(outputCpu);
 
-#if 1
+#if 0
     for (int i=0; i<sampleN; ++i) {
         sampleData[i] = 1.0f;
         jitterX[i]    = 0.5f;
