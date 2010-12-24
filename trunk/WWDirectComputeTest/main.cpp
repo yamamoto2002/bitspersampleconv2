@@ -219,7 +219,7 @@ main(void)
 
     // データ準備
     int convolutionN = 16777216;
-    int sampleN      = 16;
+    int sampleN      = 1024;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -233,10 +233,10 @@ main(void)
     float *outputCpu = new float[sampleN];
     assert(outputCpu);
 
-#if 0
+#if 1
     for (int i=0; i<sampleN; ++i) {
         sampleData[i] = 1.0f;
-        jitterX[i]    = 1.0f;
+        jitterX[i]    = 0.5f;
     }
 #else
     // 44100Hzサンプリングで1000Hzのsin
