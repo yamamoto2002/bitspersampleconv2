@@ -3,7 +3,7 @@
 /*
 
 OutputBuffer[t+convolutionN] = Σ[sample[t+x] * sinc(πx + XBuffer[t])]
-x=CONV_START～CONV_END
+CONV_START <= x < CONV_END
 を計算する
 
 convolutionN = 256
@@ -12,11 +12,17 @@ sampleN = 100
 
 CONV_START = -256
 CONV_END   =  256
-CONV_N     =  256
+CONV_COUNT =  512
 SAMPLE_N   =  100
-DTid.xは0～99まで変化。
+GROUP_THREAD_COUNT 2の乗数
+を#defineしてCS5.0 DirectCompute シェーダーとしてコンパイルする。
 
-OutputBuffer[]はsampleN個用意する
+for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
+    // シェーダー定数を渡す
+    c_convOffs = i * GROUP_THREAD_COUNT
+    ComputeShaderのrun(c_convOffs, sampleN, 1, 1);
+}
+する。
 
 用意するデータ
 
@@ -33,6 +39,7 @@ XBuffer[0]～XBuffer[sampleN-1] xの値
 
 ④出力バッファー
 OutputBuffer[0]～OutputBuffer[sampleN-1]
+OutputBuffer[]はsampleN個用意する
 
 */
 
@@ -56,18 +63,25 @@ SincF(float sinx, float x)
     if (-0.000000001f < x && x < 0.000000001f) {
         return 1.0f;
     } else {
-        // return sinx * rcp(x);
+        // どちらでも同じだった。
+#if 1
+        return sinx * rcp(x);
+#else
         return sinx / x;
+#endif
     }
 }
 
 #define PI_F 3.141592653589793238462643f
 
+// TGSM
 groupshared float s_scratch[GROUP_THREAD_COUNT];
 groupshared float s_sinx;
 groupshared float s_xOffs;
 groupshared float s_acc;
 
+/// 畳み込み計算1回実行。
+/// sample[t+x] * sinc(πx + XBuffer[t])
 inline float
 ConvolutionElemValue(int pos, int tid)
 {
@@ -75,7 +89,11 @@ ConvolutionElemValue(int pos, int tid)
     float x = mad(PI_F, tmpi + CONV_START, s_xOffs);
     return g_SampleDataBuffer[tmpi + pos] * SincF(s_sinx, x);
 }
+
 #if 1
+
+// スレッドグループとTGSMを使用して、GPUメモリからの読み出し回数を減らす最適化。
+// 10倍ぐらい速くなった。
 
 // groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
 // スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
@@ -118,27 +136,27 @@ CSMain(
 
 #if 64 <= GROUP_THREAD_COUNT
     if (tid < 32) { s_scratch[tid] += s_scratch[tid + 32]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync(); // これ以降要らないらしい。2260_GTC2010.pdf参照。
 #endif
 
 #if 32 <= GROUP_THREAD_COUNT
     if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 16 <= GROUP_THREAD_COUNT
     if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 8 <= GROUP_THREAD_COUNT
     if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
-    GroupMemoryBarrierWithGroupSync();
+   // GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 4 <= GROUP_THREAD_COUNT
     if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
     if (tid == 0) {
@@ -146,10 +164,10 @@ CSMain(
         g_OutputBuffer[groupIdXYZ.x] = s_acc + s_scratch[0];
     }
 }
-#endif
 
-#if 0
-// オリジナル。
+#else
+
+// 最適化前
 [numthreads(1, 1, 1)]
 void
 CSMain(uint3 groupIdXYZ  : SV_GroupID,
