@@ -578,6 +578,7 @@ WWDirectComputeUser::Dispatch(
         UINT Y,
         UINT Z)
 {
+    bool result = true;
     HRESULT hr = S_OK;
     D3D11_MAPPED_SUBRESOURCE mr;
 
@@ -588,7 +589,7 @@ WWDirectComputeUser::Dispatch(
     if (pCBCS) {
         ZeroMemory(&mr, sizeof mr);
 
-        HRG(m_pContext->Map(pCBCS, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr));
+        HRGR(m_pContext->Map(pCBCS, 0, D3D11_MAP_WRITE_DISCARD, 0, &mr));
         assert(mr.pData);
 
         memcpy(mr.pData, pCSData, dwNumDataBytes);
