@@ -36,51 +36,17 @@ OutputBuffer[0]～OutputBuffer[sampleN-1]
 
 */
 
-struct BufTypeF
-{
-    float f;
+StructuredBuffer<float>   SampleDataBuffer : register(t0);
+StructuredBuffer<float>   SinxBuffer       : register(t1);
+StructuredBuffer<float>   XBuffer          : register(t2);
+RWStructuredBuffer<float> OutputBuffer     : register(u0);
+
+cbuffer consts {
+    uint pos;
+    uint reserved0;
+    uint reserved1;
+    uint reserved2;
 };
-
-StructuredBuffer<BufTypeF>   SampleDataBuffer : register(t0);
-StructuredBuffer<BufTypeF>   SinxBuffer       : register(t1);
-StructuredBuffer<BufTypeF>   XBuffer          : register(t2);
-RWStructuredBuffer<BufTypeF> OutputBuffer     : register(u0);
-RWStructuredBuffer<BufTypeF> ScratchBuffer    : register(u1);
-
-#ifdef HIGH_PRECISION
-
-// 主にdoubleで計算。
-
-inline double
-SincD(float sinx, float x)
-{
-    if (-0.000000001f < x && x < 0.000000001f) {
-        return 1.0;
-    } else {
-        return ((double)sinx) * ((double)rcp(x));
-    }
-}
-
-[numthreads(1, 1, 1)]
-void
-CSMain(uint3 DTid : SV_DispatchThreadID)
-{
-    double r = 0.0;
-    float pi = 3.141592653589793238462643;
-    float sinx = SinxBuffer[DTid.x].f;
-    float offs = XBuffer[DTid.x].f;
-    int i;
-
-    for (i=CONV_START; i<CONV_END; ++i) {
-        float x = mad(pi, i, offs);
-        r += ((double)SampleDataBuffer[DTid.x+i+CONV_N].f) * SincD(sinx, x);
-    }
-    OutputBuffer[DTid.x].f = (float)r;
-}
-
-#else
-
-// 主にfloatで計算。
 
 inline float
 SincF(float sinx, float x)
@@ -92,36 +58,25 @@ SincF(float sinx, float x)
     }
 }
 
+#define PI 3.141592653589793238462643f
+
+/// @param threadIdx numThreadsに指定したパラメータxyz
+/// @param groupIdx Dispatchに指定したパラメータxyz
 [numthreads(1, 1, 1)]
 void
-CSMain(uint3 DTid : SV_DispatchThreadID)
+CSMain(uint3 threadIdx : SV_GroupThreadID,
+       uint3 groupIdx  : SV_GroupID)
 {
-    float r = 0.0f;
-    float pi = 3.141592653589793238462643f;
-    float sinx = SinxBuffer[DTid.x].f;
-    float offs = XBuffer[DTid.x].f;
     int i;
+    float sinx = SinxBuffer[pos];
+    float xOffs = XBuffer[pos];
+    float r = 0.0f;
 
-#if 0
-    // これは、速くならない。
-    for (i=CONV_START; i<CONV_END; i+=4) {
-        float x0 = mad(pi, i  , offs);
-        float x1 = mad(pi, i+1, offs);
-        float x2 = mad(pi, i+2, offs);
-        float x3 = mad(pi, i+3, offs);
-        float r0 = SampleDataBuffer[DTid.x+i  +CONV_N].f * SincF(sinx, x0);
-        float r1 = SampleDataBuffer[DTid.x+i+1+CONV_N].f * SincF(sinx, x1);
-        float r2 = SampleDataBuffer[DTid.x+i+2+CONV_N].f * SincF(sinx, x2);
-        float r3 = SampleDataBuffer[DTid.x+i+3+CONV_N].f * SincF(sinx, x3);
-        r += r0 + r1 + r2 + r3;
-    }
-#else
     for (i=CONV_START; i<CONV_END; ++i) {
-        float x = mad(pi, i  , offs);
-        r = mad(SampleDataBuffer[DTid.x+i+CONV_N].f, SincF(sinx, x), r);
+        float x = mad(PI, i, xOffs);
+        r = mad(SampleDataBuffer[pos+i+CONV_N], SincF(sinx, x), r);
     }
-#endif
-    OutputBuffer[DTid.x].f = r;
+
+    OutputBuffer[pos] = r;
 }
 
-#endif
