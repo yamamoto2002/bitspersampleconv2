@@ -56,11 +56,12 @@ SincF(float sinx, float x)
     if (-0.000000001f < x && x < 0.000000001f) {
         return 1.0f;
     } else {
-        return sinx * rcp(x);
+        // return sinx * rcp(x);
+        return sinx / x;
     }
 }
 
-#define PI 3.141592653589793238462643f
+#define PI_F 3.141592653589793238462643f
 
 groupshared float s_scratch[GROUP_THREAD_COUNT];
 groupshared float s_sinx;
@@ -70,121 +71,11 @@ groupshared float s_acc;
 inline float
 ConvolutionElemValue(int pos, int tid)
 {
-    float x = mad(PI, c_convOffs + tid + CONV_START, s_xOffs);
-    return g_SampleDataBuffer[c_convOffs + tid + pos] * SincF(s_sinx, x);
+    int tmpi = c_convOffs + tid;
+    float x = mad(PI_F, tmpi + CONV_START, s_xOffs);
+    return g_SampleDataBuffer[tmpi + pos] * SincF(s_sinx, x);
 }
 #if 1
-
-// 畳み込み動作確認用。
-
-// groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
-// スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
-[numthreads(GROUP_THREAD_COUNT, 1, 1)]
-void
-CSMain(
-        uint  tid:        SV_GroupIndex,
-        uint3 groupIdXYZ: SV_GroupID)
-{
-    if (tid == 0) {
-        s_acc   = g_OutputBuffer[groupIdXYZ.x];
-    }
-    s_scratch[tid] = 1;
-
-    GroupMemoryBarrierWithGroupSync();
-
-    for (unsigned int s = GROUP_THREAD_COUNT/2; 0 < s; s>>=1) {
-        if (tid < s) {
-            s_scratch[tid] += s_scratch[tid + s];
-        }
-        GroupMemoryBarrierWithGroupSync();
-    }
-
-    if (tid == 0) {
-        g_OutputBuffer[groupIdXYZ.x] = s_acc + s_scratch[0];
-    }
-}
-#endif
-
-#if 0
-
-// 畳み込み動作確認用。
-// GROUP_THREAD_COUNT==1024 のバージョン
-// convolutionN=16384で動作するが
-// convolutionN=32768でバグる。
-
-// groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
-// スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
-[numthreads(GROUP_THREAD_COUNT, 1, 1)]
-void
-CSMain(
-        uint  tid:        SV_GroupIndex,
-        uint3 groupIdXYZ: SV_GroupID)
-{
-    if (tid == 0) {
-        s_acc   = g_OutputBuffer[groupIdXYZ.x];
-    }
-    s_scratch[tid] = 1;
-
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 512) {
-        s_scratch[tid] += s_scratch[tid + 512];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 256) {
-        s_scratch[tid] += s_scratch[tid + 256];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 128) {
-        s_scratch[tid] += s_scratch[tid + 128];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 64) {
-        s_scratch[tid] += s_scratch[tid + 64];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 32) {
-        s_scratch[tid] += s_scratch[tid + 32];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 16) {
-        s_scratch[tid] += s_scratch[tid + 16];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 8) {
-        s_scratch[tid] += s_scratch[tid + 8];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 4) {
-        s_scratch[tid] += s_scratch[tid + 4];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid < 2) {
-        s_scratch[tid] += s_scratch[tid + 2];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid == 0) {
-        s_scratch[0] += s_scratch[1];
-    }
-    GroupMemoryBarrierWithGroupSync();
-
-    if (tid == 0) {
-        g_OutputBuffer[groupIdXYZ.x] = s_acc + s_scratch[0];
-    }
-}
-#endif
-
-#if 0
-// 畳み込み動作確認用。
 
 // groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
 // スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
@@ -197,26 +88,67 @@ CSMain(
     if (tid == 0) {
         s_sinx  = g_SinxBuffer[groupIdXYZ.x];
         s_xOffs = g_XBuffer[groupIdXYZ.x];
+        s_acc   = g_OutputBuffer[groupIdXYZ.x];
     }
+    GroupMemoryBarrierWithGroupSync();
+
+    s_scratch[tid] = ConvolutionElemValue(groupIdXYZ.x, tid);
 
     GroupMemoryBarrierWithGroupSync();
 
-    s_scratch[tid] = 1;
-
+#if 1024 <= GROUP_THREAD_COUNT
+    if (tid < 512) { s_scratch[tid] += s_scratch[tid + 512]; }
     GroupMemoryBarrierWithGroupSync();
+#endif
 
-    for (unsigned int s = GROUP_THREAD_COUNT/2; 0 < s; s>>=1) {
-        if (tid < s) {
-            s_scratch[tid] += s_scratch[tid + s];
-        }
-        GroupMemoryBarrierWithGroupSync();
-    }
+#if 512 <= GROUP_THREAD_COUNT
+    if (tid < 256) { s_scratch[tid] += s_scratch[tid + 256]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 256 <= GROUP_THREAD_COUNT
+    if (tid < 128) { s_scratch[tid] += s_scratch[tid + 128]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 128 <= GROUP_THREAD_COUNT
+    if (tid < 64) { s_scratch[tid] += s_scratch[tid + 64]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 64 <= GROUP_THREAD_COUNT
+    if (tid < 32) { s_scratch[tid] += s_scratch[tid + 32]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 32 <= GROUP_THREAD_COUNT
+    if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 16 <= GROUP_THREAD_COUNT
+    if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 8 <= GROUP_THREAD_COUNT
+    if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 4 <= GROUP_THREAD_COUNT
+    if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
 
     if (tid == 0) {
-        g_OutputBuffer[groupIdXYZ.x] += s_scratch[0];
+        s_scratch[0] += s_scratch[1];
+        g_OutputBuffer[groupIdXYZ.x] = s_acc + s_scratch[0];
     }
 }
+#endif
 
+#if 0
 // オリジナル。
 [numthreads(1, 1, 1)]
 void

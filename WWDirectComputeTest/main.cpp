@@ -15,8 +15,10 @@
 
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
-    unsigned int pos;
-    unsigned int reserved[3];
+    unsigned int c_convOffs;
+    unsigned int c_reserved0;
+    unsigned int c_reserved1;
+    unsigned int c_reserved2;
 };
 
 static HRESULT
@@ -40,9 +42,10 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     assert(outF);
 
     // データ準備
-    float *from = new float[convolutionN + sampleN + convolutionN];
+    const int fromCount = convolutionN + sampleN + convolutionN;
+    float *from = new float[fromCount];
     assert(from);
-    ZeroMemory(from, sizeof(float)* (convolutionN + sampleN + convolutionN));
+    ZeroMemory(from, sizeof(float)* fromCount);
     for (int i=0; i<sampleN; ++i) {
         from[i+convolutionN] = sampleData[i];
     }
@@ -86,7 +89,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
 
     // 入力データをGPUメモリーに送る
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), convolutionN + sampleN + convolutionN, from, "SampleDataBuffer", &pBuf0Srv));
+        sizeof(float), fromCount, from, "SampleDataBuffer", &pBuf0Srv));
     assert(pBuf0Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
@@ -108,16 +111,13 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     HRG(pDCU->CreateConstantBuffer(sizeof shaderParams, 1, "ConstShaderParams", &pBufConst));
 
     // GPU上でComputeShader実行。
+    ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
-        ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
-        HRGR(pDCU->SetupDispatch(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav));
+        shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
 
-        shaderParams.pos = i * GROUP_THREAD_COUNT;
-        HRGR(pDCU->Dispatch(pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
-
-        pDCU->UnsetupDispatch();
+        HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
+            pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
     }
-
 
     // 計算結果をCPUメモリーに持ってくる。
     HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, outF, sampleN * sizeof(float)));
@@ -163,6 +163,51 @@ end:
     return hr;
 }
 
+#define PI_D 3.141592653589793238462643
+#define PI_F 3.141592653589793238462643f
+
+static float
+SincF(float sinx, float x)
+{
+    if (-0.000000001f < x && x < 0.000000001f) {
+        return 1.0f;
+    } else {
+        return sinx / x;
+    }
+}
+
+static void
+JitterAddCpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+{
+    const int fromCount = convolutionN + sampleN + convolutionN;
+    float *from = new float[fromCount];
+    assert(from);
+
+    ZeroMemory(from, sizeof(float) * fromCount);
+    for (int i=0; i<sampleN; ++i) {
+        from[i+convolutionN] = sampleData[i];
+    }
+
+    for (int pos=0; pos<sampleN; ++pos) {
+        float xOffs = jitterX[pos];
+        float sinx  = sinf(xOffs);
+        float r = 0.0f;
+
+        for (int i=-convolutionN; i<convolutionN; ++i) {
+            float x = PI_F * i + xOffs;
+            int posS = pos + i + convolutionN;
+            float sinc =  SincF(sinx, x);
+
+            r += from[posS] * sinc;
+        }
+
+        outF[pos] = r;
+    }
+
+    delete[] from;
+    from = NULL;
+}
+
 int
 main(void)
 {
@@ -173,8 +218,8 @@ main(void)
     HRESULT hr = S_OK;
 
     // データ準備
-    int convolutionN = 65536;
-    int sampleN      = 256;
+    int convolutionN = 16777216;
+    int sampleN      = 16;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -182,22 +227,40 @@ main(void)
     float *jitterX = new float[sampleN];
     assert(jitterX);
 
-    float *outputF = new float[sampleN];
-    assert(outputF);
+    float *outputGpu = new float[sampleN];
+    assert(outputGpu);
 
+    float *outputCpu = new float[sampleN];
+    assert(outputCpu);
+
+#if 0
     for (int i=0; i<sampleN; ++i) {
-        sampleData[i] = ((float)(i))/sampleN;
-        jitterX[i]    = 0;
+        sampleData[i] = 1.0f;
+        jitterX[i]    = 1.0f;
     }
+#else
+    // 44100Hzサンプリングで1000Hzのsin
+    for (int i=0; i<sampleN; ++i) {
+        float xS = PI_F * i * 1000 / 44100;
+        float xJ = PI_F * i * 4000 / 44100;
+        sampleData[i] = sinf(xS);
+        jitterX[i]    = sinf(xJ)*0.5f;
+    }
+#endif
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, outputF));
+    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, outputGpu));
 
-    DWORD t1 = GetTickCount();
+    DWORD t1 = GetTickCount()+1;
+
+    JitterAddCpu(sampleN, convolutionN, sampleData, jitterX, outputCpu);
+
+    DWORD t2 = GetTickCount()+2;
 
     for (int i=0; i<sampleN; ++i) {
-        printf("%7d sampleData=%f jitterX=%f outputF=%f\n", i, sampleData[i], jitterX[i], outputF[i]);
+        printf("%7d sampleData=%f jitterX=%f outGpu=%f outCpu=%f diff=%12.8f\n",
+            i, sampleData[i], jitterX[i], outputGpu[i], outputCpu[i], fabsf(outputGpu[i]- outputCpu[i]));
     }
 
     if (0 < (t1-t0)) {
@@ -209,12 +272,17 @@ main(void)
              x = 256 ÷ 14
          */
 
-        printf("%dms %fsamples/s\n", (t1-t0),  sampleN / ((t1-t0)/1000.0));
+        printf("GPU=%dms(%fsamples/s) CPU=%dms(%fsamples/s)\n",
+            (t1-t0),  sampleN / ((t1-t0)/1000.0),
+            (t2-t1),  sampleN / ((t2-t1)/1000.0));
     }
 
 end:
-    delete[] outputF;
-    outputF = NULL;
+    delete[] outputCpu;
+    outputGpu = NULL;
+
+    delete[] outputGpu;
+    outputGpu = NULL;
 
     delete[] jitterX;
     jitterX = NULL;

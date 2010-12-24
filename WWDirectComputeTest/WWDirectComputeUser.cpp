@@ -627,22 +627,23 @@ WWDirectComputeUser::Run(
         ID3D11ComputeShader * pComputeShader,
         UINT nNumViews,
         ID3D11ShaderResourceView ** pShaderResourceViews,
+        ID3D11UnorderedAccessView * pUnorderedAccessView,
         ID3D11Buffer * pCBCS,
         void * pCSData,
         DWORD dwNumDataBytes,
-        ID3D11UnorderedAccessView * pUnorderedAccessView,
         UINT X,
         UINT Y,
         UINT Z)
 {
     HRESULT hr = S_OK;
+    bool result = true;
 
-    HRG(SetupDispatch(
+    HRGR(SetupDispatch(
         pComputeShader, nNumViews, pShaderResourceViews,
         pUnorderedAccessView));
 
     // é¿çsÇ∑ÇÈÅB
-    HRG(Dispatch(
+    HRGR(Dispatch(
         pCBCS, pCSData, dwNumDataBytes,
         X, Y, Z));
 
