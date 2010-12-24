@@ -8,6 +8,12 @@
 #include <assert.h>
 #include <crtdbg.h>
 
+/// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
+struct ConstShaderParams {
+    unsigned int pos;
+    unsigned int reserved[3];
+};
+
 static HRESULT
 JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *result)
 {
@@ -19,6 +25,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     ID3D11ShaderResourceView*   pBuf1Srv = NULL;
     ID3D11ShaderResourceView*   pBuf2Srv = NULL;
     ID3D11UnorderedAccessView*  pBufResultUav = NULL;
+    ID3D11Buffer * pBufConst = NULL;
 
     assert(0 < sampleN);
     assert(0 < convolutionN);
@@ -84,11 +91,22 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
         sizeof(float), sampleN, NULL, "OutputBuffer", &pBufResultUav));
     assert(pBufResultUav);
 
+    // 定数置き場をGPUに作成。
+    ConstShaderParams shaderParams;
+    ZeroMemory(&shaderParams, sizeof shaderParams);
+    HRG(pDCU->CreateConstantBuffer(sizeof shaderParams, 1, "ConstShaderParams", &pBufConst));
+
     // GPU上でComputeShader実行。
     ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
+    HRG(pDCU->SetupDispatch(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav));
 
-    HRG(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews,
-        NULL, NULL, 0, pBufResultUav, sampleN, 1, 1));
+    for (int i=0; i<sampleN; ++i) {
+        shaderParams.pos = i;
+        HRG(pDCU->Dispatch(pBufConst, &shaderParams, sizeof shaderParams, 1, 1, 1));
+    }
+
+    dprintf("pDCU->UnsetupDispatch()\n");
+    pDCU->UnsetupDispatch();
 
     // 計算結果をCPUメモリーに持ってくる。
     HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, result, sampleN * sizeof(float)));
@@ -99,6 +117,9 @@ end:
             dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
                 pDCU->GetDevice()->GetDeviceRemovedReason());
         }
+
+        pDCU->DestroyConstantBuffer(pBufConst);
+        pBufConst = NULL;
 
         pDCU->DestroyDataAndUnorderedAccessView(pBufResultUav);
         pBufResultUav = NULL;
@@ -142,7 +163,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN = 1024;
+    int sampleN = 2;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);

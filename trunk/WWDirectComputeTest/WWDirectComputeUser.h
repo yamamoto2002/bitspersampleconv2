@@ -57,7 +57,7 @@ public:
     void DestroyDataAndUnorderedAccessView(
         ID3D11UnorderedAccessView * pUav);
 
-    // 実行。ブロックするらしいｗｗ
+    // 実行。中でブロックする
     HRESULT Run(
         ID3D11ComputeShader * pComputeShader,
         UINT nNumViews,
@@ -70,6 +70,23 @@ public:
         UINT Y,
         UINT Z);
 
+    // Runの代わりに、SetupDispatch() Dispatch() UnsetupDispatch()しても良い。
+    HRESULT SetupDispatch(
+        ID3D11ComputeShader * pComputeShader,
+        UINT nNumViews,
+        ID3D11ShaderResourceView ** pShaderResourceViews,
+        ID3D11UnorderedAccessView * pUnorderedAccessView);
+
+    HRESULT Dispatch(
+        ID3D11Buffer * pCBCS,
+        void * pCSData,
+        DWORD dwNumDataBytes,
+        UINT X,
+        UINT Y,
+        UINT Z);
+
+    void UnsetupDispatch(void);
+
     // 計算結果をGPUから取り出す。
     HRESULT RecvResultToCpuMemory(
             ID3D11UnorderedAccessView * pUav,
@@ -78,18 +95,18 @@ public:
 
     ID3D11Device *GetDevice(void) { return m_pDevice; }
 
+    HRESULT CreateConstantBuffer(
+        unsigned int uElementSize,
+        unsigned int uCount,
+        const char *name,
+        ID3D11Buffer **ppBufOut);
+
+    void DestroyConstantBuffer(ID3D11Buffer * pBuf);
 private:
     ID3D11Device*               m_pDevice;
     ID3D11DeviceContext*        m_pContext;
 
     HRESULT CreateComputeDevice(void);
-
-    HRESULT CreateStructuredBuffer(
-        unsigned int uElementSize,
-        unsigned int uCount,
-        void * pInitData,
-        const char *name,
-        ID3D11Buffer ** ppBufOut);
 
     HRESULT CreateBufferShaderResourceView(
         ID3D11Buffer * pBuffer,
@@ -104,4 +121,10 @@ private:
     std::map<ID3D11ShaderResourceView *, WWReadOnlyGpuBufferInfo> m_readGpuBufInfo;
     std::map<ID3D11UnorderedAccessView *, WWReadWriteGpuBufferInfo> m_rwGpuBufInfo;
 
+    HRESULT CreateStructuredBuffer(
+        unsigned int uElementSize,
+        unsigned int uCount,
+        void * pInitData,
+        const char *name,
+        ID3D11Buffer ** ppBufOut);
 };
