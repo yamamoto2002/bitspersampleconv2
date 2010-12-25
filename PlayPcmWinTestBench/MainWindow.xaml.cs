@@ -666,7 +666,7 @@ namespace PlayPcmWinTestBench {
 
             WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
             hr = dc.Init(
-                WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PFloat,
                 args.convolutionN);
             if (hr < 0) {
                 return hr;
@@ -709,7 +709,7 @@ namespace PlayPcmWinTestBench {
                         sample1 = sampleRemain;
                     }
                     hr = dc.JitterAddPortion(
-                        WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                        WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PFloat,
                         (int)sampleN, args.convolutionN,
                         sampleDataBuffer, jitterXBuffer, ref outBuffer, offs, sample1);
                     if (hr < 0) {
