@@ -577,6 +577,7 @@ namespace PlayPcmWinTestBench {
             string result = (string)e.Result;
 
             textBoxAQResult.Text += string.Format("結果: {0}\r\n", result);
+            textBoxAQResult.ScrollToEnd();
         }
 
         private void m_AQworker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -633,7 +634,9 @@ namespace PlayPcmWinTestBench {
             buttonAQBrowseOpen.IsEnabled   = false;
             buttonAQBrowseSaveAs.IsEnabled = false;
             progressBar1.Value = 0;
+
             textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}…\r\n", args.inputPath, args.outputPath);
+            textBoxAQResult.ScrollToEnd();
 
             m_AQworker.RunWorkerAsync(args);
         }

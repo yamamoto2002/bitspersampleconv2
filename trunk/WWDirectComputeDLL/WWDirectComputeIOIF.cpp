@@ -27,7 +27,7 @@ struct ConstShaderParams {
 };
 
 static double
-moduloD(double left, double right)
+ModuloD(double left, double right)
 {
     if (right < 0) {
         right = -right;
@@ -37,27 +37,10 @@ moduloD(double left, double right)
         while (0 <= left - right) {
             left -= right;
         }
-    } else if (left < 0) {
-        do{
-            left += right;
-        } while (left < 0);
+        return left;
     }
 
-    return left;
-}
-
-static float
-moduloF(float left, float right)
-{
-    if (right < 0) {
-        right = -right;
-    }
-
-    if (0 < left) {
-        while (0 <= left - right) {
-            left -= right;
-        }
-    } else if (left < 0) {
+    if (left < 0) {
         do{
             left += right;
         } while (left < 0);
@@ -136,7 +119,7 @@ JitterAddGpu(
         double *sinxD = new double[sampleN];
         assert(sinxD);
         for (int i=0; i<sampleN; ++i) {
-            sinxD[i] = sin(jitterX[i]);
+            sinxD[i] = sin(ModuloD(jitterX[i], 2.0 * PI_D));
         }
         sinx = sinxD;
 
@@ -159,7 +142,7 @@ JitterAddGpu(
         float *sinxF = new float[sampleN];
         assert(sinxF);
         for (int i=0; i<sampleN; ++i) {
-            sinxF[i] = sinf(jitterX[i]);
+            sinxF[i] = (float)sin(ModuloD(jitterX[i], 2.0 * PI_D));
         }
         sinx = sinxF;
 
