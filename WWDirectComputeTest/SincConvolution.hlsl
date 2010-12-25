@@ -86,8 +86,8 @@ groupshared float s_acc;
 inline float
 ConvolutionElemValue(int pos, int convOffs)
 {
-    int offs = c_convOffs + convOffs;
-    float x = mad(PI_F, offs + CONV_START, s_xOffs);
+    const int offs = c_convOffs + convOffs;
+    const float x = mad(PI_F, offs + CONV_START, s_xOffs);
     return g_SampleDataBuffer[offs + pos] * SincF(s_sinX, x);
 }
 
@@ -106,16 +106,18 @@ CSMain(
     uint offs = tid;
 
     if (tid == 0) {
-        s_sinX  = g_SinxBuffer[groupIdXYZ.x];
         s_xOffs = g_XBuffer[groupIdXYZ.x];
+        s_sinX  = sin(s_xOffs);
     }
     s_scratch[tid] = 0;
 
     GroupMemoryBarrierWithGroupSync();
 
     do {
-        s_scratch[tid] += ConvolutionElemValue(groupIdXYZ.x, offs);
-        offs += GROUP_THREAD_COUNT;
+        s_scratch[tid] +=
+            ConvolutionElemValue(groupIdXYZ.x, offs) +
+            ConvolutionElemValue(groupIdXYZ.x, offs + GROUP_THREAD_COUNT);
+        offs += GROUP_THREAD_COUNT * 2;
     } while (offs < CONV_COUNT);
 
     GroupMemoryBarrierWithGroupSync();
