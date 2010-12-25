@@ -12,6 +12,14 @@
 #define PI_D 3.141592653589793238462643
 #define PI_F 3.141592653589793238462643f
 
+/// 物置 BSS: 起動時にゼロ塗される。
+struct WWDCIOInfo {
+    WWDirectComputeUser *pDCU;
+    ID3D11ComputeShader *pCS;
+};
+
+static WWDCIOInfo g_DC;
+
 enum WWGpuPrecisionType {
     WWGpuPrecision_Float,
     WWGpuPrecision_Double,
@@ -49,6 +57,8 @@ ModuloD(double left, double right)
     return left;
 }
 
+
+
 static HRESULT
 JitterAddGpu(
         WWGpuPrecisionType precision,
@@ -62,8 +72,6 @@ JitterAddGpu(
 {
     bool result = true;
     HRESULT             hr    = S_OK;
-    WWDirectComputeUser *pDCU = NULL;
-    ID3D11ComputeShader *pCS  = NULL;
 
     ID3D11ShaderResourceView*   pBuf0Srv = NULL;
     ID3D11ShaderResourceView*   pBuf1Srv = NULL;
@@ -109,37 +117,10 @@ JitterAddGpu(
             sampleData[i+offs - beforeN];
     }
 
-    // HLSLの#defineを作る。
-    char convStartStr[32];
-    char convEndStr[32];
-    char convCountStr[32];
-    char sampleNStr[32];
-    char iterateNStr[32];
-    char groupThreadCountStr[32];
-    sprintf_s(convStartStr, "%d", -convolutionN);
-    sprintf_s(convEndStr,   "%d", convolutionN);
-    sprintf_s(convCountStr, "%d", convolutionN*2);
-    sprintf_s(sampleNStr,   "%d", sampleToProcess);
-    sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
-    sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
-
     void *sinx = NULL;
-    const D3D_SHADER_MACRO *defines = NULL;
     int sinxBufferElemBytes = 0;
     if (precision == WWGpuPrecision_Double) {
         // doubleprec
-
-        const D3D_SHADER_MACRO definesD[] = {
-            "CONV_START", convStartStr,
-            "CONV_END", convEndStr,
-            "CONV_COUNT", convCountStr,
-            "SAMPLE_N", sampleNStr,
-            "ITERATE_N", iterateNStr,
-            "GROUP_THREAD_COUNT", groupThreadCountStr,
-            "HIGH_PRECISION", "1",
-            NULL, NULL
-        };
-        defines = definesD;
 
         double *sinxD = new double[sampleToProcess];
         assert(sinxD);
@@ -152,18 +133,6 @@ JitterAddGpu(
     } else {
         // singleprec
 
-        const D3D_SHADER_MACRO definesF[] = {
-            "CONV_START", convStartStr,
-            "CONV_END", convEndStr,
-            "CONV_COUNT", convCountStr,
-            "SAMPLE_N", sampleNStr,
-            "ITERATE_N", iterateNStr,
-            "GROUP_THREAD_COUNT", groupThreadCountStr,
-            // "HIGH_PRECISION", "1",
-            NULL, NULL
-        };
-        defines = definesF;
-
         float *sinxF = new float[sampleToProcess];
         assert(sinxF);
         for (int i=0; i<sampleToProcess; ++i) {
@@ -174,37 +143,28 @@ JitterAddGpu(
         sinxBufferElemBytes = 4;
     }
 
-    pDCU = new WWDirectComputeUser();
-    assert(pDCU);
-
-    HRG(pDCU->Init());
-
-    // HLSL ComputeShaderをコンパイルしてGPUに送る。
-    HRG(pDCU->CreateComputeShader(L"SincConvolution.hlsl", "CSMain", defines, &pCS));
-    assert(pCS);
-
     // 入力データをGPUメモリーに送る
-    HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+    HRG(g_DC.pDCU->SendReadOnlyDataAndCreateShaderResourceView(
         sizeof(float), fromCount, from, "SampleDataBuffer", &pBuf0Srv));
     assert(pBuf0Srv);
 
-    HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+    HRG(g_DC.pDCU->SendReadOnlyDataAndCreateShaderResourceView(
         sinxBufferElemBytes, sampleToProcess, sinx, "SinxBuffer", &pBuf1Srv));
     assert(pBuf1Srv);
 
-    HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+    HRG(g_DC.pDCU->SendReadOnlyDataAndCreateShaderResourceView(
         sizeof(float), sampleToProcess, &jitterX[offs], "XBuffer", &pBuf2Srv));
     assert(pBuf1Srv);
 
     // 結果出力領域をGPUに作成。
-    HRG(pDCU->CreateBufferAndUnorderedAccessView(
+    HRG(g_DC.pDCU->CreateBufferAndUnorderedAccessView(
         sizeof(float), sampleToProcess, NULL, "OutputBuffer", &pBufResultUav));
     assert(pBufResultUav);
 
     // 定数置き場をGPUに作成。
     ConstShaderParams shaderParams;
     ZeroMemory(&shaderParams, sizeof shaderParams);
-    HRG(pDCU->CreateConstantBuffer(sizeof shaderParams, 1, "ConstShaderParams", &pBufConst));
+    HRG(g_DC.pDCU->CreateConstantBuffer(sizeof shaderParams, 1, "ConstShaderParams", &pBufConst));
 
     // GPU上でComputeShader実行。
     ID3D11ShaderResourceView* aRViews[] = { pBuf0Srv, pBuf1Srv, pBuf2Srv };
@@ -213,55 +173,46 @@ JitterAddGpu(
     // すこしだけ速い。中でループするようにした。
     shaderParams.c_convOffs = 0;
     shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
-    HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
+    HRGR(g_DC.pDCU->Run(g_DC.pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
         pBufConst, &shaderParams, sizeof shaderParams, sampleToProcess, 1, 1));
 #else
     // 遅い。こちらに切り替えるにはシェーダーも書き換える必要あり。
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
         shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
-        HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
+        HRGR(g_DC.pDCU->Run(g_DC.pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
             pBufConst, &shaderParams, sizeof shaderParams, sampleToProcess, 1, 1));
     }
 #endif
 
     // 計算結果をCPUメモリーに持ってくる。
-    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, &outF[offs], sampleToProcess * sizeof(float)));
+    HRG(g_DC.pDCU->RecvResultToCpuMemory(pBufResultUav, &outF[offs], sampleToProcess * sizeof(float)));
 end:
 
     DWORD t1 = GetTickCount();
     dprintf("RunGpu=%dms ###################################\n", t1-t0);
 
-    if (pDCU) {
+    if (g_DC.pDCU) {
         if (hr == DXGI_ERROR_DEVICE_REMOVED) {
             dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
-                pDCU->GetDevice()->GetDeviceRemovedReason());
+                g_DC.pDCU->GetDevice()->GetDeviceRemovedReason());
         }
 
-        pDCU->DestroyConstantBuffer(pBufConst);
+        g_DC.pDCU->DestroyConstantBuffer(pBufConst);
         pBufConst = NULL;
 
-        pDCU->DestroyDataAndUnorderedAccessView(pBufResultUav);
+        g_DC.pDCU->DestroyDataAndUnorderedAccessView(pBufResultUav);
         pBufResultUav = NULL;
 
-        pDCU->DestroyDataAndShaderResourceView(pBuf2Srv);
+        g_DC.pDCU->DestroyDataAndShaderResourceView(pBuf2Srv);
         pBuf2Srv = NULL;
 
-        pDCU->DestroyDataAndShaderResourceView(pBuf1Srv);
+        g_DC.pDCU->DestroyDataAndShaderResourceView(pBuf1Srv);
         pBuf1Srv = NULL;
 
-        pDCU->DestroyDataAndShaderResourceView(pBuf0Srv);
+        g_DC.pDCU->DestroyDataAndShaderResourceView(pBuf0Srv);
         pBuf0Srv = NULL;
-
-        if (pCS) {
-            pDCU->DestroyComputeShader(pCS);
-            pCS = NULL;
-        }
-
-        pDCU->Term();
     }
-
-    SAFE_DELETE(pDCU);
 
     delete[] sinx;
     sinx = NULL;
@@ -356,17 +307,75 @@ JitterAddCpuD(int sampleToProcess, int convolutionN, float *sampleData, float *j
     from = NULL;
 }
 
+/*
 class WWDCIOInfo {
     WWDirectComputeUser dcu;
     float *outputBuffer;
 };
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 
 extern "C" __declspec(dllexport)
 int __stdcall
-WWDCIO_Init(void)
+WWDCIO_Init(int precision,
+        int convolutionN)
 {
+    HRESULT hr = S_OK;
+
+    assert(NULL == g_DC.pDCU);
+
+    // HLSLの#defineを作る。
+    char convStartStr[32];
+    char convEndStr[32];
+    char convCountStr[32];
+    char iterateNStr[32];
+    char groupThreadCountStr[32];
+    sprintf_s(convStartStr, "%d", -convolutionN);
+    sprintf_s(convEndStr,   "%d", convolutionN);
+    sprintf_s(convCountStr, "%d", convolutionN*2);
+    sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
+    sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
+
+    const D3D_SHADER_MACRO *defines = NULL;
+    if (precision == WWGpuPrecision_Double) {
+        // doubleprec
+
+        const D3D_SHADER_MACRO definesD[] = {
+            "CONV_START", convStartStr,
+            "CONV_END", convEndStr,
+            "CONV_COUNT", convCountStr,
+            "ITERATE_N", iterateNStr,
+            "GROUP_THREAD_COUNT", groupThreadCountStr,
+            "HIGH_PRECISION", "1",
+            NULL, NULL
+        };
+        defines = definesD;
+    } else {
+        // singleprec
+
+        const D3D_SHADER_MACRO definesF[] = {
+            "CONV_START", convStartStr,
+            "CONV_END", convEndStr,
+            "CONV_COUNT", convCountStr,
+            "ITERATE_N", iterateNStr,
+            "GROUP_THREAD_COUNT", groupThreadCountStr,
+            // "HIGH_PRECISION", "1",
+            NULL, NULL
+        };
+        defines = definesF;
+    }
+
+    g_DC.pDCU = new WWDirectComputeUser();
+    assert(g_DC.pDCU);
+
+    HRG(g_DC.pDCU->Init());
+
+    // HLSL ComputeShaderをコンパイルしてGPUに送る。
+    HRG(g_DC.pDCU->CreateComputeShader(L"SincConvolution.hlsl", "CSMain", defines, &g_DC.pCS));
+    assert(g_DC.pCS);
+
+end:
     return S_OK;
 }
 
@@ -374,6 +383,13 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCIO_Term(void)
 {
+    if (g_DC.pCS) {
+        g_DC.pDCU->DestroyComputeShader(g_DC.pCS);
+        g_DC.pCS = NULL;
+    }
+
+    g_DC.pDCU->Term();
+    SAFE_DELETE(g_DC.pDCU);
 }
 
 extern "C" __declspec(dllexport)

@@ -5,7 +5,9 @@
 /// @result HRESULT
 extern "C" __declspec(dllexport)
 int __stdcall
-WWDCIO_Init(void);
+WWDCIO_Init(
+        int precision,
+        int convolutionN);
 
 extern "C" __declspec(dllexport)
 void __stdcall
