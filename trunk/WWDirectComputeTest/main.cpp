@@ -363,7 +363,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN      = 256;
+    int sampleN      = 32767;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -398,7 +398,7 @@ main(void)
 
     DWORD t1 = GetTickCount()+1;
 
-    JitterAddCpuD(sampleN, convolutionN, sampleData, jitterX, outputCpu);
+    //JitterAddCpuD(sampleN, convolutionN, sampleData, jitterX, outputCpu);
 
     DWORD t2 = GetTickCount()+2;
 

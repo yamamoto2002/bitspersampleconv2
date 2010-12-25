@@ -18,11 +18,23 @@ namespace WWDirectComputeCS {
         private extern static int
         WWDCIO_JitterAddGpu(
             int precision,
-            int sampleN,
+            int sampleTotal,
             int convolutionN,
             float [] sampleData,
             float [] jitterX,
             [In, Out] float[] outF);
+
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static int
+        WWDCIO_JitterAddGpuPortion(
+            int precision,
+            int sampleTotal,
+            int convolutionN,
+            float[] sampleData,
+            float[] jitterX,
+            [In, Out] float[] outF,
+            int offs,
+            int sampleToProcess);
 
         /////////////////////////////////////////////////////////////////////
 
@@ -41,19 +53,38 @@ namespace WWDirectComputeCS {
 
         public int JitterAdd(
                 GpuPrecisionType precision,
-                int sampleN,
+                int sampleTotal,
                 int convolutionN,
                 float[] sampleData,
                 float[] jitterX,
                 ref float[] outF) {
             return WWDCIO_JitterAddGpu(
                 (int)precision,
-                sampleN,
+                sampleTotal,
                 convolutionN,
                 sampleData,
                 jitterX,
                 outF);
         }
 
+        public int JitterAddPortion(
+                GpuPrecisionType precision,
+                int sampleTotal,
+                int convolutionN,
+                float[] sampleData,
+                float[] jitterX,
+                ref float[] outF,
+                int offs,
+                int sampleToProcess) {
+            return WWDCIO_JitterAddGpuPortion(
+                (int)precision,
+                sampleTotal,
+                convolutionN,
+                sampleData,
+                jitterX,
+                outF,
+                offs,
+                sampleToProcess);
+        }
     }
 }

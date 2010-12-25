@@ -18,9 +18,21 @@ extern "C" __declspec(dllexport)
 int __stdcall
 WWDCIO_JitterAddGpu(
         int precision,
-        int sampleN,
+        int sampleTotal,
         int convolutionN,
         float *sampleData,
         float *jitterX,
         float *outF);
 
+/// convolute the specified portion (offs to offs+sampleToProcess-1)
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCIO_JitterAddGpuPortion(
+        int precision,
+        int sampleTotal,
+        int convolutionN,
+        float *sampleData,
+        float *jitterX,
+        float *outF,
+        int offs,
+        int sampleToProcess);
