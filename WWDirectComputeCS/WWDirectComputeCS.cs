@@ -8,7 +8,7 @@ namespace WWDirectComputeCS {
     public class WWDirectComputeCS {
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static int
-        WWDCIO_Init();
+        WWDCIO_Init(int precision, int convolutionN);
 
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static void
@@ -38,18 +38,18 @@ namespace WWDirectComputeCS {
 
         /////////////////////////////////////////////////////////////////////
 
-        public int Init() {
-            return WWDCIO_Init();
+        public enum GpuPrecisionType {
+            PFloat,
+            PDouble,
+        };
+
+        public int Init(GpuPrecisionType precision, int convolutionN) {
+            return WWDCIO_Init((int)precision, convolutionN);
         }
 
         public void Term() {
             WWDCIO_Term();
         }
-
-        public enum GpuPrecisionType {
-            PFloat,
-            PDouble,
-        };
 
         public int JitterAdd(
                 GpuPrecisionType precision,

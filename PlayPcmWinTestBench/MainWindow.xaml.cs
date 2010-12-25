@@ -664,6 +664,14 @@ namespace PlayPcmWinTestBench {
 
             int hr = -1;
 
+            WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
+            hr = dc.Init(
+                WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                args.convolutionN);
+            if (hr < 0) {
+                return hr;
+            }
+
             for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
                 float [] sampleDataBuffer = new float[sampleN];
                 float [] jitterXBuffer    = new float[sampleN];
@@ -693,9 +701,6 @@ namespace PlayPcmWinTestBench {
                     ++offs;
                 }
 
-                WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
-                dc.Init();
-
                 int sampleRemain = (int)sampleN;
                 offs = 0;
                 while (0 < sampleRemain) {
@@ -718,7 +723,6 @@ namespace PlayPcmWinTestBench {
                     m_AQworker.ReportProgress(
                         10 + (int)(89L * offs /sampleN ) * (ch+1)/pcmDataIn.NumChannels);
                 }
-                dc.Term();
 
                 if (hr < 0) {
                     break;
@@ -729,6 +733,8 @@ namespace PlayPcmWinTestBench {
                     pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
                 }
             }
+
+            dc.Term();
 
             return hr;
         }
@@ -783,7 +789,7 @@ namespace PlayPcmWinTestBench {
             if (args.device == ProcessDevice.Gpu) {
                 int hr = GpuJitterAdd(args, pcmDataIn, pcmDataOut);
                 if (hr < 0) {
-                    e.Result = string.Format("GpuJitterAdd エラー {0:8X}", hr);
+                    e.Result = string.Format("GpuJitterAdd エラー 0x{0:X8}", hr);
                     return;
                 }
             } else {
