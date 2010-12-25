@@ -80,6 +80,8 @@ JitterAddGpu(
     const D3D_SHADER_MACRO *defines = NULL;
     int sinxBufferElemBytes = 0;
     if (precision == WWGpuPrecision_Double) {
+        // doubleprec
+
         const D3D_SHADER_MACRO definesD[] = {
             "CONV_START", convStartStr,
             "CONV_END", convEndStr,
@@ -98,8 +100,11 @@ JitterAddGpu(
             sinxD[i] = sin((double)jitterX[i]);
         }
         sinx = sinxD;
+
         sinxBufferElemBytes = 8;
     } else {
+        // singleprec
+
         const D3D_SHADER_MACRO definesF[] = {
             "CONV_START", convStartStr,
             "CONV_END", convEndStr,
@@ -118,6 +123,7 @@ JitterAddGpu(
             sinxF[i] = sinf(jitterX[i]);
         }
         sinx = sinxF;
+
         sinxBufferElemBytes = 4;
     }
 
@@ -317,7 +323,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN      = 1024;
+    int sampleN      = 256;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
