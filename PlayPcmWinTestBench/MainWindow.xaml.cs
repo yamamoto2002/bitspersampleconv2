@@ -656,20 +656,21 @@ namespace PlayPcmWinTestBench {
         // GPUでジッター付加。
         private int GpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
             RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
-            
-            long sampleN = pcmDataIn.NumFrames * pcmDataIn.NumChannels;
 
+            long sampleN = pcmDataIn.NumFrames;
             if (0x7fffffff < sampleN) {
                 return -1;
             }
 
-            float [] sampleDataBuffer = new float[sampleN];
-            float [] jitterXBuffer    = new float[sampleN];
-            float [] outBuffer        = new float[sampleN];
+            int hr = -1;
 
-            long offs = 0;
-            for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
-                for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+            for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                float [] sampleDataBuffer = new float[sampleN];
+                float [] jitterXBuffer    = new float[sampleN];
+                float [] outBuffer        = new float[sampleN];
+
+                int offs = 0;
+                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
                     sampleDataBuffer[offs] = pcmDataIn.GetSampleValueInFloat(ch, i);
                     
                     // generate jitter
@@ -691,22 +692,41 @@ namespace PlayPcmWinTestBench {
 
                     ++offs;
                 }
-            }
 
-            WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
-            dc.Init();
-            
-            int hr = dc.JitterAdd(WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
-                (int)sampleN, args.convolutionN, sampleDataBuffer, jitterXBuffer, ref outBuffer);
+                WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
+                dc.Init();
 
-            dc.Term();
+                int sampleRemain = (int)sampleN;
+                offs = 0;
+                while (0 < sampleRemain) {
+                    int sample1 = 32768;
+                    if (sampleRemain < sample1) {
+                        sample1 = sampleRemain;
+                    }
+                    hr = dc.JitterAddPortion(
+                        WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                        (int)sampleN, args.convolutionN,
+                        sampleDataBuffer, jitterXBuffer, ref outBuffer, offs, sample1);
+                    if (hr < 0) {
+                        break;
+                    }
 
-            if (0 <= hr) {
+                    sampleRemain -= sample1;
+                    offs += sample1;
+
+                    // 10%～99%
+                    m_AQworker.ReportProgress(
+                        10 + (int)(89L * offs /sampleN ) * (ch+1)/pcmDataIn.NumChannels);
+                }
+                dc.Term();
+
+                if (hr < 0) {
+                    break;
+                }
+
                 // 成功。結果をpcmDataOutに詰める。
                 for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
-                    for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
-                        pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
-                    }
+                    pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
                 }
             }
 

@@ -52,11 +52,13 @@ ModuloD(double left, double right)
 static HRESULT
 JitterAddGpu(
         WWGpuPrecisionType precision,
-        int sampleN,
+        int sampleTotal,
         int convolutionN,
         float *sampleData,
         float *jitterX,
-        float *outF)
+        float *outF,
+        int offs,
+        int sampleToProcess)
 {
     bool result = true;
     HRESULT             hr    = S_OK;
@@ -69,19 +71,42 @@ JitterAddGpu(
     ID3D11UnorderedAccessView*  pBufResultUav = NULL;
     ID3D11Buffer * pBufConst = NULL;
 
-    assert(0 < sampleN);
+    assert(0 < sampleTotal);
+    assert(0 < sampleToProcess);
+    assert(offs + sampleToProcess <= sampleTotal);
     assert(0 < convolutionN);
     assert(sampleData);
     assert(jitterX);
     assert(outF);
 
-    // データ準備
-    const int fromCount = convolutionN + sampleN + convolutionN;
+    // データ準備          before         sample     after
+    const int fromCount = convolutionN + sampleToProcess + convolutionN;
     float *from = new float[fromCount];
     assert(from);
     ZeroMemory(from, sizeof(float)* fromCount);
-    for (int i=0; i<sampleN; ++i) {
-        from[i+convolutionN] = sampleData[i];
+
+    // データの途中から(0<offs)の場合、before領域からサンプル値を詰める。
+    int beforeN = convolutionN;
+    if (offs < convolutionN) {
+        beforeN = offs;
+    }
+
+    // fromには、最大count=beforeN + sampleToProcess + convolutionNサンプル詰めることができる。
+    // だが、sampleDataのsampleTotalが、sampleTotal - (offs - beforeN) < countの場合、
+    // sampleDataが足りない
+    int count = beforeN + sampleToProcess + convolutionN;
+    if (sampleTotal - (offs - beforeN) < count) {
+        count = sampleTotal - (offs - beforeN);
+    }
+    dprintf("offs=%d fromSZ=%d sampleSZ=%d from[%d to %d] sampleData[%d to %d] count=%d\n",
+        offs, convolutionN + sampleToProcess + convolutionN,
+        sampleTotal,
+        convolutionN-beforeN, convolutionN-beforeN + count,
+        offs - beforeN, offs - beforeN + count, count);
+
+    for (int i=0; i<count; ++i) {
+        from[i+convolutionN-beforeN] =
+            sampleData[i+offs - beforeN];
     }
 
     // HLSLの#defineを作る。
@@ -94,7 +119,7 @@ JitterAddGpu(
     sprintf_s(convStartStr, "%d", -convolutionN);
     sprintf_s(convEndStr,   "%d", convolutionN);
     sprintf_s(convCountStr, "%d", convolutionN*2);
-    sprintf_s(sampleNStr,   "%d", sampleN);
+    sprintf_s(sampleNStr,   "%d", sampleToProcess);
     sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
     sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
 
@@ -116,10 +141,10 @@ JitterAddGpu(
         };
         defines = definesD;
 
-        double *sinxD = new double[sampleN];
+        double *sinxD = new double[sampleToProcess];
         assert(sinxD);
-        for (int i=0; i<sampleN; ++i) {
-            sinxD[i] = sin(ModuloD(jitterX[i], 2.0 * PI_D));
+        for (int i=0; i<sampleToProcess; ++i) {
+            sinxD[i] = sin(ModuloD(jitterX[i+offs], 2.0 * PI_D));
         }
         sinx = sinxD;
 
@@ -139,10 +164,10 @@ JitterAddGpu(
         };
         defines = definesF;
 
-        float *sinxF = new float[sampleN];
+        float *sinxF = new float[sampleToProcess];
         assert(sinxF);
-        for (int i=0; i<sampleN; ++i) {
-            sinxF[i] = (float)sin(ModuloD(jitterX[i], 2.0 * PI_D));
+        for (int i=0; i<sampleToProcess; ++i) {
+            sinxF[i] = (float)sin(ModuloD(jitterX[i+offs], 2.0 * PI_D));
         }
         sinx = sinxF;
 
@@ -164,16 +189,16 @@ JitterAddGpu(
     assert(pBuf0Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sinxBufferElemBytes, sampleN, sinx, "SinxBuffer", &pBuf1Srv));
+        sinxBufferElemBytes, sampleToProcess, sinx, "SinxBuffer", &pBuf1Srv));
     assert(pBuf1Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), sampleN, jitterX, "XBuffer", &pBuf2Srv));
+        sizeof(float), sampleToProcess, &jitterX[offs], "XBuffer", &pBuf2Srv));
     assert(pBuf1Srv);
 
     // 結果出力領域をGPUに作成。
     HRG(pDCU->CreateBufferAndUnorderedAccessView(
-        sizeof(float), sampleN, NULL, "OutputBuffer", &pBufResultUav));
+        sizeof(float), sampleToProcess, NULL, "OutputBuffer", &pBufResultUav));
     assert(pBufResultUav);
 
     // 定数置き場をGPUに作成。
@@ -189,19 +214,19 @@ JitterAddGpu(
     shaderParams.c_convOffs = 0;
     shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
     HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
-        pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
+        pBufConst, &shaderParams, sizeof shaderParams, sampleToProcess, 1, 1));
 #else
     // 遅い。こちらに切り替えるにはシェーダーも書き換える必要あり。
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
         shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
         HRGR(pDCU->Run(pCS, sizeof aRViews/sizeof aRViews[0], aRViews, pBufResultUav,
-            pBufConst, &shaderParams, sizeof shaderParams, sampleN, 1, 1));
+            pBufConst, &shaderParams, sizeof shaderParams, sampleToProcess, 1, 1));
     }
 #endif
 
     // 計算結果をCPUメモリーに持ってくる。
-    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, outF, sampleN * sizeof(float)));
+    HRG(pDCU->RecvResultToCpuMemory(pBufResultUav, &outF[offs], sampleToProcess * sizeof(float)));
 end:
 
     DWORD t1 = GetTickCount();
@@ -268,18 +293,18 @@ SincD(double sinx, double x)
 }
 
 static void
-JitterAddCpuF(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+JitterAddCpuF(int sampleToProcess, int convolutionN, float *sampleData, float *jitterX, float *outF)
 {
-    const int fromCount = convolutionN + sampleN + convolutionN;
+    const int fromCount = convolutionN + sampleToProcess + convolutionN;
     float *from = new float[fromCount];
     assert(from);
 
     ZeroMemory(from, sizeof(float) * fromCount);
-    for (int i=0; i<sampleN; ++i) {
+    for (int i=0; i<sampleToProcess; ++i) {
         from[i+convolutionN] = sampleData[i];
     }
 
-    for (int pos=0; pos<sampleN; ++pos) {
+    for (int pos=0; pos<sampleToProcess; ++pos) {
         float xOffs = jitterX[pos];
         float sinx  = sinf(xOffs);
         float r = 0.0f;
@@ -300,18 +325,18 @@ JitterAddCpuF(int sampleN, int convolutionN, float *sampleData, float *jitterX, 
 }
 
 static void
-JitterAddCpuD(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+JitterAddCpuD(int sampleToProcess, int convolutionN, float *sampleData, float *jitterX, float *outF)
 {
-    const int fromCount = convolutionN + sampleN + convolutionN;
+    const int fromCount = convolutionN + sampleToProcess + convolutionN;
     float *from = new float[fromCount];
     assert(from);
 
     ZeroMemory(from, sizeof(float) * fromCount);
-    for (int i=0; i<sampleN; ++i) {
+    for (int i=0; i<sampleToProcess; ++i) {
         from[i+convolutionN] = sampleData[i];
     }
 
-    for (int pos=0; pos<sampleN; ++pos) {
+    for (int pos=0; pos<sampleToProcess; ++pos) {
         float xOffs = jitterX[pos];
         double sinx  = sin((double)xOffs);
         double r = 0.0f;
@@ -355,14 +380,64 @@ extern "C" __declspec(dllexport)
 int __stdcall
 WWDCIO_JitterAddGpu(
         int precision,
-        int sampleN,
+        int sampleTotal,
         int convolutionN,
         float *sampleData,
         float *jitterX,
         float *outF)
 {
     assert(0 <= precision && precision < WWGpuPrecision_NUM);
-    assert(0 < sampleN);
+    assert(0 < sampleTotal);
+    assert(65536 <= convolutionN);
+    assert(sampleData);
+    assert(jitterX);
+    assert(outF);
+
+    HRESULT hr = S_OK;
+
+    int sampleRemain = sampleTotal;
+    int offs = 0;
+    while (0 < sampleRemain) {
+        int sampleToProcess = 32768;
+        if (sampleRemain < sampleToProcess) {
+            sampleToProcess = sampleRemain;
+        }
+
+        hr = JitterAddGpu(
+            (WWGpuPrecisionType)precision,
+            sampleTotal,
+            convolutionN,
+            &sampleData[0],
+            &jitterX[0],
+            &outF[0],
+            offs,
+            sampleToProcess);
+        if (FAILED(hr)) {
+            return (int)hr;
+        }
+
+        sampleRemain -= sampleToProcess;
+        offs         += sampleToProcess;
+    }
+
+    return hr;
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCIO_JitterAddGpuPortion(
+        int precision,
+        int sampleTotal,
+        int convolutionN,
+        float *sampleData,
+        float *jitterX,
+        float *outF,
+        int offs,
+        int sampleToProcess)
+{
+    assert(0 <= precision && precision < WWGpuPrecision_NUM);
+    assert(0 < sampleToProcess && sampleToProcess <= 32768);
+    assert(offs + sampleToProcess <= sampleTotal);
     assert(65536 <= convolutionN);
     assert(sampleData);
     assert(jitterX);
@@ -370,9 +445,11 @@ WWDCIO_JitterAddGpu(
 
     return JitterAddGpu(
         (WWGpuPrecisionType)precision,
-        sampleN,
+        sampleTotal,
         convolutionN,
-        sampleData,
-        jitterX,
-        outF);
+        &sampleData[0],
+        &jitterX[0],
+        &outF[0],
+        offs,
+        sampleToProcess);
 }
