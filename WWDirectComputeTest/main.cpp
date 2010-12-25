@@ -21,8 +21,20 @@ struct ConstShaderParams {
     unsigned int c_reserved2;
 };
 
+enum WWGpuPrecisionType {
+    WWGpuPrecision_Float,
+    WWGpuPrecision_Double,
+    WWGpuPrecision_NUM
+};
+
 static HRESULT
-JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+JitterAddGpu(
+        WWGpuPrecisionType precision,
+        int sampleN,
+        int convolutionN,
+        float *sampleData,
+        float *jitterX,
+        float *outF)
 {
     bool result = true;
     HRESULT             hr    = S_OK;
@@ -50,17 +62,6 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
         from[i+convolutionN] = sampleData[i];
     }
 
-    float *sinx = new float[sampleN];
-    assert(sinx);
-    for (int i=0; i<sampleN; ++i) {
-        sinx[i] = sinf(jitterX[i]);
-    }
-
-    pDCU = new WWDirectComputeUser();
-    assert(pDCU);
-
-    HRG(pDCU->Init());
-
     // HLSLの#defineを作る。
     char convStartStr[32];
     char convEndStr[32];
@@ -75,16 +76,55 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
     sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
 
-    const D3D_SHADER_MACRO defines[] = {
-        "CONV_START", convStartStr,
-        "CONV_END", convEndStr,
-        "CONV_COUNT", convCountStr,
-        "SAMPLE_N", sampleNStr,
-        "ITERATE_N", iterateNStr,
-        "GROUP_THREAD_COUNT", groupThreadCountStr,
-        // "HIGH_PRECISION", "1",
-        NULL, NULL
-    };
+    void *sinx = NULL;
+    const D3D_SHADER_MACRO *defines = NULL;
+    int sinxBufferElemBytes = 0;
+    if (precision == WWGpuPrecision_Double) {
+        const D3D_SHADER_MACRO definesD[] = {
+            "CONV_START", convStartStr,
+            "CONV_END", convEndStr,
+            "CONV_COUNT", convCountStr,
+            "SAMPLE_N", sampleNStr,
+            "ITERATE_N", iterateNStr,
+            "GROUP_THREAD_COUNT", groupThreadCountStr,
+            "HIGH_PRECISION", "1",
+            NULL, NULL
+        };
+        defines = definesD;
+
+        double *sinxD = new double[sampleN];
+        assert(sinxD);
+        for (int i=0; i<sampleN; ++i) {
+            sinxD[i] = sin((double)jitterX[i]);
+        }
+        sinx = sinxD;
+        sinxBufferElemBytes = 8;
+    } else {
+        const D3D_SHADER_MACRO definesF[] = {
+            "CONV_START", convStartStr,
+            "CONV_END", convEndStr,
+            "CONV_COUNT", convCountStr,
+            "SAMPLE_N", sampleNStr,
+            "ITERATE_N", iterateNStr,
+            "GROUP_THREAD_COUNT", groupThreadCountStr,
+            // "HIGH_PRECISION", "1",
+            NULL, NULL
+        };
+        defines = definesF;
+
+        float *sinxF = new float[sampleN];
+        assert(sinxF);
+        for (int i=0; i<sampleN; ++i) {
+            sinxF[i] = sinf(jitterX[i]);
+        }
+        sinx = sinxF;
+        sinxBufferElemBytes = 4;
+    }
+
+    pDCU = new WWDirectComputeUser();
+    assert(pDCU);
+
+    HRG(pDCU->Init());
 
     // HLSL ComputeShaderをコンパイルしてGPUに送る。
     HRG(pDCU->CreateComputeShader(L"SincConvolution.hlsl", "CSMain", defines, &pCS));
@@ -96,7 +136,7 @@ JitterAddGpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     assert(pBuf0Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), sampleN, sinx, "SinxBuffer", &pBuf1Srv));
+        sinxBufferElemBytes, sampleN, sinx, "SinxBuffer", &pBuf1Srv));
     assert(pBuf1Srv);
 
     HRG(pDCU->SendReadOnlyDataAndCreateShaderResourceView(
@@ -249,7 +289,7 @@ main(void)
     float *outputCpu = new float[sampleN];
     assert(outputCpu);
 
-#if 0
+#if 1
     for (int i=0; i<sampleN; ++i) {
         sampleData[i] = 1.0f;
         jitterX[i]    = 0.5f;
@@ -266,7 +306,7 @@ main(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(sampleN, convolutionN, sampleData, jitterX, outputGpu));
+    HRG(JitterAddGpu(WWGpuPrecision_Float, sampleN, convolutionN, sampleData, jitterX, outputGpu));
 
     DWORD t1 = GetTickCount()+1;
 
