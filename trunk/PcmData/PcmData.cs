@@ -128,6 +128,9 @@ namespace PcmDataLib {
             Performer   = rhs.Performer;
         }
 
+        /// <summary>
+        /// ヘッダー情報、サンプルデータ領域をクローンする。
+        /// </summary>
         public void CopyFrom(PcmData rhs) {
             CopyHeaderInfoFrom(rhs);
             m_sampleArray = (byte[])rhs.m_sampleArray.Clone();

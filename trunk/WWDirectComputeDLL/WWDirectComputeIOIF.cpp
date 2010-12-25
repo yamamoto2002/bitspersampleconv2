@@ -9,6 +9,9 @@
 /// 1024にすると、±256サンプルの計算ができない。
 #define GROUP_THREAD_COUNT 1024
 
+#define PI_D 3.141592653589793238462643
+#define PI_F 3.141592653589793238462643f
+
 enum WWGpuPrecisionType {
     WWGpuPrecision_Float,
     WWGpuPrecision_Double,
@@ -22,6 +25,46 @@ struct ConstShaderParams {
     unsigned int c_reserved1;
     unsigned int c_reserved2;
 };
+
+static double
+moduloD(double left, double right)
+{
+    if (right < 0) {
+        right = -right;
+    }
+
+    if (0 < left) {
+        while (0 <= left - right) {
+            left -= right;
+        }
+    } else if (left < 0) {
+        do{
+            left += right;
+        } while (left < 0);
+    }
+
+    return left;
+}
+
+static float
+moduloF(float left, float right)
+{
+    if (right < 0) {
+        right = -right;
+    }
+
+    if (0 < left) {
+        while (0 <= left - right) {
+            left -= right;
+        }
+    } else if (left < 0) {
+        do{
+            left += right;
+        } while (left < 0);
+    }
+
+    return left;
+}
 
 static HRESULT
 JitterAddGpu(
@@ -93,7 +136,7 @@ JitterAddGpu(
         double *sinxD = new double[sampleN];
         assert(sinxD);
         for (int i=0; i<sampleN; ++i) {
-            sinxD[i] = sin((double)jitterX[i]);
+            sinxD[i] = sin(jitterX[i]);
         }
         sinx = sinxD;
 
@@ -220,9 +263,6 @@ end:
 
     return hr;
 }
-
-#define PI_D 3.141592653589793238462643
-#define PI_F 3.141592653589793238462643f
 
 static float
 SincF(float sinx, float x)

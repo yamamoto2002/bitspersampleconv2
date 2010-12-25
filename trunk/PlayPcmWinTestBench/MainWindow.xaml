@@ -161,8 +161,10 @@
                                 <RowDefinition Height="0*" />
                                 <RowDefinition Height="93*" />
                             </Grid.RowDefinitions>
-                            <RadioButton Content="±256サンプル" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonConvolution256" VerticalAlignment="Top" IsChecked="True" />
-                            <RadioButton Content="±65536サンプル(±256サンプルの6万倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonConvolution65536" VerticalAlignment="Top" />
+                            <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonConvolution256" VerticalAlignment="Top" IsChecked="True" />
+                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonConvolution65536" VerticalAlignment="Top" />
+                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonConvolution65536GPU" VerticalAlignment="Top" />
+                            <RadioButton Content="±16777216サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
                         </Grid>
                     </GroupBox>
                     <TextBox Grid.Row="3" Margin="133,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
