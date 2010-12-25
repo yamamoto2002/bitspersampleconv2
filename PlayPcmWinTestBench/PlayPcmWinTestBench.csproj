@@ -83,10 +83,16 @@
     <ManifestKeyFile>PlayPcmWinTestBench_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <GenerateManifests>true</GenerateManifests>
+    <GenerateManifests>false</GenerateManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <SignManifests>true</SignManifests>
+    <SignManifests>false</SignManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -139,6 +145,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -161,6 +168,10 @@
     <ProjectReference Include="..\WavRWLib2\WavRWLib2.csproj">
       <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
       <Name>WavRWLib2</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WWDirectComputeCS\WWDirectComputeCS.csproj">
+      <Project>{01EAC382-2F85-4FAE-ACC0-970298B17FF3}</Project>
+      <Name>WWDirectComputeCS</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -190,7 +201,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)</PostBuildEvent>
+    <PostBuildEvent>copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)
+copy /y $(ProjectDir)..\WWDirectComputeDLL\$(OutDir)* $(TargetDir)
+copy /y $(ProjectDir)..\WWDirectComputeDLL\*.hlsl $(TargetDir)
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -16,14 +16,15 @@ namespace WWDirectComputeCS {
 
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static int
-        WWDCIO_JitterAddGPU(
+        WWDCIO_JitterAddGpu(
             int precision,
             int sampleN,
             int convolutionN,
             float [] sampleData,
             float [] jitterX,
-            ref float[] outF);
+            [In, Out] float[] outF);
 
+        /////////////////////////////////////////////////////////////////////
 
         public int Init() {
             return WWDCIO_Init();
@@ -45,13 +46,13 @@ namespace WWDirectComputeCS {
                 float[] sampleData,
                 float[] jitterX,
                 ref float[] outF) {
-            return  WWDCIO_JitterAddGPU(
+            return WWDCIO_JitterAddGpu(
                 (int)precision,
                 sampleN,
                 convolutionN,
                 sampleData,
                 jitterX,
-                ref outF);
+                outF);
         }
 
     }
