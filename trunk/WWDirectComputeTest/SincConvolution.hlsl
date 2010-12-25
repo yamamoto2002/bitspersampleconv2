@@ -233,7 +233,13 @@ CSMain(
 
     if (tid == 0) {
         s_xOffs = g_XBuffer[groupIdXYZ.x];
+#if 1
+        // 計算精度良好。
+        s_sinX  = g_SinxBuffer[groupIdXYZ.x];
+#else
+        // こうすると精度が落ちる。GPUのsin()の精度に問題あり。
         s_sinX  = sin(s_xOffs);
+#endif
     }
     s_scratch[tid] = 0;
 
