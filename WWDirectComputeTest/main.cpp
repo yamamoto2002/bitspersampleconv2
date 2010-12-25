@@ -13,6 +13,9 @@
 /// この数値を書き換えたらシェーダーも書き換える必要あり。
 #define GROUP_THREAD_COUNT 1024
 
+#define PI_D 3.141592653589793238462643
+#define PI_F 3.141592653589793238462643f
+
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
     unsigned int c_convOffs;
@@ -26,6 +29,46 @@ enum WWGpuPrecisionType {
     WWGpuPrecision_Double,
     WWGpuPrecision_NUM
 };
+
+static double
+ModuloD(double left, double right)
+{
+    if (right < 0) {
+        right = -right;
+    }
+
+    if (0 < left) {
+        while (0 <= left - right) {
+            left -= right;
+        }
+    } else if (left < 0) {
+        do{
+            left += right;
+        } while (left < 0);
+    }
+
+    return left;
+}
+
+static float
+ModuloF(float left, float right)
+{
+    if (right < 0) {
+        right = -right;
+    }
+
+    if (0 < left) {
+        while (0 <= left - right) {
+            left -= right;
+        }
+    } else if (left < 0) {
+        do{
+            left += right;
+        } while (left < 0);
+    }
+
+    return left;
+}
 
 static HRESULT
 JitterAddGpu(
@@ -97,7 +140,7 @@ JitterAddGpu(
         double *sinxD = new double[sampleN];
         assert(sinxD);
         for (int i=0; i<sampleN; ++i) {
-            sinxD[i] = sin((double)jitterX[i]);
+            sinxD[i] = sin(ModuloD(jitterX[i], 2.0 * PI_D));
         }
         sinx = sinxD;
 
@@ -120,7 +163,7 @@ JitterAddGpu(
         float *sinxF = new float[sampleN];
         assert(sinxF);
         for (int i=0; i<sampleN; ++i) {
-            sinxF[i] = sinf(jitterX[i]);
+            sinxF[i] = (float)sin(ModuloD(jitterX[i], 2.0 * PI_D));
         }
         sinx = sinxF;
 
@@ -224,9 +267,6 @@ end:
 
     return hr;
 }
-
-#define PI_D 3.141592653589793238462643
-#define PI_F 3.141592653589793238462643f
 
 static float
 SincF(float sinx, float x)
@@ -354,7 +394,7 @@ main(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(WWGpuPrecision_Double, sampleN, convolutionN, sampleData, jitterX, outputGpu));
+    HRG(JitterAddGpu(WWGpuPrecision_Float, sampleN, convolutionN, sampleData, jitterX, outputGpu));
 
     DWORD t1 = GetTickCount()+1;
 
