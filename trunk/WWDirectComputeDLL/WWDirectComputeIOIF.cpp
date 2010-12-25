@@ -205,7 +205,7 @@ JitterAddGpu(
 end:
 
     DWORD t1 = GetTickCount();
-    printf("RunGpu=%dms ###################################\n", t1-t0);
+    dprintf("RunGpu=%dms ###################################\n", t1-t0);
 
     if (pDCU) {
         if (hr == DXGI_ERROR_DEVICE_REMOVED) {

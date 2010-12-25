@@ -654,7 +654,7 @@ namespace PlayPcmWinTestBench {
         }
 
         // GPUでジッター付加。
-        private int GpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, ref PcmData pcmDataOut) {
+        private int GpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
             RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
             
             long sampleN = pcmDataIn.NumFrames * pcmDataIn.NumChannels;
@@ -700,6 +700,15 @@ namespace PlayPcmWinTestBench {
                 (int)sampleN, args.convolutionN, sampleDataBuffer, jitterXBuffer, ref outBuffer);
 
             dc.Term();
+
+            if (0 <= hr) {
+                // 成功。結果をpcmDataOutに詰める。
+                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
+                    for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                        pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
+                    }
+                }
+            }
 
             return hr;
         }
@@ -752,7 +761,7 @@ namespace PlayPcmWinTestBench {
             args.scale = 1.0;
 
             if (args.device == ProcessDevice.Gpu) {
-                int hr = GpuJitterAdd(args, pcmDataIn, ref pcmDataOut);
+                int hr = GpuJitterAdd(args, pcmDataIn, pcmDataOut);
                 if (hr < 0) {
                     e.Result = string.Format("GpuJitterAdd エラー {0:8X}", hr);
                     return;
