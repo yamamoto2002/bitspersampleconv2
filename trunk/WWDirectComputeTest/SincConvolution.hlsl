@@ -115,7 +115,6 @@ CSMain(
 
     do {
         s_scratch[tid] += ConvolutionElemValue(groupIdXYZ.x, offs);
-        // s_scratch[tid] += 1;
         offs += GROUP_THREAD_COUNT;
     } while (offs < CONV_COUNT);
 
