@@ -235,7 +235,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN      = 256;
+    int sampleN      = 16;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
