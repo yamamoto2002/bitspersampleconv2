@@ -16,6 +16,8 @@
 struct WWDCIOInfo {
     WWDirectComputeUser *pDCU;
     ID3D11ComputeShader *pCS;
+    int precision;
+    int convolutionN;
 };
 
 static WWDCIOInfo g_DC;
@@ -324,6 +326,8 @@ WWDCIO_Init(int precision,
     HRESULT hr = S_OK;
 
     assert(NULL == g_DC.pDCU);
+    g_DC.precision = precision;
+    g_DC.convolutionN = convolutionN;
 
     // HLSLÇÃ#defineÇçÏÇÈÅB
     char convStartStr[32];
@@ -408,6 +412,9 @@ WWDCIO_JitterAddGpu(
     assert(sampleData);
     assert(jitterX);
     assert(outF);
+
+    assert(g_DC.precision == precision);
+    assert(g_DC.convolutionN == convolutionN);
 
     HRESULT hr = S_OK;
 
