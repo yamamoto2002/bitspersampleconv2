@@ -232,8 +232,18 @@ SincF(float sinx, float x)
     }
 }
 
+static double
+SincD(double sinx, double x)
+{
+    if (-0.000000001 < x && x < 0.000000001) {
+        return 1.0;
+    } else {
+        return sinx / x;
+    }
+}
+
 static void
-JitterAddCpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+JitterAddCpuF(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
 {
     const int fromCount = convolutionN + sampleN + convolutionN;
     float *from = new float[fromCount];
@@ -264,6 +274,38 @@ JitterAddCpu(int sampleN, int convolutionN, float *sampleData, float *jitterX, f
     from = NULL;
 }
 
+static void
+JitterAddCpuD(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
+{
+    const int fromCount = convolutionN + sampleN + convolutionN;
+    float *from = new float[fromCount];
+    assert(from);
+
+    ZeroMemory(from, sizeof(float) * fromCount);
+    for (int i=0; i<sampleN; ++i) {
+        from[i+convolutionN] = sampleData[i];
+    }
+
+    for (int pos=0; pos<sampleN; ++pos) {
+        float xOffs = jitterX[pos];
+        double sinx  = sin((double)xOffs);
+        double r = 0.0f;
+
+        for (int i=-convolutionN; i<convolutionN; ++i) {
+            double x = PI_D * i + xOffs;
+            int posS = pos + i + convolutionN;
+            double sinc =  SincD(sinx, x);
+
+            r += from[posS] * sinc;
+        }
+
+        outF[pos] = (float)r;
+    }
+
+    delete[] from;
+    from = NULL;
+}
+
 int
 main(void)
 {
@@ -275,7 +317,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN      = 256;
+    int sampleN      = 1024;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -306,11 +348,11 @@ main(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(WWGpuPrecision_Float, sampleN, convolutionN, sampleData, jitterX, outputGpu));
+    HRG(JitterAddGpu(WWGpuPrecision_Double, sampleN, convolutionN, sampleData, jitterX, outputGpu));
 
     DWORD t1 = GetTickCount()+1;
 
-    JitterAddCpu(sampleN, convolutionN, sampleData, jitterX, outputCpu);
+    JitterAddCpuD(sampleN, convolutionN, sampleData, jitterX, outputCpu);
 
     DWORD t2 = GetTickCount()+2;
 
