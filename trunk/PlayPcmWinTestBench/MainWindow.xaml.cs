@@ -525,6 +525,186 @@ namespace PlayPcmWinTestBench {
         ////////////////////////////////////////////////////////////////////////////////////////
         /// 音質劣化
 
+        /// <summary>
+        ///  仮数部が32bitぐらいまで値が埋まっているランダムの0～1
+        /// </summary>
+        /// <returns></returns>
+        private static double GenRandom0to1(RNGCryptoServiceProvider gen) {
+            byte[] bytes = new byte[4];
+            gen.GetBytes(bytes);
+            uint u = BitConverter.ToUInt32(bytes, 0);
+            double d = (double)u / uint.MaxValue;
+            return d;
+        }
+
+        // GPUでジッター付加。
+        private int GpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
+            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
+
+            long sampleN = pcmDataIn.NumFrames;
+            if (0x7fffffff < sampleN) {
+                return -1;
+            }
+
+            int hr = -1;
+
+            WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
+            hr = dc.Init(
+                WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                args.convolutionN);
+            if (hr < 0) {
+                return hr;
+            }
+
+            for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                float[] sampleDataBuffer = new float[sampleN];
+                float[] jitterXBuffer = new float[sampleN];
+                float[] outBuffer = new float[sampleN];
+
+                int offs = 0;
+                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
+                    sampleDataBuffer[offs] = pcmDataIn.GetSampleValueInFloat(ch, i);
+
+                    // generate jitter
+                    double seqJitter = args.ampSeqJitter
+                        * Math.Sin((args.thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
+                    double tpdfJitter = 0.0;
+                    double rpdfJitter = 0.0;
+                    if (0.0 < args.tpdfJitterPicoseconds) {
+                        double r = GenRandom0to1(gen) + GenRandom0to1(gen) - 1.0;
+                        tpdfJitter = args.ampTpdfJitter * r;
+                    }
+                    if (0.0 < args.rpdfJitterPicoseconds) {
+                        rpdfJitter = args.ampRpdfJitter * (GenRandom0to1(gen) * 2.0 - 1.0);
+                    }
+                    double jitter = seqJitter + tpdfJitter + rpdfJitter;
+                    jitterXBuffer[offs] = (float)jitter;
+
+                    outBuffer[offs] = 0.0f;
+
+                    ++offs;
+                }
+
+                int sampleRemain = (int)sampleN;
+                offs = 0;
+                while (0 < sampleRemain) {
+                    int sample1 = 32768;
+                    if (sampleRemain < sample1) {
+                        sample1 = sampleRemain;
+                    }
+                    hr = dc.JitterAddPortion(
+                        WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PDouble,
+                        (int)sampleN, args.convolutionN,
+                        sampleDataBuffer, jitterXBuffer, ref outBuffer, offs, sample1);
+                    if (hr < 0) {
+                        break;
+                    }
+
+                    sampleRemain -= sample1;
+                    offs += sample1;
+
+                    // 10%～99%
+                    m_AQworker.ReportProgress(
+                        10 + (int)(89L * offs / sampleN) * (ch + 1) / pcmDataIn.NumChannels);
+                }
+
+                if (hr < 0) {
+                    break;
+                }
+
+                // 成功。結果をpcmDataOutに詰める。
+                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
+                    pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
+                }
+            }
+
+            dc.Term();
+
+            return hr;
+        }
+
+        // CPUでジッター付加。
+        private int CpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
+            int hr = 0;
+
+            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
+
+            float maxValue = 0.0f;
+            float minValue = 0.0f;
+
+            long count = 0;
+            Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
+                //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
+                for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                    double acc = 0.0;
+
+                    // generate jitter
+                    double seqJitter = args.ampSeqJitter
+                        * Math.Sin((args.thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
+                    double tpdfJitter = 0.0;
+                    double rpdfJitter = 0.0;
+                    if (0.0 < args.tpdfJitterPicoseconds) {
+                        double r = GenRandom0to1(gen) + GenRandom0to1(gen) - 1.0;
+                        tpdfJitter = args.ampTpdfJitter * r;
+                    }
+                    if (0.0 < args.rpdfJitterPicoseconds) {
+                        rpdfJitter = args.ampRpdfJitter * (GenRandom0to1(gen) * 2.0 - 1.0);
+                    }
+                    double jitter = seqJitter + tpdfJitter + rpdfJitter;
+
+                    double sinTheta = Math.Sin(jitter % (2.0 * Math.PI));
+
+                    for (int offset = -args.convolutionN; offset < args.convolutionN; ++offset) {
+                        double pos = Math.PI * offset + jitter;
+                        double v = pcmDataIn.GetSampleValueInFloat(ch, i + offset);
+
+                        if (pos < -double.Epsilon || double.Epsilon < pos) {
+                            v *= sinTheta / pos;
+                        }
+
+                        acc += v;
+                    }
+                    pcmDataOut.SetSampleValueInFloat(ch, i, (float)acc);
+                    if (maxValue < acc) {
+                        maxValue = (float)acc;
+                    }
+                    if (acc < minValue) {
+                        minValue = (float)acc;
+                    }
+                    /*
+                    if (ch == 0 && i < 1024) {
+                        System.Console.WriteLine("{0}, {1}, {2}",
+                            i, pcmDataIn.GetSampleValueInFloat(ch, i),
+                            acc);
+                    }
+                    */
+                }
+
+                ++count;
+                if (0 == (count % pcmDataIn.SampleRate)) {
+                    m_AQworker.ReportProgress((int)(1 + 98 * count / pcmDataIn.NumFrames));
+                }
+            });
+
+            // 音量制限
+            args.scale = 1.0;
+            if (0.99999988079071044921875f < maxValue) {
+                // 最大値は 1.0 - (1/8388608)
+                args.scale = 0.99999988079071044921875 / maxValue;
+            }
+            if (minValue < -1.0f) {
+                // 最小値は-1.0
+                args.scale = -1.0 / minValue;
+            }
+            if (args.scale != 1.0) {
+                pcmDataOut.Scale((float)args.scale);
+            }
+
+            return hr;
+        }
+
+        // -----------------------------------------------------------------
+
         private void buttonAQBrowseOpen_Click(object sender, RoutedEventArgs e) {
             string fileName = BrowseOpenFile();
             if (0 < fileName.Length) {
@@ -625,6 +805,10 @@ namespace PlayPcmWinTestBench {
                 args.convolutionN = 65536;
                 args.device = ProcessDevice.Gpu;
             }
+            if (radioButtonConvolution1048576GPU.IsChecked == true) {
+                args.convolutionN = 1048576;
+                args.device = ProcessDevice.Gpu;
+            }
             if (radioButtonConvolution16777216GPU.IsChecked == true) {
                 args.convolutionN = 16777216;
                 args.device = ProcessDevice.Gpu;
@@ -635,108 +819,11 @@ namespace PlayPcmWinTestBench {
             buttonAQBrowseSaveAs.IsEnabled = false;
             progressBar1.Value = 0;
 
-            textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}…\r\n", args.inputPath, args.outputPath);
+            textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}……処理中はPCの動作が遅くなります!\r\n",
+                args.inputPath, args.outputPath);
             textBoxAQResult.ScrollToEnd();
 
             m_AQworker.RunWorkerAsync(args);
-        }
-
-        /// <summary>
-        ///  仮数部が32bitぐらいまで値が埋まっているランダムの0～1
-        /// </summary>
-        /// <returns></returns>
-        private static double GenRandom0to1(RNGCryptoServiceProvider gen) {
-            byte[] bytes = new byte[4];
-            gen.GetBytes(bytes);
-            uint u = BitConverter.ToUInt32(bytes, 0);
-            double d = (double)u / uint.MaxValue;
-            return d;
-        }
-
-        // GPUでジッター付加。
-        private int GpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
-            RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
-
-            long sampleN = pcmDataIn.NumFrames;
-            if (0x7fffffff < sampleN) {
-                return -1;
-            }
-
-            int hr = -1;
-
-            WWDirectComputeCS.WWDirectComputeCS dc = new WWDirectComputeCS.WWDirectComputeCS();
-            hr = dc.Init(
-                WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PFloat,
-                args.convolutionN);
-            if (hr < 0) {
-                return hr;
-            }
-
-            for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
-                float [] sampleDataBuffer = new float[sampleN];
-                float [] jitterXBuffer    = new float[sampleN];
-                float [] outBuffer        = new float[sampleN];
-
-                int offs = 0;
-                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
-                    sampleDataBuffer[offs] = pcmDataIn.GetSampleValueInFloat(ch, i);
-                    
-                    // generate jitter
-                    double seqJitter = args.ampSeqJitter
-                        * Math.Sin((args.thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
-                    double tpdfJitter = 0.0;
-                    double rpdfJitter = 0.0;
-                    if (0.0 < args.tpdfJitterPicoseconds) {
-                        double r = GenRandom0to1(gen) + GenRandom0to1(gen) - 1.0;
-                        tpdfJitter = args.ampTpdfJitter * r;
-                    }
-                    if (0.0 < args.rpdfJitterPicoseconds) {
-                        rpdfJitter = args.ampRpdfJitter * (GenRandom0to1(gen) * 2.0 - 1.0);
-                    }
-                    double jitter = seqJitter + tpdfJitter + rpdfJitter;
-                    jitterXBuffer[offs] = (float)jitter;
-
-                    outBuffer[offs] = 0.0f;
-
-                    ++offs;
-                }
-
-                int sampleRemain = (int)sampleN;
-                offs = 0;
-                while (0 < sampleRemain) {
-                    int sample1 = 32768;
-                    if (sampleRemain < sample1) {
-                        sample1 = sampleRemain;
-                    }
-                    hr = dc.JitterAddPortion(
-                        WWDirectComputeCS.WWDirectComputeCS.GpuPrecisionType.PFloat,
-                        (int)sampleN, args.convolutionN,
-                        sampleDataBuffer, jitterXBuffer, ref outBuffer, offs, sample1);
-                    if (hr < 0) {
-                        break;
-                    }
-
-                    sampleRemain -= sample1;
-                    offs += sample1;
-
-                    // 10%～99%
-                    m_AQworker.ReportProgress(
-                        10 + (int)(89L * offs /sampleN ) * (ch+1)/pcmDataIn.NumChannels);
-                }
-
-                if (hr < 0) {
-                    break;
-                }
-
-                // 成功。結果をpcmDataOutに詰める。
-                for (long i = 0; i < pcmDataIn.NumFrames; ++i) {
-                    pcmDataOut.SetSampleValueInFloat(ch, i, outBuffer[i]);
-                }
-            }
-
-            dc.Term();
-
-            return hr;
         }
 
         private void m_AQworker_DoWork(object sender, DoWorkEventArgs e) {
@@ -751,6 +838,9 @@ namespace PlayPcmWinTestBench {
             }
 
             m_AQworker.ReportProgress(1);
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
 
             pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
             PcmData pcmDataOut = new PcmData();
@@ -786,91 +876,28 @@ namespace PlayPcmWinTestBench {
             args.ampRpdfJitter = 1.0e-12 * pcmDataIn.SampleRate * args.rpdfJitterPicoseconds;
             args.scale = 1.0;
 
+            int hr = 0;
             if (args.device == ProcessDevice.Gpu) {
-                int hr = GpuJitterAdd(args, pcmDataIn, pcmDataOut);
-                if (hr < 0) {
-                    e.Result = string.Format("GpuJitterAdd エラー 0x{0:X8}", hr);
-                    return;
-                }
+                hr = GpuJitterAdd(args, pcmDataIn, pcmDataOut);
             } else {
-                RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
-
-                float maxValue = 0.0f;
-                float minValue = 0.0f;
-
-                long count = 0;
-                Parallel.For(0, pcmDataIn.NumFrames, delegate(long i) {
-                    //for (long i=0; i<pcmDataIn.NumFrames; ++i) {
-                    for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
-                        double acc = 0.0;
-
-                        // generate jitter
-                        double seqJitter = args.ampSeqJitter
-                            * Math.Sin((args.thetaCoefficientSeqJitter * i) % (2.0 * Math.PI));
-                        double tpdfJitter = 0.0;
-                        double rpdfJitter = 0.0;
-                        if (0.0 < args.tpdfJitterPicoseconds) {
-                            double r = GenRandom0to1(gen) + GenRandom0to1(gen) - 1.0;
-                            tpdfJitter = args.ampTpdfJitter * r;
-                        }
-                        if (0.0 < args.rpdfJitterPicoseconds) {
-                            rpdfJitter = args.ampRpdfJitter * (GenRandom0to1(gen) * 2.0 - 1.0);
-                        }
-                        double jitter = seqJitter + tpdfJitter + rpdfJitter;
-
-                        double sinTheta = Math.Sin(jitter % (2.0 * Math.PI));
-
-                        for (int offset = -args.convolutionN; offset < args.convolutionN; ++offset) {
-                            double pos = Math.PI * offset + jitter;
-                            double v = pcmDataIn.GetSampleValueInFloat(ch, i + offset);
-
-                            if (pos < -double.Epsilon || double.Epsilon < pos) {
-                                v *= sinTheta / pos;
-                            }
-
-                            acc += v;
-                        }
-                        pcmDataOut.SetSampleValueInFloat(ch, i, (float)acc);
-                        if (maxValue < acc) {
-                            maxValue = (float)acc;
-                        }
-                        if (acc < minValue) {
-                            minValue = (float)acc;
-                        }
-                        /*
-                        if (ch == 0 && i < 1024) {
-                            System.Console.WriteLine("{0}, {1}, {2}",
-                                i, pcmDataIn.GetSampleValueInFloat(ch, i),
-                                acc);
-                        }
-                        */
-                    }
-
-                    ++count;
-                    if (0 == (count % pcmDataIn.SampleRate)) {
-                        m_AQworker.ReportProgress((int)(1 + 98 * count / pcmDataIn.NumFrames));
-                    }
-                });
-
-                // 音量制限
-                args.scale = 1.0;
-                if (0.99999988079071044921875f < maxValue) {
-                    // 最大値は 1.0 - (1/8388608)
-                    args.scale = 0.99999988079071044921875 / maxValue;
-                }
-                if (minValue < -1.0f) {
-                    // 最小値は-1.0
-                    args.scale = -1.0 / minValue;
-                }
-                if (args.scale != 1.0) {
-                    pcmDataOut.Scale((float)args.scale);
-                }
+                hr = CpuJitterAdd(args, pcmDataIn, pcmDataOut);
             }
 
+            if (hr < 0) {
+                e.Result = string.Format("JitterAdd エラー 0x{0:X8}", hr);
+                return;
+            }
+
+            sw.Stop();
+
             WriteWavFile(pcmDataOut, args.outputPath);
-            e.Result = string.Format("書き込み成功。");
+
+            e.Result = string.Format("書き込み成功。所要時間 {0}秒",
+                sw.ElapsedMilliseconds * 0.001);
             if (args.scale < 1.0) {
-                e.Result += string.Format("書き込み成功。レベルオーバーのため音量調整{0}dB({1}倍)しました。",
+                e.Result = string.Format("書き込み成功。所要時間 {0}秒" +
+                    "レベルオーバーのため音量調整{1}dB({2}倍)しました。",
+                    sw.ElapsedMilliseconds * 0.001,
                     20.0 * Math.Log10(args.scale), args.scale);
             }
             m_AQworker.ReportProgress(100);
