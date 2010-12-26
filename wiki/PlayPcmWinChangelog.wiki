@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.43 ==
+  * PlayPcmWinテストベンチの[音質劣化]機能 たたみ込み計算のGPU処理。(GeForce GTX 570以上必要)
+
 ===!PlayPcmWin 2.0.41 ==
   * Issue 28 修正。
 
