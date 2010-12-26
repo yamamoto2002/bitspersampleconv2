@@ -5,6 +5,7 @@
 
 ===!PlayPcmWin 2.0.44 ==
   * PlayPcmWinテストベンチの[音質劣化]機能 たたみ込み計算のGPU処理。エラー処理を少し改善
+  * ジッター付加機能 計算が何箇所か間違っている
 
 ===!PlayPcmWin 2.0.43 ==
   * PlayPcmWinテストベンチの[音質劣化]機能 たたみ込み計算のGPU処理。(GPUはGeForce GTX 570以上必要。この機能を使用するためには、最新のDirectXエンドユーザーランタイムをインストールする必要があります。 http://www.microsoft.com/downloads/details.aspx?FamilyID=2da43d38-db71-4c1b-bc6a-9b6652cd92a3&displayLang=ja )
