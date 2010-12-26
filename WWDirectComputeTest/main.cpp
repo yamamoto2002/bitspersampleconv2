@@ -352,13 +352,9 @@ JitterAddCpuD(int sampleN, int convolutionN, float *sampleData, float *jitterX, 
     from = NULL;
 }
 
-int
-main(void)
+static void
+Test1(void)
 {
-#if defined(DEBUG) || defined(_DEBUG)
-    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-#endif
-
     HRESULT hr = S_OK;
 
     // データ準備
@@ -433,6 +429,16 @@ end:
 
     delete[] sampleData;
     sampleData = NULL;
+}
+
+int
+main(void)
+{
+#if defined(DEBUG) || defined(_DEBUG)
+    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
+
+    Test1();
 
     return 0;
 }

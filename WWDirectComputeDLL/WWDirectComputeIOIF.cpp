@@ -380,7 +380,7 @@ WWDCIO_Init(int precision,
     assert(g_DC.pCS);
 
 end:
-    return S_OK;
+    return hr;
 }
 
 extern "C" __declspec(dllexport)
