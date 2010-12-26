@@ -25,6 +25,7 @@ Lynx AES16は、PCに取り付ける前に説明書を読んでジャンパー�
 近い将来ドライバがWaveRTになるようです。
 
 なお、ドライバのリリースノートに以下のようなことが書いてあります。
+あらゆるオーディオインターフェースに言えることです。
 (http://www.lynxstudio.com/pop/support_downloads_notes.asp?i=82)
 より引用:
 
