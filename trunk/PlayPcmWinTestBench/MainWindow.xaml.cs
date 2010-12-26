@@ -588,7 +588,7 @@ namespace PlayPcmWinTestBench {
                 int sampleRemain = (int)sampleN;
                 offs = 0;
                 while (0 < sampleRemain) {
-                    int sample1 = 32768;
+                    int sample1 = args.gpuSampleSlice;
                     if (sampleRemain < sample1) {
                         sample1 = sampleRemain;
                     }
@@ -605,7 +605,7 @@ namespace PlayPcmWinTestBench {
 
                     // 10%～99%
                     m_AQworker.ReportProgress(
-                        10 + (int)(89L * offs / sampleN) * (ch + 1) / pcmDataIn.NumChannels);
+                        10 + (int)(89L * offs / sampleN + 89L * ch) / pcmDataIn.NumChannels);
                 }
 
                 if (hr < 0) {
@@ -735,6 +735,7 @@ namespace PlayPcmWinTestBench {
             public double rpdfJitterPicoseconds;
             public int convolutionN;
             public ProcessDevice device;
+            public int gpuSampleSlice;
 
             // --------------------------------------------------------
             // 以降、物置(RunWorkerAsync()でセットする必要はない)
@@ -798,6 +799,7 @@ namespace PlayPcmWinTestBench {
 
             args.convolutionN = 256;
             args.device = ProcessDevice.Cpu;
+            args.gpuSampleSlice = 32768;
             if (radioButtonConvolution65536.IsChecked == true) {
                 args.convolutionN = 65536;
             }
@@ -812,6 +814,9 @@ namespace PlayPcmWinTestBench {
             if (radioButtonConvolution16777216GPU.IsChecked == true) {
                 args.convolutionN = 16777216;
                 args.device = ProcessDevice.Gpu;
+
+                /// この条件では一度に32768個処理できないので半分に減らす。
+                args.gpuSampleSlice = 16384;
             }
 
             buttonAQOutputStart.IsEnabled  = false;
@@ -819,7 +824,7 @@ namespace PlayPcmWinTestBench {
             buttonAQBrowseSaveAs.IsEnabled = false;
             progressBar1.Value = 0;
 
-            textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}……処理中はPCの動作が遅くなります!\r\n",
+            textBoxAQResult.Text += string.Format("処理中 {0}⇒{1}……処理中はPCの動作が重くなります!\r\n",
                 args.inputPath, args.outputPath);
             textBoxAQResult.ScrollToEnd();
 

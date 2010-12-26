@@ -159,7 +159,7 @@
                             <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonConvolution65536" VerticalAlignment="Top" />
                             <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonConvolution65536GPU" VerticalAlignment="Top" />
                             <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonConvolution1048576GPU" VerticalAlignment="Top" />
-                            <RadioButton Content="±16777216サンプル GPU処理(バグっています)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
+                            <RadioButton Content="±16777216サンプル GPU処理(PCの動作が重くなります)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox6" VerticalAlignment="Top" Width="474" Grid.Row="2">

@@ -363,7 +363,7 @@ main(void)
 
     // データ準備
     int convolutionN = 65536 * 256;
-    int sampleN      = 32767;
+    int sampleN      = 16384;
 
     float *sampleData = new float[sampleN];
     assert(sampleData);
@@ -394,7 +394,7 @@ main(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(JitterAddGpu(WWGpuPrecision_Float, sampleN, convolutionN, sampleData, jitterX, outputGpu));
+    HRG(JitterAddGpu(WWGpuPrecision_Double, sampleN, convolutionN, sampleData, jitterX, outputGpu));
 
     DWORD t1 = GetTickCount()+1;
 
