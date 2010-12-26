@@ -97,8 +97,8 @@
                 <Grid Name="grid1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="112" />
-                        <RowDefinition Height="234" />
-                        <RowDefinition Height="107" />
+                        <RowDefinition Height="253" />
+                        <RowDefinition Height="88" />
                         <RowDefinition Height="74" />
                     </Grid.RowDefinitions>
                     <GroupBox Header="周期ジッターを増やす" Height="97" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox4" VerticalAlignment="Top" Width="281" Grid.Row="1">
@@ -117,12 +117,6 @@
                         <Grid>
                             <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxAQInputFilePath" VerticalAlignment="Top" Width="450" Text="C:\wav\input.wav" />
                             <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonAQBrowseOpen" VerticalAlignment="Top" Width="120" Click="buttonAQBrowseOpen_Click" />
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Header="出力ファイル" Height="90" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox6" VerticalAlignment="Top" Width="474" Grid.Row="2">
-                        <Grid>
-                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxAQOutputFilePath" VerticalAlignment="Top" Width="450" Text="C:\wav\output.wav" />
-                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonAQBrowseSaveAs" VerticalAlignment="Top" Width="120" Click="buttonAQBrowseSaveAs_Click" />
                         </Grid>
                     </GroupBox>
                     <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,9,0,0" Name="buttonAQOutputStart" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQOutputStart_Click" />
@@ -155,7 +149,7 @@
                             <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="0,10,0,0" Name="textBoxRpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" />
                         </Grid>
                     </GroupBox>
-                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="127" HorizontalAlignment="Left" IsEnabled="True" Margin="6,107,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
+                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="146" HorizontalAlignment="Left" IsEnabled="True" Margin="6,107,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="0*" />
@@ -164,7 +158,14 @@
                             <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonConvolution256" VerticalAlignment="Top" IsChecked="True" />
                             <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonConvolution65536" VerticalAlignment="Top" />
                             <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonConvolution65536GPU" VerticalAlignment="Top" />
-                            <RadioButton Content="±16777216サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
+                            <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonConvolution1048576GPU" VerticalAlignment="Top" />
+                            <RadioButton Content="±16777216サンプル GPU処理(バグっています)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox6" VerticalAlignment="Top" Width="474" Grid.Row="2">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxAQOutputFilePath" VerticalAlignment="Top" Width="450" Text="C:\wav\output.wav" />
+                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonAQBrowseSaveAs" VerticalAlignment="Top" Width="120" Click="buttonAQBrowseSaveAs_Click" />
                         </Grid>
                     </GroupBox>
                     <TextBox Grid.Row="3" Margin="133,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
