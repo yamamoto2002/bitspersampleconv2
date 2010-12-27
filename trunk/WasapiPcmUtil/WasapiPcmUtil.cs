@@ -41,6 +41,19 @@ namespace WasapiPcmUtil {
         public int validBitsPerSample;
         public WasapiCS.BitFormatType bitFormatType;
 
+        static public WasapiCS.BitFormatType
+        VrtToBft(PcmDataLib.PcmData.ValueRepresentationType vrt) {
+            switch (vrt) {
+            case PcmDataLib.PcmData.ValueRepresentationType.SInt:
+                return WasapiCS.BitFormatType.SInt;
+            case PcmDataLib.PcmData.ValueRepresentationType.SFloat:
+                return WasapiCS.BitFormatType.SFloat;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return WasapiCS.BitFormatType.SInt;
+            }
+        }
+
         public WasapiCS.SampleFormatType GetSampleFormatType() {
             if (bitFormatType == WasapiCS.BitFormatType.SFloat) {
                 System.Diagnostics.Debug.Assert(bitsPerSample == 32);
@@ -72,9 +85,11 @@ namespace WasapiPcmUtil {
         static public int GetDeviceSampleFormatCandidateNum(
                 WasapiSharedOrExclusive sharedOrExclusive,
                 BitsPerSampleFixType bitsPerSampleFixType,
-                int pcmDataValidBitsPerSample) {
+                int pcmDataValidBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType vrt) {
             if (bitsPerSampleFixType != BitsPerSampleFixType.AutoSelect ||
-                pcmDataValidBitsPerSample != 24 ||
+                pcmDataValidBitsPerSample == 16 ||
+                (pcmDataValidBitsPerSample == 32 && vrt == PcmData.ValueRepresentationType.SInt) ||
                 sharedOrExclusive == WasapiSharedOrExclusive.Shared) {
                 return 1;
             }
@@ -94,6 +109,7 @@ namespace WasapiPcmUtil {
                 WasapiSharedOrExclusive sharedOrExclusive,
                 BitsPerSampleFixType bitsPerSampleFixType,
                 int validBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType vrt,
                 int candidateId) {
             SampleFormatInfo sf = new SampleFormatInfo();
 
@@ -170,12 +186,12 @@ namespace WasapiPcmUtil {
                 break;
             case BitsPerSampleFixType.AutoSelect:
                 if (validBitsPerSample == 16 ||
-                    validBitsPerSample == 32) {
-                    // 32や16の場合、1通りしか無い。
+                    (validBitsPerSample == 32 && vrt == PcmData.ValueRepresentationType.SInt)) {
+                    // Sint32や16の場合、1通りしか無い。
                     sf.bitFormatType = WasapiCS.BitFormatType.SInt;
                     sf.bitsPerSample = validBitsPerSample;
                     sf.validBitsPerSample = validBitsPerSample;
-                } else if (validBitsPerSample == 24) {
+                } else {
                     // Sint32V24とSint24を試す。
                     switch (candidateId) {
                     case 0:
@@ -192,8 +208,6 @@ namespace WasapiPcmUtil {
                         System.Diagnostics.Debug.Assert(false);
                         break;
                     }
-                } else {
-                    System.Diagnostics.Debug.Assert(false);
                 }
                 break;
             default:

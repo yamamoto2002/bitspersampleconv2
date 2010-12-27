@@ -112,7 +112,7 @@ WWUpsampleGpu::Setup(
     assert(0 < sampleTotalTo);
 
     m_convolutionN    = convolutionN;
-    m_sampleFrom      = sampleFrom;
+    //m_sampleFrom      = sampleFrom;
     m_sampleTotalFrom = sampleTotalFrom;
     m_sampleRateFrom  = sampleRateFrom;
     m_sampleRateTo    = sampleRateTo;
@@ -352,27 +352,40 @@ SincD(double sinx, double x)
 }
 
 HRESULT
-WWUpsampleGpu::UpsampleCpu(
+WWUpsampleGpu::UpsampleCpuSetup(
         int convolutionN,
-        float * sampleData,
+        float * sampleFrom,
         int sampleTotalFrom,
         int sampleRateFrom,
         int sampleRateTo,
-        float * outputTo,
         int sampleTotalTo)
 {
     HRESULT hr = S_OK;
 
+    assert(0 < convolutionN);
+    assert(sampleFrom);
+    assert(0 < sampleTotalFrom);
     assert(sampleRateFrom <= sampleRateTo);
+    assert(0 < sampleTotalTo);
 
-    unsigned int * resamplePosArray = new unsigned int[sampleTotalTo];
-    assert(resamplePosArray);
+    m_convolutionN    = convolutionN;
+    m_sampleTotalFrom = sampleTotalFrom;
+    m_sampleRateFrom  = sampleRateFrom;
+    m_sampleRateTo    = sampleRateTo;
+    m_sampleTotalTo   = sampleTotalTo;
 
-    float * fractionArray = new float[sampleTotalTo];
-    assert(fractionArray);
+    m_sampleFrom      = new float[sampleTotalFrom];
+    assert(m_sampleFrom);
+    memcpy(m_sampleFrom, sampleFrom, sizeof(float)*sampleTotalFrom);
 
-    double *sinPreComputeArray = new double[sampleTotalTo];
-    assert(sinPreComputeArray);
+    m_resamplePosArray = new unsigned int[sampleTotalTo];
+    assert(m_resamplePosArray);
+
+    m_fractionArray = new float[sampleTotalTo];
+    assert(m_fractionArray);
+
+    m_sinPreComputeArray = new double[sampleTotalTo];
+    assert(m_sinPreComputeArray);
 
     for (int i=0; i<sampleTotalTo; ++i) {
         double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
@@ -393,27 +406,39 @@ WWUpsampleGpu::UpsampleCpu(
 #endif
         double fraction = resamplePos - resamplePosI;
 
-        resamplePosArray[i]   = resamplePosI;
-        fractionArray[i]      = (float)fraction;
-        sinPreComputeArray[i] = sin(-PI_D * fraction);
+        m_resamplePosArray[i]   = resamplePosI;
+        m_fractionArray[i]      = (float)fraction;
+        m_sinPreComputeArray[i] = sin(-PI_D * fraction);
     }
 
+    /*
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("i=%6d rPos=%6d fraction=%+f\n",
             i, resamplePosArray[i], fractionArray[i]);
     }
     printf("resamplePos created\n");
+    */
+    return hr;
+}
 
-    for (int toPos=0; toPos<sampleTotalTo; ++toPos) {
-        int    fromPos  = resamplePosArray[toPos];
-        double fraction = fractionArray[toPos];
-        double sinPreCompute = sinPreComputeArray[toPos];
+HRESULT
+WWUpsampleGpu::UpsampleCpuDo(
+        int startPos,
+        int count,
+        float *output)
+{
+    HRESULT hr = S_OK;
+
+    for (int toPos=startPos; toPos<startPos+count; ++toPos) {
+        int    fromPos       = m_resamplePosArray[toPos];
+        double fraction      = m_fractionArray[toPos];
+        double sinPreCompute = m_sinPreComputeArray[toPos];
 
         double v = 0.0;
 
-        for (int convOffs=-convolutionN; convOffs < convolutionN; ++convOffs) {
+        for (int convOffs=-m_convolutionN; convOffs < m_convolutionN; ++convOffs) {
             int pos = convOffs + fromPos;
-            if (0 <= pos && pos < sampleTotalFrom) {
+            if (0 <= pos && pos < m_sampleTotalFrom) {
                 double x = PI_D * (convOffs - fraction);
                 
                 double sinX = sinPreCompute;
@@ -436,10 +461,11 @@ WWUpsampleGpu::UpsampleCpu(
                 }
                 */
 
-                v += sampleData[pos] * sinc;
+                v += m_sampleFrom[pos] * sinc;
             }
         }
-        outputTo[toPos] = (float)v;
+        // output[0]`output[count-1]‚É‘‚«ž‚ÞB
+        output[toPos-startPos] = (float)v;
     }
 
     /*
@@ -449,16 +475,21 @@ WWUpsampleGpu::UpsampleCpu(
     }
     printf("resampled\n");
     */
-
-//end:
-    delete [] sinPreComputeArray;
-    sinPreComputeArray = NULL;
-
-    delete [] fractionArray;
-    fractionArray = NULL;
-
-    delete [] resamplePosArray;
-    resamplePosArray = NULL;
-
     return hr;
+}
+
+void
+WWUpsampleGpu::UpsampleCpuUnsetup(void)
+{
+    delete [] m_sinPreComputeArray;
+    m_sinPreComputeArray = NULL;
+
+    delete [] m_fractionArray;
+    m_fractionArray = NULL;
+
+    delete [] m_resamplePosArray;
+    m_resamplePosArray = NULL;
+
+    delete [] m_sampleFrom;
+    m_sampleFrom = NULL;
 }

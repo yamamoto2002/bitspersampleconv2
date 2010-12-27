@@ -77,7 +77,7 @@ OutputBuffer[]はsampleN個用意する
 #define PI_D 3.141592653589793238462643
 
 StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
-StructuredBuffer<int>     g_ResamplePosBuffer   : register(t1);
+StructuredBuffer<uint>    g_ResamplePosBuffer   : register(t1);
 StructuredBuffer<float>   g_FractionBuffer      : register(t2);
 StructuredBuffer<float>   g_SinPreComputeBuffer : register(t3);
 RWStructuredBuffer<float> g_OutputBuffer        : register(u0);
@@ -115,18 +115,18 @@ Sinc(double sinx, float x)
 
 // TGSM
 groupshared double s_scratch[GROUP_THREAD_COUNT];
-groupshared int    s_fromPos;
+groupshared uint   s_fromPos;
 groupshared float  s_fraction;
 groupshared float  s_sinPreCompute;
 
 inline double
-ConvolutionElemValue(int convOffs)
+ConvolutionElemValue(uint convOffs)
 {
     double r = 0.0;
 
     int pos = convOffs + s_fromPos;
     if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
-        float x = PI_F * ((float)convOffs - s_fraction);
+        float x = PI_F * (convOffs - s_fraction);
                 
         double sinX = s_sinPreCompute;
         if (convOffs & 1) {
@@ -155,7 +155,7 @@ CSMain(
         s_sinPreCompute = g_SinPreComputeBuffer[toPos];
     }
     s_scratch[tid] = 0;
-    int offs = (int)tid + CONV_START;
+    int offs = tid + CONV_START;
 
     GroupMemoryBarrierWithGroupSync();
     

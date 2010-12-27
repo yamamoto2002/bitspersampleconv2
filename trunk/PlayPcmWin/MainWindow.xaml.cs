@@ -833,12 +833,15 @@ namespace PlayPcmWin
             int candidateNum = SampleFormatInfo.GetDeviceSampleFormatCandidateNum(
                 m_preference.wasapiSharedOrExclusive,
                 m_preference.bitsPerSampleFixType,
-                startPcmData.ValidBitsPerSample);
+                startPcmData.ValidBitsPerSample,
+                startPcmData.SampleValueRepresentationType);
             for (int i = 0; i < candidateNum; ++i) {
                 SampleFormatInfo sf = SampleFormatInfo.GetDeviceSampleFormat(
                     m_preference.wasapiSharedOrExclusive,
                     m_preference.bitsPerSampleFixType,
-                    startPcmData.ValidBitsPerSample, i);
+                    startPcmData.ValidBitsPerSample,
+                    startPcmData.SampleValueRepresentationType,
+                    i);
 
                 if (m_deviceSetupInfo.Is(
                     startPcmData.SampleRate,
@@ -856,7 +859,8 @@ namespace PlayPcmWin
                 SampleFormatInfo sf = SampleFormatInfo.GetDeviceSampleFormat(
                     m_preference.wasapiSharedOrExclusive,
                     m_preference.bitsPerSampleFixType,
-                    startPcmData.ValidBitsPerSample, i);
+                    startPcmData.ValidBitsPerSample,
+                    startPcmData.SampleValueRepresentationType, i);
 
                 m_deviceSetupInfo.Set(
                     startPcmData.SampleRate,

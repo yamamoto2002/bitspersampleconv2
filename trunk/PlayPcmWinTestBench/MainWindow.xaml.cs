@@ -355,18 +355,19 @@ namespace PlayPcmWinTestBench {
                 bool isEventDriven,
                 int sampleRate,
                 int pcmDataValidBitsPerSample,
+                PcmDataLib.PcmData.ValueRepresentationType vrt,
                 int latencyMillisec) {
             int num = SampleFormatInfo.GetDeviceSampleFormatCandidateNum(
                 isExclusive ? WasapiSharedOrExclusive.Exclusive : WasapiSharedOrExclusive.Shared,
                 BitsPerSampleFixType.AutoSelect,
-                pcmDataValidBitsPerSample);
+                pcmDataValidBitsPerSample, vrt);
 
             int hr = -1;
             for (int i = 0; i < num; ++i) {
                 SampleFormatInfo sf = SampleFormatInfo.GetDeviceSampleFormat(
                     isExclusive ? WasapiSharedOrExclusive.Exclusive : WasapiSharedOrExclusive.Shared,
                     BitsPerSampleFixType.AutoSelect,
-                    pcmDataValidBitsPerSample, i);
+                    pcmDataValidBitsPerSample, vrt, i);
 
                 wasapi.SetDataFeedMode(
                     isEventDriven ?
@@ -413,6 +414,7 @@ namespace PlayPcmWinTestBench {
                 radioButtonEventDrivenA.IsChecked == true,
                 pcmData.SampleRate,
                 pcmData.ValidBitsPerSample,
+                pcmData.SampleValueRepresentationType,
                 Int32.Parse(textBoxLatencyA.Text));
             if (hr < 0) {
                 MessageBox.Show(string.Format("Wasapi.Setup失敗 {0:X8}", hr));
@@ -453,6 +455,7 @@ namespace PlayPcmWinTestBench {
                 radioButtonEventDrivenB.IsChecked == true,
                 pcmData.SampleRate,
                 pcmData.ValidBitsPerSample,
+                pcmData.SampleValueRepresentationType,
                 Int32.Parse(textBoxLatencyB.Text));
             if (hr < 0) {
                 MessageBox.Show(string.Format("Wasapi.Setup失敗 {0:X8}", hr));
@@ -904,10 +907,10 @@ namespace PlayPcmWinTestBench {
 
             WriteWavFile(pcmDataOut, args.outputPath);
 
-            e.Result = string.Format("書き込み成功。所要時間 {0}秒",
+            e.Result = string.Format("書き込み成功。処理時間 {0}秒",
                 sw.ElapsedMilliseconds * 0.001);
             if (args.scale < 1.0) {
-                e.Result = string.Format("書き込み成功。所要時間 {0}秒" +
+                e.Result = string.Format("書き込み成功。処理時間 {0}秒" +
                     "レベルオーバーのため音量調整{1}dB({2}倍)しました。",
                     sw.ElapsedMilliseconds * 0.001,
                     20.0 * Math.Log10(args.scale), args.scale);
@@ -925,7 +928,7 @@ namespace PlayPcmWinTestBench {
             public int resampleFrequency;
             public int convolutionN;
             public ProcessDevice device;
-            public int gpuSampleSlice;
+            public int sampleSlice;
 
             // --------------------------------------------------------
             // 以降、物置(RunWorkerAsync()でセットする必要はない)
@@ -955,9 +958,12 @@ namespace PlayPcmWinTestBench {
             buttonUSBrowseOpen.IsEnabled = true;
             buttonUSBrowseSaveAs.IsEnabled = true;
 
-            string result = (string)e.Result;
-
-            textBoxUSResult.Text += string.Format("結果: {0}\r\n", result);
+            if (e.Cancelled) {
+                textBoxUSResult.Text += string.Format("キャンセル完了。\r\n");
+            } else {
+                string result = (string)e.Result;
+                textBoxUSResult.Text += string.Format("結果: {0}\r\n", result);
+            }
             textBoxUSResult.ScrollToEnd();
         }
 
@@ -981,24 +987,29 @@ namespace PlayPcmWinTestBench {
 
             args.convolutionN = 256;
             args.device = ProcessDevice.Cpu;
-            args.gpuSampleSlice = 32768;
+            args.sampleSlice = 256;
             if (radioButtonUSCpu16.IsChecked == true) {
                 args.convolutionN = 65536;
             }
             if (radioButtonUSGpu16.IsChecked == true) {
                 args.convolutionN = 65536;
                 args.device = ProcessDevice.Gpu;
+                args.sampleSlice = 32768;
             }
             if (radioButtonUSGpu20.IsChecked == true) {
                 args.convolutionN = 1048576;
                 args.device = ProcessDevice.Gpu;
+
+                // 重いので減らす。
+                args.sampleSlice = 256;
             }
             if (radioButtonUSGpu24.IsChecked == true) {
                 args.convolutionN = 16777216;
                 args.device = ProcessDevice.Gpu;
 
-                /// この条件では一度に32768個処理できないので半分に減らす。
-                args.gpuSampleSlice = 16384;
+                // この条件では一度に32768個処理できない。
+                // 16384以下の値をセットする。
+                args.sampleSlice = 16;
             }
 
             buttonUSCancel.IsEnabled = true;
@@ -1012,6 +1023,82 @@ namespace PlayPcmWinTestBench {
             textBoxUSResult.ScrollToEnd();
 
             m_USworker.RunWorkerAsync(args);
+        }
+
+        private int CpuUpsample(USWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
+            int hr = 0;
+
+            int sampleTotalTo = (int)(args.resampleFrequency * pcmDataIn.NumFrames / pcmDataIn.SampleRate);
+            {   // PcmDataOutのサンプルレートとサンプル数を更新する。
+                byte[] outSampleArray = new byte[(long)sampleTotalTo * pcmDataOut.NumChannels * 4];
+                pcmDataOut.SetSampleArray(sampleTotalTo, outSampleArray);
+                pcmDataOut.SampleRate = args.resampleFrequency;
+                outSampleArray = null;
+            }
+            WWUpsampleGpu us = new WWUpsampleGpu();
+
+            float[] sampleData = new float[pcmDataIn.NumFrames];
+            for (int ch = 0; ch < pcmDataIn.NumChannels; ++ch) {
+                for (int i = 0; i < pcmDataIn.NumFrames; ++i) {
+                    sampleData[i] = pcmDataIn.GetSampleValueInFloat(ch, i);
+                }
+
+                hr = us.UpsampleCpuSetup(args.convolutionN, sampleData, sampleData.Length,
+                    pcmDataIn.SampleRate, pcmDataOut.SampleRate, sampleTotalTo);
+                if (hr < 0) {
+                    break;
+                }
+
+                for (int offs=0; offs < sampleTotalTo; offs += args.sampleSlice) {
+                    int sample1 = args.sampleSlice;
+                    if (sampleTotalTo - offs < sample1) {
+                        sample1 = sampleTotalTo - offs;
+                    }
+                    if (sample1 < 1) {
+                        break;
+                    }
+
+                    float[] outFragment = new float[sample1];
+                    hr = us.UpsampleCpuDo(offs, sample1, ref outFragment);
+                    if (hr < 0) {
+                        // ここからreturnしても外のfor文までしか行かない
+                        us.UpsampleCpuUnsetup();
+                        sampleData = null;
+                        break;
+                    }
+                    if (m_USworker.CancellationPending) {
+                        // ここからreturnしても外のfor文までしか行かない
+                        us.UpsampleCpuUnsetup();
+                        sampleData = null;
+                        hr = -1;
+                        break;
+                    }
+                    if (0 <= hr) {
+                        // 成功。出てきたデータをpcmDataOutに詰める。
+                        for (int j = 0; j < sample1; ++j) {
+                            pcmDataOut.SetSampleValueInFloat(ch, offs + j, outFragment[j]);
+                        }
+                    }
+                    outFragment = null;
+
+                    // 10%～99%
+                    m_USworker.ReportProgress(
+                        10 + (int)(89L * offs / sampleTotalTo + 89L * ch) / pcmDataIn.NumChannels);
+                }
+
+                if (m_USworker.CancellationPending) {
+                    break;
+                }
+                if (hr < 0) {
+                    break;
+                }
+
+                us.UpsampleCpuUnsetup();
+            }
+
+            sampleData = null;
+
+            return hr;
         }
 
         private int GpuUpsample(USWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
@@ -1042,7 +1129,7 @@ namespace PlayPcmWinTestBench {
                 int sampleRemain = sampleTotalTo;
                 int offs = 0;
                 while (0 < sampleRemain) {
-                    int sample1 = args.gpuSampleSlice;
+                    int sample1 = args.sampleSlice;
                     if (sampleRemain < sample1) {
                         sample1 = sampleRemain;
                     }
@@ -1052,6 +1139,7 @@ namespace PlayPcmWinTestBench {
                     }
                     if (m_USworker.CancellationPending) {
                         us.Term();
+                        return -1;
                     }
 
                     sampleRemain -= sample1;
@@ -1061,6 +1149,7 @@ namespace PlayPcmWinTestBench {
                     m_USworker.ReportProgress(
                         10 + (int)(89L * offs / sampleTotalTo + 89L * ch) / pcmDataIn.NumChannels);
                 }
+
                 if (0 <= hr) {
                     float[] output = new float[sampleTotalTo];
                     hr = us.GetResultFromGpuMemory(ref output, sampleTotalTo);
@@ -1070,6 +1159,7 @@ namespace PlayPcmWinTestBench {
                             pcmDataOut.SetSampleValueInFloat(ch, i, output[i]);
                         }
                     }
+                    output = null;
                 }
                 us.Term();
 
@@ -1077,12 +1167,13 @@ namespace PlayPcmWinTestBench {
                     break;
                 }
             }
+            sampleData = null;
 
             return hr;
         }
 
         private void m_USworker_DoWork(object sender, DoWorkEventArgs e) {
-            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
+            // System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
             USWorkerArgs args = (USWorkerArgs)e.Argument;
 
@@ -1097,8 +1188,8 @@ namespace PlayPcmWinTestBench {
                     args.inputPath, pcmDataIn.SampleRate, args.resampleFrequency);
                 return;
             }
-            if (0x7fffffffL < pcmDataIn.NumFrames * args.resampleFrequency / pcmDataIn.SampleRate) {
-                e.Result = string.Format("エラー: リサンプル後のファイルが2GBを超えそうなので中断しました {0}",
+            if (0x7fff0000L < pcmDataIn.NumFrames * 4 * pcmDataIn.NumChannels * args.resampleFrequency / pcmDataIn.SampleRate) {
+                e.Result = string.Format("エラー: リサンプル後のファイルサイズが2GBを超えそうなので中断しました {0}",
                     args.inputPath);
                 return;
             }
@@ -1118,11 +1209,11 @@ namespace PlayPcmWinTestBench {
             if (args.device == ProcessDevice.Gpu) {
                 hr = GpuUpsample(args, pcmDataIn, pcmDataOut);
             } else {
-                System.Diagnostics.Debug.Assert(false);
+                hr = CpuUpsample(args, pcmDataIn, pcmDataOut);
             }
 
             if (m_USworker.CancellationPending) {
-                e.Result = string.Format("キャンセル。");
+                e.Result = string.Format("キャンセル完了。");
                 e.Cancel = true;
                 return;
             }
@@ -1134,10 +1225,10 @@ namespace PlayPcmWinTestBench {
 
             WriteWavFile(pcmDataOut, args.outputPath);
 
-            e.Result = string.Format("書き込み成功。所要時間 {0}秒",
+            e.Result = string.Format("書き込み成功。処理時間 {0}秒",
                 sw.ElapsedMilliseconds * 0.001);
             if (args.scale < 1.0) {
-                e.Result = string.Format("書き込み成功。所要時間 {0}秒" +
+                e.Result = string.Format("書き込み成功。処理時間 {0}秒" +
                     "レベルオーバーのため音量調整{1}dB({2}倍)しました。",
                     sw.ElapsedMilliseconds * 0.001,
                     20.0 * Math.Log10(args.scale), args.scale);
