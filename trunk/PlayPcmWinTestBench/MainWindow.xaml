@@ -1,9 +1,52 @@
 ﻿<Window x:Class="PlayPcmWinTestBench.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="PlayPcmWinテストベンチ" Height="600" Width="800" Closed="Window_Closed">
+        Title="PlayPcmWinテストベンチ" Height="600" Width="800" Closed="Window_Closed" IsEnabled="True">
     <Grid>
         <TabControl Name="tabControl1" >
+            <TabItem Header="アップサンプル">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBox8" VerticalAlignment="Top" Width="474">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxUSInputFilePath" Text="C:\wav\input.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Click="buttonUSBrowseOpen_Click" Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonUSBrowseOpen" VerticalAlignment="Top" Width="120" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Click="buttonUSOutputStart_Click" Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="10,466,0,0" Name="buttonUSOutputStart" VerticalAlignment="Top" Width="120" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="10,0,0,4" Name="progressBarUS" VerticalAlignment="Bottom" Width="244" />
+                    <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="10,369,0,0" Name="groupBox11" VerticalAlignment="Top" Width="474">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxUSOutputFilePath" Text="C:\wav\output.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Click="buttonUSBrowseSaveAs_Click" Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonUSBrowseSaveAs" VerticalAlignment="Top" Width="120" />
+                        </Grid>
+                    </GroupBox>
+                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="0,466,2,4" Name="textBoxUSResult" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" HorizontalAlignment="Right" Width="506" />
+                    <GroupBox Header="畳み込み計算打ち切り設定" Height="146" HorizontalAlignment="Left" IsEnabled="True" Margin="6,177,0,0" Name="groupBox12" VerticalAlignment="Top" Width="380">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="0*" />
+                                <RowDefinition Height="93*" />
+                            </Grid.RowDefinitions>
+                            <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="6,7,0,0" Name="radioButtonUSCpu8" VerticalAlignment="Top" IsEnabled="False" />
+                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonUSCpu16" VerticalAlignment="Top" IsEnabled="False" />
+                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonUSGpu16" VerticalAlignment="Top" IsChecked="True" />
+                            <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonUSGpu20" VerticalAlignment="Top" />
+                            <RadioButton Content="±16777216サンプル GPU処理(PCの動作が重くなります)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonUSGpu24" VerticalAlignment="Top" />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="リサンプル後サンプリング周波数" Height="65" HorizontalAlignment="Left" Margin="10,106,0,0" Name="groupBox13" VerticalAlignment="Top" Width="281">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="190*" />
+                                <ColumnDefinition Width="113*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="周波数(Hz)" Height="24" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,6,5,0" Name="label9" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="158" />
+                            <TextBox Grid.Column="1" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="0,6,0,0" Name="textBoxUSFrequency" Text="96000" VerticalAlignment="Top" Width="79" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Content="キャンセル(_C)" Height="23" HorizontalAlignment="Left" Margin="134,466,0,0" Name="buttonUSCancel" VerticalAlignment="Top" Width="120" Click="buttonUSCancel_Click" IsEnabled="False" />
+                </Grid>
+            </TabItem>
             <TabItem Header="ABXテスト" Name="tabItem1" DataContext="{Binding}">
                 <Grid>
                     <GroupBox Header="A" Height="265" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBoxA" VerticalAlignment="Top" Width="377">
