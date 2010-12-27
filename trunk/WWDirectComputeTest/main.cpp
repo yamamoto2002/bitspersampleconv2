@@ -20,7 +20,7 @@
 struct ConstShaderParams {
     unsigned int c_convOffs;
     unsigned int c_dispatchCount;
-    unsigned int c_reserved1;
+    unsigned int c_sampleToStartPos;
     unsigned int c_reserved2;
 };
 
@@ -402,7 +402,7 @@ end:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class UpsampleGpu {
+class WWUpsampleGpu {
 public:
     void Init(void);
     void Term(void);
@@ -444,27 +444,8 @@ private:
     ID3D11Buffer * m_pBufConst;
 };
 
-HRESULT
-UpsampleGpu::ResultGetFromGpuMemory(
-        float *outputTo,
-        int outputToElemNum)
-{
-    HRESULT hr = S_OK;
-
-    assert(m_pDCU);
-    assert(m_pBufResultUav);
-
-    assert(outputTo);
-    assert(outputToElemNum <= m_sampleTotalTo);
-
-    // 計算結果をCPUメモリーに持ってくる。
-    HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo, outputToElemNum * sizeof(float)));
-end:
-    return hr;
-}
-
 void
-UpsampleGpu::Init(void)
+WWUpsampleGpu::Init(void)
 {
     int m_convolutionN = 0;
     float * m_sampleFrom = NULL;
@@ -485,7 +466,7 @@ UpsampleGpu::Init(void)
 }
 
 void
-UpsampleGpu::Term(void)
+WWUpsampleGpu::Term(void)
 {
     assert(m_pDCU == NULL);
     assert(m_pCS  == NULL);
@@ -499,7 +480,7 @@ UpsampleGpu::Term(void)
 }
 
 HRESULT
-UpsampleGpu::Setup(
+WWUpsampleGpu::Setup(
         int convolutionN,
         float * sampleFrom,
         int sampleTotalFrom,
@@ -653,7 +634,7 @@ end:
 }
 
 HRESULT
-UpsampleGpu::Dispatch(
+WWUpsampleGpu::Dispatch(
         int startPos,
         int count)
 {
@@ -668,15 +649,17 @@ UpsampleGpu::Dispatch(
     // すこしだけ速い。中でループするようにした。
     shaderParams.c_convOffs = 0;
     shaderParams.c_dispatchCount = m_convolutionN*2/GROUP_THREAD_COUNT;
+    shaderParams.c_sampleToStartPos = startPos;
     HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
-        m_pBufConst, &shaderParams, sizeof shaderParams, m_sampleTotalTo, 1, 1));
+        m_pBufConst, &shaderParams, sizeof shaderParams, count, 1, 1));
 #else
     // 遅い
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
         shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
+        shaderParams.c_sampleToStartPos = startPos;
         HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
-            m_pBufConst, &shaderParams, sizeof shaderParams, m_sampleTotalTo, 1, 1));
+            m_pBufConst, &shaderParams, sizeof shaderParams, count, 1, 1));
     }
 #endif
 
@@ -689,8 +672,32 @@ end:
     return hr;
 }
 
+HRESULT
+WWUpsampleGpu::ResultGetFromGpuMemory(
+        float *outputTo,
+        int outputToElemNum)
+{
+    HRESULT hr = S_OK;
+
+    assert(m_pDCU);
+    assert(m_pBufResultUav);
+
+    assert(outputTo);
+    assert(outputToElemNum <= m_sampleTotalTo);
+
+    // 計算結果をCPUメモリーに持ってくる。
+    HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo, outputToElemNum * sizeof(float)));
+end:
+    if (hr == DXGI_ERROR_DEVICE_REMOVED) {
+        dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
+            m_pDCU->GetDevice()->GetDeviceRemovedReason());
+    }
+
+    return hr;
+}
+
 void
-UpsampleGpu::Unsetup(void)
+WWUpsampleGpu::Unsetup(void)
 {
     if (m_pDCU) {
         m_pDCU->DestroyConstantBuffer(m_pBufConst);
@@ -845,12 +852,12 @@ static void
 Test2(void)
 {
     HRESULT hr = S_OK;
-    UpsampleGpu us;
+    WWUpsampleGpu us;
 
     us.Init();
 
     // データ準備
-    int convolutionN    = 256;
+    int convolutionN    = 256*256;
     int sampleTotalFrom = 256;
     int sampleRateFrom = 44100;
     int sampleRateTo   = 44100*10;
@@ -883,7 +890,9 @@ Test2(void)
     DWORD t0 = GetTickCount();
 
     HRG(us.Setup(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo));
-    HRG(us.Dispatch(0, sampleTotalTo));
+    for (int i=1; i<2; ++i ) { // sampleTotalTo; ++i) {
+        HRG(us.Dispatch(i, 2));
+    }
     HRG(us.ResultGetFromGpuMemory(outputGpu, sampleTotalTo));
 
     DWORD t1 = GetTickCount()+1;
