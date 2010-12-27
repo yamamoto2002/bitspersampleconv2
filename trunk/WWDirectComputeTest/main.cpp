@@ -425,6 +425,11 @@ public:
 
     void Unsetup(void);
 
+    // limit level to fit to the audio sampledata range
+    static float LimitSampleData(
+        float * sampleData,
+        int sampleDataCount);
+
 private:
     int m_convolutionN;
     float * m_sampleFrom;
@@ -442,7 +447,44 @@ private:
     ID3D11ShaderResourceView*   m_pBuf3Srv;
     ID3D11UnorderedAccessView*  m_pBufResultUav;
     ID3D11Buffer * m_pBufConst;
+    
 };
+
+float
+WWUpsampleGpu::LimitSampleData(
+        float * sampleData,
+        int sampleDataCount)
+{
+    float minV = 0.0f;
+    float maxV = 0.0f;
+
+    for (int i=0; i<sampleDataCount; ++i) {
+        if (sampleData[i] < minV) {
+            minV = sampleData[i];
+        }
+        if (maxV < sampleData[i]) {
+            maxV = sampleData[i];
+        }
+    }
+
+    float scale = 1.0f;
+    if (minV < -1.0f) {
+        scale = -1.0f / minV;
+    }
+    if (0.99999988079071044921875f < maxV) {
+        float scale2 = 0.99999988079071044921875f / maxV;
+        if (scale2 < scale) {
+            scale = scale2;
+        }
+    }
+    if (scale < 1.0f) {
+        for (int i=0; i<sampleDataCount; ++i) {
+            sampleData[i] *= scale;
+        }
+    }
+
+    return scale;
+}
 
 void
 WWUpsampleGpu::Init(void)
@@ -890,13 +932,16 @@ Test2(void)
     sampleData[0] = 1.0f;
     */
 
-    // 真ん中のサンプルだけ1で、残りは0
+    /*
+    // 真ん中あたりのサンプルだけ-1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 0;
     }
-    sampleData[127] = 1.0f;
-
-
+    sampleData[125] = -1.0f;
+    sampleData[126] = -1.0f;
+    sampleData[127] = -1.0f;
+    sampleData[128] = -1.0f;
+    */
 
     HRG(us.Setup(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo));
     DWORD t0 = GetTickCount();
@@ -927,14 +972,16 @@ Test2(void)
 
             x = 256 ÷ 14
         */
+    float scaleG = WWUpsampleGpu::LimitSampleData(outputGpu, sampleTotalTo);
+    float scaleC = WWUpsampleGpu::LimitSampleData(outputCpu, sampleTotalTo);
 
     for (int i=0; i<sampleTotalTo; ++i) {
-        printf("%d, %f\n", i, outputGpu[i]);
+        printf("%d, %12.8f\n", i, outputGpu[i]);
     }
 
-    printf("GPU=%dms(%fsamples/s) CPU=%dms(%fsamples/s)\n",
-        (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0),
-        (t3-t2),  sampleTotalTo / ((t3-t2)/1000.0));
+    printf("GPU=%dms(%fsamples/s)s=%f CPU=%dms(%fsamples/s)s=%f\n",
+        (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0), scaleG,
+        (t3-t2),  sampleTotalTo / ((t3-t2)/1000.0), scaleC);
 
 end:
     us.Unsetup();
