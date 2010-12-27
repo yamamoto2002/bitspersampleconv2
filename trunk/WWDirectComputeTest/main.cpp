@@ -571,7 +571,6 @@ WWUpsampleGpu::Setup(
     sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
 
     // doubleprec
-    int sinxBufferElemBytes = 8;
     const D3D_SHADER_MACRO defines[] = {
             "CONV_START", convStartStr,
             "CONV_END", convEndStr,
@@ -829,11 +828,6 @@ UpsampleCpu(
     }
     printf("resampled\n");
     */
-    /*
-    for (int i=0; i<sampleTotalTo; ++i) {
-        printf("%d, %f\n", i, outputTo[i]);
-    }
-    */
 
 //end:
     delete [] sinPreComputeArray;
@@ -858,9 +852,9 @@ Test2(void)
 
     // データ準備
     int convolutionN    = 256*256;
-    int sampleTotalFrom = 16;
-    int sampleRateFrom = 44100;
-    int sampleRateTo   = 44100*10;
+    int sampleTotalFrom = 256;
+    int sampleRateFrom  = 44100;
+    int sampleRateTo    = 44100*10;
 
     int sampleTotalTo   = sampleTotalFrom * sampleRateTo / sampleRateFrom;
 
@@ -873,10 +867,12 @@ Test2(void)
     float *outputGpu = new float[sampleTotalTo];
     assert(outputGpu);
 
+    /*
     // 全部1
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 1.0f;
     }
+    */
 
     /*
     // 44100Hzサンプリングで1000Hzのsin
@@ -885,6 +881,7 @@ Test2(void)
         sampleData[i] = sinf(xS);
     }
     */
+
     /*
     // 最初のサンプルだけ1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
@@ -893,13 +890,11 @@ Test2(void)
     sampleData[0] = 1.0f;
     */
 
-    /*
     // 真ん中のサンプルだけ1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 0;
     }
     sampleData[127] = 1.0f;
-    */
 
 
 
@@ -917,11 +912,13 @@ Test2(void)
 
     DWORD t3 = GetTickCount()+1;
 
+    /*
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("%7d outGpu=%f outCpu=%f diff=%12.8f\n",
             i, outputGpu[i], outputCpu[i],
             fabsf(outputGpu[i]-outputCpu[i]));
     }
+    */
 
     /*
         1 (秒)       x(サンプル/秒)
@@ -930,6 +927,10 @@ Test2(void)
 
             x = 256 ÷ 14
         */
+
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("%d, %f\n", i, outputGpu[i]);
+    }
 
     printf("GPU=%dms(%fsamples/s) CPU=%dms(%fsamples/s)\n",
         (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0),
