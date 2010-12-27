@@ -289,40 +289,9 @@ SincD(double sinx, double x)
 }
 
 static void
-JitterAddCpuF(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
-{
-    const int fromCount = convolutionN + sampleN + convolutionN;
-    float *from = new float[fromCount];
-    assert(from);
-
-    ZeroMemory(from, sizeof(float) * fromCount);
-    for (int i=0; i<sampleN; ++i) {
-        from[i+convolutionN] = sampleData[i];
-    }
-
-    for (int pos=0; pos<sampleN; ++pos) {
-        float xOffs = jitterX[pos];
-        float sinx  = sinf(xOffs);
-        float r = 0.0f;
-
-        for (int i=-convolutionN; i<convolutionN; ++i) {
-            float x = PI_F * i + xOffs;
-            int posS = pos + i + convolutionN;
-            float sinc =  SincF(sinx, x);
-
-            r += from[posS] * sinc;
-        }
-
-        outF[pos] = r;
-    }
-
-    delete[] from;
-    from = NULL;
-}
-
-static void
 JitterAddCpuD(int sampleN, int convolutionN, float *sampleData, float *jitterX, float *outF)
 {
+    // サンプルデータから、前後を0で水増ししたfromを作成。
     const int fromCount = convolutionN + sampleN + convolutionN;
     float *from = new float[fromCount];
     assert(from);
@@ -334,12 +303,12 @@ JitterAddCpuD(int sampleN, int convolutionN, float *sampleData, float *jitterX, 
 
     for (int pos=0; pos<sampleN; ++pos) {
         float xOffs = jitterX[pos];
-        double sinx  = sin((double)xOffs);
         double r = 0.0f;
 
         for (int i=-convolutionN; i<convolutionN; ++i) {
-            double x = PI_D * i + xOffs;
-            int posS = pos + i + convolutionN;
+            double x = PI_D * (i + xOffs);
+            double sinx = sin(ModuloD(xOffs, 2.0 * PI_D));
+            int    posS = pos + i + convolutionN;
             double sinc =  SincD(sinx, x);
 
             r += from[posS] * sinc;
@@ -431,6 +400,189 @@ end:
     sampleData = NULL;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+static HRESULT
+ResampleCpu(
+        int convolutionN,
+        float * sampleData,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        float * outputTo,
+        int sampleTotalTo)
+{
+    HRESULT hr = S_OK;
+
+    assert(sampleRateFrom <= sampleRateTo);
+
+    unsigned int * resamplePosArray = new unsigned int[sampleTotalTo];
+    assert(resamplePosArray);
+
+    float * fractionArray = new float[sampleTotalTo];
+    assert(fractionArray);
+
+    double *sinPreComputeArray = new double[sampleTotalTo];
+    assert(sinPreComputeArray);
+
+    for (int i=0; i<sampleTotalTo; ++i) {
+        double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
+#if 1
+        /* -0.5 <= fraction<+0.5になるようにresamplePosを選ぶ。
+         * 最後のほうで範囲外を指さないようにする。
+         */
+        int resamplePosI = (int)(resamplePos+0.5);
+        if (sampleTotalFrom <= resamplePosI) {
+            resamplePosI = sampleTotalFrom -1;
+        }
+#else
+        /* 0<=fraction<1になるにresamplePosIを選ぶ。
+         */
+        int resamplePosI = (int)(resamplePos+0.5);
+        assert(resamplePosI < sampleTotalFrom);
+#endif
+        double fraction = resamplePos - resamplePosI;
+
+        resamplePosArray[i]   = resamplePosI;
+        fractionArray[i]      = (float)fraction;
+        sinPreComputeArray[i] = sin(-PI_D * fraction);
+    }
+
+    /*
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("i=%6d rPos=%6d fraction=%+f\n",
+            i, resamplePosArray[i], fractionArray[i]);
+    }
+    printf("resamplePos created\n");
+    */
+
+    for (int toPos=0; toPos<sampleTotalTo; ++toPos) {
+        int    fromPos  = resamplePosArray[toPos];
+        double fraction = fractionArray[toPos];
+        double sinPreCompute = sinPreComputeArray[toPos];
+
+        double v = 0.0;
+
+        for (int convOffs=-convolutionN; convOffs < convolutionN; ++convOffs) {
+            int pos = convOffs + fromPos;
+            if (0 <= pos && pos < sampleTotalFrom) {
+                double x = PI_D * (convOffs - fraction);
+                
+                double sinX = sinPreCompute;
+                if (convOffs & 1) {
+                    sinX *= -1.0;
+                }
+
+#if 1
+                // 合っていた。
+                assert(fabs(sinX - sin(x)) < 0.000001);
+#endif
+
+                double sinc =  SincD(sinX, x);
+
+                /*
+                if (pos == 0) {
+                    printf("toPos=%d pos=%d x=%f sinX=%f",
+                        toPos, pos, x, sinX);
+                    printf("\n");
+                }
+                */
+
+                v += sampleData[pos] * sinc;
+            }
+        }
+        outputTo[toPos] = (float)v;
+    }
+
+    /*
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("i=%6d rPos=%6d fraction=%+6.2f output=%f\n",
+            i, resamplePosArray[i], fractionArray[i], outputTo[i]);
+    }
+    printf("resampled\n");
+    */
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("%d, %f\n", i, outputTo[i]);
+    }
+
+//end:
+    delete [] sinPreComputeArray;
+    sinPreComputeArray = NULL;
+
+    delete [] fractionArray;
+    fractionArray = NULL;
+
+    delete [] resamplePosArray;
+    resamplePosArray = NULL;
+
+    return hr;
+}
+
+static void
+Test2(void)
+{
+    HRESULT hr = S_OK;
+
+    // データ準備
+    int convolutionN    = 256*256;
+    int sampleTotalFrom = 256;
+    int sampleRateFrom = 44100;
+    int sampleRateTo   = 44100*10;
+
+    int sampleTotalTo   = sampleTotalFrom * sampleRateTo / sampleRateFrom;
+
+    float *sampleData = new float[sampleTotalFrom];
+    assert(sampleData);
+
+    float *outputCpu = new float[sampleTotalTo];
+    assert(outputCpu);
+
+#if 1
+    // 最初のサンプルだけ1で、残りは0
+    for (int i=0; i<sampleTotalFrom; ++i) {
+        sampleData[i] = 0;
+    }
+    sampleData[0] = 1.0f;
+#else
+    // 真ん中のサンプルだけ1で、残りは0
+    for (int i=0; i<sampleTotalFrom; ++i) {
+        sampleData[i] = 0;
+    }
+    sampleData[127] = 1.0f;
+#endif
+
+    DWORD t0 = GetTickCount();
+
+    HRG(ResampleCpu(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, outputCpu, sampleTotalTo));
+
+    DWORD t1 = GetTickCount()+1;
+
+    /*
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("%7d outCpu=%f\n",
+            i, outputCpu[i]);
+    }
+    */
+
+    /*
+        1 (秒)       x(サンプル/秒)
+        ───── ＝ ────────
+        14 (秒)       256(サンプル)
+
+            x = 256 ÷ 14
+        */
+
+    printf("CPU=%dms(%fsamples/s)\n",
+        (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0));
+
+end:
+    delete[] outputCpu;
+    outputCpu = NULL;
+
+    delete[] sampleData;
+    sampleData = NULL;
+}
+
 int
 main(void)
 {
@@ -438,7 +590,7 @@ main(void)
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 
-    Test1();
+    Test2();
 
     return 0;
 }
