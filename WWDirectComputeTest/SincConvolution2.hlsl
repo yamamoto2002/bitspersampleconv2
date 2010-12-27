@@ -77,7 +77,7 @@ OutputBuffer[]はsampleN個用意する
 #define PI_D 3.141592653589793238462643
 
 StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
-StructuredBuffer<uint>    g_ResamplePosBuffer   : register(t1);
+StructuredBuffer<int>     g_ResamplePosBuffer   : register(t1);
 StructuredBuffer<float>   g_FractionBuffer      : register(t2);
 StructuredBuffer<float>   g_SinPreComputeBuffer : register(t3);
 RWStructuredBuffer<float> g_OutputBuffer        : register(u0);
@@ -104,18 +104,29 @@ Sinc(double sinx, float x)
     }
 }
 
-groupshared uint   s_fromPos;
+/* スレッドグループとTGSMを使用して、GPUメモリからの読み出し回数を減らす最適化。
+ * 1個の出力サンプルを計算するためには、
+ * ・g_ResamplePosBuffer   1回読み出し。
+ * ・g_FractionBuffer      1回読み出し。
+ * ・g_SinPreComputeBuffer 1回読み出し
+ * で良いので、TGSMに蓄える。
+ * 各スレッドは、自分の担当convolution位置の計算を行ってs_scratchに入れる。
+ */
+
+// TGSM
+groupshared double s_scratch[GROUP_THREAD_COUNT];
+groupshared int    s_fromPos;
 groupshared float  s_fraction;
 groupshared float  s_sinPreCompute;
 
 inline double
-ConvolutionElemValue(uint convOffs)
+ConvolutionElemValue(int convOffs)
 {
     double r = 0.0;
 
     int pos = convOffs + s_fromPos;
     if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
-        float x = PI_F * (convOffs - s_fraction);
+        float x = PI_F * ((float)convOffs - s_fraction);
                 
         double sinX = s_sinPreCompute;
         if (convOffs & 1) {
@@ -131,25 +142,87 @@ ConvolutionElemValue(uint convOffs)
 }
 
 #if 1
-[numthreads(1, 1, 1)]
+[numthreads(GROUP_THREAD_COUNT, 1, 1)]
 void
 CSMain(
         uint  tid:        SV_GroupIndex,
         uint3 groupIdXYZ: SV_GroupID)
 {
-    uint toPos = c_sampleToStartPos + groupIdXYZ.x;
-
-    s_fromPos       = g_ResamplePosBuffer[toPos];
-    s_fraction      = g_FractionBuffer[toPos];
-    s_sinPreCompute = g_SinPreComputeBuffer[toPos];
-
-    double v = 0.0;
-
-    for (int convOffs=CONV_START; convOffs < CONV_END; ++convOffs) {
-        v += ConvolutionElemValue(convOffs);
+    if (tid == 0) {
+        uint toPos = c_sampleToStartPos + groupIdXYZ.x;
+        s_fromPos       = g_ResamplePosBuffer[toPos];
+        s_fraction      = g_FractionBuffer[toPos];
+        s_sinPreCompute = g_SinPreComputeBuffer[toPos];
     }
+    s_scratch[tid] = 0;
+    int offs = (int)tid + CONV_START;
 
-    g_OutputBuffer[toPos] = (float)v;
+    GroupMemoryBarrierWithGroupSync();
+    
+    do {
+        s_scratch[tid] +=
+            ConvolutionElemValue(offs) +
+            ConvolutionElemValue(offs + GROUP_THREAD_COUNT);
+        offs += GROUP_THREAD_COUNT * 2;
+    } while (offs < CONV_END);
+
+    GroupMemoryBarrierWithGroupSync();
+
+#if 1024 <= GROUP_THREAD_COUNT
+    if (tid < 512) { s_scratch[tid] += s_scratch[tid + 512]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 512 <= GROUP_THREAD_COUNT
+    if (tid < 256) { s_scratch[tid] += s_scratch[tid + 256]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 256 <= GROUP_THREAD_COUNT
+    if (tid < 128) { s_scratch[tid] += s_scratch[tid + 128]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 128 <= GROUP_THREAD_COUNT
+    if (tid < 64) { s_scratch[tid] += s_scratch[tid + 64]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 64 <= GROUP_THREAD_COUNT
+    if (tid < 32) { s_scratch[tid] += s_scratch[tid + 32]; }
+    /* これ以降GroupMemoryBarrierWithGroupSyncは要らないらしい。
+     * 2260_GTC2010.pdf参照。
+     * だが、動作が怪しくなるのでうまくいかない場合はSyncしてみると良い。
+     */
+    GroupMemoryBarrierWithGroupSync(); 
+#endif
+
+#if 32 <= GROUP_THREAD_COUNT
+    if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 16 <= GROUP_THREAD_COUNT
+    if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 8 <= GROUP_THREAD_COUNT
+    if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+#if 4 <= GROUP_THREAD_COUNT
+    if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
+    GroupMemoryBarrierWithGroupSync();
+#endif
+
+    if (tid == 0) {
+        s_scratch[0] += s_scratch[1];
+
+        uint toPos = c_sampleToStartPos + groupIdXYZ.x;
+        g_OutputBuffer[toPos] = (float)s_scratch[0];
+    }
 }
 #endif
 
@@ -189,110 +262,3 @@ CSMain(
 }
 #endif
 
-#if 0
-// TGSM
-groupshared double s_scratch[GROUP_THREAD_COUNT];
-groupshared uint   s_resamplePos;
-groupshared float  s_fraction;
-groupshared float  s_sinFractionPiMinus1;
-
-/// 畳み込み計算要素1回実行。
-/// sample[t+x] * sinc(πx + XBuffer[t])
-inline double
-ConvolutionElemValue(uint pos, uint convOffs)
-{
-    const int offs = c_convOffs + convOffs;
-    
-    const float x = PI_F *(offs + CONV_START, s_xOffs);
-    return ((double)g_SampleDataBuffer[offs + pos]) * SincF(s_sinX, x);
-}
-
-/* スレッドグループとTGSMを使用して、GPUメモリからの読み出し回数を減らす最適化。
- * 1個の出力サンプルを計算するためには、
- * ・g_ResamplePosBuffer   1回読み出し。
- * ・g_FractionBuffer      1回読み出し。
- * ・g_SinPreComputeBuffer 1回読み出し
- * で良いので、TGSMに蓄える。
- * 各スレッドは、自分の担当convolution位置の計算を行ってs_scratchに入れる。
- */
-
-// groupIdXYZはDispatch()のパラメータXYZ=(nx,1,1)の場合(0,0,0)～(nx-1, 0, 0)。
-// スレッドグループが作られ、tid==0～groupDim_x-1までのtidを持ったスレッドが同時に走る。
-[numthreads(GROUP_THREAD_COUNT, 1, 1)]
-void
-CSMain(
-        uint  tid:        SV_GroupIndex,
-        uint3 groupIdXYZ: SV_GroupID)
-{
-    uint offs = tid;
-
-    if (tid == 0) {
-        s_resamplePos = g_ResamplePosBuffer[groupIdXYZ.x];
-        s_fraction    = g_FractionBuffer[groupIdXYZ.x];
-        s_sinFractionPiMinus1 = g_SinPreComputeBuffer[groupIdXYZ.x];
-    }
-    s_scratch[tid] = 0;
-
-    GroupMemoryBarrierWithGroupSync();
-
-    do {
-        s_scratch[tid] +=
-            ConvolutionElemValue(groupIdXYZ.x, offs) +
-            ConvolutionElemValue(groupIdXYZ.x, offs + GROUP_THREAD_COUNT);
-        offs += GROUP_THREAD_COUNT * 2;
-    } while (offs < CONV_COUNT);
-
-    GroupMemoryBarrierWithGroupSync();
-
-#if 1024 <= GROUP_THREAD_COUNT
-    if (tid < 512) { s_scratch[tid] += s_scratch[tid + 512]; }
-    GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 512 <= GROUP_THREAD_COUNT
-    if (tid < 256) { s_scratch[tid] += s_scratch[tid + 256]; }
-    GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 256 <= GROUP_THREAD_COUNT
-    if (tid < 128) { s_scratch[tid] += s_scratch[tid + 128]; }
-    GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 128 <= GROUP_THREAD_COUNT
-    if (tid < 64) { s_scratch[tid] += s_scratch[tid + 64]; }
-    GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 64 <= GROUP_THREAD_COUNT
-    if (tid < 32) { s_scratch[tid] += s_scratch[tid + 32]; }
-    //GroupMemoryBarrierWithGroupSync(); // これ以降要らないらしい。2260_GTC2010.pdf参照。
-#endif
-
-#if 32 <= GROUP_THREAD_COUNT
-    if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
-    //GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 16 <= GROUP_THREAD_COUNT
-    if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
-    //GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 8 <= GROUP_THREAD_COUNT
-    if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
-   // GroupMemoryBarrierWithGroupSync();
-#endif
-
-#if 4 <= GROUP_THREAD_COUNT
-    if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
-    //GroupMemoryBarrierWithGroupSync();
-#endif
-
-    if (tid == 0) {
-        s_scratch[0] += s_scratch[1];
-        g_OutputBuffer[groupIdXYZ.x] = (float)s_scratch[0];
-    }
-}
-
-#endif
