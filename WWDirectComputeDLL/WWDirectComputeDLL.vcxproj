@@ -162,6 +162,7 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WWDirectComputeIOIF.h" />
     <ClInclude Include="WWDirectComputeUser.h" />
+    <ClInclude Include="WWUpsampleGpu.h" />
     <ClInclude Include="WWUtil.h" />
   </ItemGroup>
   <ItemGroup>
@@ -181,10 +182,12 @@
     </ClCompile>
     <ClCompile Include="WWDirectComputeIOIF.cpp" />
     <ClCompile Include="WWDirectComputeUser.cpp" />
+    <ClCompile Include="WWUpsampleGpu.cpp" />
     <ClCompile Include="WWUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SincConvolution.hlsl" />
+    <None Include="SincConvolution2.hlsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
