@@ -73,6 +73,9 @@ OutputBuffer[]はsampleN個用意する
 
 */
 
+#define PI_F 3.141592653589793238462643f
+#define PI_D 3.141592653589793238462643
+
 StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
 StructuredBuffer<uint>    g_ResamplePosBuffer   : register(t1);
 StructuredBuffer<float>   g_FractionBuffer      : register(t2);
@@ -85,12 +88,14 @@ cbuffer consts {
     uint c_convOffs;
     /// Dispatch繰り返し回数。
     uint c_dispatchCount;
-    uint c_reserved1;
+
+    /// toPosにこの値を足す。
+    uint c_sampleToStartPos;
     uint c_reserved2;
 };
 
 inline double
-SincF(double sinx, float x)
+Sinc(double sinx, float x)
 {
     if (-0.000000001f < x && x < 0.000000001f) {
         return 1.0;
@@ -99,8 +104,31 @@ SincF(double sinx, float x)
     }
 }
 
-#define PI_F 3.141592653589793238462643f
-#define PI_D 3.141592653589793238462643
+groupshared uint   s_fromPos;
+groupshared float  s_fraction;
+groupshared float  s_sinPreCompute;
+
+inline double
+ConvolutionElemValue(uint convOffs)
+{
+    double r = 0.0;
+
+    int pos = convOffs + s_fromPos;
+    if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
+        float x = PI_F * (convOffs - s_fraction);
+                
+        double sinX = s_sinPreCompute;
+        if (convOffs & 1) {
+            sinX *= -1.0;
+        }
+
+        double sinc =  Sinc(sinX, x);
+
+        r = g_SampleFromBuffer[pos] * sinc;
+    }
+
+    return r;
+}
 
 #if 1
 [numthreads(1, 1, 1)]
@@ -109,37 +137,59 @@ CSMain(
         uint  tid:        SV_GroupIndex,
         uint3 groupIdXYZ: SV_GroupID)
 {
-    uint toPos = groupIdXYZ.x;
+    uint toPos = c_sampleToStartPos + groupIdXYZ.x;
 
-    for (int toPos=0; toPos<SAMPLE_TOTAL_TO; ++toPos) {
-        int    fromPos       = g_ResamplePosBuffer[toPos];
-        float  fraction      = g_FractionBuffer[toPos];
-        float  sinPreCompute = g_SinPreComputeBuffer[toPos];
+    s_fromPos       = g_ResamplePosBuffer[toPos];
+    s_fraction      = g_FractionBuffer[toPos];
+    s_sinPreCompute = g_SinPreComputeBuffer[toPos];
 
-        double v = 0.0;
+    double v = 0.0;
 
-        for (int convOffs=CONV_START; convOffs < CONV_END; ++convOffs) {
-            int pos = convOffs + fromPos;
-            if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
-                float x = PI_F * (convOffs - fraction);
-                
-                double sinX = sinPreCompute;
-                if (convOffs & 1) {
-                    sinX *= -1.0;
-                }
-
-                double sinc =  SincF(sinX, x);
-
-                v += g_SampleFromBuffer[pos] * sinc;
-            }
-        }
-        g_OutputBuffer[toPos] = (float)v;
+    for (int convOffs=CONV_START; convOffs < CONV_END; ++convOffs) {
+        v += ConvolutionElemValue(convOffs);
     }
+
+    g_OutputBuffer[toPos] = (float)v;
 }
 #endif
 
 #if 0
+// 最適化前。
 
+[numthreads(1, 1, 1)]
+void
+CSMain(
+        uint  tid:        SV_GroupIndex,
+        uint3 groupIdXYZ: SV_GroupID)
+{
+    uint toPos = c_sampleToStartPos + groupIdXYZ.x;
+
+    s_fromPos       = g_ResamplePosBuffer[toPos];
+    s_fraction      = g_FractionBuffer[toPos];
+    s_sinPreCompute = g_SinPreComputeBuffer[toPos];
+
+    double v = 0.0;
+
+    for (int convOffs=CONV_START; convOffs < CONV_END; ++convOffs) {
+        int pos = convOffs + fromPos;
+        if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
+            float x = PI_F * (convOffs - fraction);
+                
+            double sinX = sinPreCompute;
+            if (convOffs & 1) {
+                sinX *= -1.0;
+            }
+
+            double sinc =  Sinc(sinX, x);
+
+            v += g_SampleFromBuffer[pos] * sinc;
+        }
+    }
+    g_OutputBuffer[toPos] = (float)v;
+}
+#endif
+
+#if 0
 // TGSM
 groupshared double s_scratch[GROUP_THREAD_COUNT];
 groupshared uint   s_resamplePos;

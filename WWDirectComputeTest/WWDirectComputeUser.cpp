@@ -582,6 +582,10 @@ WWDirectComputeUser::Dispatch(
     HRESULT hr = S_OK;
     D3D11_MAPPED_SUBRESOURCE mr;
 
+    assert(0 < X);
+    assert(0 < Y);
+    assert(0 < Z);
+
     assert(m_pContext);
     // pCBCS==NULL‚Å‚à‰ÂB
     // pCSData==NULL‚Å‚à‰ÂB
