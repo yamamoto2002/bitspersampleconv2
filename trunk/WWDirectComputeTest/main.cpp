@@ -490,7 +490,7 @@ WWUpsampleGpu::Setup(
 {
     bool    result = true;
     HRESULT hr     = S_OK;
-    unsigned int * resamplePosArray = NULL;
+    int * resamplePosArray = NULL;
     float * fractionArray = NULL;
     float * sinPreComputeArray = NULL;
 
@@ -508,7 +508,7 @@ WWUpsampleGpu::Setup(
     m_sampleRateTo    = sampleRateTo;
     m_sampleTotalTo   = sampleTotalTo;
 
-    resamplePosArray = new unsigned int[sampleTotalTo];
+    resamplePosArray = new int[sampleTotalTo];
     assert(resamplePosArray);
 
     fractionArray = new float[sampleTotalTo];
@@ -601,7 +601,7 @@ WWUpsampleGpu::Setup(
     assert(m_pBuf0Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(unsigned int), sampleTotalTo, resamplePosArray, "ResamplePosBuffer", &m_pBuf1Srv));
+        sizeof(int), sampleTotalTo, resamplePosArray, "ResamplePosBuffer", &m_pBuf1Srv));
     assert(m_pBuf1Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
@@ -778,13 +778,11 @@ UpsampleCpu(
         sinPreComputeArray[i] = sin(-PI_D * fraction);
     }
 
-    /*
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("i=%6d rPos=%6d fraction=%+f\n",
             i, resamplePosArray[i], fractionArray[i]);
     }
     printf("resamplePos created\n");
-    */
 
     for (int toPos=0; toPos<sampleTotalTo; ++toPos) {
         int    fromPos  = resamplePosArray[toPos];
@@ -831,9 +829,11 @@ UpsampleCpu(
     }
     printf("resampled\n");
     */
+    /*
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("%d, %f\n", i, outputTo[i]);
     }
+    */
 
 //end:
     delete [] sinPreComputeArray;
@@ -858,7 +858,7 @@ Test2(void)
 
     // データ準備
     int convolutionN    = 256*256;
-    int sampleTotalFrom = 256;
+    int sampleTotalFrom = 16;
     int sampleRateFrom = 44100;
     int sampleRateTo   = 44100*10;
 
@@ -873,33 +873,49 @@ Test2(void)
     float *outputGpu = new float[sampleTotalTo];
     assert(outputGpu);
 
-#if 1
+    // 全部1
+    for (int i=0; i<sampleTotalFrom; ++i) {
+        sampleData[i] = 1.0f;
+    }
+
+    /*
+    // 44100Hzサンプリングで1000Hzのsin
+    for (int i=0; i<sampleTotalFrom; ++i) {
+        float xS = PI_F * i * 1000 / 44100;
+        sampleData[i] = sinf(xS);
+    }
+    */
+    /*
     // 最初のサンプルだけ1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 0;
     }
     sampleData[0] = 1.0f;
-#else
+    */
+
+    /*
     // 真ん中のサンプルだけ1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 0;
     }
     sampleData[127] = 1.0f;
-#endif
+    */
 
-    DWORD t0 = GetTickCount();
+
 
     HRG(us.Setup(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo));
-    for (int i=1; i<2; ++i ) { // sampleTotalTo; ++i) {
-        HRG(us.Dispatch(i, 2));
+    DWORD t0 = GetTickCount();
+    for (int i=0; i<1; ++i ) { // sampleTotalTo; ++i) {
+        HRG(us.Dispatch(0, sampleTotalTo));
     }
+    DWORD t1 = GetTickCount()+1;
     HRG(us.ResultGetFromGpuMemory(outputGpu, sampleTotalTo));
 
-    DWORD t1 = GetTickCount()+1;
+    DWORD t2 = GetTickCount();
 
     HRG(UpsampleCpu(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, outputCpu, sampleTotalTo));
 
-    DWORD t2 = GetTickCount()+2;
+    DWORD t3 = GetTickCount()+1;
 
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("%7d outGpu=%f outCpu=%f diff=%12.8f\n",
@@ -917,7 +933,7 @@ Test2(void)
 
     printf("GPU=%dms(%fsamples/s) CPU=%dms(%fsamples/s)\n",
         (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0),
-        (t2-t1),  sampleTotalTo / ((t2-t1)/1000.0));
+        (t3-t2),  sampleTotalTo / ((t3-t2)/1000.0));
 
 end:
     us.Unsetup();
