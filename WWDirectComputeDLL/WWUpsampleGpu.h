@@ -30,22 +30,34 @@ public:
         float * sampleData,
         int sampleDataCount);
 
-    static HRESULT UpsampleCpu(
+    HRESULT UpsampleCpuSetup(
         int convolutionN,
-        float * sampleData,
+        float * sampleFrom,
         int sampleTotalFrom,
         int sampleRateFrom,
         int sampleRateTo,
-        float * outputTo,
         int sampleTotalTo);
+
+    // output[0]Å`output[count-1]Ç…èëÇ´çûÇﬁ
+    HRESULT UpsampleCpuDo(
+        int startPos,
+        int count,
+        float *output);
+
+    void UpsampleCpuUnsetup(void);
 
 private:
     int m_convolutionN;
-    float * m_sampleFrom;
     int m_sampleTotalFrom;
     int m_sampleRateFrom;
     int m_sampleRateTo;
     int m_sampleTotalTo;
+
+    //CPUèàóùóp
+    float        * m_sampleFrom;
+    unsigned int * m_resamplePosArray;
+    float        * m_fractionArray;
+    double       * m_sinPreComputeArray;
 
     WWDirectComputeUser *m_pDCU;
     ID3D11ComputeShader *m_pCS;

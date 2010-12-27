@@ -27,9 +27,9 @@
                                 <RowDefinition Height="0*" />
                                 <RowDefinition Height="93*" />
                             </Grid.RowDefinitions>
-                            <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" IsChecked="False" Margin="6,7,0,0" Name="radioButtonUSCpu8" VerticalAlignment="Top" IsEnabled="False" />
-                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonUSCpu16" VerticalAlignment="Top" IsEnabled="False" />
-                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonUSGpu16" VerticalAlignment="Top" IsChecked="True" />
+                            <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonUSCpu8" VerticalAlignment="Top" IsEnabled="True" />
+                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonUSCpu16" VerticalAlignment="Top" IsEnabled="True" IsChecked="False" />
+                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonUSGpu16" VerticalAlignment="Top" IsChecked="False" IsEnabled="True" />
                             <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonUSGpu20" VerticalAlignment="Top" />
                             <RadioButton Content="±16777216サンプル GPU処理(PCの動作が重くなります)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonUSGpu24" VerticalAlignment="Top" />
                         </Grid>
@@ -136,7 +136,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="音質劣化">
+            <TabItem Header="音質劣化" IsEnabled="False">
                 <Grid Name="grid1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="112" />

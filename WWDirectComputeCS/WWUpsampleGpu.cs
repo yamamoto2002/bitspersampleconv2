@@ -32,6 +32,55 @@ namespace WWDirectComputeCS {
         private extern static void
         WWDCUpsample_Term();
 
+        // initしなくても呼べる。
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static int
+        WWDCUpsample_UpsampleCpuSetup(
+                int convolutionN,
+                float [] sampleData,
+                int sampleTotalFrom,
+                int sampleRateFrom,
+                int sampleRateTo,
+                int sampleTotalTo);
+
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static int
+        WWDCUpsample_UpsampleCpuDo(
+                int startPos,
+                int count,
+                [In, Out] float[] outputTo);
+
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static void
+        WWDCUpsample_UpsampleCpuUnsetup();
+
+        /////////////////////////////////////////////////////////////////////
+
+        /// <returns>HRESULT</returns>
+        public int UpsampleCpuSetup(
+                int convolutionN,
+                float [] sampleData,
+                int sampleTotalFrom,
+                int sampleRateFrom,
+                int sampleRateTo,
+                int sampleTotalTo) {
+            return WWDCUpsample_UpsampleCpuSetup(
+                convolutionN, sampleData, sampleTotalFrom,
+                sampleRateFrom, sampleRateTo, sampleTotalTo);
+        }
+
+        public int UpsampleCpuDo(
+                int startPos,
+                int count,
+                ref float[] outputTo) {
+            return WWDCUpsample_UpsampleCpuDo(
+                startPos, count, outputTo);
+        }
+
+        public void UpsampleCpuUnsetup() {
+            WWDCUpsample_UpsampleCpuUnsetup();
+        }
+
         /////////////////////////////////////////////////////////////////////
 
         /// <returns>HRESULT</returns>

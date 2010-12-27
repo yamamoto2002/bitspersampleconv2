@@ -34,6 +34,28 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCUpsample_Term(void);
 
+// CPUèàóù
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_UpsampleCpuSetup(
+        int convolutionN,
+        float * sampleData,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_UpsampleCpuDo(
+        int startPos,
+        int count,
+        float * outputTo);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCUpsample_UpsampleCpuUnsetup(void);
+
 /////////////////////////////////////////////////////////////////////////////
 // å√Ç¢
 

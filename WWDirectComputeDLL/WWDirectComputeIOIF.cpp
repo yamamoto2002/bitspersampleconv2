@@ -56,6 +56,37 @@ WWDCUpsample_Term(void)
     g_upsampleGpu.Unsetup();
     g_upsampleGpu.Term();
 }
+// CPUèàóù
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_UpsampleCpuSetup(
+        int convolutionN,
+        float * sampleData,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo)
+{
+    return g_upsampleGpu.UpsampleCpuSetup(convolutionN, sampleData, sampleTotalFrom,
+        sampleRateFrom, sampleRateTo, sampleTotalTo);
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_UpsampleCpuDo(
+        int startPos,
+        int count,
+        float * outputTo)
+{
+    return g_upsampleGpu.UpsampleCpuDo(startPos, count, outputTo);
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCUpsample_UpsampleCpuUnsetup(void)
+{
+    g_upsampleGpu.UpsampleCpuUnsetup();
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
