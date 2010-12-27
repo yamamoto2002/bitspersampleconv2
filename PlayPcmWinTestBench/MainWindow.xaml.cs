@@ -624,6 +624,7 @@ namespace PlayPcmWinTestBench {
         }
 
         // CPUでジッター付加。
+        // @todo ジッターの量に、πをかけるのを忘れているような気がするので、あとで調べる。
         private int CpuJitterAdd(AQWorkerArgs args, PcmData pcmDataIn, PcmData pcmDataOut) {
             int hr = 0;
 

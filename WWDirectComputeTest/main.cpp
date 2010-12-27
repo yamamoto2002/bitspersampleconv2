@@ -402,8 +402,330 @@ end:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class UpsampleGpu {
+public:
+    void Init(void);
+    void Term(void);
+
+    HRESULT Setup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo);
+
+    HRESULT Dispatch(
+        int startPos,
+        int count);
+
+    HRESULT ResultGetFromGpuMemory(
+        float * outputTo,
+        int outputToElemNum);
+
+    void Unsetup(void);
+
+private:
+    int m_convolutionN;
+    float * m_sampleFrom;
+    int m_sampleTotalFrom;
+    int m_sampleRateFrom;
+    int m_sampleRateTo;
+    int m_sampleTotalTo;
+
+    WWDirectComputeUser *m_pDCU;
+    ID3D11ComputeShader *m_pCS;
+
+    ID3D11ShaderResourceView*   m_pBuf0Srv;
+    ID3D11ShaderResourceView*   m_pBuf1Srv;
+    ID3D11ShaderResourceView*   m_pBuf2Srv;
+    ID3D11ShaderResourceView*   m_pBuf3Srv;
+    ID3D11UnorderedAccessView*  m_pBufResultUav;
+    ID3D11Buffer * m_pBufConst;
+};
+
+HRESULT
+UpsampleGpu::ResultGetFromGpuMemory(
+        float *outputTo,
+        int outputToElemNum)
+{
+    HRESULT hr = S_OK;
+
+    assert(m_pDCU);
+    assert(m_pBufResultUav);
+
+    assert(outputTo);
+    assert(outputToElemNum <= m_sampleTotalTo);
+
+    // 計算結果をCPUメモリーに持ってくる。
+    HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo, outputToElemNum * sizeof(float)));
+end:
+    return hr;
+}
+
+void
+UpsampleGpu::Init(void)
+{
+    int m_convolutionN = 0;
+    float * m_sampleFrom = NULL;
+    int m_sampleTotalFrom = 0;
+    int m_sampleRateFrom = 0;
+    int m_sampleRateTo = 0;
+    int m_sampleTotalTo = 0;
+
+    m_pDCU = NULL;
+    m_pCS  = NULL;
+
+    m_pBuf0Srv = NULL;
+    m_pBuf1Srv = NULL;
+    m_pBuf2Srv = NULL;
+    m_pBuf3Srv = NULL;
+    m_pBufResultUav = NULL;
+    m_pBufConst = NULL;
+}
+
+void
+UpsampleGpu::Term(void)
+{
+    assert(m_pDCU == NULL);
+    assert(m_pCS  == NULL);
+
+    assert(m_pBuf0Srv == NULL);
+    assert(m_pBuf1Srv == NULL);
+    assert(m_pBuf2Srv == NULL);
+    assert(m_pBuf3Srv == NULL);
+    assert(m_pBufResultUav == NULL);
+    assert(m_pBufConst == NULL);
+}
+
+HRESULT
+UpsampleGpu::Setup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo)
+{
+    bool    result = true;
+    HRESULT hr     = S_OK;
+    unsigned int * resamplePosArray = NULL;
+    float * fractionArray = NULL;
+    float * sinPreComputeArray = NULL;
+
+
+    assert(0 < convolutionN);
+    assert(sampleFrom);
+    assert(0 < sampleTotalFrom);
+    assert(sampleRateFrom <= sampleRateTo);
+    assert(0 < sampleTotalTo);
+
+    m_convolutionN    = convolutionN;
+    m_sampleFrom      = sampleFrom;
+    m_sampleTotalFrom = sampleTotalFrom;
+    m_sampleRateFrom  = sampleRateFrom;
+    m_sampleRateTo    = sampleRateTo;
+    m_sampleTotalTo   = sampleTotalTo;
+
+    resamplePosArray = new unsigned int[sampleTotalTo];
+    assert(resamplePosArray);
+
+    fractionArray = new float[sampleTotalTo];
+    assert(fractionArray);
+
+    sinPreComputeArray = new float[sampleTotalTo];
+    assert(sinPreComputeArray);
+
+    for (int i=0; i<sampleTotalTo; ++i) {
+        double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
+#if 1
+        /* -0.5 <= fraction<+0.5になるようにresamplePosを選ぶ。
+         * 最後のほうで範囲外を指さないようにする。
+         */
+        int resamplePosI = (int)(resamplePos+0.5);
+        if (sampleTotalFrom <= resamplePosI) {
+            resamplePosI = sampleTotalFrom -1;
+        }
+#else
+        /* 0<=fraction<1になるにresamplePosIを選ぶ。
+         * これは1に近い値が頻出するのでよくない。
+         */
+        int resamplePosI = (int)(resamplePos+0.5);
+        assert(resamplePosI < sampleTotalFrom);
+#endif
+        double fraction = resamplePos - resamplePosI;
+
+        resamplePosArray[i]   = resamplePosI;
+        fractionArray[i]      = (float)fraction;
+        sinPreComputeArray[i] = (float)sin(-PI_D * fraction);
+    }
+
+    /*
+    for (int i=0; i<sampleTotalTo; ++i) {
+        printf("i=%6d rPos=%6d fraction=%+f\n",
+            i, resamplePosArray[i], fractionArray[i]);
+    }
+    printf("resamplePos created\n");
+    */
+
+    // HLSLの#defineを作る。
+    char      convStartStr[32];
+    sprintf_s(convStartStr, "%d", -convolutionN);
+    char      convEndStr[32];
+    sprintf_s(convEndStr,   "%d", convolutionN);
+    char      convCountStr[32];
+    sprintf_s(convCountStr, "%d", convolutionN*2);
+    char      sampleTotalFromStr[32];
+    sprintf_s(sampleTotalFromStr,   "%d", sampleTotalFrom);
+    char      sampleTotalToStr[32];
+    sprintf_s(sampleTotalToStr,   "%d", sampleTotalTo);
+
+    char      sampleRateFromStr[32];
+    sprintf_s(sampleRateFromStr,   "%d", sampleRateFrom);
+    char      sampleRateToStr[32];
+    sprintf_s(sampleRateToStr,   "%d", sampleRateTo);
+    char      iterateNStr[32];
+    sprintf_s(iterateNStr,  "%d", convolutionN*2/GROUP_THREAD_COUNT);
+    char      groupThreadCountStr[32];
+    sprintf_s(groupThreadCountStr, "%d", GROUP_THREAD_COUNT);
+
+    // doubleprec
+    int sinxBufferElemBytes = 8;
+    const D3D_SHADER_MACRO defines[] = {
+            "CONV_START", convStartStr,
+            "CONV_END", convEndStr,
+            "CONV_COUNT", convCountStr,
+            "SAMPLE_TOTAL_FROM", sampleTotalFromStr,
+            "SAMPLE_TOTAL_TO", sampleTotalToStr,
+
+            "SAMPLE_RATE_FROM", sampleRateFromStr,
+            "SAMPLE_RATE_TO", sampleRateToStr,
+            "ITERATE_N", iterateNStr,
+            "GROUP_THREAD_COUNT", groupThreadCountStr,
+            NULL, NULL
+        };
+
+    m_pDCU = new WWDirectComputeUser();
+    assert(m_pDCU);
+
+    HRG(m_pDCU->Init());
+
+    // HLSL ComputeShaderをコンパイルしてGPUに送る。
+    HRG(m_pDCU->CreateComputeShader(L"SincConvolution2.hlsl", "CSMain", defines, &m_pCS));
+    assert(m_pCS);
+
+    // 入力データをGPUメモリーに送る
+    HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+        sizeof(float), sampleTotalFrom, sampleFrom, "SampleFromBuffer", &m_pBuf0Srv));
+    assert(m_pBuf0Srv);
+
+    HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+        sizeof(unsigned int), sampleTotalTo, resamplePosArray, "ResamplePosBuffer", &m_pBuf1Srv));
+    assert(m_pBuf1Srv);
+
+    HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+        sizeof(float), sampleTotalTo, fractionArray, "FractionBuffer", &m_pBuf2Srv));
+    assert(m_pBuf2Srv);
+
+    HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
+        sizeof(float), sampleTotalTo, sinPreComputeArray, "SinPreComputeBuffer", &m_pBuf3Srv));
+    assert(m_pBuf3Srv);
+    
+    // 結果出力領域をGPUに作成。
+    HRG(m_pDCU->CreateBufferAndUnorderedAccessView(
+        sizeof(float), sampleTotalTo, NULL, "OutputBuffer", &m_pBufResultUav));
+    assert(m_pBufResultUav);
+
+    // 定数置き場をGPUに作成。
+    HRG(m_pDCU->CreateConstantBuffer(sizeof(ConstShaderParams), 1, "ConstShaderParams", &m_pBufConst));
+
+end:
+    delete [] sinPreComputeArray;
+    sinPreComputeArray = NULL;
+
+    delete [] fractionArray;
+    fractionArray = NULL;
+
+    delete [] resamplePosArray;
+    resamplePosArray = NULL;
+
+    return hr;
+}
+
+HRESULT
+UpsampleGpu::Dispatch(
+        int startPos,
+        int count)
+{
+    HRESULT hr = S_OK;
+    bool result = true;
+
+    // GPU上でComputeShader実行。
+    ID3D11ShaderResourceView* aRViews[] = { m_pBuf0Srv, m_pBuf1Srv, m_pBuf2Srv, m_pBuf3Srv };
+    ConstShaderParams shaderParams;
+    ZeroMemory(&shaderParams, sizeof shaderParams);
+#if 1
+    // すこしだけ速い。中でループするようにした。
+    shaderParams.c_convOffs = 0;
+    shaderParams.c_dispatchCount = m_convolutionN*2/GROUP_THREAD_COUNT;
+    HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
+        m_pBufConst, &shaderParams, sizeof shaderParams, m_sampleTotalTo, 1, 1));
+#else
+    // 遅い
+    for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
+        shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
+        shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
+        HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
+            m_pBufConst, &shaderParams, sizeof shaderParams, m_sampleTotalTo, 1, 1));
+    }
+#endif
+
+end:
+    if (hr == DXGI_ERROR_DEVICE_REMOVED) {
+        dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
+            m_pDCU->GetDevice()->GetDeviceRemovedReason());
+    }
+
+    return hr;
+}
+
+void
+UpsampleGpu::Unsetup(void)
+{
+    if (m_pDCU) {
+        m_pDCU->DestroyConstantBuffer(m_pBufConst);
+        m_pBufConst = NULL;
+
+        m_pDCU->DestroyDataAndUnorderedAccessView(m_pBufResultUav);
+        m_pBufResultUav = NULL;
+
+        m_pDCU->DestroyDataAndShaderResourceView(m_pBuf3Srv);
+        m_pBuf3Srv = NULL;
+
+        m_pDCU->DestroyDataAndShaderResourceView(m_pBuf2Srv);
+        m_pBuf2Srv = NULL;
+
+        m_pDCU->DestroyDataAndShaderResourceView(m_pBuf1Srv);
+        m_pBuf1Srv = NULL;
+
+        m_pDCU->DestroyDataAndShaderResourceView(m_pBuf0Srv);
+        m_pBuf0Srv = NULL;
+
+        if (m_pCS) {
+            m_pDCU->DestroyComputeShader(m_pCS);
+            m_pCS = NULL;
+        }
+
+        m_pDCU->Term();
+    }
+
+    SAFE_DELETE(m_pDCU);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+
 static HRESULT
-ResampleCpu(
+UpsampleCpu(
         int convolutionN,
         float * sampleData,
         int sampleTotalFrom,
@@ -437,6 +759,7 @@ ResampleCpu(
         }
 #else
         /* 0<=fraction<1になるにresamplePosIを選ぶ。
+         * これは1に近い値が頻出するのでよくない。
          */
         int resamplePosI = (int)(resamplePos+0.5);
         assert(resamplePosI < sampleTotalFrom);
@@ -522,9 +845,12 @@ static void
 Test2(void)
 {
     HRESULT hr = S_OK;
+    UpsampleGpu us;
+
+    us.Init();
 
     // データ準備
-    int convolutionN    = 256*256;
+    int convolutionN    = 256;
     int sampleTotalFrom = 256;
     int sampleRateFrom = 44100;
     int sampleRateTo   = 44100*10;
@@ -536,6 +862,9 @@ Test2(void)
 
     float *outputCpu = new float[sampleTotalTo];
     assert(outputCpu);
+
+    float *outputGpu = new float[sampleTotalTo];
+    assert(outputGpu);
 
 #if 1
     // 最初のサンプルだけ1で、残りは0
@@ -553,16 +882,21 @@ Test2(void)
 
     DWORD t0 = GetTickCount();
 
-    HRG(ResampleCpu(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, outputCpu, sampleTotalTo));
+    HRG(us.Setup(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo));
+    HRG(us.Dispatch(0, sampleTotalTo));
+    HRG(us.ResultGetFromGpuMemory(outputGpu, sampleTotalTo));
 
     DWORD t1 = GetTickCount()+1;
 
-    /*
+    HRG(UpsampleCpu(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, outputCpu, sampleTotalTo));
+
+    DWORD t2 = GetTickCount()+2;
+
     for (int i=0; i<sampleTotalTo; ++i) {
-        printf("%7d outCpu=%f\n",
-            i, outputCpu[i]);
+        printf("%7d outGpu=%f outCpu=%f diff=%12.8f\n",
+            i, outputGpu[i], outputCpu[i],
+            fabsf(outputGpu[i]-outputCpu[i]));
     }
-    */
 
     /*
         1 (秒)       x(サンプル/秒)
@@ -572,10 +906,17 @@ Test2(void)
             x = 256 ÷ 14
         */
 
-    printf("CPU=%dms(%fsamples/s)\n",
-        (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0));
+    printf("GPU=%dms(%fsamples/s) CPU=%dms(%fsamples/s)\n",
+        (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0),
+        (t2-t1),  sampleTotalTo / ((t2-t1)/1000.0));
 
 end:
+    us.Unsetup();
+    us.Term();
+
+    delete[] outputGpu;
+    outputGpu = NULL;
+
     delete[] outputCpu;
     outputCpu = NULL;
 

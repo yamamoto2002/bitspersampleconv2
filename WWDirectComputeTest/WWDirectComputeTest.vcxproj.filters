@@ -40,5 +40,8 @@
     <None Include="SincConvolution.hlsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="SincConvolution2.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
