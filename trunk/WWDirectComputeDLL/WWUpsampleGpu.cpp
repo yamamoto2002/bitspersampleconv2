@@ -1,6 +1,7 @@
 #include "WWUpsampleGpu.h"
 #include "WWUtil.h"
 #include <assert.h>
+#include <float.h>
 
 /// 1スレッドグループに所属するスレッドの数。TGSMを共有する。
 /// 2の乗数。
@@ -9,6 +10,9 @@
 
 #define PI_D 3.141592653589793238462643
 #define PI_F 3.141592653589793238462643f
+
+// シェーダーでdoubleprecを盛大に使用する
+// #define USE_HIGH_PRECISION
 
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
@@ -101,9 +105,6 @@ WWUpsampleGpu::Setup(
     bool    result = true;
     HRESULT hr     = S_OK;
     int * resamplePosArray = NULL;
-    float * fractionArray = NULL;
-    float * sinPreComputeArray = NULL;
-
 
     assert(0 < convolutionN);
     assert(sampleFrom);
@@ -121,10 +122,21 @@ WWUpsampleGpu::Setup(
     resamplePosArray = new int[sampleTotalTo];
     assert(resamplePosArray);
 
-    fractionArray = new float[sampleTotalTo];
-    assert(fractionArray);
+#ifdef USE_HIGH_PRECISION
+    /// 要素がdoubleになったりfloatになったり
+    double * fractionArray = NULL;
+    fractionArray = new double[sampleTotalTo];
 
+    double * sinPreComputeArray = NULL;
+    sinPreComputeArray = new double[sampleTotalTo];
+#else
+    float * fractionArray = NULL;
+    fractionArray = new float[sampleTotalTo];
+
+    float * sinPreComputeArray = NULL;
     sinPreComputeArray = new float[sampleTotalTo];
+#endif
+    assert(fractionArray);
     assert(sinPreComputeArray);
 
     for (int i=0; i<sampleTotalTo; ++i) {
@@ -147,8 +159,13 @@ WWUpsampleGpu::Setup(
         double fraction = resamplePos - resamplePosI;
 
         resamplePosArray[i]   = resamplePosI;
+#ifdef USE_HIGH_PRECISION
+        fractionArray[i]      = fraction;
+        sinPreComputeArray[i] = sin(-PI_D * fraction);
+#else
         fractionArray[i]      = (float)fraction;
         sinPreComputeArray[i] = (float)sin(-PI_D * fraction);
+#endif
     }
 
     /*
@@ -192,6 +209,9 @@ WWUpsampleGpu::Setup(
             "SAMPLE_RATE_TO", sampleRateToStr,
             "ITERATE_N", iterateNStr,
             "GROUP_THREAD_COUNT", groupThreadCountStr,
+#ifdef USE_HIGH_PRECISION
+            "HIGH_PRECISION", "1",
+#endif
             NULL, NULL
         };
 
@@ -206,19 +226,19 @@ WWUpsampleGpu::Setup(
 
     // 入力データをGPUメモリーに送る
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), sampleTotalFrom, sampleFrom, "SampleFromBuffer", &m_pBuf0Srv));
+        sizeof sampleFrom[0], sampleTotalFrom, sampleFrom, "SampleFromBuffer", &m_pBuf0Srv));
     assert(m_pBuf0Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(int), sampleTotalTo, resamplePosArray, "ResamplePosBuffer", &m_pBuf1Srv));
+        sizeof resamplePosArray[0], sampleTotalTo, resamplePosArray, "ResamplePosBuffer", &m_pBuf1Srv));
     assert(m_pBuf1Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), sampleTotalTo, fractionArray, "FractionBuffer", &m_pBuf2Srv));
+        sizeof fractionArray[0], sampleTotalTo, fractionArray, "FractionBuffer", &m_pBuf2Srv));
     assert(m_pBuf2Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof(float), sampleTotalTo, sinPreComputeArray, "SinPreComputeBuffer", &m_pBuf3Srv));
+        sizeof sinPreComputeArray[0], sampleTotalTo, sinPreComputeArray, "SinPreComputeBuffer", &m_pBuf3Srv));
     assert(m_pBuf3Srv);
     
     // 結果出力領域をGPUに作成。

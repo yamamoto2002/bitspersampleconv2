@@ -108,6 +108,12 @@ namespace PlayPcmWinTestBench {
             m_USworker.ProgressChanged += new ProgressChangedEventHandler(m_USworker_ProgressChanged);
             m_USworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_USworker_RunWorkerCompleted);
             m_USworker.WorkerSupportsCancellation = true;
+
+            textBoxUSResult.Text += "※GPU計算機能を使用するためには以下の3つの準備が要ります:\r\n"
+                + "・GPUはGeForce GTX 570以上を用意して下さい。"
+                + "・最新のNVIDIAディスプレイドライバ をインストールして下さい(バージョン260以降が必要)。\r\n"
+                + "・最新のDirectXエンドユーザーランタイムをインストールする必要があります(August 2009以降が必要)。"
+                + " http://www.microsoft.com/downloads/details.aspx?FamilyID=2da43d38-db71-4c1b-bc6a-9b6652cd92a3&displayLang=ja\r\n";
         }
 
         
@@ -1223,7 +1229,13 @@ namespace PlayPcmWinTestBench {
             }
             sw.Stop();
 
-            WriteWavFile(pcmDataOut, args.outputPath);
+            try {
+                WriteWavFile(pcmDataOut, args.outputPath);
+            } catch (IOException ex) {
+                // 書き込みエラー。
+                e.Result = ex.ToString();
+                return;
+            }
 
             e.Result = string.Format("書き込み成功。処理時間 {0}秒",
                 sw.ElapsedMilliseconds * 0.001);
