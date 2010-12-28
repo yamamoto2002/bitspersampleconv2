@@ -6,7 +6,7 @@
 ===!PlayPcmWin 2.0.50 ==
   * PlayPcmWinテストベンチの[アップサンプリング]機能 GPU±1048576サンプル 計算誤差(バグ)修正。
   * 音質劣化機能 修正中
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin250ss.png
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWin250.png
 
 ===!PlayPcmWin 2.0.46 ==
   * PlayPcmWinテストベンチの[アップサンプリング]機能 GPU±1048576サンプル 最適化パラメータ調整。
