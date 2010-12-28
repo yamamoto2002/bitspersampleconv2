@@ -59,6 +59,7 @@ WaveRTらしいです。(未確認)
   * Prodigy HD2はS/PDIF出力に量子化ビット数32ビットのデータを入れると出力に量子化ビット数16ビットのデータが出てきます。
   * Lynx L22は、アナログ音声出力は44.1kHz～192kHzの範囲のデータが再生出来ます。デジタル出力は44.1kHz～96kHzの範囲のデータが出力できます。
   * Halide bridgeは、[Sint24に固定する]を選択すると良いそうです。
+  * USB Sound Blaster Digital Music Premium HDは、タイマー駆動再生よりもイベント駆動再生のほうが安定動作します。
 
 =表1: オーディオインターフェースごとの、使用可能なフォーマット一覧=
 
@@ -138,7 +139,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || × 88890008 || × 88890008 || × 88890008 || × 88890008 || × 88890008 || × 88890008 || × 88890008 || × 88890008 ||
 
-スピーカー (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD アナログ音声出力)
+スピーカー (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD アナログ音声出力) ※上記説明参照
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || × 88890008 || ○        0 || × 88890008 || ○        0 || × 88890008 || × 88890008 || × 88890008 || × 88890008 ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
