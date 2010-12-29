@@ -156,7 +156,7 @@ WWUpsampleGpu::Setup(
     m_sampleTotalTo   = sampleTotalTo;
 
     // sinPreComputeArrayの精度を高めるためdoubleprecのfractionArrayDから計算する。
-    // こうすることで歪が減る。
+    // こうすることで歪が減ると良いなぁ。
     sinPreComputeArray = new float[sampleTotalTo];
     assert(sinPreComputeArray);
     PrepareSinPreComputeArray(fractionArrayD, sampleTotalTo, sinPreComputeArray);
