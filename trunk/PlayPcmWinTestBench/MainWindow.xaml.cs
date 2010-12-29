@@ -935,12 +935,6 @@ namespace PlayPcmWinTestBench {
             public int convolutionN;
             public ProcessDevice device;
             public int sampleSlice;
-
-            // --------------------------------------------------------
-            // 以降、物置(RunWorkerAsync()でセットする必要はない)
-
-            // 音量制限
-            public double scale;
         };
 
         private void buttonUSBrowseOpen_Click(object sender, RoutedEventArgs e) {
@@ -1209,8 +1203,6 @@ namespace PlayPcmWinTestBench {
             PcmData pcmDataOut = new PcmData();
             pcmDataOut.CopyFrom(pcmDataIn);
 
-            args.scale = 1.0;
-
             int hr = 0;
             if (args.device == ProcessDevice.Gpu) {
                 hr = GpuUpsample(args, pcmDataIn, pcmDataOut);
@@ -1229,6 +1221,9 @@ namespace PlayPcmWinTestBench {
             }
             sw.Stop();
 
+            // 成功した。レベル制限する。
+            float scale = pcmDataOut.LimitLevelOnFloatRange();
+
             try {
                 WriteWavFile(pcmDataOut, args.outputPath);
             } catch (IOException ex) {
@@ -1239,11 +1234,11 @@ namespace PlayPcmWinTestBench {
 
             e.Result = string.Format("書き込み成功。処理時間 {0}秒",
                 sw.ElapsedMilliseconds * 0.001);
-            if (args.scale < 1.0) {
+            if (scale < 1.0f) {
                 e.Result = string.Format("書き込み成功。処理時間 {0}秒" +
                     "レベルオーバーのため音量調整{1}dB({2}倍)しました。",
                     sw.ElapsedMilliseconds * 0.001,
-                    20.0 * Math.Log10(args.scale), args.scale);
+                    20.0 * Math.Log10(scale), scale);
             }
             m_USworker.ReportProgress(100);
         }

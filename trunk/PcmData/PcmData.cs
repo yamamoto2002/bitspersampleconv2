@@ -306,6 +306,43 @@ namespace PcmDataLib {
             }
         }
 
+        public void FindMaxMinValue(out float maxV, out float minV) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 32);
+            maxV = 0.0f;
+            minV = 0.0f;
+
+            for (int i = 0; i < NumFrames * NumChannels; ++i) {
+                float v = BitConverter.ToSingle(m_sampleArray, i * 4);
+                if (v < minV) {
+                    minV = v;
+                }
+                if (maxV < v) {
+                    maxV = v;
+                }
+            }
+        }
+
+        public float LimitLevelOnFloatRange() {
+            float maxV;
+            float minV;
+            FindMaxMinValue(out maxV, out minV);
+
+            float scale = 1.0f;
+            if (0.99999988079071044921875f < maxV) {
+                scale = 0.99999988079071044921875f / maxV;
+            }
+            if (minV < -1.0f && -1.0f/minV < scale) {
+                scale = -1.0f/minV;
+            }
+
+            if (scale < 1.0f) {
+                Scale(scale);
+            }
+
+            return scale;
+        }
+
         /// <summary>
         /// 量子化ビット数をbitsPerSampleに変更した、新しいPcmDataを戻す。
         /// 自分自身の内容は変更しない。

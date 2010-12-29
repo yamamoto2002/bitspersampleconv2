@@ -76,12 +76,6 @@ OutputBuffer[]はsampleN個用意する
 #define PI_F 3.141592653589793238462643f
 #define PI_D 3.141592653589793238462643
 
-StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
-StructuredBuffer<uint>    g_ResamplePosBuffer   : register(t1);
-StructuredBuffer<float>   g_FractionBuffer      : register(t2);
-StructuredBuffer<float>   g_SinPreComputeBuffer : register(t3);
-RWStructuredBuffer<float> g_OutputBuffer        : register(u0);
-
 /// 定数。16バイトの倍数のサイズの構造体。
 cbuffer consts {
     /// 畳み込み要素オフセット値。n * GROUP_THREAD_COUNTの飛び飛びの値が渡る。
@@ -97,10 +91,21 @@ cbuffer consts {
 inline double
 Sinc(double sinx, float x)
 {
-    if (-0.000000001f < x && x < 0.000000001f) {
+    if (-1.192092896e-07F < x && x < 1.192092896e-07F) {
         return 1.0;
     } else {
         return sinx * rcp(x);
+    }
+}
+
+inline double
+SincD(double sinx, double x)
+{
+    if (-2.2204460492503131e-016 < x && x < 2.2204460492503131e-016) {
+        return 1.0;
+    } else {
+        float xf = 1.0f / (float)x;
+        return sinx * xf;
     }
 }
 
@@ -113,33 +118,82 @@ Sinc(double sinx, float x)
  * 各スレッドは、自分の担当convolution位置の計算を行ってs_scratchに入れる。
  */
 
+#ifdef HIGH_PRECISION
+// できるだけdoubleprec
+
+// GPUメモリー
+StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
+StructuredBuffer<int>     g_ResamplePosBuffer   : register(t1);
+StructuredBuffer<double>  g_FractionBuffer      : register(t2);
+StructuredBuffer<double>  g_SinPreComputeBuffer : register(t3);
+RWStructuredBuffer<float> g_OutputBuffer        : register(u0);
+
 // TGSM
 groupshared double s_scratch[GROUP_THREAD_COUNT];
-groupshared uint   s_fromPos;
-groupshared float  s_fraction;
-groupshared float  s_sinPreCompute;
+groupshared int    s_fromPos;
+groupshared double s_fraction;
+groupshared double s_sinPreCompute;
 
 inline double
-ConvolutionElemValue(uint convOffs)
+ConvolutionElemValue(int convOffs)
 {
     double r = 0.0;
 
     int pos = convOffs + s_fromPos;
     if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
-        float x = PI_F * (convOffs - s_fraction);
-                
+        double x = PI_D * ((double)convOffs - s_fraction);
+
         double sinX = s_sinPreCompute;
         if (convOffs & 1) {
             sinX *= -1.0;
         }
 
-        double sinc =  Sinc(sinX, x);
+        double sinc =  SincD(sinX, x);
 
         r = g_SampleFromBuffer[pos] * sinc;
     }
 
     return r;
 }
+#else
+ // 主にsingleprec
+
+// GPUメモリー
+StructuredBuffer<float>   g_SampleFromBuffer    : register(t0);
+StructuredBuffer<int>     g_ResamplePosBuffer   : register(t1);
+StructuredBuffer<float>   g_FractionBuffer      : register(t2);
+StructuredBuffer<float>   g_SinPreComputeBuffer : register(t3);
+RWStructuredBuffer<float> g_OutputBuffer        : register(u0);
+
+// TGSM
+groupshared double s_scratch[GROUP_THREAD_COUNT];
+groupshared int    s_fromPos;
+groupshared float  s_fraction;
+groupshared float  s_sinPreCompute;
+
+inline double
+ConvolutionElemValue(int convOffs)
+{
+    double r = 0.0;
+
+    int pos = convOffs + s_fromPos;
+    if (0 <= pos && pos < SAMPLE_TOTAL_FROM) {
+        double x = PI_D * ((double)convOffs - (double)s_fraction);
+                
+        double sinX = s_sinPreCompute;
+        if (convOffs & 1) {
+            sinX *= -1.0;
+        }
+
+        double sinc =  SincD(sinX, x);
+
+        r = g_SampleFromBuffer[pos] * sinc;
+    }
+
+    return r;
+}
+
+#endif // HIGH_PRECISION
 
 #if 1
 [numthreads(GROUP_THREAD_COUNT, 1, 1)]
@@ -155,7 +209,7 @@ CSMain(
         s_sinPreCompute = g_SinPreComputeBuffer[toPos];
     }
     s_scratch[tid] = 0;
-    int offs = tid + CONV_START;
+    int offs = (int)tid + CONV_START;
 
     GroupMemoryBarrierWithGroupSync();
     
@@ -194,27 +248,27 @@ CSMain(
      * 2260_GTC2010.pdf参照。
      * だが、動作が怪しくなるのでうまくいかない場合はSyncしてみると良い。
      */
-    GroupMemoryBarrierWithGroupSync(); 
+    //GroupMemoryBarrierWithGroupSync(); 
 #endif
 
 #if 32 <= GROUP_THREAD_COUNT
     if (tid < 16) { s_scratch[tid] += s_scratch[tid + 16]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 16 <= GROUP_THREAD_COUNT
     if (tid < 8) { s_scratch[tid] += s_scratch[tid + 8]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 8 <= GROUP_THREAD_COUNT
     if (tid < 4) { s_scratch[tid] += s_scratch[tid + 4]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
 #if 4 <= GROUP_THREAD_COUNT
     if (tid < 2) { s_scratch[tid] += s_scratch[tid + 2]; }
-    GroupMemoryBarrierWithGroupSync();
+    //GroupMemoryBarrierWithGroupSync();
 #endif
 
     if (tid == 0) {

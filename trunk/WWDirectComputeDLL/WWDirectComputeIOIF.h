@@ -56,6 +56,13 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCUpsample_UpsampleCpuUnsetup(void);
 
+/// @result サンプルデータのスケーリング(0.5=0.5倍スケール)
+extern "C" __declspec(dllexport)
+float __stdcall
+WWDCUpsample_LimitSampleData(
+        float * sampleInOut,
+        int sampleElemNum);
+
 /////////////////////////////////////////////////////////////////////////////
 // 古い
 
