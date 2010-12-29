@@ -18,6 +18,18 @@ namespace WWDirectComputeCS {
 
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static int
+        WWDCUpsample_InitWithResamplePosArray(
+            int convolutionN,
+            float[] sampleFrom,
+            int sampleTotalFrom,
+            int sampleRateFrom,
+            int sampleRateTo,
+            int sampleTotalTo,
+            int[] resamplePosArray,
+            double[] fractionArray);
+
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static int
         WWDCUpsample_Dispatch(
             int startPos,
             int count);
@@ -42,6 +54,19 @@ namespace WWDirectComputeCS {
                 int sampleRateFrom,
                 int sampleRateTo,
                 int sampleTotalTo);
+        
+        // initしなくても呼べる。
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static int
+        WWDCUpsample_UpsampleCpuSetupWithResamplePosArray(
+                int convolutionN,
+                float[] sampleData,
+                int sampleTotalFrom,
+                int sampleRateFrom,
+                int sampleRateTo,
+                int sampleTotalTo,
+                int[] resamplePosArray,
+                double[] fractionArray);
 
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static int
@@ -53,20 +78,6 @@ namespace WWDirectComputeCS {
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static void
         WWDCUpsample_UpsampleCpuUnsetup();
-
-        [DllImport("WWDirectComputeDLL.dll")]
-        private extern static float
-        WWDCUpsample_LimitSampleData(
-                [In, Out] float [] sampleInOut,
-                int sampleElemNum);
-
-        /////////////////////////////////////////////////////////////////////
-
-        // この機能はステレオで各チャンネルを別々に処理すると左右の音量差が発生するため使用できない
-        [DllImport("WWDirectComputeDLL.dll")]
-        private extern static float LimitSampleData(
-                ref float[] sampleDataInOut,
-                int sampleElemNum);
 
         /////////////////////////////////////////////////////////////////////
 
@@ -81,6 +92,22 @@ namespace WWDirectComputeCS {
             return WWDCUpsample_UpsampleCpuSetup(
                 convolutionN, sampleData, sampleTotalFrom,
                 sampleRateFrom, sampleRateTo, sampleTotalTo);
+        }
+
+        /// <returns>HRESULT</returns>
+        public int UpsampleCpuSetup(
+                int convolutionN,
+                float[] sampleData,
+                int sampleTotalFrom,
+                int sampleRateFrom,
+                int sampleRateTo,
+                int sampleTotalTo,
+                int[] resamplePosArray,
+                double[] fractionArray) {
+            return WWDCUpsample_UpsampleCpuSetupWithResamplePosArray(
+                convolutionN, sampleData, sampleTotalFrom,
+                sampleRateFrom, sampleRateTo, sampleTotalTo,
+                resamplePosArray, fractionArray);
         }
 
         public int UpsampleCpuDo(
@@ -107,6 +134,21 @@ namespace WWDirectComputeCS {
                 int sampleTotalTo) {
             return WWDCUpsample_Init(convolutionN, sampleFrom,
                 sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo);
+        }
+
+        /// <returns>HRESULT</returns>
+        public int Init(
+                int convolutionN,
+                float[] sampleFrom,
+                int sampleTotalFrom,
+                int sampleRateFrom,
+                int sampleRateTo,
+                int sampleTotalTo,
+                int[] resamplePosArray,
+                double[] fractionArray) {
+            return WWDCUpsample_InitWithResamplePosArray(convolutionN, sampleFrom,
+                sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo,
+                resamplePosArray, fractionArray);
         }
 
         /// <summary>

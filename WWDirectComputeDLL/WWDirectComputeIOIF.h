@@ -19,6 +19,19 @@ WWDCUpsample_Init(
 /// @result HRESULT
 extern "C" __declspec(dllexport)
 int __stdcall
+WWDCUpsample_InitWithResamplePosArray(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArray);
+
+/// @result HRESULT
+extern "C" __declspec(dllexport)
+int __stdcall
 WWDCUpsample_Dispatch(
         int startPos,
         int count);
@@ -34,7 +47,9 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCUpsample_Term(void);
 
+/////////////////////////////////////////////////////////////////////////////
 // CPU処理
+
 extern "C" __declspec(dllexport)
 int __stdcall
 WWDCUpsample_UpsampleCpuSetup(
@@ -47,6 +62,18 @@ WWDCUpsample_UpsampleCpuSetup(
 
 extern "C" __declspec(dllexport)
 int __stdcall
+WWDCUpsample_UpsampleCpuSetupWithResamplePosArray(
+        int convolutionN,
+        float * sampleData,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int *resamplePosArray,
+        double *fractionArray);
+
+extern "C" __declspec(dllexport)
+int __stdcall
 WWDCUpsample_UpsampleCpuDo(
         int startPos,
         int count,
@@ -56,12 +83,14 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCUpsample_UpsampleCpuUnsetup(void);
 
+/*
 /// @result サンプルデータのスケーリング(0.5=0.5倍スケール)
 extern "C" __declspec(dllexport)
 float __stdcall
 WWDCUpsample_LimitSampleData(
         float * sampleInOut,
         int sampleElemNum);
+*/
 
 /////////////////////////////////////////////////////////////////////////////
 // 古い
