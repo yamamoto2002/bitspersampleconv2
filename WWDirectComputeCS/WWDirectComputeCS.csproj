@@ -84,7 +84,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WWDirectComputeCS.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WWUpsampleGpu.cs" />
   </ItemGroup>
