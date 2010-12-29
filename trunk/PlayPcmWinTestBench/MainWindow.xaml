@@ -17,7 +17,7 @@
                         </Grid>
                     </GroupBox>
                     <Button Click="buttonUSOutputStart_Click" Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="10,4,0,0" Name="buttonUSOutputStart" VerticalAlignment="Top" Width="120" Grid.Row="1" />
-                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="10,33,0,0" Name="progressBarUS" VerticalAlignment="Top" Width="244" Grid.Row="1" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="10,0,0,6" Name="progressBarUS" VerticalAlignment="Bottom" Width="244" Grid.Row="1" />
                     <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="10,258,0,0" Name="groupBox11" VerticalAlignment="Top" Width="474">
                         <Grid>
                             <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxUSOutputFilePath" Text="C:\wav\output.wav" VerticalAlignment="Top" Width="450" />
@@ -48,7 +48,7 @@
                             <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="109,6,0,0" Name="textBoxUSFrequency" Text="96000" VerticalAlignment="Top" Width="79" Grid.ColumnSpan="2" />
                         </Grid>
                     </GroupBox>
-                    <Button Content="キャンセル(_C)" Height="23" HorizontalAlignment="Left" Margin="134,4,0,0" Name="buttonUSCancel" VerticalAlignment="Top" Width="120" Click="buttonUSCancel_Click" IsEnabled="False" Grid.Row="1" />
+                    <Button Content="処理中断(_C)" Height="23" HorizontalAlignment="Left" Margin="134,4,0,0" Name="buttonUSAbort" VerticalAlignment="Top" Width="120" Click="buttonUSAbort_Click" IsEnabled="False" Grid.Row="1" />
                 </Grid>
             </TabItem>
             <TabItem Header="ABXテスト" Name="tabItem1" DataContext="{Binding}">
@@ -140,13 +140,13 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="音質劣化" IsEnabled="False">
+            <TabItem Header="音質劣化" IsEnabled="True">
                 <Grid Name="grid1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="112" />
-                        <RowDefinition Height="253" />
+                        <RowDefinition Height="204" />
                         <RowDefinition Height="88" />
-                        <RowDefinition Height="74" />
+                        <RowDefinition Height="123" />
                     </Grid.RowDefinitions>
                     <GroupBox Header="周期ジッターを増やす" Height="97" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox4" VerticalAlignment="Top" Width="281" Grid.Row="1">
                         <Grid>
@@ -166,47 +166,35 @@
                             <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonAQBrowseOpen" VerticalAlignment="Top" Width="120" Click="buttonAQBrowseOpen_Click" />
                         </Grid>
                     </GroupBox>
-                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,9,0,0" Name="buttonAQOutputStart" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQOutputStart_Click" />
-                    <GroupBox Header="三角分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" Margin="388,6,0,0" Name="groupBox7" VerticalAlignment="Top" Width="249" Grid.Row="1" IsEnabled="True">
+                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,9,0,0" Name="buttonAQOutputStart" VerticalAlignment="Top" Width="107" Grid.Row="3" Click="buttonAQOutputStart_Click" />
+                    <GroupBox Header="ランダムジッターを増やす" Height="102" HorizontalAlignment="Left" Margin="6,102,0,0" Name="groupBox7" VerticalAlignment="Top" Width="330" Grid.Row="1" IsEnabled="True">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="190*" />
-                                <ColumnDefinition Width="113*" />
+                                <ColumnDefinition Width="221*" />
+                                <ColumnDefinition Width="97*" />
                             </Grid.ColumnDefinitions>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="0*" />
                                 <RowDefinition Height="93*" />
                             </Grid.RowDefinitions>
-                            <Label Content="最大ずれ量(ピコ秒)" Grid.Row="1" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,7,0,0" Name="label12" VerticalContentAlignment="Center" Width="127" Height="34" VerticalAlignment="Top" />
-                            <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="0,10,0,0" Name="textBoxTpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" HorizontalContentAlignment="Right" />
+                            <Label Content="三角分布ジッター最大量(ピコ秒)" Grid.Row="1" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,7,0,0" Name="label12" VerticalContentAlignment="Center" Width="215" Height="34" VerticalAlignment="Top" />
+                            <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" Margin="12,12,0,0" Name="textBoxTpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" HorizontalContentAlignment="Right" />
+                            <Label Content="一様分布ジッター最大量(ピコ秒)" Grid.Row="1" Height="34" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,37,0,0" Name="label15" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="215" />
+                            <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="12,42,0,0" Name="textBoxRpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" />
                         </Grid>
                     </GroupBox>
-                    <ProgressBar Grid.Row="3" Height="23" Margin="6,0,0,8" Name="progressBar1" VerticalAlignment="Bottom" Width="120" HorizontalAlignment="Left" />
-                    <GroupBox Grid.Row="1" Header="一様分布ランダムジッターを増やす" Height="70" HorizontalAlignment="Left" IsEnabled="True" Margin="388,81,0,0" Name="groupBox9" VerticalAlignment="Top" Width="249">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="190*" />
-                                <ColumnDefinition Width="113*" />
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="0*" />
-                                <RowDefinition Height="93*" />
-                            </Grid.RowDefinitions>
-                            <Label Content="最大ずれ量(ピコ秒)" Grid.Row="1" Height="34" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,7,0,0" Name="label15" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="127" />
-                            <TextBox Grid.Column="1" Grid.Row="1" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="0,10,0,0" Name="textBoxRpdfJitterPicoseconds" Text="0" VerticalAlignment="Top" Width="79" />
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="146" HorizontalAlignment="Left" IsEnabled="True" Margin="6,107,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
+                    <ProgressBar Grid.Row="3" Height="23" Margin="6,0,0,8" Name="progressBarAQ" VerticalAlignment="Bottom" Width="233" HorizontalAlignment="Left" />
+                    <GroupBox Grid.Row="1" Header="畳み込み計算打ち切り設定" Height="146" HorizontalAlignment="Left" IsEnabled="True" Margin="382,7,0,0" Name="groupBox10" VerticalAlignment="Top" Width="380">
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="0*" />
                                 <RowDefinition Height="93*" />
                             </Grid.RowDefinitions>
                             <RadioButton Content="±256サンプル CPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonConvolution256" VerticalAlignment="Top" IsChecked="True" />
-                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonConvolution65536" VerticalAlignment="Top" />
-                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonConvolution65536GPU" VerticalAlignment="Top" />
-                            <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonConvolution1048576GPU" VerticalAlignment="Top" />
-                            <RadioButton Content="±16777216サンプル GPU処理(PCの動作が重くなります)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonConvolution16777216GPU" VerticalAlignment="Top" />
+                            <RadioButton Content="±65536サンプル CPU処理(±256サンプルの256倍の計算量)" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,29,0,0" Name="radioButtonAQCpu16" VerticalAlignment="Top" />
+                            <RadioButton Content="±65536サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,51,0,0" Name="radioButtonAQGpu16" VerticalAlignment="Top" />
+                            <RadioButton Content="±1048576サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,73,0,0" Name="radioButtonAQGpu20" VerticalAlignment="Top" />
+                            <RadioButton Content="±16777216サンプル GPU処理" Grid.Row="1" Height="16" HorizontalAlignment="Left" Margin="6,95,0,0" Name="radioButtonAQGpu24" VerticalAlignment="Top" />
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="6,0,0,0" Name="groupBox6" VerticalAlignment="Top" Width="474" Grid.Row="2">
@@ -215,8 +203,9 @@
                             <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonAQBrowseSaveAs" VerticalAlignment="Top" Width="120" Click="buttonAQBrowseSaveAs_Click" />
                         </Grid>
                     </GroupBox>
-                    <TextBox Grid.Row="3" Margin="133,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" />
-                    <Label Content="※1000ピコ秒=1ナノ秒です" Grid.Row="1" Height="28" HorizontalAlignment="Left" Margin="416,169,0,0" Name="label14" VerticalAlignment="Top" Width="235" />
+                    <TextBox Grid.Row="3" Margin="245,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Width="517" />
+                    <Label Content="※1000ピコ秒=1ナノ秒です" Grid.Row="1" Height="28" HorizontalAlignment="Left" Margin="345,163,0,0" Name="label14" VerticalAlignment="Top" Width="235" />
+                    <Button Content="処理中断(_C)" Height="23" HorizontalAlignment="Left" Margin="119,9,0,0" Name="buttonAQAbort" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQAbort_Click" />
                 </Grid>
             </TabItem>
         </TabControl>

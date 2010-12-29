@@ -15,6 +15,17 @@ public:
         int sampleRateTo,
         int sampleTotalTo);
 
+    // With resamplePosArray
+    HRESULT Setup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArrayD);
+
     HRESULT Dispatch(
         int startPos,
         int count);
@@ -25,11 +36,6 @@ public:
 
     void Unsetup(void);
 
-    // limit level to fit to the audio sampledata range
-    static float LimitSampleData(
-        float * sampleData,
-        int sampleDataCount);
-
     HRESULT UpsampleCpuSetup(
         int convolutionN,
         float * sampleFrom,
@@ -37,6 +43,17 @@ public:
         int sampleRateFrom,
         int sampleRateTo,
         int sampleTotalTo);
+
+    /// With resamplePosArray
+    HRESULT UpsampleCpuSetup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArrayD);
 
     // output[0]Å`output[count-1]Ç…èëÇ´çûÇﬁ
     HRESULT UpsampleCpuDo(
@@ -53,12 +70,6 @@ private:
     int m_sampleRateTo;
     int m_sampleTotalTo;
 
-    //CPUèàóùóp
-    float        * m_sampleFrom;
-    unsigned int * m_resamplePosArray;
-    float        * m_fractionArray;
-    double       * m_sinPreComputeArray;
-
     WWDirectComputeUser *m_pDCU;
     ID3D11ComputeShader *m_pCS;
 
@@ -68,6 +79,11 @@ private:
     ID3D11ShaderResourceView*   m_pBuf3Srv;
     ID3D11UnorderedAccessView*  m_pBufResultUav;
     ID3D11Buffer * m_pBufConst;
-    
+
+    //CPUèàóùóp
+    float        * m_sampleFrom;
+    int          * m_resamplePosArray;
+    double       * m_fractionArray;
+    float        * m_sinPreComputeArray;
 };
 

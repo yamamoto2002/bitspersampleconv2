@@ -18,8 +18,29 @@ WWDCUpsample_Init(
         int sampleTotalTo)
 {
     g_upsampleGpu.Init();
-    return g_upsampleGpu.Setup(convolutionN, sampleFrom, sampleTotalFrom,
+    return g_upsampleGpu.Setup(
+        convolutionN, sampleFrom, sampleTotalFrom,
         sampleRateFrom, sampleRateTo, sampleTotalTo);
+}
+
+/// @result HRESULT
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_InitWithResamplePosArray(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArray)
+{
+    g_upsampleGpu.Init();
+    return g_upsampleGpu.Setup(
+        convolutionN, sampleFrom, sampleTotalFrom,
+        sampleRateFrom, sampleRateTo, sampleTotalTo,
+        resamplePosArray, fractionArray);
 }
 
 /// @result HRESULT
@@ -57,7 +78,10 @@ WWDCUpsample_Term(void)
     g_upsampleGpu.Unsetup();
     g_upsampleGpu.Term();
 }
+
+/////////////////////////////////////////////////////////////////////////////
 // CPU処理
+
 extern "C" __declspec(dllexport)
 int __stdcall
 WWDCUpsample_UpsampleCpuSetup(
@@ -68,8 +92,27 @@ WWDCUpsample_UpsampleCpuSetup(
         int sampleRateTo,
         int sampleTotalTo)
 {
-    return g_upsampleGpu.UpsampleCpuSetup(convolutionN, sampleData, sampleTotalFrom,
+    return g_upsampleGpu.UpsampleCpuSetup(
+        convolutionN, sampleData, sampleTotalFrom,
         sampleRateFrom, sampleRateTo, sampleTotalTo);
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCUpsample_UpsampleCpuSetupWithResamplePosArray(
+        int convolutionN,
+        float * sampleData,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int *resamplePosArray,
+        double *fractionArray)
+{
+    return g_upsampleGpu.UpsampleCpuSetup(
+        convolutionN, sampleData, sampleTotalFrom,
+        sampleRateFrom, sampleRateTo, sampleTotalTo,
+        resamplePosArray, fractionArray);
 }
 
 extern "C" __declspec(dllexport)
@@ -89,16 +132,7 @@ WWDCUpsample_UpsampleCpuUnsetup(void)
     g_upsampleGpu.UpsampleCpuUnsetup();
 }
 
-/// @result サンプルデータのスケーリング(0.5=0.5倍スケール)
-extern "C" __declspec(dllexport)
-float __stdcall
-WWDCUpsample_LimitSampleData(
-        float * sampleInOut,
-        int sampleElemNum)
-{
-    return WWUpsampleGpu::LimitSampleData(sampleInOut, sampleElemNum);
-}
-
+#if 0
 /////////////////////////////////////////////////////////////////////////////
 
 /// 1スレッドグループに所属するスレッドの数。TGSMを共有する。
@@ -574,3 +608,5 @@ WWDCIO_JitterAddGpuPortion(
         offs,
         sampleToProcess);
 }
+
+#endif

@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace WWDirectComputeCS {
     public class WWDirectComputeCS {
+        /*
         [DllImport("WWDirectComputeDLL.dll")]
         private extern static int
         WWDCIO_Init(int precision, int convolutionN);
@@ -86,5 +87,6 @@ namespace WWDirectComputeCS {
                 offs,
                 sampleToProcess);
         }
+        */
     }
 }

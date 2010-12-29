@@ -11,9 +11,6 @@
 #define PI_D 3.141592653589793238462643
 #define PI_F 3.141592653589793238462643f
 
-// シェーダーでdoubleprecを盛大に使用する
-// #define USE_HIGH_PRECISION
-
 /// シェーダーに渡す定数。16バイトの倍数でないといけないらしい。
 struct ConstShaderParams {
     unsigned int c_convOffs;
@@ -22,6 +19,7 @@ struct ConstShaderParams {
     unsigned int c_reserved2;
 };
 
+/*
 float
 WWUpsampleGpu::LimitSampleData(
         float * sampleData,
@@ -57,6 +55,7 @@ WWUpsampleGpu::LimitSampleData(
 
     return scale;
 }
+*/
 
 void
 WWUpsampleGpu::Init(void)
@@ -93,6 +92,43 @@ WWUpsampleGpu::Term(void)
     assert(m_pBufConst == NULL);
 }
 
+static void
+PrepareResamplePosArray(
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArrayD)
+{
+    for (int i=0; i<sampleTotalTo; ++i) {
+        double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
+        /* -0.5 <= fraction<+0.5になるようにresamplePosを選ぶ。
+         * 最後のほうで範囲外を指さないようにする。
+         */
+        int resamplePosI = (int)(resamplePos+0.5);
+        if (resamplePosI < 0) {
+            resamplePosI = 0;
+        }
+        if (sampleTotalFrom <= resamplePosI) {
+            resamplePosI = sampleTotalFrom -1;
+        }
+        double fraction = resamplePos - resamplePosI;
+
+        resamplePosArray[i] = resamplePosI;
+        fractionArrayD[i]   = fraction;
+    }
+}
+
+static void
+PrepareSinPreComputeArray(
+        const double *fractionArray, int sampleTotalTo, float *sinPreComputeArray)
+{
+    for (int i=0; i<sampleTotalTo; ++i) {
+        sinPreComputeArray[i] = (float)sin(-PI_D * fractionArray[i]);
+    }
+}
+
 HRESULT
 WWUpsampleGpu::Setup(
         int convolutionN,
@@ -100,11 +136,12 @@ WWUpsampleGpu::Setup(
         int sampleTotalFrom,
         int sampleRateFrom,
         int sampleRateTo,
-        int sampleTotalTo)
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArrayD)
 {
-    bool    result = true;
-    HRESULT hr     = S_OK;
-    int * resamplePosArray = NULL;
+    HRESULT hr = S_OK;
+    float * sinPreComputeArray = NULL;
 
     assert(0 < convolutionN);
     assert(sampleFrom);
@@ -113,59 +150,22 @@ WWUpsampleGpu::Setup(
     assert(0 < sampleTotalTo);
 
     m_convolutionN    = convolutionN;
-    //m_sampleFrom      = sampleFrom;
     m_sampleTotalFrom = sampleTotalFrom;
     m_sampleRateFrom  = sampleRateFrom;
     m_sampleRateTo    = sampleRateTo;
     m_sampleTotalTo   = sampleTotalTo;
 
-    resamplePosArray = new int[sampleTotalTo];
-    assert(resamplePosArray);
-
-#ifdef USE_HIGH_PRECISION
-    /// 要素がdoubleになったりfloatになったり
-    double * fractionArray = NULL;
-    fractionArray = new double[sampleTotalTo];
-
-    double * sinPreComputeArray = NULL;
-    sinPreComputeArray = new double[sampleTotalTo];
-#else
-    float * fractionArray = NULL;
-    fractionArray = new float[sampleTotalTo];
-
-    float * sinPreComputeArray = NULL;
+    // sinPreComputeArrayの精度を高めるためdoubleprecのfractionArrayDから計算する。
+    // こうすることで歪が減る。
     sinPreComputeArray = new float[sampleTotalTo];
-#endif
-    assert(fractionArray);
     assert(sinPreComputeArray);
+    PrepareSinPreComputeArray(fractionArrayD, sampleTotalTo, sinPreComputeArray);
 
+    // ここでsingleprecのfractionArrayF作成。
+    float *fractionArrayF = new float[sampleTotalTo];
+    assert(fractionArrayF);
     for (int i=0; i<sampleTotalTo; ++i) {
-        double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
-#if 1
-        /* -0.5 <= fraction<+0.5になるようにresamplePosを選ぶ。
-         * 最後のほうで範囲外を指さないようにする。
-         */
-        int resamplePosI = (int)(resamplePos+0.5);
-        if (sampleTotalFrom <= resamplePosI) {
-            resamplePosI = sampleTotalFrom -1;
-        }
-#else
-        /* 0<=fraction<1になるにresamplePosIを選ぶ。
-         * これは1に近い値が頻出するのでよくない。
-         */
-        int resamplePosI = (int)(resamplePos+0.5);
-        assert(resamplePosI < sampleTotalFrom);
-#endif
-        double fraction = resamplePos - resamplePosI;
-
-        resamplePosArray[i]   = resamplePosI;
-#ifdef USE_HIGH_PRECISION
-        fractionArray[i]      = fraction;
-        sinPreComputeArray[i] = sin(-PI_D * fraction);
-#else
-        fractionArray[i]      = (float)fraction;
-        sinPreComputeArray[i] = (float)sin(-PI_D * fraction);
-#endif
+        fractionArrayF[i] = (float)fractionArrayD[i];
     }
 
     /*
@@ -173,7 +173,7 @@ WWUpsampleGpu::Setup(
         printf("i=%6d rPos=%6d fraction=%+f\n",
             i, resamplePosArray[i], fractionArray[i]);
     }
-    printf("resamplePos created\n");
+    printf("sampleTotal=%d\n", i);
     */
 
     // HLSLの#defineを作る。
@@ -209,9 +209,6 @@ WWUpsampleGpu::Setup(
             "SAMPLE_RATE_TO", sampleRateToStr,
             "ITERATE_N", iterateNStr,
             "GROUP_THREAD_COUNT", groupThreadCountStr,
-#ifdef USE_HIGH_PRECISION
-            "HIGH_PRECISION", "1",
-#endif
             NULL, NULL
         };
 
@@ -234,7 +231,7 @@ WWUpsampleGpu::Setup(
     assert(m_pBuf1Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
-        sizeof fractionArray[0], sampleTotalTo, fractionArray, "FractionBuffer", &m_pBuf2Srv));
+        sizeof fractionArrayF[0], sampleTotalTo, fractionArrayF, "FractionBuffer", &m_pBuf2Srv));
     assert(m_pBuf2Srv);
 
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
@@ -250,14 +247,58 @@ WWUpsampleGpu::Setup(
     HRG(m_pDCU->CreateConstantBuffer(sizeof(ConstShaderParams), 1, "ConstShaderParams", &m_pBufConst));
 
 end:
-    delete [] sinPreComputeArray;
-    sinPreComputeArray = NULL;
+    SAFE_DELETE(fractionArrayF);
+    SAFE_DELETE(sinPreComputeArray);
 
-    delete [] fractionArray;
-    fractionArray = NULL;
+    return hr;
+}
 
-    delete [] resamplePosArray;
-    resamplePosArray = NULL;
+// without resamplePosArray
+HRESULT
+WWUpsampleGpu::Setup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo)
+{
+    bool    result = true;
+    HRESULT hr     = S_OK;
+
+    assert(0 < convolutionN);
+    assert(sampleFrom);
+    assert(0 < sampleTotalFrom);
+    assert(sampleRateFrom <= sampleRateTo);
+    assert(0 < sampleTotalTo);
+
+    int * resamplePosArray = new int[sampleTotalTo];
+    assert(resamplePosArray);
+
+    double * fractionArrayD = new double[sampleTotalTo];
+    assert(fractionArrayD);
+
+    PrepareResamplePosArray(
+          sampleTotalFrom,
+          sampleRateFrom,
+          sampleRateTo,
+          sampleTotalTo,
+          resamplePosArray,
+          fractionArrayD);
+
+    HRG(Setup(
+        convolutionN,
+        sampleFrom,
+        sampleTotalFrom,
+        sampleRateFrom,
+        sampleRateTo,
+        sampleTotalTo,
+        resamplePosArray,
+        fractionArrayD));
+
+end:
+    SAFE_DELETE(fractionArrayD);
+    SAFE_DELETE(resamplePosArray);
 
     return hr;
 }
@@ -371,6 +412,53 @@ SincD(double sinx, double x)
     }
 }
 
+// with resamplePosArray
+HRESULT
+WWUpsampleGpu::UpsampleCpuSetup(
+        int convolutionN,
+        float * sampleFrom,
+        int sampleTotalFrom,
+        int sampleRateFrom,
+        int sampleRateTo,
+        int sampleTotalTo,
+        int * resamplePosArray,
+        double *fractionArrayD)
+{
+    HRESULT hr = S_OK;
+
+    assert(0 < convolutionN);
+    assert(sampleFrom);
+    assert(0 < sampleTotalFrom);
+    assert(sampleRateFrom <= sampleRateTo);
+    assert(0 < sampleTotalTo);
+
+    m_convolutionN    = convolutionN;
+    m_sampleTotalFrom = sampleTotalFrom;
+    m_sampleRateFrom  = sampleRateFrom;
+    m_sampleRateTo    = sampleRateTo;
+    m_sampleTotalTo   = sampleTotalTo;
+
+    m_resamplePosArray = new int[sampleTotalTo];
+    assert(m_resamplePosArray);
+    memcpy(m_resamplePosArray, resamplePosArray, sizeof(int)*sampleTotalTo);
+
+    m_fractionArray = new double[sampleTotalTo];
+    assert(m_fractionArray);
+    memcpy(m_fractionArray, fractionArrayD, sizeof(double)*sampleTotalTo);
+
+    m_sampleFrom      = new float[sampleTotalFrom];
+    assert(m_sampleFrom);
+    memcpy(m_sampleFrom, sampleFrom, sizeof(float)*sampleTotalFrom);
+
+    m_sinPreComputeArray = new float[sampleTotalTo];
+    assert(m_sinPreComputeArray);
+
+    PrepareSinPreComputeArray(m_fractionArray, sampleTotalTo, m_sinPreComputeArray);
+
+    return hr;
+}
+
+// without resamplePosArray
 HRESULT
 WWUpsampleGpu::UpsampleCpuSetup(
         int convolutionN,
@@ -388,56 +476,30 @@ WWUpsampleGpu::UpsampleCpuSetup(
     assert(sampleRateFrom <= sampleRateTo);
     assert(0 < sampleTotalTo);
 
-    m_convolutionN    = convolutionN;
-    m_sampleTotalFrom = sampleTotalFrom;
-    m_sampleRateFrom  = sampleRateFrom;
-    m_sampleRateTo    = sampleRateTo;
-    m_sampleTotalTo   = sampleTotalTo;
+    // 多少無駄だが…
+    int * resamplePosArray = new int[sampleTotalTo];
+    assert(resamplePosArray);
 
-    m_sampleFrom      = new float[sampleTotalFrom];
-    assert(m_sampleFrom);
-    memcpy(m_sampleFrom, sampleFrom, sizeof(float)*sampleTotalFrom);
+    double * fractionArrayD = new double[sampleTotalTo];
+    assert(fractionArrayD);
 
-    m_resamplePosArray = new unsigned int[sampleTotalTo];
-    assert(m_resamplePosArray);
+    PrepareResamplePosArray(
+        sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo,
+        resamplePosArray, fractionArrayD);
 
-    m_fractionArray = new float[sampleTotalTo];
-    assert(m_fractionArray);
+    hr = UpsampleCpuSetup(
+          convolutionN,
+          sampleFrom,
+          sampleTotalFrom,
+          sampleRateFrom,
+          sampleRateTo,
+          sampleTotalTo,
+          resamplePosArray,
+          fractionArrayD);
 
-    m_sinPreComputeArray = new double[sampleTotalTo];
-    assert(m_sinPreComputeArray);
+    SAFE_DELETE(fractionArrayD);
+    SAFE_DELETE(resamplePosArray);
 
-    for (int i=0; i<sampleTotalTo; ++i) {
-        double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
-#if 1
-        /* -0.5 <= fraction<+0.5になるようにresamplePosを選ぶ。
-         * 最後のほうで範囲外を指さないようにする。
-         */
-        int resamplePosI = (int)(resamplePos+0.5);
-        if (sampleTotalFrom <= resamplePosI) {
-            resamplePosI = sampleTotalFrom -1;
-        }
-#else
-        /* 0<=fraction<1になるにresamplePosIを選ぶ。
-         * これは1に近い値が頻出するのでよくない。
-         */
-        int resamplePosI = (int)(resamplePos+0.5);
-        assert(resamplePosI < sampleTotalFrom);
-#endif
-        double fraction = resamplePos - resamplePosI;
-
-        m_resamplePosArray[i]   = resamplePosI;
-        m_fractionArray[i]      = (float)fraction;
-        m_sinPreComputeArray[i] = sin(-PI_D * fraction);
-    }
-
-    /*
-    for (int i=0; i<sampleTotalTo; ++i) {
-        printf("i=%6d rPos=%6d fraction=%+f\n",
-            i, resamplePosArray[i], fractionArray[i]);
-    }
-    printf("resamplePos created\n");
-    */
     return hr;
 }
 
@@ -501,15 +563,8 @@ WWUpsampleGpu::UpsampleCpuDo(
 void
 WWUpsampleGpu::UpsampleCpuUnsetup(void)
 {
-    delete [] m_sinPreComputeArray;
-    m_sinPreComputeArray = NULL;
-
-    delete [] m_fractionArray;
-    m_fractionArray = NULL;
-
-    delete [] m_resamplePosArray;
-    m_resamplePosArray = NULL;
-
-    delete [] m_sampleFrom;
-    m_sampleFrom = NULL;
+    SAFE_DELETE(m_sinPreComputeArray);
+    SAFE_DELETE(m_fractionArray);
+    SAFE_DELETE(m_resamplePosArray);
+    SAFE_DELETE(m_sampleFrom);
 }
