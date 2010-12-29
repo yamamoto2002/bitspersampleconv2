@@ -44,7 +44,8 @@ WWDCUpsample_GetResultFromGpuMemory(
         return hr;
     }
 
-    WWUpsampleGpu::LimitSampleData(outputTo, outputToElemNum);
+    // 何倍にスケールしたかわからなくなるので別の関数に分けた。
+    //WWUpsampleGpu::LimitSampleData(outputTo, outputToElemNum);
 
     return hr;
 }
@@ -86,6 +87,16 @@ void __stdcall
 WWDCUpsample_UpsampleCpuUnsetup(void)
 {
     g_upsampleGpu.UpsampleCpuUnsetup();
+}
+
+/// @result サンプルデータのスケーリング(0.5=0.5倍スケール)
+extern "C" __declspec(dllexport)
+float __stdcall
+WWDCUpsample_LimitSampleData(
+        float * sampleInOut,
+        int sampleElemNum)
+{
+    return WWUpsampleGpu::LimitSampleData(sampleInOut, sampleElemNum);
 }
 
 /////////////////////////////////////////////////////////////////////////////

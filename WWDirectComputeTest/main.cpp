@@ -895,10 +895,10 @@ Test2(void)
     us.Init();
 
     // データ準備
-    int convolutionN    = 256*256*16;
-    int sampleTotalFrom = 1048576*2;
+    int convolutionN    = 256*256;
+    int sampleTotalFrom = 256;
     int sampleRateFrom  = 44100;
-    int sampleRateTo    = 48000;
+    int sampleRateTo    = 441000;
 
     int sampleTotalTo   = (int64_t)sampleTotalFrom * sampleRateTo / sampleRateFrom;
 
@@ -911,10 +911,12 @@ Test2(void)
     float *outputGpu = new float[sampleTotalTo];
     assert(outputGpu);
 
+    /*
     // 全部1
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 1.0f;
     }
+    */
 
     /*
     // 44100Hzサンプリングで1000Hzのsin
@@ -932,22 +934,16 @@ Test2(void)
     sampleData[0] = 1.0f;
     */
 
-    /*
-    // 真ん中あたりのサンプルだけ-1で、残りは0
+    // 真ん中あたりのサンプルだけ1で、残りは0
     for (int i=0; i<sampleTotalFrom; ++i) {
         sampleData[i] = 0;
     }
-    sampleData[125] = -1.0f;
-    sampleData[126] = -1.0f;
-    sampleData[127] = -1.0f;
-    sampleData[128] = -1.0f;
-    */
+    sampleData[127] = 1.0f;
 
     HRG(us.Setup(convolutionN, sampleData, sampleTotalFrom, sampleRateFrom, sampleRateTo, sampleTotalTo));
     DWORD t0 = GetTickCount();
-    for (int i=0; i<256*16; ++i ) { // sampleTotalTo; ++i) {
-        HRGR(us.Dispatch(i*256, 256));
-        Sleep(1000);
+    for (int i=0; i<1; ++i ) { // sampleTotalTo; ++i) {
+        HRGR(us.Dispatch(0, sampleTotalTo));
     }
     DWORD t1 = GetTickCount()+1;
     HRG(us.ResultGetFromGpuMemory(outputGpu, sampleTotalTo));
@@ -976,11 +972,9 @@ Test2(void)
     float scaleG = WWUpsampleGpu::LimitSampleData(outputGpu, sampleTotalTo);
     float scaleC = WWUpsampleGpu::LimitSampleData(outputCpu, sampleTotalTo);
 
-    /*
     for (int i=0; i<sampleTotalTo; ++i) {
         printf("%d, %12.8f\n", i, outputGpu[i]);
     }
-    */
 
     printf("GPU=%dms(%fsamples/s)s=%f CPU=%dms(%fsamples/s)s=%f\n",
         (t1-t0),  sampleTotalTo / ((t1-t0)/1000.0), scaleG,

@@ -54,6 +54,20 @@ namespace WWDirectComputeCS {
         private extern static void
         WWDCUpsample_UpsampleCpuUnsetup();
 
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static float
+        WWDCUpsample_LimitSampleData(
+                [In, Out] float [] sampleInOut,
+                int sampleElemNum);
+
+        /////////////////////////////////////////////////////////////////////
+
+        // この機能はステレオで各チャンネルを別々に処理すると左右の音量差が発生するため使用できない
+        [DllImport("WWDirectComputeDLL.dll")]
+        private extern static float LimitSampleData(
+                ref float[] sampleDataInOut,
+                int sampleElemNum);
+
         /////////////////////////////////////////////////////////////////////
 
         /// <returns>HRESULT</returns>
