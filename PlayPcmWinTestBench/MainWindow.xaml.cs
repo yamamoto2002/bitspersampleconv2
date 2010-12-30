@@ -98,17 +98,19 @@ namespace PlayPcmWinTestBench {
             m_USAQworker.WorkerReportsProgress = true;
             m_USAQworker.DoWork += new DoWorkEventHandler(m_USAQworker_DoWork);
             m_USAQworker.ProgressChanged += new ProgressChangedEventHandler(m_USAQworker_ProgressChanged);
-            m_USAQworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_USworker_RunWorkerCompleted);
+            m_USAQworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_USAQworker_RunWorkerCompleted);
             m_USAQworker.WorkerSupportsCancellation = true;
 
-            textBoxUSResult.Text += "※GPU計算機能を使用するためには以下の3つの準備が要ります:\r\n"
-                + "・GPUはGeForce GTX 570以上を用意して下さい。"
+            string s = "※GPU計算機能を使用するためには以下の3つの準備が要ります:\r\n"
+                + "・GPUはGeForce GTX 570以上を用意して下さい。\r\n"
                 + "・最新のNVIDIAディスプレイドライバ をインストールして下さい(バージョン260以降が必要)。\r\n"
                 + "・最新のDirectXエンドユーザーランタイムをインストールする必要があります(August 2009以降が必要)。"
                 + " http://www.microsoft.com/downloads/details.aspx?FamilyID=2da43d38-db71-4c1b-bc6a-9b6652cd92a3&displayLang=ja\r\n";
+
+            textBoxUSResult.Text = s;
+            textBoxAQResult.Text = s;
         }
 
-        
         private void Window_Closed(object sender, EventArgs e) {
             if (wasapi != null) {
                 Stop();
@@ -553,6 +555,9 @@ namespace PlayPcmWinTestBench {
             public double tpdfJitterPicoseconds;
             public double rpdfJitterPicoseconds;
 
+            public int outputBitsPerSample;
+            public PcmDataLib.PcmData.ValueRepresentationType outputVRT;
+
             // --------------------------------------------------------
             // 以降、物置(DoWork()の中で使用する)
             public double thetaCoefficientSeqJitter;
@@ -621,7 +626,18 @@ namespace PlayPcmWinTestBench {
 
             args.addJitter = false;
 
-            buttonUSOutputStart.IsEnabled  = false;
+            // 出力フォーマット
+            args.outputBitsPerSample = 16;
+            args.outputVRT = PcmData.ValueRepresentationType.SInt;
+            if (radioButtonOutputSint24.IsChecked == true) {
+                args.outputBitsPerSample = 24;
+            }
+            if (radioButtonOutputFloat32.IsChecked == true) {
+                args.outputBitsPerSample = 32;
+                args.outputVRT = PcmData.ValueRepresentationType.SFloat;
+            }
+
+            buttonUSOutputStart.IsEnabled = false;
             buttonUSBrowseOpen.IsEnabled   = false;
             buttonUSBrowseSaveAs.IsEnabled = false;
             buttonUSAbort.IsEnabled        = true;
@@ -710,6 +726,10 @@ namespace PlayPcmWinTestBench {
             }
 
             args.addJitter = true;
+
+            // 出力フォーマット
+            args.outputBitsPerSample = 32;
+            args.outputVRT = PcmData.ValueRepresentationType.SFloat;
 
             buttonAQOutputStart.IsEnabled  = false;
             buttonAQBrowseOpen.IsEnabled   = false;
@@ -1059,6 +1079,11 @@ namespace PlayPcmWinTestBench {
             // 成功した。レベル制限する。
             float scale = pcmDataOut.LimitLevelOnFloatRange();
 
+            if (args.outputVRT != PcmData.ValueRepresentationType.SFloat) {
+                // ビットフォーマット変更。
+                pcmDataOut = pcmDataOut.BitsPerSampleConvertTo(args.outputBitsPerSample, args.outputVRT);
+            }
+
             try {
                 WriteWavFile(pcmDataOut, args.outputPath);
             } catch (IOException ex) {
@@ -1083,7 +1108,7 @@ namespace PlayPcmWinTestBench {
             buttonUSAbort.IsEnabled = false;
         }
 
-        private void m_USworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+        private void m_USAQworker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             progressBarUS.Value = 0;
             buttonUSAbort.IsEnabled = false;
             buttonUSOutputStart.IsEnabled = true;
