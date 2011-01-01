@@ -367,7 +367,7 @@ WWUpsampleGpu::Unsetup(void)
 static double
 SincD(double sinx, double x)
 {
-    if (-0.000000001 < x && x < 0.000000001) {
+    if (-2.2204460492503131e-016 < x && x < 2.2204460492503131e-016) {
         return 1.0;
     } else {
         return sinx / x;
