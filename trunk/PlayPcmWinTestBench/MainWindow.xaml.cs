@@ -763,13 +763,13 @@ namespace PlayPcmWinTestBench {
                     sampleData[i] = pcmDataIn.GetSampleValueInFloat(ch, i);
                 }
 
-                WWUpsampleGpu us = new WWUpsampleGpu();
+                WWUpsampleCpu us = new WWUpsampleCpu();
                 if (args.addJitter) {
-                    hr = us.UpsampleCpuSetup(args.convolutionN, sampleData, sampleData.Length,
+                    hr = us.Setup(args.convolutionN, sampleData, sampleData.Length,
                         pcmDataIn.SampleRate, pcmDataOut.SampleRate, sampleTotalTo,
                         args.resamplePosArray, args.fractionArray);
                 } else {
-                    hr = us.UpsampleCpuSetup(args.convolutionN, sampleData, sampleData.Length,
+                    hr = us.Setup(args.convolutionN, sampleData, sampleData.Length,
                         pcmDataIn.SampleRate, pcmDataOut.SampleRate, sampleTotalTo);
                 }
                 if (hr < 0) {
@@ -786,16 +786,16 @@ namespace PlayPcmWinTestBench {
                     }
 
                     float[] outFragment = new float[sample1];
-                    hr = us.UpsampleCpuDo(offs, sample1, ref outFragment);
+                    hr = us.Do(offs, sample1, outFragment);
                     if (hr < 0) {
-                        // ここからreturnしても外のfor文までしか行かない
-                        us.UpsampleCpuUnsetup();
+                        // ここからbreakしても外のfor文までしか行かない
+                        us.Unsetup();
                         sampleData = null;
                         break;
                     }
                     if (m_USAQworker.CancellationPending) {
-                        // ここからreturnしても外のfor文までしか行かない
-                        us.UpsampleCpuUnsetup();
+                        // ここからbreakしても外のfor文までしか行かない
+                        us.Unsetup();
                         sampleData = null;
                         hr = -1;
                         break;
@@ -820,7 +820,7 @@ namespace PlayPcmWinTestBench {
                     break;
                 }
 
-                us.UpsampleCpuUnsetup();
+                us.Unsetup();
             }
 
             sampleData = null;
