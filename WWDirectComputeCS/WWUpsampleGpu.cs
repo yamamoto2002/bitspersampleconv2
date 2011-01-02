@@ -80,6 +80,9 @@ namespace WWDirectComputeCS {
         WWDCUpsample_UpsampleCpuUnsetup();
 
         /////////////////////////////////////////////////////////////////////
+        // CPU処理
+
+        /* 没。WWUpsampleCpuクラスに移動。
 
         /// <returns>HRESULT</returns>
         public int UpsampleCpuSetup(
@@ -121,6 +124,8 @@ namespace WWDirectComputeCS {
         public void UpsampleCpuUnsetup() {
             WWDCUpsample_UpsampleCpuUnsetup();
         }
+
+         */
 
         /////////////////////////////////////////////////////////////////////
 

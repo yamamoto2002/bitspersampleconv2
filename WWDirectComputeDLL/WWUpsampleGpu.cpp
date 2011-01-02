@@ -274,7 +274,8 @@ WWUpsampleGpu::Dispatch(
     bool result = true;
 
     // GPU上でComputeShader実行。
-    ID3D11ShaderResourceView* aRViews[] = { m_pBuf0Srv, m_pBuf1Srv, m_pBuf2Srv, m_pBuf3Srv };
+    ID3D11ShaderResourceView* aRViews[]
+        = { m_pBuf0Srv, m_pBuf1Srv, m_pBuf2Srv, m_pBuf3Srv };
     ConstShaderParams shaderParams;
     ZeroMemory(&shaderParams, sizeof shaderParams);
 #if 1
@@ -282,7 +283,8 @@ WWUpsampleGpu::Dispatch(
     shaderParams.c_convOffs = 0;
     shaderParams.c_dispatchCount = m_convolutionN*2/GROUP_THREAD_COUNT;
     shaderParams.c_sampleToStartPos = startPos;
-    HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
+    HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews,
+        m_pBufResultUav,
         m_pBufConst, &shaderParams, sizeof shaderParams, count, 1, 1));
 #else
     // 遅い
@@ -290,7 +292,8 @@ WWUpsampleGpu::Dispatch(
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
         shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
         shaderParams.c_sampleToStartPos = startPos;
-        HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews, m_pBufResultUav,
+        HRGR(m_pDCU->Run(m_pCS, sizeof aRViews/sizeof aRViews[0], aRViews,
+            m_pBufResultUav,
             m_pBufConst, &shaderParams, sizeof shaderParams, count, 1, 1));
     }
 #endif
@@ -318,7 +321,8 @@ WWUpsampleGpu::GetResultFromGpuMemory(
     assert(outputToElemNum <= m_sampleTotalTo);
 
     // 計算結果をCPUメモリーに持ってくる。
-    HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo, outputToElemNum * sizeof(float)));
+    HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo,
+        outputToElemNum * sizeof(float)));
 end:
     if (hr == DXGI_ERROR_DEVICE_REMOVED) {
         dprintf("DXGI_ERROR_DEVICE_REMOVED reason=%08x\n",
@@ -363,6 +367,7 @@ WWUpsampleGpu::Unsetup(void)
 
 /////////////////////////////////////////////////////////////////////////////
 // CPU処理
+/*
 
 static double
 SincD(double sinx, double x)
@@ -497,14 +502,6 @@ WWUpsampleGpu::UpsampleCpuDo(
 
                 double sinc =  SincD(sinX, x);
 
-                /*
-                if (pos == 0) {
-                    printf("toPos=%d pos=%d x=%f sinX=%f",
-                        toPos, pos, x, sinX);
-                    printf("\n");
-                }
-                */
-
                 v += m_sampleFrom[pos] * sinc;
             }
         }
@@ -512,13 +509,6 @@ WWUpsampleGpu::UpsampleCpuDo(
         output[toPos-startPos] = (float)v;
     }
 
-    /*
-    for (int i=0; i<sampleTotalTo; ++i) {
-        printf("i=%6d rPos=%6d fraction=%+6.2f output=%f\n",
-            i, resamplePosArray[i], fractionArray[i], outputTo[i]);
-    }
-    printf("resampled\n");
-    */
     return hr;
 }
 
@@ -530,3 +520,5 @@ WWUpsampleGpu::UpsampleCpuUnsetup(void)
     SAFE_DELETE(m_resamplePosArray);
     SAFE_DELETE(m_sampleFrom);
 }
+
+*/

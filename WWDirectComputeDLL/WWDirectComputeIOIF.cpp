@@ -82,6 +82,8 @@ WWDCUpsample_Term(void)
 /////////////////////////////////////////////////////////////////////////////
 // CPUèàóù
 
+/*
+
 extern "C" __declspec(dllexport)
 int __stdcall
 WWDCUpsample_UpsampleCpuSetup(
@@ -131,3 +133,5 @@ WWDCUpsample_UpsampleCpuUnsetup(void)
 {
     g_upsampleGpu.UpsampleCpuUnsetup();
 }
+
+*/
