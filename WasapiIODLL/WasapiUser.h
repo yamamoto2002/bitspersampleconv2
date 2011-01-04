@@ -11,6 +11,8 @@
 
 #define WW_DEVICE_NAME_COUNT (256)
 
+typedef void (__stdcall WWStateChanged)();
+
 struct WWDeviceInfo {
     int id;
     wchar_t name[WW_DEVICE_NAME_COUNT];
@@ -133,6 +135,12 @@ public:
         return m_dataFlow;
     }
 
+    void RegisterCallback(WWStateChanged callback) {
+        m_stateChangedCallback = callback;
+    }
+
+    void DeviceStateChanged(void);
+
 private:
     std::vector<WWDeviceInfo> m_deviceInfo;
     IMMDeviceCollection       *m_deviceCollection;
@@ -178,6 +186,10 @@ private:
     WWPcmData    m_spliceBuffer;
     WWPcmData    m_startSilenceBuffer;
     WWPcmData    m_endSilenceBuffer;
+
+    WWStateChanged * m_stateChangedCallback;
+    IMMDeviceEnumerator *m_deviceEnumerator;
+    IMMNotificationClient *m_pNotificationClient;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);

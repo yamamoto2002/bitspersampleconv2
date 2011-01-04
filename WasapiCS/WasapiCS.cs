@@ -151,13 +151,22 @@ namespace Wasapi {
         [DllImport("WasapiIODLL.dll")]
         private extern static int
         WasapiIO_GetPcmDataNumChannels();
-        
+
+        public delegate void StateChangedCallback();
+
+        [DllImport("WasapiIODLL.dll")]
+        public static extern void WasapiIO_RegisterCallback(StateChangedCallback callback);
+
         public int Init() {
             return WasapiIO_Init();
         }
 
         public void Term() {
             WasapiIO_Term();
+        }
+
+        public void RegisterCallback(StateChangedCallback callback) {
+            WasapiIO_RegisterCallback(callback);
         }
 
         public enum SchedulerTaskType {

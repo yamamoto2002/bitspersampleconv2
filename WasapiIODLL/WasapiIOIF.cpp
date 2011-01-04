@@ -401,3 +401,11 @@ WasapiIO_GetPcmDataNumChannels(void)
     return self->wasapi.GetPcmDataNumChannels();
 }
 
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_RegisterCallback(WWStateChanged callback)
+{
+    assert(self);
+    self->wasapi.RegisterCallback(callback);
+}
+

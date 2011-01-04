@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include "WasapiUser.h"
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
@@ -150,3 +151,6 @@ extern "C" __declspec(dllexport)
 int __stdcall
 WasapiIO_GetPcmDataNumChannels(void);
 
+extern "C" __declspec(dllexport)
+void __stdcall
+WasapiIO_RegisterCallback(WWStateChanged callback);
