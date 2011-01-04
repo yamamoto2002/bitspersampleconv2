@@ -627,9 +627,6 @@ namespace PlayPcmWin
             int hr;
 
             int selectedIndex = -1;
-            if (0 < listBoxDevices.Items.Count) {
-                selectedIndex = listBoxDevices.SelectedIndex;
-            }
 
             listBoxDevices.Items.Clear();
 
@@ -640,10 +637,8 @@ namespace PlayPcmWin
             for (int i = 0; i < nDevices; ++i) {
                 string deviceName = wasapi.GetDeviceName(i);
                 listBoxDevices.Items.Add(deviceName);
-                if (selectedIndex < 0
-                    && 0 < m_preference.PreferredDeviceName.Length
+                if (0 < m_preference.PreferredDeviceName.Length
                     && 0 == m_preference.PreferredDeviceName.CompareTo(deviceName)) {
-                    // まだユーザーが選択していない場合は
                     // お気に入りデバイスを選択状態にする。
                     selectedIndex = i;
                 }
@@ -2234,6 +2229,14 @@ namespace PlayPcmWin
         private void WasapiStatusChanged() {
             Console.WriteLine("WasapiStatusChanged");
             Dispatcher.BeginInvoke(new Action(delegate() {
+
+                // お気に入りデバイス設定。
+                object selectedItem = listBoxDevices.SelectedItem;
+                if (null != selectedItem) {
+                    string selectedItemName = (string)selectedItem;
+                    m_preference.PreferredDeviceName = selectedItemName;
+                }
+
                 DeviceDeselect();
                 CreateDeviceList();
             }));
