@@ -30,6 +30,8 @@ namespace PlayPcmWin
 
         private WasapiCS wasapi;
 
+        private Wasapi.WasapiCS.StateChangedCallback m_wasapiStateChangedDelegate;
+
         private Preference m_preference = new Preference();
 
         /// <summary>
@@ -394,6 +396,9 @@ namespace PlayPcmWin
             wasapi = new WasapiCS();
             hr = wasapi.Init();
             AddLogText(string.Format("wasapi.Init() {0:X8}\r\n", hr));
+
+            m_wasapiStateChangedDelegate = new Wasapi.WasapiCS.StateChangedCallback(WasapiStatusChanged);
+            wasapi.RegisterCallback(m_wasapiStateChangedDelegate);
 
             textBoxLatency.Text = string.Format("{0}", m_preference.LatencyMillisec);
 
@@ -2221,6 +2226,17 @@ namespace PlayPcmWin
                 sliderWindowScaling.Value = scaling;
                 m_preference.WindowScale = scaling;
             }
+        }
+
+        /// <summary>
+        /// デバイスが突然消えたとか、突然増えたとかのイベント。
+        /// </summary>
+        private void WasapiStatusChanged() {
+            Console.WriteLine("WasapiStatusChanged");
+            Dispatcher.BeginInvoke(new Action(delegate() {
+                DeviceDeselect();
+                CreateDeviceList();
+            }));
         }
     }
 }

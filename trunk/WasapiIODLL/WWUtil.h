@@ -61,6 +61,10 @@ template <class T> void SafeRelease(T **ppT)
     }
 }
 
+#define SAFE_RELEASE(x) { if (x) { x->Release(); x = NULL; } }
+
+#define SAFE_DELETE(x) { delete x; x=NULL; }
+
 // malloc memory and copy-create 32bitWAV from 24bitWAV data
 BYTE*
 WWStereo24ToStereo32(BYTE *data, int bytes);

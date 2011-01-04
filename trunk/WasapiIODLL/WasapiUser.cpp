@@ -33,6 +33,134 @@ WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
 }
 
 ///////////////////////////////////////////////////////////////////////
+// event handler
+
+class CMMNotificationClient : public IMMNotificationClient
+{
+public:
+    CMMNotificationClient(WasapiUser *pWU):
+            m_cRef(1)
+    {
+        m_pWasapiUser = pWU;
+    }
+
+    ~CMMNotificationClient()
+    {
+        m_pWasapiUser = NULL;
+    }
+
+    ULONG STDMETHODCALLTYPE
+    AddRef()
+    {
+        return InterlockedIncrement(&m_cRef);
+    }
+
+    ULONG STDMETHODCALLTYPE
+    Release()
+    {
+        ULONG ulRef = InterlockedDecrement(&m_cRef);
+        if (0 == ulRef) {
+            delete this;
+        }
+        return ulRef;
+    }
+
+    HRESULT STDMETHODCALLTYPE
+    QueryInterface(
+            REFIID riid, VOID **ppvInterface)
+    {
+        if (IID_IUnknown == riid) {
+            AddRef();
+            *ppvInterface = (IUnknown*)this;
+        }
+        else if (__uuidof(IMMNotificationClient) == riid) {
+            AddRef();
+            *ppvInterface = (IMMNotificationClient*)this;
+        } else {
+            *ppvInterface = NULL;
+            return E_NOINTERFACE;
+        }
+        return S_OK;
+    }
+
+    HRESULT STDMETHODCALLTYPE
+    OnDefaultDeviceChanged(
+            EDataFlow flow,
+            ERole role,
+            LPCWSTR pwstrDeviceId)
+    {
+        dprintf("%s %d %d %S\n",
+            __FUNCTION__, flow, role, pwstrDeviceId);
+
+        (void)flow;
+        (void)role;
+        (void)pwstrDeviceId;
+
+        return S_OK;
+    }
+
+    HRESULT STDMETHODCALLTYPE
+    OnDeviceAdded(LPCWSTR pwstrDeviceId)
+    {
+        dprintf("%s %S\n", __FUNCTION__,
+            pwstrDeviceId);
+
+        (void)pwstrDeviceId;
+
+        return S_OK;
+    };
+
+    HRESULT STDMETHODCALLTYPE
+    OnDeviceRemoved(LPCWSTR pwstrDeviceId)
+    {
+        dprintf("%s %S\n", __FUNCTION__,
+            pwstrDeviceId);
+
+        (void)pwstrDeviceId;
+
+        return S_OK;
+    }
+
+    HRESULT STDMETHODCALLTYPE
+    OnDeviceStateChanged(
+            LPCWSTR pwstrDeviceId,
+            DWORD dwNewState)
+    {
+        dprintf("%s %S %08x\n", __FUNCTION__,
+            pwstrDeviceId, dwNewState);
+
+        m_pWasapiUser->DeviceStateChanged();
+
+        (void)pwstrDeviceId;
+        (void)dwNewState;
+
+        return S_OK;
+    }
+
+    HRESULT STDMETHODCALLTYPE
+    OnPropertyValueChanged(
+            LPCWSTR pwstrDeviceId,
+            const PROPERTYKEY key)
+    {
+        /*
+        dprintf("%s %S %08x:%08x:%08x:%08x = %08x\n", __FUNCTION__,
+            pwstrDeviceId, key.fmtid.Data1, key.fmtid.Data2, key.fmtid.Data3, key.fmtid.Data4, key.pid);
+        */
+
+        (void)pwstrDeviceId;
+        (void)key;
+
+        return S_OK;
+    }
+
+private:
+    LONG m_cRef;
+    WasapiUser *m_pWasapiUser;
+};
+
+
+
+///////////////////////////////////////////////////////////////////////
 // WasapiUser class
 
 WasapiUser::WasapiUser(void)
@@ -62,10 +190,16 @@ WasapiUser::WasapiUser(void)
     m_deviceSampleRate  = 0;
 
     memset(m_useDeviceName, 0, sizeof m_useDeviceName);
+
+    m_stateChangedCallback = NULL;
+    m_deviceEnumerator     = NULL;
+    m_pNotificationClient  = NULL;
 }
 
 WasapiUser::~WasapiUser(void)
 {
+    assert(!m_pNotificationClient);
+    assert(!m_deviceEnumerator);
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
     m_useDeviceId = -1;
@@ -79,6 +213,8 @@ WasapiUser::Init(void)
     
     dprintf("D: %s()\n", __FUNCTION__);
 
+    assert(!m_pNotificationClient);
+    assert(!m_deviceEnumerator);
     assert(!m_deviceCollection);
     assert(!m_deviceToUse);
 
@@ -102,7 +238,14 @@ WasapiUser::Term(void)
     dprintf("D: %s() m_deviceCollection=%p m_deviceToUse=%p m_mutex=%p\n",
         __FUNCTION__, m_deviceCollection, m_deviceToUse, m_mutex);
 
+    if (m_deviceEnumerator && m_pNotificationClient) {
+        m_deviceEnumerator->UnregisterEndpointNotificationCallback(
+            m_pNotificationClient);
+    }
+
     SafeRelease(&m_deviceCollection);
+    SafeRelease(&m_deviceEnumerator);
+    SAFE_DELETE(m_pNotificationClient);
     SafeRelease(&m_deviceToUse);
     m_useDeviceId = -1;
     m_useDeviceName[0] = 0;
@@ -203,13 +346,27 @@ HRESULT
 WasapiUser::DoDeviceEnumeration(WWDeviceType t)
 {
     HRESULT hr = 0;
-    IMMDeviceEnumerator *deviceEnumerator = NULL;
 
     dprintf("D: %s() t=%d\n", __FUNCTION__, (int)t);
 
+    bool needCreate = false;
+    if (NULL == m_deviceEnumerator) {
+        needCreate = true;
+    }
+
     switch (t) {
-    case WWDTPlay: m_dataFlow = eRender;  break;
-    case WWDTRec:  m_dataFlow = eCapture; break;
+    case WWDTPlay:
+        if (m_dataFlow != eRender) {
+            m_dataFlow = eRender;
+            needCreate = true;
+        }
+        break;
+    case WWDTRec:
+        if (m_dataFlow != eCapture) {
+            m_dataFlow = eCapture;
+            needCreate = true;
+        }
+        break;
     default:
         assert(0);
         return E_FAIL;
@@ -217,10 +374,25 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
 
     m_deviceInfo.clear();
 
-    HRR(CoCreateInstance(__uuidof(MMDeviceEnumerator),
-        NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&deviceEnumerator)));
-    
-    HRR(deviceEnumerator->EnumAudioEndpoints(
+    if (needCreate) {
+        if (m_deviceEnumerator && m_pNotificationClient) {
+            m_deviceEnumerator->UnregisterEndpointNotificationCallback(
+                m_pNotificationClient);
+        }
+        SafeRelease(&m_deviceEnumerator);
+        SAFE_DELETE(m_pNotificationClient);
+
+        HRR(CoCreateInstance(__uuidof(MMDeviceEnumerator),
+            NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_deviceEnumerator)));
+    }
+
+    if (NULL == m_pNotificationClient) {
+        m_pNotificationClient = new CMMNotificationClient(this);
+        m_deviceEnumerator->RegisterEndpointNotificationCallback(
+            m_pNotificationClient);
+    }
+
+    HRR(m_deviceEnumerator->EnumAudioEndpoints(
         m_dataFlow, DEVICE_STATE_ACTIVE, &m_deviceCollection));
 
     UINT nDevices = 0;
@@ -242,7 +414,6 @@ WasapiUser::DoDeviceEnumeration(WWDeviceType t)
     }
 
 end:
-    SafeRelease(&deviceEnumerator);
     return hr;
 }
 
@@ -1471,3 +1642,10 @@ WasapiUser::GetPcmDataFrameBytes(void)
     return m_frameBytes;
 }
 
+void
+WasapiUser::DeviceStateChanged(void)
+{
+    if (m_stateChangedCallback) {
+        m_stateChangedCallback();
+    }
+}
