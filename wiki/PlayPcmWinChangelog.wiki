@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.53 ==
+  * Issue 17 修正。
+  * Issue 33 修正。
+
 ===!PlayPcmWin 2.0.52 ==
   * PlayPcmWinテストベンチの[アップサンプリング]機能 出力ビットフォーマット設定機能新規作成。
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWinTB252ss.png
