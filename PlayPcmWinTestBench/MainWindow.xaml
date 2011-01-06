@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="PlayPcmWinテストベンチ" Height="600" Width="800" Closed="Window_Closed" IsEnabled="True">
     <Grid>
-        <TabControl Name="tabControl1" >
+        <TabControl Name="tabControl1">
             <TabItem Header="アップサンプル">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
@@ -218,6 +218,16 @@
                     <TextBox Grid.Row="3" Margin="245,9,6,8" Name="textBoxAQResult" IsReadOnly="True" AcceptsReturn="True" AcceptsTab="True" Text="" VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Width="517" />
                     <Label Content="※1000ピコ秒=1ナノ秒です" Grid.Row="1" Height="28" HorizontalAlignment="Left" Margin="345,163,0,0" Name="label14" VerticalAlignment="Top" Width="235" />
                     <Button Content="処理中断(_C)" Height="23" HorizontalAlignment="Left" Margin="119,9,0,0" Name="buttonAQAbort" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQAbort_Click" />
+                </Grid>
+            </TabItem>
+            <TabItem Header="互換性フラグ実験">
+                <Grid Name="grid2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="112" />
+                        <RowDefinition Height="415" />
+                    </Grid.RowDefinitions>
+                    <Button Content="Button" Height="33" HorizontalAlignment="Left" Margin="32,44,0,0" Name="buttonCompatibility" VerticalAlignment="Top" Width="379" Click="buttonCompatibility_Click" />
+                    <TextBox Grid.Row="1" Height="409" HorizontalAlignment="Left" Margin="6,0,0,0" Name="textBoxCompatibility" VerticalAlignment="Top" Width="756" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
                 </Grid>
             </TabItem>
         </TabControl>

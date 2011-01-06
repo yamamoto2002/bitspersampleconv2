@@ -92,6 +92,11 @@
     <TargetZone>LocalIntranet</TargetZone>
   </PropertyGroup>
   <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup />
+  <PropertyGroup>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -143,6 +148,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="PlayPcmWinTestBench.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -201,7 +207,7 @@
     <PostBuildEvent>copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)
 copy /y $(ProjectDir)..\WWDirectComputeDLL\$(OutDir)* $(TargetDir)
 copy /y $(ProjectDir)..\WWDirectComputeDLL\*.hlsl $(TargetDir)
-</PostBuildEvent>
+copy /y $(ProjectDir)..\WWDirectDrawTest\$(OutDir)* $(TargetDir)</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

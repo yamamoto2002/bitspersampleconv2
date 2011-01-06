@@ -13,6 +13,7 @@ using WasapiPcmUtil;
 using WavRWLib2;
 using System.Threading.Tasks;
 using WWDirectComputeCS;
+using System.Runtime.InteropServices;
 
 namespace PlayPcmWinTestBench {
     public partial class MainWindow : Window {
@@ -1131,6 +1132,19 @@ namespace PlayPcmWinTestBench {
             }
             textBoxUSResult.ScrollToEnd();
             textBoxAQResult.ScrollToEnd();
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // 互換性実験
+
+        [DllImport("WWDirectDrawTest.dll")]
+        private extern static int
+        WWDirectDrawTest_Test();
+
+        private void buttonCompatibility_Click(object sender, RoutedEventArgs e) {
+            int hr = WWDirectDrawTest_Test();
+            textBoxCompatibility.Text += string.Format("DirectDraw PrimarySurface Lock {0:X8} {1}\r\n",
+                hr, hr==0 ? "成功" : "失敗");
         }
 
     }
