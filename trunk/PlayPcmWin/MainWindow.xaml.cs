@@ -558,7 +558,7 @@ namespace PlayPcmWin
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 slider1.Value = 0;
-                labelPlayingTime.Content = "0/0";
+                labelPlayingTime.Content = "--:--:--/--:--:--";
                 break;
             case State.再生中:
                 menuItemFileOpen.IsEnabled = false;
@@ -1793,7 +1793,7 @@ namespace PlayPcmWin
 
             if (playingPcmDataId < 0) {
                 textBoxFileName.Text = "";
-                labelPlayingTime.Content = string.Format("{0, 0:f1}/{1, 0:f1}", 0, 0);
+                labelPlayingTime.Content = "--:--:--/--:--:--";
             } else {
                 dataGridPlayList.SelectedIndex
                     = GetPlayListIndexOfWaveDataId(playingPcmDataId);
