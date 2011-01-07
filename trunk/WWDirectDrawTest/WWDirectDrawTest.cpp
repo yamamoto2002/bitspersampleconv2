@@ -7,7 +7,7 @@ extern "C" __declspec(dllexport)
 int __stdcall
 WWDirectDrawTest_Test(void)
 {
-    HRESULT              hr = S_OK;
+    HRESULT              hr = E_FAIL;
     LPDIRECTDRAW7        pDirectDraw = NULL;
     LPDIRECTDRAWSURFACE7 pDDSPrimary = NULL;
     DDSURFACEDESC2 ddsd;
@@ -43,5 +43,12 @@ WWDirectDrawTest_Test(void)
     HRG(pDDSPrimary->Unlock(NULL));
 
 end:
+    SAFE_RELEASE(pDDSPrimary);
+    SAFE_RELEASE(pDirectDraw);
+    if (ddrawLib) {
+        FreeLibrary(ddrawLib);
+        ddrawLib = NULL;
+    }
+
     return hr;
 }
