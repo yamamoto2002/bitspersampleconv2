@@ -290,11 +290,11 @@ C:\Program Files\yamamoto2002\PlayPcmWin\libFlacLicense.txt
 
 再生スレッドは、PCMデータをWASAPIに送るスレッドです。
 
-WasapiUser.cppの1100行目あたりに書かれています。
+WasapiUser.cppに書かれています。
 
 全部で200行ほどの短いプログラムです。
 
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1109
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1246
 
 ==再生スレッド 関数呼び出しグラフ==
 
