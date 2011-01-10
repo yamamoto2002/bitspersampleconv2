@@ -1537,7 +1537,18 @@ namespace PlayPcmWin
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 // ファイル読み込み完了後、再生を開始する。
                 // 再生するファイルは、タスクで指定されたファイル。
+                // このwavDataIdは、再生開始ボタンが押された時点で選択されていたファイル。
                 int wavDataId = m_task.WavDataId;
+
+                if (null != m_pliUpdatedByUserSelectWhileLoading) {
+                    // (Issue 6)再生リストで選択されている曲が違う曲の場合、
+                    // 選択されている曲を再生する。
+                    wavDataId = m_pliUpdatedByUserSelectWhileLoading.PcmData().Id;
+
+                    // 使い終わったのでクリアーする。
+                    m_pliUpdatedByUserSelectWhileLoading = null;
+                }
+
                 ReadStartPlayByWavDataId(wavDataId);
                 return;
             }
@@ -1917,6 +1928,13 @@ namespace PlayPcmWin
         }
 
         /// <summary>
+        /// ロード中に選択曲が変更された場合、ロード後に再生曲変更処理を行う。
+        /// ChangePlayWavDataById()でセットし
+        /// ReadFileRunWorkerCompleted()で参照する。
+        /// </summary>
+        private PlayListItemInfo m_pliUpdatedByUserSelectWhileLoading = null;
+
+        /// <summary>
         /// 再生中に、再生曲をwavDataIdの曲に切り替える。
         /// wavDataIdの曲がロードされていたら、直ちに再生曲切り替え。
         /// ロードされていなければ、グループをロードしてから再生。
@@ -1932,13 +1950,10 @@ namespace PlayPcmWin
             int playingId = wasapi.GetNowPlayingPcmDataId();
             if (playingId < 0 && 0 <= m_loadingGroupId) {
                 // 再生中でなく、ロード中の場合。
-                if (groupId == m_loadingGroupId) {
-                    // 同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
-                    wasapi.UpdatePlayPcmDataById(wavDataId);
-                } else {
-                    // ファイルグループが違う場合。無視！
-                    /// @todo 直す
-                }
+                // ロード完了後ReadFileRunWorkerCompleted()で再生する曲を切り替えるための
+                // 情報をセットする。
+                m_pliUpdatedByUserSelectWhileLoading
+                    = m_playListItems[dataGridPlayList.SelectedIndex];
                 return;
             }
 
