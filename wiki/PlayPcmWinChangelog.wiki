@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.58 ==
+  * Issue 6 修正。
+
 ===!PlayPcmWin 2.0.57 ==
   * PlayPcmWinTestBench 互換性マニフェスト動作テスト機能
   * アプリケーションマニフェストをexeに埋め込むのをやめ、manifestファイルを配置。アプリケーションマニフェストファイルの内容を自由に編集できるようにした。
