@@ -18,6 +18,7 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using PcmDataLib;
 using WasapiPcmUtil;
+using System.Collections.ObjectModel;
 
 namespace PlayPcmWin
 {
@@ -40,10 +41,10 @@ namespace PlayPcmWin
         private List<PcmDataLib.PcmData> m_pcmDataList = new List<PcmDataLib.PcmData>();
 
         /// <summary>
-        /// プレイリスト1項目の情報。区切り線を1個と数える。
-        /// ListBoxPlayList.Itemsの項目と一対一に対応する。
+        /// プレイリスト1項目の情報。
+        /// dataGridPlayList.Itemsの項目と一対一に対応する。
         /// </summary>
-        class PlayListItemInfo {
+        class PlayListItemInfo : INotifyPropertyChanged {
 
             public string Id {
                 get {
@@ -88,19 +89,33 @@ namespace PlayPcmWin
             }
 
             public enum ItemType {
-                AudioData,
-                ReadSeparator,
-                SampleRateChange
+                Unused,
+                AudioData
             }
 
             private ItemType m_type;
-            public ItemType Type { get { return m_type; } }
 
             private PcmDataLib.PcmData m_pcmData;
             public PcmDataLib.PcmData PcmData() { return m_pcmData; }
 
+            private bool m_readSeparatorAfter;
+            public bool ReadSeparaterAfter {
+                get { return m_readSeparatorAfter; }
+                set {
+                    m_readSeparatorAfter = value;
+                    OnPropertyChanged("ReadSeparaterAfter");
+                }
+            }
+
+            public string FileGroupId {
+                get {
+                    if (m_pcmData == null) { return "-"; }
+                    return m_pcmData.GroupId.ToString();
+                }
+            }
+
             public PlayListItemInfo() {
-                m_type = ItemType.AudioData;
+                m_type = ItemType.Unused;
                 m_pcmData = null;
             }
 
@@ -108,6 +123,19 @@ namespace PlayPcmWin
                 m_type = type;
                 m_pcmData = pcmData;
             }
+
+            #region INotifyPropertyChangedのメンバー
+
+            public event PropertyChangedEventHandler PropertyChanged;
+
+            protected void OnPropertyChanged(string propertyName)
+            {
+                if (PropertyChanged != null) {
+                    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+                }
+            }
+
+            #endregion
         }
 
         /// <summary>
@@ -116,7 +144,7 @@ namespace PlayPcmWin
         class PlayListViewModel {
             public ICollectionView PlayListCollection { get; private set; }
 
-            public PlayListViewModel(List<PlayListItemInfo> playList) {
+            public PlayListViewModel(ObservableCollection<PlayListItemInfo> playList) {
                 PlayListCollection = CollectionViewSource.GetDefaultView(playList);
             }
 
@@ -129,7 +157,7 @@ namespace PlayPcmWin
         /// <summary>
         /// プレイリスト項目情報。
         /// </summary>
-        private List<PlayListItemInfo> m_playListItems = new List<PlayListItemInfo>();
+        private ObservableCollection<PlayListItemInfo> m_playListItems = new ObservableCollection<PlayListItemInfo>();
 
         private BackgroundWorker m_playWorker;
         private BackgroundWorker m_readFileWorker;
@@ -370,6 +398,9 @@ namespace PlayPcmWin
         {
             InitializeComponent();
 
+            dataGridPlayList.CanUserAddRows = false;
+            dataGridPlayList.EnableRowVirtualization = false;
+
             // InitializeComponent()によって、チェックボックスのチェックイベントが発生し
             // m_preferenceの内容が変わるので、InitializeComponent()の後にロードする。
 
@@ -489,7 +520,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
                 buttonClearPlayList.IsEnabled    = false;
-                buttonReadSeparator.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = true;
@@ -507,7 +537,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
                 buttonClearPlayList.IsEnabled    = true;
-                buttonReadSeparator.IsEnabled    = true;
                 groupBoxWasapiSettings.IsEnabled = true;
 
                 buttonInspectDevice.IsEnabled    = false;
@@ -526,7 +555,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
                 buttonClearPlayList.IsEnabled = false;
-                buttonReadSeparator.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -547,7 +575,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
                 buttonClearPlayList.IsEnabled = false;
-                buttonReadSeparator.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -568,7 +595,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled = true;
                 buttonPrev.IsEnabled = true;
                 buttonClearPlayList.IsEnabled = false;
-                buttonReadSeparator.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -587,7 +613,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
                 buttonClearPlayList.IsEnabled = false;
-                buttonReadSeparator.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -604,7 +629,6 @@ namespace PlayPcmWin
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
                 buttonClearPlayList.IsEnabled = false;
-                buttonReadSeparator.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -948,9 +972,9 @@ namespace PlayPcmWin
 
             if (0 < m_pcmDataList.Count
                 && !m_pcmDataList[m_pcmDataList.Count - 1].IsSameFormat(pcmData)) {
-                // データフォーマットが変わった。
-                m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.SampleRateChange, null));
-                m_playListView.RefreshCollection();
+                /* データフォーマットが変わった。
+                 * Setupのやり直しになるのでファイルグループ番号を変える。
+                 */
                 ++m_groupIdNextAdd;
             }
 
@@ -984,10 +1008,13 @@ namespace PlayPcmWin
                 pcmData.AlbumPerformer = csr.GetAlbumPerformer();
             }
 
-            m_pcmDataList.Add(pcmData);
-            m_playListItems.Add(new PlayListItemInfo(
+            var pli = new PlayListItemInfo(
                 PlayListItemInfo.ItemType.AudioData,
-                pcmData));
+                pcmData);
+            pli.PropertyChanged += new PropertyChangedEventHandler(PlayListItemInfoPropertyChanged);
+            m_pcmDataList.Add(pcmData);
+            m_playListItems.Add(pli);
+
             m_playListView.RefreshCollection();
 
             // 状態の更新。再生リストにファイル有り。
@@ -1985,19 +2012,8 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (m_pcmDataList[m_pcmDataList.Count - 1].GroupId != m_groupIdNextAdd) {
-                // 既にグループ区切り線が入れられている。
-                return;
-            }
+            m_playListItems[m_playListItems.Count() - 1].ReadSeparaterAfter = true;
 
-            // 同じ名前の項目を複数入れると選択状態が変になるので
-            string dispNameOnPlayList = "----------ここまで一括読み込み------------";
-            for (int i = 0; i < m_groupIdNextAdd; ++i) {
-                dispNameOnPlayList =
-                    dispNameOnPlayList + " ";
-            }
-
-            m_playListItems.Add(new PlayListItemInfo(PlayListItemInfo.ItemType.ReadSeparator, null));
             m_playListView.RefreshCollection();
             ++m_groupIdNextAdd;
         }
@@ -2152,7 +2168,8 @@ namespace PlayPcmWin
             }
 
             if (!m_playListMouseDown ||
-                dataGridPlayList.SelectedIndex < 0) {
+                dataGridPlayList.SelectedIndex < 0 ||
+                m_playListItems.Count() <= dataGridPlayList.SelectedIndex) {
                 return;
             }
 
@@ -2180,10 +2197,6 @@ namespace PlayPcmWin
                 playingId != pli.PcmData().Id) {
                 ChangePlayWavDataById(pli.PcmData().Id);
             }
-        }
-
-        private void buttonReadSeparator_Click(object sender, RoutedEventArgs e) {
-            AddKokomade();
         }
 
         private void buttonClose_Click(object sender, RoutedEventArgs e) {
@@ -2255,6 +2268,159 @@ namespace PlayPcmWin
                 DeviceDeselect();
                 CreateDeviceList();
             }));
+        }
+        
+        #region ドラッグアンドドロップ
+
+        private void dataGridPlayList_DragEnter(object sender, DragEventArgs e) {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+                MainWindowDragEnter(sender, e);
+                return;
+            } else {
+                DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as UIElement);
+                if (row == null) {
+                    // 行がドラッグされていない。
+                    e.Effects = DragDropEffects.None;
+                } else {
+                    // 行がドラッグされている。
+                    e.Effects = DragDropEffects.Move;
+                }
+                e.Handled = true;
+            }
+        }
+
+        private void dataGridPlayList_Drop(object sender, DragEventArgs e) {
+            e.Effects = DragDropEffects.None;
+
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+                // ファイルのドラッグアンドドロップ。
+                MainWindowDragDrop(sender, e);
+                return;
+            }
+
+            DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as UIElement);
+            if (row != null) {
+                e.Handled = true;
+                m_dropTargetPlayListItem = row.Item as PlayListItemInfo;
+                if (m_dropTargetPlayListItem != null) {
+                    // 再生リスト項目のドロップ。
+                    e.Effects = DragDropEffects.Move;
+                }
+            }
+        }
+
+        private void dataGridPlayList_MouseMove(object sender, MouseEventArgs e) {
+            if (m_state == State.再生中) {
+                // 再生中は再生リスト項目入れ替え不可能。
+                return;
+            }
+
+            if (e.LeftButton != MouseButtonState.Pressed) {
+                // 左マウスボタンが押されていない。
+                return;
+            }
+
+            DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as FrameworkElement);
+            if ((row == null) || !row.IsSelected) {
+                return;
+            }
+
+            PlayListItemInfo pli = row.Item as PlayListItemInfo;
+            if (null == pli) {
+                return;
+            }
+
+            // MainWindow.Drop()イベントを発生させる(ブロック)。
+            DragDropEffects finalDropEffect = DragDrop.DoDragDrop(row, pli, DragDropEffects.Move);
+            if (finalDropEffect == DragDropEffects.Move && m_dropTargetPlayListItem != null) {
+                // ドロップ操作実行。
+
+                int oldIndex = m_playListItems.IndexOf(pli);
+                int newIndex = m_playListItems.IndexOf(m_dropTargetPlayListItem);
+                if (oldIndex != newIndex) {
+                    // 項目が挿入された。PcmDataも挿入処理する。
+                    m_playListItems.Move(oldIndex, newIndex);
+                    PcmDataListItemsMove(oldIndex, newIndex);
+                }
+                m_dropTargetPlayListItem = null;
+            }
+        }
+
+        private static T FindVisualParent<T>(UIElement element) where T : UIElement {
+            UIElement parent = element;
+            while (parent != null) {
+                T correctlyTyped = parent as T;
+                if (correctlyTyped != null) {
+                    return correctlyTyped;
+                }
+
+                parent = VisualTreeHelper.GetParent(parent) as UIElement;
+            }
+            return null;
+        }
+
+        private PlayListItemInfo m_dropTargetPlayListItem = null;
+
+        #endregion
+
+        /// <summary>
+        /// m_playListItemsのIdとGroupIdをリナンバーする。
+        /// </summary>
+        private void PcmDataListItemsRenumber() {
+            m_groupIdNextAdd = 0;
+            for (int i = 0; i < m_pcmDataList.Count(); ++i) {
+                PcmData pcmData = m_pcmDataList[i];
+                PlayListItemInfo pli = m_playListItems[i];
+
+                if (0 < i) {
+                    PcmData prevPcmData = m_pcmDataList[i - 1];
+                    PlayListItemInfo prevPli = m_playListItems[i - 1];
+
+                    if (prevPli.ReadSeparaterAfter || !pcmData.IsSameFormat(prevPcmData)) {
+                        /* 1つ前の項目にReadSeparatorAfterフラグが立っている、または
+                         * 1つ前の項目とPCMフォーマットが異なる。
+                         * ファイルグループ番号を更新する。
+                         */
+                        ++m_groupIdNextAdd;
+                    }
+                }
+
+                pcmData.Id = i;
+                pcmData.GroupId = m_groupIdNextAdd;
+            }
+        }
+
+        /// <summary>
+        /// oldIdxの項目をnewIdxの項目の後に挿入する。
+        /// </summary>
+        private void PcmDataListItemsMove(int oldIdx, int newIdx) {
+            System.Diagnostics.Debug.Assert(oldIdx != newIdx);
+
+            /* oldIdx==0, newIdx==1, Count==2の場合
+             * remove(0)
+             * insert(1)
+             * 
+             * oldIdx==1, newIdx==0, Count==2の場合
+             * remove(1)
+             * insert(0)
+             */
+
+            PcmData old = m_pcmDataList[oldIdx];
+
+            m_pcmDataList.RemoveAt(oldIdx);
+
+            m_pcmDataList.Insert(newIdx, old);
+
+            // Idをリナンバーする。
+            PcmDataListItemsRenumber();
+            m_playListView.RefreshCollection();
+        }
+
+        void PlayListItemInfoPropertyChanged(object sender, PropertyChangedEventArgs e) {
+            if (e.PropertyName == "ReadSeparaterAfter") {
+                // グループ番号をリナンバーする。
+                PcmDataListItemsRenumber();
+            }
         }
     }
 }
