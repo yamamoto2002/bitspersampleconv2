@@ -58,6 +58,12 @@ namespace PlayPcmWin
                     if (m_pcmData == null) { return "-"; }
                     return m_pcmData.DisplayName;
                 }
+                /*
+                set {
+                    if (m_pcmData == null) { return; }
+                    m_pcmData.DisplayName = value;
+                }
+                */
             }
 
             public string Performer {
@@ -65,6 +71,12 @@ namespace PlayPcmWin
                     if (m_pcmData == null) { return "-"; }
                     return m_pcmData.Performer;
                 }
+                /*
+                set {
+                    if (m_pcmData == null) { return; }
+                    m_pcmData.Performer = value;
+                }
+                */
             }
 
             public string AlbumTitle {
@@ -72,6 +84,12 @@ namespace PlayPcmWin
                     if (m_pcmData == null) { return "-"; }
                     return m_pcmData.AlbumTitle;
                 }
+                /*
+                set {
+                    if (m_pcmData == null) { return; }
+                    m_pcmData.AlbumTitle = value;
+                }
+                */
             }
 
             public string SampleRate {
@@ -107,12 +125,14 @@ namespace PlayPcmWin
                 }
             }
 
+            /*
             public string FileGroupId {
                 get {
                     if (m_pcmData == null) { return "-"; }
                     return m_pcmData.GroupId.ToString();
                 }
             }
+             */
 
             public PlayListItemInfo() {
                 m_type = ItemType.Unused;
@@ -2274,38 +2294,39 @@ namespace PlayPcmWin
 
         private void dataGridPlayList_DragEnter(object sender, DragEventArgs e) {
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
+                // ファイルのドラッグアンドドロップ。
                 MainWindowDragEnter(sender, e);
                 return;
+            }
+
+            e.Handled = true;
+            DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as UIElement);
+            if (row == null || !(row.Item is PlayListItemInfo)) {
+                // 行がドラッグされていない。
+                e.Effects = DragDropEffects.None;
             } else {
-                DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as UIElement);
-                if (row == null) {
-                    // 行がドラッグされていない。
-                    e.Effects = DragDropEffects.None;
-                } else {
-                    // 行がドラッグされている。
-                    e.Effects = DragDropEffects.Move;
-                }
-                e.Handled = true;
+                // 行がドラッグされている。
+                e.Effects = DragDropEffects.Move;
             }
         }
 
         private void dataGridPlayList_Drop(object sender, DragEventArgs e) {
-            e.Effects = DragDropEffects.None;
-
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
                 // ファイルのドラッグアンドドロップ。
                 MainWindowDragDrop(sender, e);
                 return;
             }
 
+            e.Handled = true;
             DataGridRow row = FindVisualParent<DataGridRow>(e.OriginalSource as UIElement);
-            if (row != null) {
-                e.Handled = true;
+            if (row == null || !(row.Item is PlayListItemInfo)) {
+                // 行がドラッグされていない。
+                e.Effects = DragDropEffects.None;
+            } else {
+                // 再生リスト項目のドロップ。
                 m_dropTargetPlayListItem = row.Item as PlayListItemInfo;
-                if (m_dropTargetPlayListItem != null) {
-                    // 再生リスト項目のドロップ。
-                    e.Effects = DragDropEffects.Move;
-                }
+                System.Diagnostics.Debug.Assert(null != m_dropTargetPlayListItem);
+                e.Effects = DragDropEffects.Move;
             }
         }
 
@@ -2330,10 +2351,13 @@ namespace PlayPcmWin
                 return;
             }
 
+
             // MainWindow.Drop()イベントを発生させる(ブロック)。
             DragDropEffects finalDropEffect = DragDrop.DoDragDrop(row, pli, DragDropEffects.Move);
             if (finalDropEffect == DragDropEffects.Move && m_dropTargetPlayListItem != null) {
                 // ドロップ操作実行。
+
+                dataGridPlayList.CancelEdit();
 
                 int oldIndex = m_playListItems.IndexOf(pli);
                 int newIndex = m_playListItems.IndexOf(m_dropTargetPlayListItem);
@@ -2341,6 +2365,7 @@ namespace PlayPcmWin
                     // 項目が挿入された。PcmDataも挿入処理する。
                     m_playListItems.Move(oldIndex, newIndex);
                     PcmDataListItemsMove(oldIndex, newIndex);
+                    m_playListView.RefreshCollection();
                 }
                 m_dropTargetPlayListItem = null;
             }
@@ -2406,14 +2431,11 @@ namespace PlayPcmWin
              */
 
             PcmData old = m_pcmDataList[oldIdx];
-
             m_pcmDataList.RemoveAt(oldIdx);
-
             m_pcmDataList.Insert(newIdx, old);
 
             // Idをリナンバーする。
             PcmDataListItemsRenumber();
-            m_playListView.RefreshCollection();
         }
 
         void PlayListItemInfoPropertyChanged(object sender, PropertyChangedEventArgs e) {
