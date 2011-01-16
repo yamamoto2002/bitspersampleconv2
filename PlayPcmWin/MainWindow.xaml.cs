@@ -2295,7 +2295,8 @@ namespace PlayPcmWin
         private void dataGridPlayList_DragEnter(object sender, DragEventArgs e) {
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
                 // ファイルのドラッグアンドドロップ。
-                MainWindowDragEnter(sender, e);
+                // ここでハンドルせず、MainWindowのMainWindowDragDropに任せる。
+                e.Handled = false;
                 return;
             }
 
@@ -2313,7 +2314,8 @@ namespace PlayPcmWin
         private void dataGridPlayList_Drop(object sender, DragEventArgs e) {
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
                 // ファイルのドラッグアンドドロップ。
-                MainWindowDragDrop(sender, e);
+                // ここでハンドルせず、MainWindowのMainWindowDragDropに任せる。
+                e.Handled = false;
                 return;
             }
 
