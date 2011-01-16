@@ -30,8 +30,9 @@ http://bitspersampleconv2.googlecode.com/files/PlayPcmWin251.png
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin260.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin260x64.zip
 
-非常にバグっぽい開発版
-  * なし
+非常にバグっぽい開発版　(バージョン2.0.61)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin261.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin261x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
