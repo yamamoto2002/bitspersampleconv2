@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.59 ==
-  * 再生リスト項目の並べ替え機能。
+  * Issue 31 再生リスト項目の並べ替え機能。
 
 ===!PlayPcmWin 2.0.58 ==
   * Issue 6 修正。
