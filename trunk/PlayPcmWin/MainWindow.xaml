@@ -18,6 +18,7 @@
         <Menu Height="23" Name="menu1" VerticalAlignment="Top">
             <MenuItem Name="menuFile" Header="ファイル(_F)">
                 <MenuItem Header="開く(_O)..." Click="MenuItemFileOpen_Click" Name="menuItemFileOpen" />
+                <MenuItem Header="名前をつけて保存(_A)..." Click="MenuItemFileSaveAs_Click" Name="menuItemFileSaveAs" />
                 <Separator />
                 <MenuItem Header="終了(_X)" Click="MenuItemFileExit_Click" />
             </MenuItem>
