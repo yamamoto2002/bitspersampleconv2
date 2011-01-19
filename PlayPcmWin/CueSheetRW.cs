@@ -20,6 +20,7 @@ namespace PlayPcmWin {
         public int    endTick;   // -1: till the end of file
         public int    indexId;   // INDEX 00 ==> 0, INDEX 01 ==> 1
         public string performer;
+        public bool readSeparatorAfter;
 
         public void Clear() {
             path = "";
@@ -29,6 +30,7 @@ namespace PlayPcmWin {
             endTick = -1;
             indexId = -1;
             performer = string.Empty;
+            readSeparatorAfter = false;
         }
 
         public void CopyFrom(CueSheetTrackInfo rhs) {
@@ -39,6 +41,7 @@ namespace PlayPcmWin {
             endTick   = rhs.endTick;
             indexId   = rhs.indexId;
             performer = rhs.performer;
+            readSeparatorAfter = rhs.readSeparatorAfter;
         }
 
         private static bool TimeStrToInt(string timeStr, out int timeInt) {
@@ -84,9 +87,70 @@ namespace PlayPcmWin {
         }
 
         public void Debug() {
-            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) performer={7}\n    title={8}",
+            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) performer={7} rsa={8}\n    title={9}",
                 path, trackId, indexId, startTick, TickIntToStr(startTick),
-                endTick, TickIntToStr(endTick), performer, title);
+                endTick, TickIntToStr(endTick), performer, readSeparatorAfter, title);
+        }
+    };
+
+    /// <summary>
+    /// CUEシートを書き込むクラス。
+    /// </summary>
+    class CueSheetWriter {
+        private List<CueSheetTrackInfo> m_trackInfoList = new List<CueSheetTrackInfo>();
+        private string m_albumTitle;
+
+        public void AddTrackInfo(CueSheetTrackInfo a) {
+            m_trackInfoList.Add(a);
+        }
+
+        public void SetAlbumTitle(string s) {
+            m_albumTitle = s;
+        }
+
+        public bool WriteToFile(string path) {
+            if (m_trackInfoList.Count() == 0) {
+                return false;
+            }
+
+            try {
+                using (StreamWriter sw = new StreamWriter(path, false, Encoding.Default)) {
+                    // アルバムタイトル
+                    if (m_albumTitle.Length == 0) {
+                        sw.WriteLine(
+                            string.Format("TITLE \"album title unknown\""));
+                    } else {
+                        sw.WriteLine(
+                            string.Format("TITLE \"{0}\"", m_albumTitle));
+                    }
+
+                    // 曲情報出力
+                    int trackCount = 1;
+                    for (int i = 0; i < m_trackInfoList.Count(); ++i) {
+                        CueSheetTrackInfo cti = m_trackInfoList[i];
+
+                        sw.WriteLine("FILE \"{0}\" WAVE", cti.path);
+                        sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
+                        sw.WriteLine("    TITLE \"{0}\"", cti.title);
+                        sw.WriteLine("    PERFORMER \"{0}\"", cti.performer);
+                        sw.WriteLine("    INDEX 01 {0}",
+                            CueSheetTrackInfo.TickIntToStr(cti.startTick));
+
+                        if (0 <= cti.endTick) {
+                            sw.WriteLine("    INDEX 00 {0}",
+                                CueSheetTrackInfo.TickIntToStr(cti.endTick));
+                        } else if (cti.readSeparatorAfter) {
+                            sw.WriteLine("    REM KOKOMADE");
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Let the user know what went wrong.
+                Console.WriteLine("The file could not be write:");
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return true;
         }
     };
 
@@ -285,13 +349,25 @@ namespace PlayPcmWin {
                 break;
             case "rem":
                 Console.WriteLine("rem tag has come");
+                if (2 <= tokenList.Count && 0 == tokenList[1].CompareTo("KOKOMADE")) {
+                    Console.WriteLine("rem kokomade");
+                    m_currentTrackInfo.readSeparatorAfter = true;
+                }
                 break;
             case "file":
                 if (tokenList.Count < 2) {
                     Console.WriteLine("Error on line {0}: FILE directive error: filename is not specified", lineno);
                     return true;
                 }
-                m_currentTrackInfo.path = m_dirPath + tokenList[1];
+                if (3 <= tokenList[1].Length &&
+                    ((tokenList[1][0] == '\\' && tokenList[1][1] == '\\') ||
+                    ((tokenList[1][1] == ':')))) {
+                    // フルパス。
+                    m_currentTrackInfo.path = tokenList[1];
+                } else {
+                    // 相対パス。
+                    m_currentTrackInfo.path = m_dirPath + tokenList[1];
+                }
                 Console.WriteLine("file tag has come");
                 m_currentTrackInfo.Debug();
                 break;

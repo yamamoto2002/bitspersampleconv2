@@ -1140,9 +1140,11 @@ namespace PlayPcmWin
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                if (csti.indexId == 0 &&
-                    m_preference.ReplaceGapWithKokomade) {
-                    // INDEX 00 == gap。gapのかわりに[ここまで読みこみ]を追加する。
+                if ((csti.indexId == 0 &&
+                    m_preference.ReplaceGapWithKokomade) ||
+                    (csti.readSeparatorAfter)) {
+                    // REM KOKOMADE または
+                    // INDEX 00 == gap しかも gapのかわりに[ここまで読みこみ]を追加する。
                     AddKokomade();
                 } else {
                     ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
@@ -1216,6 +1218,47 @@ namespace PlayPcmWin
                 ReadFileHeader(paths[i], ReadHeaderMode.ReadAll, null, null);
             }
             UpdateUIStatus();
+        }
+
+        private void MenuItemFileSaveAs_Click(object sender, RoutedEventArgs e) {
+            if (m_pcmDataList.Count() == 0) {
+                MessageBox.Show("保存するデータはありません");
+                return;
+            }
+
+            System.Diagnostics.Debug.Assert(0 < m_pcmDataList.Count());
+            var pcmData0 = m_pcmDataList[0];
+
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.InitialDirectory = System.IO.Path.GetDirectoryName(pcmData0.FullPath);
+            dlg.Filter = "CUEファイル|*.cue";
+            Nullable<bool> result = dlg.ShowDialog();
+
+            if (result == true) {
+                CueSheetWriter csw = new CueSheetWriter();
+
+                csw.SetAlbumTitle(m_playListItems[0].AlbumTitle);
+
+                int i = 0;
+                foreach (var pli in m_playListItems) {
+                    var pcmData = m_pcmDataList[i];
+
+                    CueSheetTrackInfo cst = new CueSheetTrackInfo();
+                    cst.title = pli.Title;
+                    cst.performer = pli.Performer;
+                    cst.readSeparatorAfter = pli.ReadSeparaterAfter;
+                    cst.startTick = pcmData.StartTick;
+                    cst.endTick = pcmData.EndTick;
+                    cst.path = pcmData.FullPath;
+                    csw.AddTrackInfo(cst);
+                    ++i;
+                }
+
+                if (!csw.WriteToFile(dlg.FileName)) {
+                    MessageBox.Show(
+                        string.Format("ファイル保存失敗: {0}", dlg.FileName));
+                }
+            }
         }
 
         private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
