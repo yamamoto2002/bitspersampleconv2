@@ -129,14 +129,24 @@ namespace PlayPcmWin {
                     for (int i = 0; i < m_trackInfoList.Count(); ++i) {
                         CueSheetTrackInfo cti = m_trackInfoList[i];
 
-                        sw.WriteLine("FILE \"{0}\" WAVE", cti.path);
+                        if (0 == Path.GetDirectoryName(path).CompareTo(
+                            Path.GetDirectoryName(cti.path))) {
+                            sw.WriteLine("FILE \"{0}\" WAVE", Path.GetFileName(cti.path));
+                        } else {
+                            sw.WriteLine("FILE \"{0}\" WAVE", cti.path);
+                        }
                         sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
                         sw.WriteLine("    TITLE \"{0}\"", cti.title);
                         sw.WriteLine("    PERFORMER \"{0}\"", cti.performer);
-                        sw.WriteLine("    INDEX 01 {0}",
+                        sw.WriteLine("    INDEX {0} {1}",
+                            cti.indexId,
                             CueSheetTrackInfo.TickIntToStr(cti.startTick));
 
-                        if (0 <= cti.endTick) {
+                        if (0 <= cti.endTick &&
+                            ((i == m_trackInfoList.Count() -1) ||
+                            (m_trackInfoList[i+1].indexId != 0))) {
+                            sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
+                            sw.WriteLine("    TITLE \" gap \"");
                             sw.WriteLine("    INDEX 00 {0}",
                                 CueSheetTrackInfo.TickIntToStr(cti.endTick));
                         } else if (cti.readSeparatorAfter) {

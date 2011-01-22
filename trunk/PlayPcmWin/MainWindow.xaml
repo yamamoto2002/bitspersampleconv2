@@ -17,6 +17,7 @@
         </Grid.ColumnDefinitions>
         <Menu Height="23" Name="menu1" VerticalAlignment="Top">
             <MenuItem Name="menuFile" Header="ファイル(_F)">
+                <MenuItem Header="再生リストをクリアー(_N)..." Click="MenuItemFileNew_Click" Name="menuItemFileNew" />
                 <MenuItem Header="開く(_O)..." Click="MenuItemFileOpen_Click" Name="menuItemFileOpen" />
                 <MenuItem Header="名前をつけて保存(_A)..." Click="MenuItemFileSaveAs_Click" Name="menuItemFileSaveAs" />
                 <Separator />
@@ -37,7 +38,7 @@
                 <Button Content="対応フォーマット(_I)" Height="23" HorizontalAlignment="Left" Margin="198,0,0,6" Name="buttonInspectDevice" VerticalAlignment="Bottom" Width="164" Click="buttonInspectDevice_Click" />
             </Grid>
         </GroupBox>
-        <GroupBox Header="再生するWAVファイル(エクスプローラーからD&amp;Dして下さい)" Margin="6,29,0,151" Name="groupBox2">
+        <GroupBox Header="再生リスト" Margin="6,29,0,151" Name="groupBox2">
             <Grid>
                 <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
                 <DataGrid
@@ -81,10 +82,12 @@
                         <!-- <DataGridTextColumn x:Name="IdColumn" Width="Auto" Binding="{Binding Path=Id}" Header="Id" />
                         -->
                         <DataGridTextColumn x:Name="TitleColumn" Width="Auto" Binding="{Binding Path=Title}" Header="タイトル" />
+                        <DataGridTextColumn x:Name="DurationColumn" Width="Auto" Binding="{Binding Path=Duration}" Header="長さ"/>
                         <DataGridTextColumn x:Name="PerformerColumn" Width="Auto" Binding="{Binding Path=Performer}" Header="演奏者"/>
                         <DataGridTextColumn x:Name="AlbumTitleColumn" Width="Auto" Binding="{Binding Path=AlbumTitle}" Header="アルバム名"/>
                         <DataGridTextColumn x:Name="SampleRateColumn" Width="Auto" Binding="{Binding Path=SampleRate}" Header="サンプルレート"/>
                         <DataGridTextColumn x:Name="QuantizationBitRateColumn" Width="Auto" Binding="{Binding Path=QuantizationBitRate}" Header="量子化ビット数"/>
+                        <DataGridTextColumn x:Name="IsGapColumn"  Width="Auto" Binding="{Binding Path=IsGap}" Header="GAP"/>
                         <DataGridCheckBoxColumn x:Name="ReadSeparaterAfterColumn" Width="SizeToCells" Binding="{Binding Path=ReadSeparaterAfter}" Header="ここまで一括読み込み"/>
                     </DataGrid.Columns>
 
