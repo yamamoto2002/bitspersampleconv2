@@ -138,6 +138,14 @@ namespace PlayPcmWin {
                         sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
                         sw.WriteLine("    TITLE \"{0}\"", cti.title);
                         sw.WriteLine("    PERFORMER \"{0}\"", cti.performer);
+
+                        // INDEX ?? で曲情報が確定するので、その前にREM KOKOMADEを入れる。
+                        if (!(0 <= cti.endTick &&
+                            (i == m_trackInfoList.Count() - 1)) &&
+                            cti.readSeparatorAfter) {
+                            sw.WriteLine("    REM KOKOMADE");
+                        }
+
                         sw.WriteLine("    INDEX {0} {1}",
                             cti.indexId,
                             CueSheetTrackInfo.TickIntToStr(cti.startTick));
@@ -149,8 +157,6 @@ namespace PlayPcmWin {
                             sw.WriteLine("    TITLE \" gap \"");
                             sw.WriteLine("    INDEX 00 {0}",
                                 CueSheetTrackInfo.TickIntToStr(cti.endTick));
-                        } else if (cti.readSeparatorAfter) {
-                            sw.WriteLine("    REM KOKOMADE");
                         }
                     }
                 }
