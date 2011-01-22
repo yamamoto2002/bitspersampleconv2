@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.62 ==
-  * Issue 31 再生リストの保存。
+  * Issue 30 再生リストの保存。
 
 ===!PlayPcmWin 2.0.61 ==
   * Issue 31 再生リスト項目の並べ替え機能。修正。
