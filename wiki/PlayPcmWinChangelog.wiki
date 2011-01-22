@@ -3,7 +3,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 2.0.62 ==
+===!PlayPcmWin 2.0.63 ==
   * Issue 30 再生リストの保存。
 
 ===!PlayPcmWin 2.0.61 ==
