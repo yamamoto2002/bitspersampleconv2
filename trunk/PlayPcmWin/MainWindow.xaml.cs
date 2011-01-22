@@ -1055,6 +1055,7 @@ namespace PlayPcmWin
             var pli = new PlayListItemInfo(
                 PlayListItemInfo.ItemType.AudioData,
                 pcmData);
+            pli.ReadSeparaterAfter = csti.readSeparatorAfter;
             pli.PropertyChanged += new PropertyChangedEventHandler(PlayListItemInfoPropertyChanged);
             m_pcmDataList.Add(pcmData);
             m_playListItems.Add(pli);
@@ -1175,9 +1176,8 @@ namespace PlayPcmWin
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                if ((csti.indexId == 0 &&
-                    m_preference.ReplaceGapWithKokomade) ||
-                    (csti.readSeparatorAfter)) {
+                if (csti.indexId == 0 &&
+                    m_preference.ReplaceGapWithKokomade) {
                     // REM KOKOMADE または
                     // INDEX 00 == gap しかも gapのかわりに[ここまで読みこみ]を追加する。
                     AddKokomade();
