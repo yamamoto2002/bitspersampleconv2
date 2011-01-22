@@ -1065,7 +1065,10 @@ namespace PlayPcmWin
             var pli = new PlayListItemInfo(
                 PlayListItemInfo.ItemType.AudioData,
                 pcmData);
-            pli.ReadSeparaterAfter = csti.readSeparatorAfter;
+            
+            if (csti != null) {
+                pli.ReadSeparaterAfter = csti.readSeparatorAfter;
+            }
             pli.PropertyChanged += new PropertyChangedEventHandler(PlayListItemInfoPropertyChanged);
             m_pcmDataList.Add(pcmData);
             m_playListItems.Add(pli);
