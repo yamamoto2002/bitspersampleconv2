@@ -96,6 +96,25 @@ namespace PlayPcmWin
                 }
             }
 
+            /// <summary>
+            /// 長さ表示用文字列
+            /// </summary>
+            public string Duration {
+                get {
+                    int seconds = m_pcmData.DurationSeconds;
+                    return SecondToHMSString(seconds);
+                }
+            }
+
+            /// <summary>
+            /// GAPの場合true
+            /// </summary>
+            public string IsGap {
+                get {
+                    return (m_pcmData.CueSheetIndex == 0) ? "Yes" : "No";
+                }
+            }
+
             public string SampleRate {
                 get {
                     //if (m_pcmData == null) { return "-"; }
@@ -520,7 +539,9 @@ namespace PlayPcmWin
         private void UpdateUIStatus() {
             switch (m_state) {
             case State.初期化完了:
+                menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = true;
+                menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
 
@@ -537,7 +558,9 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
-                menuItemFileOpen.IsEnabled = true;
+                menuItemFileNew.IsEnabled        = true;
+                menuItemFileOpen.IsEnabled       = true;
+                menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
 
@@ -555,7 +578,9 @@ namespace PlayPcmWin
                 break;
             case State.デバイスSetup完了:
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled        = false;
+                menuItemFileOpen.IsEnabled       = false;
+                menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
 
@@ -575,7 +600,9 @@ namespace PlayPcmWin
                 statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
                 break;
             case State.ファイル読み込み完了:
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled        = false;
+                menuItemFileOpen.IsEnabled       = false;
+                menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled = true;
                 buttonStop.IsEnabled = false;
 
@@ -595,7 +622,9 @@ namespace PlayPcmWin
                 labelPlayingTime.Content = "--:--:--/--:--:--";
                 break;
             case State.再生中:
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled        = false;
+                menuItemFileOpen.IsEnabled       = false;
+                menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = true;
 
@@ -613,7 +642,9 @@ namespace PlayPcmWin
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 break;
             case State.再生停止開始:
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled        = false;
+                menuItemFileOpen.IsEnabled       = false;
+                menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
 
@@ -629,7 +660,9 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生停止開始";
                 break;
             case State.再生グループ切り替え中:
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled        = false;
+                menuItemFileOpen.IsEnabled       = false;
+                menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
 
@@ -997,12 +1030,13 @@ namespace PlayPcmWin
                 pcmData.DisplayName = pcmData.FileName;
                 pcmData.StartTick = 0;
                 pcmData.EndTick = -1;
+                pcmData.CueSheetIndex = 1;
             } else {
                 if (0 < csti.title.Length) {
                     pcmData.DisplayName = csti.title;
-                    if (csti.indexId == 0) {
+                    /* if (csti.indexId == 0) {
                         pcmData.DisplayName = csti.title + " (gap)";
-                    }
+                    } */
                 } else {
                     pcmData.DisplayName = pcmData.FileName;
                 }
@@ -1010,6 +1044,7 @@ namespace PlayPcmWin
                 pcmData.EndTick = csti.endTick;
 
                 pcmData.Performer = csti.performer;
+                pcmData.CueSheetIndex = csti.indexId;
             }
 
             if (null != csr) {
@@ -1245,6 +1280,7 @@ namespace PlayPcmWin
 
                     CueSheetTrackInfo cst = new CueSheetTrackInfo();
                     cst.title = pli.Title;
+                    cst.indexId = pcmData.CueSheetIndex;
                     cst.performer = pli.Performer;
                     cst.readSeparatorAfter = pli.ReadSeparaterAfter;
                     cst.startTick = pcmData.StartTick;
@@ -1259,6 +1295,10 @@ namespace PlayPcmWin
                         string.Format("ファイル保存失敗: {0}", dlg.FileName));
                 }
             }
+        }
+        
+        private void MenuItemFileNew_Click(object sender, RoutedEventArgs e) {
+            ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
         }
 
         private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
@@ -1856,7 +1896,7 @@ namespace PlayPcmWin
             //Console.WriteLine("PlayDoWork end");
         }
 
-        private string SecondToHMSString(int seconds) {
+        private static string SecondToHMSString(int seconds) {
             int h = seconds / 3600;
             int m = seconds / 60 - h * 60;
             int s = seconds - h * 3600 - m * 60;

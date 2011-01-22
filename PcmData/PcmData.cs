@@ -104,6 +104,28 @@ namespace PcmDataLib {
         public string Performer { get; set; }
 
         /// <summary>
+        /// CUEシートから読んだ場合のINDEX番号(1==音声データ、0==無音)
+        /// </summary>
+        public int CueSheetIndex { get; set; }
+
+        /// <summary>
+        /// 長さ(秒)
+        /// </summary>
+        public int DurationSeconds {
+            get {
+                int seconds = (int)(NumFrames / SampleRate)
+                        - StartTick / 75;
+                if (0 <= EndTick) {
+                    seconds = (EndTick - StartTick) / 75;
+                }
+                if (seconds < 0) {
+                    seconds = 0;
+                }
+                return seconds;
+            }
+        }
+
+        /// <summary>
         /// rhsの内容をコピーする。PCMデータ配列だけはコピーしない。(nullをセットする)
         /// PCMデータ配列は、SetSampleArrayで別途設定する。
         /// </summary>
@@ -126,6 +148,7 @@ namespace PcmDataLib {
             AlbumTitle  = rhs.AlbumTitle;
             AlbumPerformer = rhs.AlbumPerformer;
             Performer   = rhs.Performer;
+            CueSheetIndex = rhs.CueSheetIndex;
         }
 
         /// <summary>
@@ -276,9 +299,6 @@ namespace PcmDataLib {
         /// <summary>
         /// サンプル値セット。フォーマットがSFloatの場合のみ使用可能。
         /// </summary>
-        /// <param name="ch"></param>
-        /// <param name="pos"></param>
-        /// <param name="val"></param>
         public void SetSampleValueInFloat(int ch, long pos, float val) {
             Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
             Debug.Assert(ValidBitsPerSample == 32);
