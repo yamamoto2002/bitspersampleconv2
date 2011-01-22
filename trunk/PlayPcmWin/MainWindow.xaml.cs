@@ -61,6 +61,8 @@ namespace PlayPcmWin
                 get {
                     return m_pcmData.Id.ToString();
                 }
+                set {
+                }
             }
 
             public string Title {
@@ -104,6 +106,8 @@ namespace PlayPcmWin
                     int seconds = m_pcmData.DurationSeconds;
                     return SecondToHMSString(seconds);
                 }
+                set {
+                }
             }
 
             /// <summary>
@@ -113,6 +117,8 @@ namespace PlayPcmWin
                 get {
                     return (m_pcmData.CueSheetIndex == 0) ? "Yes" : "No";
                 }
+                set {
+                }
             }
 
             public string SampleRate {
@@ -120,12 +126,16 @@ namespace PlayPcmWin
                     //if (m_pcmData == null) { return "-"; }
                     return m_pcmData.SampleRate.ToString() + " Hz";
                 }
+                set {
+                }
             }
 
             public string QuantizationBitRate {
                 get {
                     //if (m_pcmData == null) { return "-"; }
                     return m_pcmData.BitsPerSample.ToString() + " bit";
+                }
+                set {
                 }
             }
 
