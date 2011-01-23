@@ -152,7 +152,10 @@ namespace PlayPcmWin {
 
                         if (0 <= cti.endTick &&
                             ((i == m_trackInfoList.Count() -1) ||
-                            (m_trackInfoList[i+1].indexId != 0))) {
+                            (0 == m_trackInfoList[i+1].path.CompareTo(
+                                m_trackInfoList[i].path) &&
+                             m_trackInfoList[i+1].startTick !=
+                                m_trackInfoList[i].endTick))) {
                             sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
                             sw.WriteLine("    TITLE \" gap \"");
                             sw.WriteLine("    INDEX 00 {0}",
@@ -420,6 +423,7 @@ namespace PlayPcmWin {
 
                     // 揮発要素はここでリセットする。
                     m_currentTrackInfo.startTick = -1;
+                    m_currentTrackInfo.readSeparatorAfter = false;
                 }
                 break;
 
