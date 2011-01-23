@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.65 ==
+  * Issue 36 修正
+
 ===!PlayPcmWin 2.0.64 ==
   * Issue 35 (再生リストにCUEシート以外のファイルを追加するとヌルポ)修正
 
