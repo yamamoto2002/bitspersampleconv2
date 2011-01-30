@@ -4,6 +4,9 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.66 ==
+  * Issue 40 修正
+
+===!PlayPcmWin 2.0.66 ==
   * Issue 23 (再生一時停止機能) 作成。再生一時停止中も排他モードでデバイスを占有し続ける
 
 ===!PlayPcmWin 2.0.65 ==
