@@ -33,7 +33,7 @@
             </GroupBox>
             <GroupBox Header="CUEシート設定" Height="59" Margin="12,249,12,0" Name="groupBox2" VerticalAlignment="Top">
                 <Grid>
-                    <CheckBox Content="gapを[ここまで一括読み込み]に置き換える" Height="16" Margin="6,6,6,0" Name="checkBoxReplaceGapWithKokomade" VerticalAlignment="Top" />
+                    <CheckBox Content="INDEX00の後に[ここまで一括読み込み]を付ける" Height="16" Margin="6,6,6,0" Name="checkBoxPlaceKokomadeAfterIndex00" VerticalAlignment="Top" />
                 </Grid>
             </GroupBox>
             <GroupBox Header="ウィンドウ設定" Height="115" Margin="12,311,12,0" Name="groupBox3" VerticalAlignment="Top">

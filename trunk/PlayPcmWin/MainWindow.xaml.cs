@@ -1220,13 +1220,12 @@ namespace PlayPcmWin
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
+                ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
+
                 if (csti.indexId == 0 &&
                     m_preference.ReplaceGapWithKokomade) {
-                    // REM KOKOMADE または
-                    // INDEX 00 == gap しかも gapのかわりに[ここまで読みこみ]を追加する。
+                    // INDEX 00 == gap しかも gapのかわりに[ここまで読みこみ]を追加するの場合
                     AddKokomade();
-                } else {
-                    ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
                 }
             }
             return true;
