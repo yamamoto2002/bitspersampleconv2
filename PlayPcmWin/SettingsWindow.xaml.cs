@@ -60,7 +60,7 @@ namespace PlayPcmWin {
                 break;
             }
 
-            checkBoxReplaceGapWithKokomade.IsChecked =
+            checkBoxPlaceKokomadeAfterIndex00.IsChecked =
                 preference.ReplaceGapWithKokomade;
 
             checkBoxManuallySetMainWindowDimension.IsChecked =
@@ -130,7 +130,7 @@ namespace PlayPcmWin {
             }
 
             m_preference.ReplaceGapWithKokomade
-                = checkBoxReplaceGapWithKokomade.IsChecked == true;
+                = checkBoxPlaceKokomadeAfterIndex00.IsChecked == true;
 
             m_preference.ManuallySetMainWindowDimension
                 = checkBoxManuallySetMainWindowDimension.IsChecked == true;
