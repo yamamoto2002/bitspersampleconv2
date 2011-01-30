@@ -122,6 +122,12 @@ public:
     /// 停止。
     void Stop(void);
 
+    /// ポーズ。
+    HRESULT Pause(void);
+
+    /// ポーズ解除。
+    HRESULT Unpause(void);
+
     /// negative number returns when playing pregap
     int GetPosFrame(void);
 
@@ -183,9 +189,11 @@ private:
 
     WWPcmData    *m_capturedPcmData;
     WWPcmData    *m_nowPlayingPcmData;
+    WWPcmData    *m_pauseResumePcmData;
     WWPcmData    m_spliceBuffer;
     WWPcmData    m_startSilenceBuffer;
     WWPcmData    m_endSilenceBuffer;
+    WWPcmData    m_pauseBuffer;
 
     WWStateChanged * m_stateChangedCallback;
     IMMDeviceEnumerator *m_deviceEnumerator;

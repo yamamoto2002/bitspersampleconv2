@@ -157,6 +157,7 @@
     <ClInclude Include="WWUtil.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="WasapiIOIF.cpp" />
     <ClCompile Include="WasapiUser.cpp" />
     <ClCompile Include="WWPcmData.cpp" />
