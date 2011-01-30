@@ -113,7 +113,7 @@ namespace PlayPcmWin
             /// <summary>
             /// GAPの場合true
             /// </summary>
-            public string IsGap {
+            public string IsIndex00 {
                 get {
                     return (m_pcmData.CueSheetIndex == 0) ? "Yes" : "No";
                 }
