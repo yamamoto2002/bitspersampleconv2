@@ -31,6 +31,8 @@ Lynx AES16は、PCに取り付ける前に説明書を読んでジャンパー�
 
 PLEASE NOTE: For Windows Vista and Windows 7, Lynx recommends disabling SpeedStep in your BIOS, and setting the Power Options in the OS to "High Performance".  This can improve the overall reliability of audio playback in MME/DirectSound applications.
 
+Issue 41 をご覧ください
+
 ==おすすめ2: Creative X-Fi Titanium HD==
 
 アナログ音声出力は、44.1kHzと88.2kHzは、WASAPI排他タイマー駆動モードでしか動作しないようですが、
