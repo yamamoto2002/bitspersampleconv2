@@ -24,14 +24,14 @@ Lynx AES16は、PCに取り付ける前に説明書を読んでジャンパー�
 
 近い将来ドライバがWaveRTになるようです。
 
+Issue 41 もご覧ください。
+
 なお、ドライバのリリースノートに以下のようなことが書いてあります。
 あらゆるオーディオインターフェースに言えることです。
 (http://www.lynxstudio.com/pop/support_downloads_notes.asp?i=82)
 より引用:
 
 PLEASE NOTE: For Windows Vista and Windows 7, Lynx recommends disabling SpeedStep in your BIOS, and setting the Power Options in the OS to "High Performance".  This can improve the overall reliability of audio playback in MME/DirectSound applications.
-
-Issue 41 をご覧ください
 
 ==おすすめ2: Creative X-Fi Titanium HD==
 
