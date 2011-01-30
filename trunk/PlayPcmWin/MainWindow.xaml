@@ -140,6 +140,7 @@
                 <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="148,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
                 <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="204,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="50" Click="buttonNext_Click" />
                 <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" IsTabStop="False" />
+                <Button Content="一時停止(_U)" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="260,6,0,0" Name="buttonPause" VerticalAlignment="Top" Width="89" Click="buttonPause_Click" />
             </Grid>
         </GroupBox>
         <StatusBar Height="23" Name="statusBar1" VerticalAlignment="Bottom" Grid.ColumnSpan="2">

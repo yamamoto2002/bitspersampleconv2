@@ -373,6 +373,7 @@ namespace PlayPcmWin
             デバイスSetup完了,
             ファイル読み込み完了,
             再生中,
+            再生一時停止中,
             再生停止開始,
             再生グループ切り替え中,
         }
@@ -554,6 +555,7 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
+                buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -573,6 +575,7 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
+                buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -593,6 +596,7 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
+                buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -615,6 +619,7 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = true;
                 buttonPlay.IsEnabled = true;
                 buttonStop.IsEnabled = false;
+                buttonPause.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -637,6 +642,8 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = true;
+                buttonPause.IsEnabled = true;
+                buttonPause.Content = "一時停止(_U)";
 
                 buttonNext.IsEnabled = true;
                 buttonPrev.IsEnabled = true;
@@ -651,12 +658,35 @@ namespace PlayPcmWin
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 break;
+            case State.再生一時停止中:
+                menuItemFileNew.IsEnabled = false;
+                menuItemFileOpen.IsEnabled = false;
+                menuItemFileSaveAs.IsEnabled = false;
+                buttonPlay.IsEnabled = false;
+                buttonStop.IsEnabled = false;
+                buttonPause.IsEnabled = true;
+                buttonPause.Content = "再生再開(_U)";
+
+                buttonNext.IsEnabled = false;
+                buttonPrev.IsEnabled = false;
+                buttonClearPlayList.IsEnabled = false;
+                groupBoxWasapiSettings.IsEnabled = false;
+
+                buttonInspectDevice.IsEnabled = false;
+
+                buttonSettings.IsEnabled = false;
+                menuToolSettings.IsEnabled = false;
+                statusBarText.Content = "再生一時停止中";
+
+                progressBar1.Visibility = System.Windows.Visibility.Collapsed;
+                break;
             case State.再生停止開始:
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
+                buttonPause.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -675,6 +705,7 @@ namespace PlayPcmWin
                 menuItemFileSaveAs.IsEnabled     = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
+                buttonPause.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -1764,6 +1795,36 @@ namespace PlayPcmWin
             ReadStartPlayByWavDataId(wavDataId);
         }
 
+        private void buttonPause_Click(object sender, RoutedEventArgs e) {
+            int hr = 0;
+
+            switch (m_state) {
+            case State.再生中:
+                hr = wasapi.Pause();
+                AddLogText(string.Format("wasapi.Pause() {0:X8}\r\n", hr));
+                if (0 <= hr) {
+                    ChangeState(State.再生一時停止中);
+                    UpdateUIStatus();
+                } else {
+                    // PAUSE失敗＝すでに再生していない。ここで状態遷移する必要はない。
+                }
+                break;
+            case State.再生一時停止中:
+                hr = wasapi.Unpause();
+                AddLogText(string.Format("wasapi.Unpause() {0:X8}\r\n", hr));
+                if (0 <= hr) {
+                    ChangeState(State.再生中);
+                    UpdateUIStatus();
+                } else {
+                    // UNPAUSE失敗＝すでに再生していない。ここで状態遷移する必要はない。
+                }
+                break;
+            default:
+                break;
+            }
+        }
+
+
         /// <summary>
         /// wavDataIdのGroupがロードされていたら直ちに再生開始する。
         /// 読み込まれていない場合、直ちに再生を開始できないので、ロードしてから再生する。
@@ -2423,7 +2484,8 @@ namespace PlayPcmWin
         }
 
         private void dataGridPlayList_MouseMove(object sender, MouseEventArgs e) {
-            if (m_state == State.再生中) {
+            if (m_state == State.再生中 ||
+                m_state == State.再生一時停止中) {
                 // 再生中は再生リスト項目入れ替え不可能。
                 return;
             }
@@ -2533,5 +2595,6 @@ namespace PlayPcmWin
                 PcmDataListItemsRenumber();
             }
         }
+
     }
 }

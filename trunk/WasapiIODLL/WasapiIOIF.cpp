@@ -339,6 +339,22 @@ WasapiIO_Stop(void)
 
 extern "C" __declspec(dllexport)
 int __stdcall
+WasapiIO_Pause(void)
+{
+    assert(self);
+    return self->wasapi.Pause();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_Unpause(void)
+{
+    assert(self);
+    return self->wasapi.Unpause();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
 WasapiIO_GetPosFrame(void)
 {
     assert(self);

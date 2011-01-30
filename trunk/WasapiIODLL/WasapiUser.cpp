@@ -185,9 +185,10 @@ WasapiUser::WasapiUser(void)
     m_shareMode         = AUDCLNT_SHAREMODE_EXCLUSIVE;
 
     m_audioClockAdjustment = NULL;
-    m_nowPlayingPcmData = NULL;
-    m_useDeviceId    = -1;
-    m_deviceSampleRate  = 0;
+    m_nowPlayingPcmData    = NULL;
+    m_pauseResumePcmData   = NULL;
+    m_useDeviceId          = -1;
+    m_deviceSampleRate     = 0;
 
     memset(m_useDeviceName, 0, sizeof m_useDeviceName);
 
@@ -852,10 +853,13 @@ WasapiUser::Setup(
         m_endSilenceBuffer.Init(-1, m_format, m_numChannels,
             4 * (int)((int64_t)m_sampleRate * m_latencyMillisec / 1000),
             m_frameBytes, WWPcmDataContentSilence);
+
         // spliceバッファー。サイズは100分の1秒=10ms 適当に選んだ。
         m_spliceBuffer.Init(-1, m_format, m_numChannels,
-            m_sampleRate / 100,
-            m_frameBytes, WWPcmDataContentSplice);
+            m_sampleRate / 100, m_frameBytes, WWPcmDataContentSplice);
+        // pauseバッファー。ポーズ時の波形つなぎに使われる。spliceバッファーと同様。
+        m_pauseBuffer.Init(-1, m_format, m_numChannels,
+            m_sampleRate / 100, m_frameBytes, WWPcmDataContentSplice);
         break;
     case eCapture:
         HRG(m_audioClient->GetService(IID_PPV_ARGS(&m_captureClient)));
@@ -978,6 +982,9 @@ WasapiUser::Stop(void)
     dprintf("D: %s() AC=%p SE=%p T=%p\n", __FUNCTION__,
         m_audioClient, m_shutdownEvent, m_thread);
 
+    // ポーズ中の場合、ポーズを解除。
+    m_pauseResumePcmData = NULL;
+
     if (NULL != m_audioClient) {
         hr = m_audioClient->Stop();
         if (FAILED(hr)) {
@@ -1004,6 +1011,107 @@ WasapiUser::Stop(void)
     }
 }
 
+HRESULT
+WasapiUser::Pause(void)
+{
+    // HRESULT hr = S_OK;
+    bool pauseDataSetSucceeded = false;
+
+    assert(m_mutex);
+    WaitForSingleObject(m_mutex, INFINITE);
+    {
+        WWPcmData *nowPlaying = m_nowPlayingPcmData;
+
+        if (nowPlaying && nowPlaying != &m_endSilenceBuffer) {
+            /* 現在再生中で、endSilenceを再生中でない場合ポーズが可能。
+             * m_nowPlayingPcmDataを
+             * pauseBuffer(フェードアウトするPCMデータ)に差し替え、
+             * 再生が終わるまでブロッキングで待つ。
+             */
+
+            // ブロックするので起こらないはず。
+            assert(nowPlaying != &m_pauseBuffer);
+
+            pauseDataSetSucceeded = true;
+
+            m_pauseResumePcmData = nowPlaying;
+
+            m_pauseBuffer.posFrame = 0;
+            m_pauseBuffer.next = &m_endSilenceBuffer;
+
+            m_endSilenceBuffer.posFrame = 0;
+            m_endSilenceBuffer.next = NULL;
+
+            m_pauseBuffer.UpdateSpliceDataWithStraightLine(
+                m_nowPlayingPcmData, m_nowPlayingPcmData->posFrame,
+                &m_endSilenceBuffer, m_endSilenceBuffer.posFrame);
+
+            m_nowPlayingPcmData = &m_pauseBuffer;
+        }
+    }
+    ReleaseMutex(m_mutex);
+
+    if (pauseDataSetSucceeded) {
+        // ここで再生停止までブロックする。
+
+        WWPcmData *nowPlayingPcmData = NULL;
+
+        do {
+            assert(m_mutex);
+            WaitForSingleObject(m_mutex, INFINITE);
+            nowPlayingPcmData = m_nowPlayingPcmData;
+            ReleaseMutex(m_mutex);
+
+            Sleep(100);
+        } while (nowPlayingPcmData != NULL);
+
+        /* 再生停止。これは、呼ばなくても良い。
+        assert(m_audioClient);
+        HRG(m_audioClient->Stop());
+        */
+    }
+
+//end:
+    return (pauseDataSetSucceeded) ? S_OK : E_FAIL;
+}
+
+HRESULT
+WasapiUser::Unpause(void)
+{
+    //HRESULT hr = S_OK;
+
+    /* 再生するPCMデータへフェードインするPCMデータをセットして
+     * 再生開始する。
+     */
+    assert(m_pauseResumePcmData);
+
+    m_startSilenceBuffer.posFrame = 0;
+    m_startSilenceBuffer.next = &m_pauseBuffer;
+
+    m_pauseBuffer.posFrame = 0;
+    m_pauseBuffer.next = m_pauseResumePcmData;
+
+    m_pauseBuffer.UpdateSpliceDataWithStraightLine(
+            &m_startSilenceBuffer, m_startSilenceBuffer.posFrame,
+            m_pauseResumePcmData, m_pauseResumePcmData->posFrame);
+
+    assert(m_mutex);
+    WaitForSingleObject(m_mutex, INFINITE);
+    {
+        m_nowPlayingPcmData = &m_startSilenceBuffer;
+    }
+    ReleaseMutex(m_mutex);
+
+    /* 再生再開。これは、呼ばなくても良い。
+    assert(m_audioClient);
+    HRG(m_audioClient->Start());
+     */
+
+//end:
+    m_pauseResumePcmData = NULL;
+    return S_OK;
+}
+
 bool
 WasapiUser::Run(int millisec)
 {
@@ -1020,6 +1128,7 @@ void
 WasapiUser::ClearPlayPcmData(void)
 {
     m_spliceBuffer.Term();
+    m_pauseBuffer.Term();
     m_startSilenceBuffer.Term();
     m_endSilenceBuffer.Term();
 
@@ -1351,7 +1460,11 @@ WasapiUser::AudioSamplesSendProc(void)
     if (NULL == m_nowPlayingPcmData) {
         ++m_footerCount;
         if (m_footerNeedSendCount < m_footerCount) {
-            result = false;
+            if (NULL != m_pauseResumePcmData) {
+                // ポーズ中。スレッドを回し続ける。
+            } else {
+                result = false;
+            }
         }
     }
 

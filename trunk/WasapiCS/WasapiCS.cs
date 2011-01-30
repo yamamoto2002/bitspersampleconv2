@@ -122,6 +122,14 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static int
+        WasapiIO_Pause();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_Unpause();
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
         WasapiIO_GetPosFrame();
 
         [DllImport("WasapiIODLL.dll")]
@@ -323,6 +331,14 @@ namespace Wasapi {
 
         public void Stop() {
             WasapiIO_Stop();
+        }
+
+        public int Pause() {
+            return WasapiIO_Pause();
+        }
+
+        public int Unpause() {
+            return WasapiIO_Unpause();
         }
 
         public int GetPosFrame() {

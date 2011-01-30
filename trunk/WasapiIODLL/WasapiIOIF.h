@@ -125,6 +125,14 @@ WasapiIO_Stop(void);
 
 extern "C" __declspec(dllexport)
 int __stdcall
+WasapiIO_Pause(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WasapiIO_Unpause(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
 WasapiIO_GetPosFrame(void);
 
 extern "C" __declspec(dllexport)
