@@ -66,7 +66,10 @@ http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 
 =既知のバグ一覧=
 
-こちらをご覧下さい。
+最新版に存在する不具合一覧:
+http://code.google.com/p/bitspersampleconv2/issues/list?can=2&q=&sort=-id&colspec=ID%20Type%20Status%20Priority%20Milestone%20Owner%20Summary
+
+過去に存在した不具合も含めて全て表示:
 http://code.google.com/p/bitspersampleconv2/issues/list?can=1&q=&sort=-id&colspec=ID%20Type%20Status%20Summary
 
 =▲▼▲【よくある質問】複数ファイルをエクスプローラーから!PlayPcmWinにドラッグアンドドロップする際、エクスプローラーに並んでいる順番に再生リストに並べる方法▲▼▲=
