@@ -1089,7 +1089,7 @@ namespace PlayPcmWin
             }
 
             if (null != csr) {
-                pcmData.AlbumTitle = csr.GetAlbumTitle();
+                pcmData.AlbumTitle     = csr.GetAlbumTitle();
                 pcmData.AlbumPerformer = csr.GetAlbumPerformer();
             }
 
@@ -1316,6 +1316,7 @@ namespace PlayPcmWin
                 CueSheetWriter csw = new CueSheetWriter();
 
                 csw.SetAlbumTitle(m_playListItems[0].AlbumTitle);
+                csw.SetAlbumPerformer(m_playListItems[0].PcmData().AlbumPerformer);
 
                 int i = 0;
                 foreach (var pli in m_playListItems) {
@@ -1323,6 +1324,7 @@ namespace PlayPcmWin
 
                     CueSheetTrackInfo cst = new CueSheetTrackInfo();
                     cst.title = pli.Title;
+                    cst.albumTitle = pli.AlbumTitle;
                     cst.indexId = pcmData.CueSheetIndex;
                     cst.performer = pli.Performer;
                     cst.readSeparatorAfter = pli.ReadSeparaterAfter;

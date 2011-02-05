@@ -18,9 +18,14 @@ namespace PlayPcmWin {
         public int    trackId;   // TRACK 10 ==> 10
         public int    startTick; // *75 seconds
         public int    endTick;   // -1: till the end of file
+ 
         public int    indexId;   // INDEX 00 ==> 0, INDEX 01 ==> 1
         public string performer;
         public bool readSeparatorAfter;
+
+        // 複数アルバムが単一のCUEシートに入っている場合、
+        // アルバム情報が全体で1個というわけにはいかない。曲情報として扱う。
+        public string albumTitle;
 
         public void Clear() {
             path = "";
@@ -28,8 +33,10 @@ namespace PlayPcmWin {
             trackId = 0;
             startTick = 0;
             endTick = -1;
+
             indexId = -1;
             performer = string.Empty;
+            albumTitle = string.Empty;
             readSeparatorAfter = false;
         }
 
@@ -39,8 +46,10 @@ namespace PlayPcmWin {
             trackId   = rhs.trackId;
             startTick = rhs.startTick;
             endTick   = rhs.endTick;
+
             indexId   = rhs.indexId;
             performer = rhs.performer;
+            albumTitle = rhs.albumTitle;
             readSeparatorAfter = rhs.readSeparatorAfter;
         }
 
@@ -87,9 +96,9 @@ namespace PlayPcmWin {
         }
 
         public void Debug() {
-            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) performer={7} rsa={8}\n    title={9}",
+            Console.WriteLine("    path={0}\n    Track={1} Index={2} start={3}({4}) end={5}({6}) performer={7} albumTitle={8} rsa={9}\n    title={10}",
                 path, trackId, indexId, startTick, TickIntToStr(startTick),
-                endTick, TickIntToStr(endTick), performer, readSeparatorAfter, title);
+                endTick, TickIntToStr(endTick), performer, albumTitle, readSeparatorAfter, title);
         }
     };
 
@@ -98,7 +107,8 @@ namespace PlayPcmWin {
     /// </summary>
     class CueSheetWriter {
         private List<CueSheetTrackInfo> m_trackInfoList = new List<CueSheetTrackInfo>();
-        private string m_albumTitle;
+        private string m_albumTitle     = string.Empty;
+        private string m_albumPerformer = string.Empty;
 
         public void AddTrackInfo(CueSheetTrackInfo a) {
             m_trackInfoList.Add(a);
@@ -106,6 +116,10 @@ namespace PlayPcmWin {
 
         public void SetAlbumTitle(string s) {
             m_albumTitle = s;
+        }
+
+        public void SetAlbumPerformer(string s) {
+            m_albumPerformer = s;
         }
 
         public bool WriteToFile(string path) {
@@ -116,12 +130,18 @@ namespace PlayPcmWin {
             try {
                 using (StreamWriter sw = new StreamWriter(path, false, Encoding.Default)) {
                     // アルバムタイトル
-                    if (m_albumTitle.Length == 0) {
-                        sw.WriteLine(
-                            string.Format("TITLE \"album title unknown\""));
-                    } else {
+                    if (null != m_albumTitle && 0 < m_albumTitle.Length) {
                         sw.WriteLine(
                             string.Format("TITLE \"{0}\"", m_albumTitle));
+                    } else {
+                        sw.WriteLine(
+                            string.Format("TITLE \"\""));
+                    }
+
+                    // アルバム演奏者。
+                    if (null != m_albumPerformer && 0 < m_albumPerformer.Length) {
+                        sw.WriteLine(
+                            string.Format("PERFORMER \"{0}\"", m_albumPerformer));
                     }
 
                     // 曲情報出力
@@ -135,9 +155,14 @@ namespace PlayPcmWin {
                         } else {
                             sw.WriteLine("FILE \"{0}\" WAVE", cti.path);
                         }
+
                         sw.WriteLine("  TRACK {0:D2} AUDIO", trackCount++);
+
                         sw.WriteLine("    TITLE \"{0}\"", cti.title);
-                        sw.WriteLine("    PERFORMER \"{0}\"", cti.performer);
+
+                        if (null != cti.performer && 0 < cti.performer.Length) {
+                            sw.WriteLine("    PERFORMER \"{0}\"", cti.performer);
+                        }
 
                         // INDEX ?? で曲情報が確定するので、その前にREM KOKOMADEを入れる。
                         if (!(0 <= cti.endTick &&
@@ -184,6 +209,8 @@ namespace PlayPcmWin {
         private string m_albumTitle;
         private string m_albumPerformer;
 
+        private bool m_bAlbumInfoParsing;
+
         public int GetTrackInfoCount() {
             return m_trackInfoList.Count;
         }
@@ -222,7 +249,8 @@ namespace PlayPcmWin {
             m_currentTrackInfo.Clear();
 
             m_albumTitle     = string.Empty;
-            m_albumPerformer = string.Empty;
+
+            m_bAlbumInfoParsing = true;
 
             // Pass 1の処理
             bool result = true;
@@ -349,22 +377,25 @@ namespace PlayPcmWin {
             case "performer":
                 m_currentTrackInfo.performer = string.Empty;
                 if (2 <= tokenList.Count && 0 < tokenList[1].Trim().Length) {
-                    m_currentTrackInfo.performer = tokenList[1];
+                    if (m_bAlbumInfoParsing) {
+                        m_albumPerformer = tokenList[1];
+                    } else {
+                        m_currentTrackInfo.performer = tokenList[1];
+                    }
+                    Console.WriteLine("performer {0}", tokenList[1]);
                 }
-                if (m_albumPerformer.Length == 0) {
-                    m_albumPerformer = m_currentTrackInfo.performer;
-                }
-                Console.WriteLine("performer {0}", m_currentTrackInfo.performer);
+
                 break;
             case "title":
                 m_currentTrackInfo.title = string.Empty;
                 if (2 <= tokenList.Count && 0 < tokenList[1].Trim().Length) {
-                    m_currentTrackInfo.title = tokenList[1];
+                    if (m_bAlbumInfoParsing) {
+                        m_albumTitle = tokenList[1];
+                    } else {
+                        m_currentTrackInfo.title = tokenList[1];
+                    }
+                    Console.WriteLine("title {0}", tokenList[1]);
                 }
-                if (m_albumTitle.Length == 0) {
-                    m_albumTitle = m_currentTrackInfo.title;
-                }
-                Console.WriteLine("title {0}", m_currentTrackInfo.title);
                 break;
             case "rem":
                 Console.WriteLine("rem tag has come");
@@ -387,8 +418,12 @@ namespace PlayPcmWin {
                     // 相対パス。
                     m_currentTrackInfo.path = m_dirPath + tokenList[1];
                 }
+
+                // file tag has come; End album info.
                 Console.WriteLine("file tag has come");
+                m_bAlbumInfoParsing = false;
                 m_currentTrackInfo.Debug();
+
                 break;
             case "track":
                 if (tokenList.Count < 2) {
@@ -424,6 +459,8 @@ namespace PlayPcmWin {
                     // 揮発要素はここでリセットする。
                     m_currentTrackInfo.startTick = -1;
                     m_currentTrackInfo.readSeparatorAfter = false;
+                    m_currentTrackInfo.performer = string.Empty;
+                    m_currentTrackInfo.albumTitle = string.Empty;
                 }
                 break;
 
