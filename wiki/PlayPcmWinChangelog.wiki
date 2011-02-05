@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.70 ==
+  * Issue 43 修正
+  * Issue 44 修正
+
 ===!PlayPcmWin 2.0.68 ==
   * Issue 42 (32ビット版のメモリ不足問題)暫定対策を入れた
 
