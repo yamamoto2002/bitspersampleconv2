@@ -1222,9 +1222,11 @@ namespace PlayPcmWin
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
                 ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
 
-                if (csti.indexId == 0 &&
-                    m_preference.ReplaceGapWithKokomade) {
+                if ((csti.indexId == 0 &&
+                    m_preference.ReplaceGapWithKokomade) ||
+                    csti.readSeparatorAfter) {
                     // INDEX 00 == gap しかも gapのかわりに[ここまで読みこみ]を追加するの場合
+                    // または、CUEシートにREM KOKOMADEが書いてある場合。
                     AddKokomade();
                 }
             }
