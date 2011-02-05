@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.70 ==
-  * Issue 43 修正
+  * Issue 43 (cueに書き込まれてる「ここまで一括読み込み（REM KOKOMADE）」が効かない)修正
   * Issue 44 修正
 
 ===!PlayPcmWin 2.0.68 ==
