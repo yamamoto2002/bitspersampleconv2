@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.71 ==
+  * Issue 45 と Issue 46 (一時停止関連バグ)修正
+
 ===!PlayPcmWin 2.0.70 ==
   * Issue 43 (cueに書き込まれてる「ここまで一括読み込み（REM KOKOMADE）」が効かない)修正
   * Issue 44 (wavファイルを直接D&Dして作ったリストがcue保存できない)修正
