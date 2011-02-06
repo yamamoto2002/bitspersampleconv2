@@ -1022,15 +1022,16 @@ WasapiUser::Pause(void)
     {
         WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
-        if (nowPlaying && nowPlaying != &m_endSilenceBuffer) {
-            /* 現在再生中で、endSilenceを再生中でない場合ポーズが可能。
+        dprintf("%s nowPlaying=%p posFrame=%d splice=%p startSilence=%p endSilence=%p pause=%p\n", __FUNCTION__,
+            nowPlaying, (nowPlaying) ? nowPlaying->posFrame : -1, &m_spliceBuffer, &m_startSilenceBuffer, &m_endSilenceBuffer, &m_pauseBuffer);
+
+        if (nowPlaying && nowPlaying != &m_startSilenceBuffer && nowPlaying != &m_endSilenceBuffer && nowPlaying != &m_pauseBuffer &&
+            nowPlaying != &m_spliceBuffer) {
+            /* 通常データを再生中の場合ポーズが可能。
              * m_nowPlayingPcmDataを
              * pauseBuffer(フェードアウトするPCMデータ)に差し替え、
              * 再生が終わるまでブロッキングで待つ。
              */
-
-            // ブロックするので起こらないはず。
-            assert(nowPlaying != &m_pauseBuffer);
 
             pauseDataSetSucceeded = true;
 
@@ -1069,6 +1070,8 @@ WasapiUser::Pause(void)
         assert(m_audioClient);
         HRG(m_audioClient->Stop());
         */
+    } else {
+        dprintf("%s pauseDataSet failed\n", __FUNCTION__);
     }
 
 //end:
@@ -1080,10 +1083,13 @@ WasapiUser::Unpause(void)
 {
     //HRESULT hr = S_OK;
 
-    /* 再生するPCMデータへフェードインするPCMデータをセットして
+    /* 再生するPCMデータへフェードインするPCMデータをpauseBufferにセットして
      * 再生開始する。
      */
     assert(m_pauseResumePcmData);
+
+    dprintf("%s resume=%p posFrame=%d\n", __FUNCTION__,
+        m_pauseResumePcmData, m_pauseResumePcmData->posFrame);
 
     m_startSilenceBuffer.posFrame = 0;
     m_startSilenceBuffer.next = &m_pauseBuffer;
@@ -1380,8 +1386,8 @@ WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
             copyFrames = pcmData->nFrames - pcmData->posFrame;
         }
 
-        dprintf("pcmData->posFrame=%d copyFrames=%d nFrames=%d\n",
-            pcmData->posFrame, copyFrames, pcmData->nFrames);
+        dprintf("pcmData=%p next=%p posFrame=%d copyFrames=%d nFrames=%d\n",
+            pcmData, pcmData->next, pcmData->posFrame, copyFrames, pcmData->nFrames);
 
         CopyMemory(&pData_return[pos*m_frameBytes],
             &pcmData->stream[pcmData->posFrame * m_frameBytes],

@@ -1809,7 +1809,7 @@ namespace PlayPcmWin
                     ChangeState(State.再生一時停止中);
                     UpdateUIStatus();
                 } else {
-                    // PAUSE失敗＝すでに再生していない。ここで状態遷移する必要はない。
+                    // Pause失敗＝すでに再生していない または再生一時停止ができない状況。ここで状態遷移する必要はない。
                 }
                 break;
             case State.再生一時停止中:
@@ -1819,10 +1819,11 @@ namespace PlayPcmWin
                     ChangeState(State.再生中);
                     UpdateUIStatus();
                 } else {
-                    // UNPAUSE失敗＝すでに再生していない。ここで状態遷移する必要はない。
+                    // Unpause失敗＝すでに再生していない。ここで状態遷移する必要はない。
                 }
                 break;
             default:
+                System.Diagnostics.Debug.Assert(false);
                 break;
             }
         }
