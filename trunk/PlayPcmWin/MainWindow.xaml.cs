@@ -663,7 +663,7 @@ namespace PlayPcmWin
                 menuItemFileOpen.IsEnabled = false;
                 menuItemFileSaveAs.IsEnabled = false;
                 buttonPlay.IsEnabled = false;
-                buttonStop.IsEnabled = false;
+                buttonStop.IsEnabled = true;
                 buttonPause.IsEnabled = true;
                 buttonPause.Content = "再生再開(_U)";
 
