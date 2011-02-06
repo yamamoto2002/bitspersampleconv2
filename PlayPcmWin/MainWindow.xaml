@@ -133,14 +133,14 @@
         <GroupBox Grid.Column="1" Header="再生制御" Margin="8,0,12,30" Name="groupBox7" Height="133" VerticalAlignment="Bottom">
             <Grid>
                 <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="67" IsEnabled="False" Click="buttonPlay_Click" />
-                <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="76,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="66" IsEnabled="False" Click="buttonStop_Click" />
+                <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="78,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="66" IsEnabled="False" Click="buttonStop_Click" />
+                <Button Content="一時停止(_U)" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="149,6,0,0" Name="buttonPause" VerticalAlignment="Top" Width="89" Click="buttonPause_Click" />
+                <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="256,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
+                <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="311,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="50" Click="buttonNext_Click" />
                 <Label Content="00:00:00/00:00:00" Margin="148,30,6,0" Name="labelPlayingTime" Height="29" VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="16" FontFamily="Courier New" />
                 <Slider Margin="6,0,7,0" Name="slider1" MouseMove="slider1_MouseMove" Height="23" VerticalAlignment="Bottom" />
                 <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
-                <Button Content="＜＜" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="148,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
-                <Button Content="＞＞" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="204,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="50" Click="buttonNext_Click" />
                 <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" IsTabStop="False" />
-                <Button Content="一時停止(_U)" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="260,6,0,0" Name="buttonPause" VerticalAlignment="Top" Width="89" Click="buttonPause_Click" />
             </Grid>
         </GroupBox>
         <StatusBar Height="23" Name="statusBar1" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
