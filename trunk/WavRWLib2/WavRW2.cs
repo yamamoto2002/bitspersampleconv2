@@ -72,7 +72,7 @@ namespace WavRWLib2
 
         private uint   m_byteRate;
         private ushort m_blockAlign;
-        public ushort BitsPerFrame { get; set; }
+        public ushort BitsPerSample { get; set; }
 
         public bool Create(
                 int numChannels, int sampleRate, int bitsPerSample,
@@ -95,7 +95,7 @@ namespace WavRWLib2
             m_byteRate = (uint)(sampleRate * numChannels * bitsPerSample / 8);
             m_blockAlign = (ushort)(numChannels * bitsPerSample / 8);
 
-            BitsPerFrame = (ushort)bitsPerSample;
+            BitsPerSample = (ushort)bitsPerSample;
 
             SampleValueRepresentationType = sampleValueRepresentation;
             if (sampleValueRepresentation == PcmDataLib.PcmData.ValueRepresentationType.SInt) {
@@ -154,19 +154,19 @@ namespace WavRWLib2
             m_blockAlign = br.ReadUInt16();
             Console.WriteLine("D: blockAlign={0}", m_blockAlign);
 
-            BitsPerFrame = br.ReadUInt16();
-            Console.WriteLine("D: bitsPerSample={0}", BitsPerFrame);
+            BitsPerSample = br.ReadUInt16();
+            Console.WriteLine("D: bitsPerSample={0}", BitsPerSample);
 
             if (16 < m_subChunk1Size) {
                 br.ReadBytes((int)(m_subChunk1Size - 16));
             }
 
-            if (m_byteRate != SampleRate * NumChannels * BitsPerFrame / 8) {
+            if (m_byteRate != SampleRate * NumChannels * BitsPerSample / 8) {
                 Console.WriteLine("E: byteRate is wrong value. corrupted file?");
                 return false;
             }
 
-            if (m_blockAlign != NumChannels * BitsPerFrame / 8) {
+            if (m_blockAlign != NumChannels * BitsPerSample / 8) {
                 Console.WriteLine("E: blockAlign is wrong value. corrupted file?");
                 return false;
             }
@@ -184,7 +184,7 @@ namespace WavRWLib2
 
             bw.Write(m_byteRate);
             bw.Write(m_blockAlign);
-            bw.Write(BitsPerFrame);
+            bw.Write(BitsPerSample);
         }
     }
 
@@ -248,7 +248,7 @@ namespace WavRWLib2
         /// <summary>
         /// readerのデータをcountバイトだけスキップする。
         /// </summary>
-        private static void BinaryReaderSkip(BinaryReader reader, long count) {
+        public static void BinaryReaderSkip(BinaryReader reader, long count) {
             if (reader.BaseStream.CanSeek) {
                 reader.BaseStream.Seek(count, SeekOrigin.Current);
             } else {
@@ -369,9 +369,9 @@ namespace WavRWLib2
         }
 
         /// <summary>
-        /// StartTickとEndTickを見て、必要な部分だけ読み込む。
+        /// StartTickとEndTickを見て、DSCヘッダ以降の必要な部分だけ読み込む。
         /// </summary>
-        private bool ReadHeaderAndPcmData(BinaryReader br, long startFrame, long endFrame) {
+        private bool ReadDscHeaderAndPcmDataInternal(BinaryReader br, long startFrame, long endFrame) {
             if (startFrame < 0) {
                 // データ壊れ。先頭を読む。
                 startFrame = 0;
@@ -382,7 +382,7 @@ namespace WavRWLib2
                 startFrame = endFrame;
             }
 
-            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerFrame, startFrame, endFrame);
+            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample, startFrame, endFrame);
         }
 
         private bool Read(BinaryReader br, ReadMode mode, long startFrame, long endFrame) {
@@ -399,12 +399,12 @@ namespace WavRWLib2
             m_dsc = new DataSubChunk();
             switch (mode) {
             case ReadMode.HeaderAndPcmData:
-                if (!ReadHeaderAndPcmData(br, startFrame, endFrame)) {
+                if (!ReadDscHeaderAndPcmDataInternal(br, startFrame, endFrame)) {
                     return false;
                 }
                 break;
             case ReadMode.OnlyHeader:
-                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerFrame)) {
+                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
                     return false;
                 }
                 break;
@@ -424,7 +424,7 @@ namespace WavRWLib2
             return Read(br, ReadMode.OnlyHeader, 0, -1);
         }
 
-        public bool ReadAll(BinaryReader br, long startFrame, long endFrame) {
+        public bool ReadHeaderAndSamples(BinaryReader br, long startFrame, long endFrame) {
             return Read(br, ReadMode.HeaderAndPcmData, startFrame, endFrame);
         }
 
@@ -442,7 +442,7 @@ namespace WavRWLib2
 
         public int BitsPerFrame
         {
-            get { return m_fsc.BitsPerFrame; }
+            get { return m_fsc.BitsPerSample; }
         }
 
         public long NumFrames
@@ -482,6 +482,34 @@ namespace WavRWLib2
             m_dsc.Create(numFrames, sampleArray);
 
             return true;
+        }
+
+        public bool ReadStreamBegin(BinaryReader br,out PcmDataLib.PcmData pcmData) {
+            if (!ReadHeader(br)) {
+                pcmData = new PcmDataLib.PcmData();
+                return false;
+            }
+
+            pcmData = new PcmDataLib.PcmData();
+            pcmData.SetFormat(m_fsc.NumChannels, m_fsc.BitsPerSample,
+                m_fsc.BitsPerSample, (int)m_fsc.SampleRate,
+                m_fsc.SampleValueRepresentationType, m_dsc.NumFrames);
+
+            return true;
+        }
+
+        public void ReadStreamSkip(BinaryReader br, long skipFrames) {
+            int frameBytes = m_fsc.BitsPerSample / 8 * m_fsc.NumChannels;
+
+            DataSubChunk.BinaryReaderSkip(br, frameBytes * skipFrames);
+        }
+
+        public byte[] ReadStreamReadOne(BinaryReader br, long preferredFrames) {
+            int frameBytes = m_fsc.BitsPerSample / 8 * m_fsc.NumChannels;
+            return br.ReadBytes((int)(preferredFrames * frameBytes));
+        }
+
+        public void ReadStreamEnd() {
         }
     }
 }

@@ -78,6 +78,10 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
+        WasapiIO_AddPlayPcmDataSetPcmPartially(int id, int posBytes, byte[] data, int bytes);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static bool
         WasapiIO_AddPlayPcmDataEnd();
 
         [DllImport("WasapiIODLL.dll")]
@@ -267,6 +271,24 @@ namespace Wasapi {
             Sfloat,
         };
 
+        /// <summary>
+        /// サンプルフォーマットタイプ→メモリ上に占めるバイト数
+        /// </summary>
+        /// <param name="t">サンプルフォーマットタイプ</param>
+        /// <returns>メモリ上に占めるバイト数(1サンプルあたり)</returns>
+        public int SampleFormatTypeToUseBytesPerSample(SampleFormatType t) {
+            switch (t) {
+            case SampleFormatType.Sint16: return 2;
+            case SampleFormatType.Sint24: return 3;
+            case SampleFormatType.Sint32V24: return 4;
+            case SampleFormatType.Sint32: return 4;
+            case SampleFormatType.Sfloat: return 4;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return 0;
+            }
+        }
+
         public int Setup(int sampleRate, SampleFormatType format, int numChannels) {
             return WasapiIO_Setup(sampleRate, (int)format, numChannels);
         }
@@ -281,6 +303,14 @@ namespace Wasapi {
 
         public bool AddPlayPcmData(int id, byte[] data) {
             return WasapiIO_AddPlayPcmData(id, data, data.Length);
+        }
+
+        public bool AddPlayPcmDataAllocOnly(int id, int bytes) {
+            return WasapiIO_AddPlayPcmData(id, null, bytes);
+        }
+
+        public bool AddPlayPcmDataPart(int id, int posBytes, byte[] data) {
+            return WasapiIO_AddPlayPcmDataSetPcmPartially(id, posBytes, data, data.Length);
         }
 
         public bool AddPlayPcmDataEnd() {

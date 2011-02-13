@@ -33,7 +33,7 @@ WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int bytes)
     assert(1 <= m_sampleRate);
     assert(1 <= m_frameBytes);
 
-    if (data == NULL || 0 == bytes) {
+    if (0 == bytes) {
         dprintf("E: %s(%d, %p, %d) arg check failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
@@ -45,7 +45,10 @@ WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int bytes)
         dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
-    CopyMemory(pcmData.stream, data, (bytes/m_frameBytes) * m_frameBytes);
+
+    if (NULL != data) {
+        CopyMemory(pcmData.stream, data, (bytes/m_frameBytes) * m_frameBytes);
+    }
     m_playPcmDataList.push_back(pcmData);
     return true;
 }

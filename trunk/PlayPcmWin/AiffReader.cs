@@ -16,7 +16,8 @@ namespace PlayPcmWin {
             HeaderError,
             NotSupportOffsetNonzero,
             NotSupportBlockSizeNonzero,
-            NotSupportBitsPerSample
+            NotSupportBitsPerSample,
+            ReadError
         }
 
         public int NumChannels { get; set; }
@@ -61,6 +62,7 @@ namespace PlayPcmWin {
 
         /// <summary>
         /// readerのデータをcountバイトだけスキップする。
+        /// WavRW2.csからコピペ…
         /// </summary>
         private static void BinaryReaderSkip(BinaryReader reader, long count) {
             if (reader.BaseStream.CanSeek) {
@@ -121,10 +123,10 @@ namespace PlayPcmWin {
             return ResultType.Success;
         }
 
-        private ResultType ReadSoundDataChunk(BinaryReader br) {
+        private ResultType ReadSoundDataChunk(BinaryReader br, long startFrame, long endFrame) {
             SkipToChunk(br, "SSND");
-            long ckSize = ReadBigU32(br);
-            long offset = ReadBigU32(br);
+            long ckSize    = ReadBigU32(br);
+            long offset    = ReadBigU32(br);
             long blockSize = ReadBigU32(br);
 
             if (offset != 0) {
@@ -138,16 +140,27 @@ namespace PlayPcmWin {
                 return ResultType.NotSupportBitsPerSample;
             }
 
-            m_sampleArray = br.ReadBytes((int)(NumFrames * BitsPerFrame / 8));
+            // 読み込むフレーム数を計算。
+            long readFrames = NumFrames - startFrame;
+            if (0 <= endFrame) {
+                System.Diagnostics.Debug.Assert(startFrame < endFrame);
+                readFrames = endFrame - startFrame;
+            }
+
+            // 読み込み開始フレームまでスキップする。
+            BinaryReaderSkip(br, startFrame * BitsPerFrame / 8);
+
+            m_sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
             
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
             // エンディアン変換
+            /// @todo 16bppの場合以外にも対応する必要あり。
             {
                 // 案5 (1Mサンプルごとに並列化、この時点で2GB以下なので、long→intにする)
                 int workUnit = 1048576;
-                int sampleUnits = (int)(NumFrames * NumChannels / workUnit);
+                int sampleUnits = (int)(readFrames * NumChannels / workUnit);
                 Parallel.For(0, sampleUnits, delegate(int m) {
                     int pos = m * workUnit * 2;
                     for (int i = 0; i < workUnit; ++i) {
@@ -159,7 +172,7 @@ namespace PlayPcmWin {
                     }
                 });
                 for (int i = workUnit * sampleUnits;
-                    i < NumFrames * NumChannels; ++i) {
+                    i < readFrames * NumChannels; ++i) {
                     int pos = i * 2;
                     byte v0 = m_sampleArray[pos + 0];
                     byte v1 = m_sampleArray[pos + 1];
@@ -205,14 +218,14 @@ namespace PlayPcmWin {
             return 0;
         }
 
-        public ResultType ReadHeaderAndPcmData(BinaryReader br) {
+        public ResultType ReadHeaderAndSamples(BinaryReader br, long startFrame, long endFrame) {
             ResultType result = ReadFormChunkHeader(br);
             if (result != ResultType.Success) {
                 return result;
             }
 
             ReadCommonChunk(br);
-            result = ReadSoundDataChunk(br);
+            result = ReadSoundDataChunk(br, startFrame, endFrame);
             return result;
         }
 
@@ -266,6 +279,93 @@ namespace PlayPcmWin {
 
             double result = System.BitConverter.ToDouble(resultBytes, 0);
             return result;
+        }
+
+        private int m_bytesPerFrame;
+        private long m_posFrame;
+
+        public ResultType ReadStreamBegin(BinaryReader br, out PcmDataLib.PcmData pcmData) {
+            ResultType rt = ResultType.Success;
+
+            rt = ReadHeader(br, out pcmData);
+            if (rt == ResultType.Success) {
+                m_bytesPerFrame = pcmData.BitsPerFrame / 8;
+            }
+            m_posFrame = 0;
+
+            return rt;
+        }
+
+        /// <summary>
+        /// フレーム指定でスキップする。
+        /// </summary>
+        /// <param name="skipFrames">スキップするフレーム数。負の値は指定できない。</param>
+        /// <returns>実際にスキップできたフレーム数。</returns>
+        public long ReadStreamSkip(BinaryReader br, long skipFrames) {
+            System.Diagnostics.Debug.Assert(0 < m_bytesPerFrame);
+            if (skipFrames < 0) {
+                System.Diagnostics.Debug.Assert(false);
+                skipFrames = 0;
+            }
+            if (NumFrames < m_posFrame + skipFrames) {
+                // 最後に移動。
+                skipFrames = NumFrames - m_posFrame;
+            }
+
+            BinaryReaderSkip(br, skipFrames * m_bytesPerFrame / 8);
+            m_posFrame += skipFrames;
+            return skipFrames;
+        }
+
+        /// <summary>
+        /// preferredFramesフレームぐらい読み出す。
+        /// 1Mフレームぐらいにすると効率が良い。
+        /// </summary>
+        /// <returns>読みだしたフレーム</returns>
+        public byte[] ReadStreamReadOne(BinaryReader br, int preferredFrames) {
+            int readFrames = preferredFrames;
+            if (NumFrames < m_posFrame + readFrames) {
+                readFrames = (int)(NumFrames - m_posFrame);
+            }
+
+            if (readFrames == 0) {
+                // 1バイトも読めない。
+                return new byte[0];
+            }
+
+            byte[] sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
+
+            // エンディアン変換
+            /// @todo 16bppの場合以外にも対応する必要あり。
+            {
+                const int workUnit = 16384;
+                int sampleUnits = (int)(readFrames * NumChannels / workUnit);
+                Parallel.For(0, sampleUnits, delegate(int m) {
+                    int pos = m * workUnit * 2;
+                    for (int i = 0; i < workUnit; ++i) {
+                        byte v0 = sampleArray[pos + 0];
+                        byte v1 = sampleArray[pos + 1];
+                        sampleArray[pos + 1] = v0;
+                        sampleArray[pos + 0] = v1;
+                        pos += 2;
+                    }
+                });
+                for (int i = workUnit * sampleUnits;
+                    i < readFrames * NumChannels; ++i) {
+                    int pos = i * 2;
+                    byte v0 = sampleArray[pos + 0];
+                    byte v1 = sampleArray[pos + 1];
+                    sampleArray[pos + 1] = v0;
+                    sampleArray[pos + 0] = v1;
+                }
+            }
+
+            return sampleArray;
+        }
+
+        public void ReadStreamEnd() {
+            m_bytesPerFrame = 0;
+            m_posFrame = 0;
         }
     }
 }

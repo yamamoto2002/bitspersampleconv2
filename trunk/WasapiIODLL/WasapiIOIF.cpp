@@ -235,6 +235,23 @@ WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes)
 
 extern "C" __declspec(dllexport)
 bool __stdcall
+WasapiIO_AddPlayPcmDataSetPcmPartially(int id, int posBytes, unsigned char *data, int bytes)
+{
+    assert(self);
+
+    WWPcmData *p = self->playPcmGroup.FindPcmDataById(id);
+    if (NULL == p) {
+        return false;
+    }
+
+    assert(posBytes + bytes <= p->nFrames * p->frameBytes);
+
+    memcpy(&p->stream[posBytes], data, bytes);
+    return true;
+}
+
+extern "C" __declspec(dllexport)
+bool __stdcall
 WasapiIO_AddPlayPcmDataEnd(void)
 {
     assert(self);
