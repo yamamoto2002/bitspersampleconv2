@@ -11,6 +11,8 @@ namespace PlayPcmWin {
         private Process m_childProcess;
         private BinaryReader m_br;
         private AnonymousPipeServerStream m_pss;
+        private int m_bytesPerFrame;
+        private long m_numFrames;
 
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
@@ -89,7 +91,10 @@ namespace PlayPcmWin {
             int exitCode = m_childProcess.ExitCode;
             m_childProcess.Close();
             m_childProcess = null;
+
             m_pss.Close();
+            m_pss = null;
+
             m_br.Close();
             m_br = null;
 
@@ -112,10 +117,10 @@ namespace PlayPcmWin {
             int nChannels     = m_br.ReadInt32();
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
-            long numFrames    = m_br.ReadInt64();
+            m_numFrames       = m_br.ReadInt64();
 
             System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
-                nChannels, bitsPerSample, sampleRate, numFrames);
+                nChannels, bitsPerSample, sampleRate, m_numFrames);
 
             StopChildProcess();
 
@@ -125,11 +130,14 @@ namespace PlayPcmWin {
                 bitsPerSample,
                 sampleRate,
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
-                numFrames);
+                m_numFrames);
 
             return 0;
         }
 
+        /// <summary>
+        /// ReadStreamBegin() ReadStreamOne() ReadStreamEnd()を使って作り直す
+        /// </summary>
         public int ReadAll(string flacFilePath, out PcmDataLib.PcmData pcmData) {
             pcmData = new PcmDataLib.PcmData();
 
@@ -146,14 +154,14 @@ namespace PlayPcmWin {
             int nChannels     = m_br.ReadInt32();
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
-            long numFrames    = m_br.ReadInt64();
+            m_numFrames       = m_br.ReadInt64();
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 
-            byte[] sampleArray = new byte[numFrames * bytesPerFrame];
+            byte[] sampleArray = new byte[m_numFrames * bytesPerFrame];
 
             long pos = 0;
-            while (pos < numFrames) {
+            while (pos < m_numFrames) {
                 int frameCount = m_br.ReadInt32();
 
                 System.Console.WriteLine("ReadAll() frameCount={0}", frameCount);
@@ -175,7 +183,7 @@ namespace PlayPcmWin {
             }
 
             System.Console.WriteLine("ReadAll() numFrames={0} pos={1} ({2}M frames)",
-                numFrames, pos, pos / 1048576);
+                m_numFrames, pos, pos / 1048576);
 
             int exitCode = StopChildProcess();
             System.Console.WriteLine("ReadAll() exitCode={0}",
@@ -188,10 +196,85 @@ namespace PlayPcmWin {
                     bitsPerSample,
                     sampleRate,
                     PcmDataLib.PcmData.ValueRepresentationType.SInt,
-                    numFrames);
-                pcmData.SetSampleArray(numFrames, sampleArray);
+                    m_numFrames);
+                pcmData.SetSampleArray(m_numFrames, sampleArray);
             }
             return exitCode;
         }
+
+        public int ReadStreamBegin(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+            pcmData = new PcmDataLib.PcmData();
+
+            StartChildProcess();
+            SendString("A");
+            SendBase64(flacFilePath);
+
+            int rv = m_br.ReadInt32();
+            if (rv != 0) {
+                StopChildProcess();
+                m_bytesPerFrame = 0;
+                return rv;
+            }
+
+            int nChannels     = m_br.ReadInt32();
+            int bitsPerSample = m_br.ReadInt32();
+            int sampleRate    = m_br.ReadInt32();
+            m_numFrames       = m_br.ReadInt64();
+
+            pcmData.SetFormat(
+                    nChannels,
+                    bitsPerSample,
+                    bitsPerSample,
+                    sampleRate,
+                    PcmDataLib.PcmData.ValueRepresentationType.SInt,
+                    m_numFrames);
+
+            m_bytesPerFrame = pcmData.BitsPerFrame / 8;
+
+            return 0;
+        }
+
+        /// <summary>
+        /// PCMサンプルを読み出す。
+        /// </summary>
+        /// <returns>読んだサンプルデータ</returns>
+        public byte [] ReadStreamReadOne()
+        {
+            System.Diagnostics.Debug.Assert(0 < m_bytesPerFrame);
+
+            int frameCount = m_br.ReadInt32();
+            // System.Console.WriteLine("ReadStreamReadOne() frameCount={0}", frameCount);
+
+            if (frameCount == 0) {
+                return new byte[0];
+            }
+
+            byte [] sampleArray = m_br.ReadBytes(frameCount * m_bytesPerFrame);
+
+            System.Console.WriteLine("ReadStreamReadOne() frameCount={0} readCount={1}",
+                frameCount, sampleArray.Length / m_bytesPerFrame);
+            return sampleArray;
+        }
+
+        public int BytesPerFrame {
+            get { return m_bytesPerFrame; }
+        }
+
+        public long NumFrames {
+            get { return m_numFrames; }
+        }
+
+        public int ReadStreamEnd()
+        {
+            int exitCode = StopChildProcess();
+
+            System.Console.WriteLine("ReadEnd() exitCode={0}",
+                exitCode);
+
+            m_bytesPerFrame = 0;
+
+            return exitCode;
+        }
+
     }
 }

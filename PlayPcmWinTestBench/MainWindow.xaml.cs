@@ -325,7 +325,7 @@ namespace PlayPcmWinTestBench {
             using (BinaryReader br = new BinaryReader(
                     File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                 WavData wavData = new WavData();
-                bool readSuccess = wavData.ReadAll(br, 0, -1);
+                bool readSuccess = wavData.ReadHeaderAndSamples(br, 0, -1);
                 if (!readSuccess) {
                     return null;
                 }

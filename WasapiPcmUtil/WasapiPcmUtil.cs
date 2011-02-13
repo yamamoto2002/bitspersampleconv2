@@ -229,6 +229,45 @@ namespace WasapiPcmUtil {
         static public PcmData BitsPerSampleConvAsNeeded(PcmData pd, WasapiCS.SampleFormatType fmt) {
             switch (fmt) {
             case WasapiCS.SampleFormatType.Sfloat:
+                // System.Console.WriteLine("Converting to Sfloat32bit...");
+                pd = pd.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
+                pd.ValidBitsPerSample = 32;
+                break;
+            case WasapiCS.SampleFormatType.Sint16:
+                // System.Console.WriteLine("Converting to SInt16bit...");
+                pd = pd.BitsPerSampleConvertTo(16, PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 16;
+                break;
+            case WasapiCS.SampleFormatType.Sint24:
+                // System.Console.WriteLine("Converting to SInt24...");
+                pd = pd.BitsPerSampleConvertTo(24, PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 24;
+                break;
+            case WasapiCS.SampleFormatType.Sint32V24:
+                // System.Console.WriteLine("Converting to SInt32V24...");
+                pd = pd.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 24;
+                break;
+            case WasapiCS.SampleFormatType.Sint32:
+                // System.Console.WriteLine("Converting to SInt32bit...");
+                pd = pd.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SInt);
+                pd.ValidBitsPerSample = 32;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+            return pd;
+        }
+
+        /// <summary>
+        /// 量子化ビット数を、もし必要なら変更する。
+        /// </summary>
+        /// <param name="pd">入力PcmData</param>
+        /// <returns>変更後PcmData</returns>
+        static public PcmData BitsPerSampleConvAsNeeded(PcmData pd, byte [] sampleArray, WasapiCS.SampleFormatType fmt) {
+            switch (fmt) {
+            case WasapiCS.SampleFormatType.Sfloat:
                 System.Console.WriteLine("Converting to Sfloat32bit...");
                 pd = pd.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
                 pd.ValidBitsPerSample = 32;

@@ -1425,7 +1425,7 @@ namespace PlayPcmWin
         /// ファイルからヘッダ＋PCMデータ部分を読む。
         /// N.B. ReadWavFileHeaderとReadFlacFileHeaderも参照。
         /// </summary>
-        private int ReadPcmDataFromFile(PcmDataLib.PcmData pcmData) {
+        private int ReadPcmDataFromFile(PcmDataLib.PcmData pcmData, long startFrame, long endFrame) {
             string ext = System.IO.Path.GetExtension(pcmData.FullPath);
             if (0 == String.Compare(".flac", ext, true)) {
                 // FLACファイル読み込み。
@@ -1437,8 +1437,8 @@ namespace PlayPcmWin
                 }
                 pd = null;
 
-                // StartTickとEndTickを見て、必要な部分以外をカットする。
-                pcmData.Trim();
+                pcmData.TrimByFrame(startFrame, endFrame);
+
                 return ercd;
             } else if (0 == String.Compare(".aif", ext, true)) {
                 // AIFFファイル読み込み。
@@ -1446,14 +1446,14 @@ namespace PlayPcmWin
                 using (BinaryReader br = new BinaryReader(
                         File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     AiffReader ar = new AiffReader();
-                    AiffReader.ResultType result = ar.ReadHeaderAndPcmData(br);
+                    AiffReader.ResultType result = ar.ReadHeaderAndSamples(br, startFrame, endFrame);
                     if (result == AiffReader.ResultType.Success) {
                         pcmData.SetSampleArray(ar.NumFrames, ar.GetSampleArray());
                         ercd = 0;
                     }
                     ar = null;
                 }
-                pcmData.Trim();
+
                 return ercd;
             } else {
                 // WAVファイル読み込み。
@@ -1461,10 +1461,7 @@ namespace PlayPcmWin
                         File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     WavData wavData = new WavData();
 
-                    long startFrame = (long)(pcmData.StartTick) * pcmData.SampleRate / 75;
-                    long endFrame   = (long)(pcmData.EndTick)   * pcmData.SampleRate / 75;
-
-                    bool readSuccess = wavData.ReadAll(br, startFrame, endFrame);
+                    bool readSuccess = wavData.ReadHeaderAndSamples(br, startFrame, endFrame);
                     if (!readSuccess) {
                         return -1;
                     }
@@ -1479,11 +1476,7 @@ namespace PlayPcmWin
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
 
-            if (m_preference.ParallelRead) {
-                ReadFileParallelDoWork(o, args);
-            } else {
-                ReadFileSingleThreadDoWork(o, args);
-            }
+            ReadFileSingleThreadDoWork(o, args);
 
             sw.Stop();
             Console.WriteLine("ReadFile elapsed time {0}", sw.Elapsed);
@@ -1510,17 +1503,14 @@ namespace PlayPcmWin
                         continue;
                     }
 
-                    if (bw.CancellationPending) {
-                        Console.WriteLine("D: ReadFileSingleDoWork() Cancelled");
-                        args.Cancel = true;
-                        return;
-                    }
-
                     // どーなのよ、という感じがするが。
                     // 効果絶大である。
                     GC.Collect();
 
-                    int ercd = ReadPcmDataFromFile(pd);
+                    long startFrame = (long)(pd.StartTick) * pd.SampleRate / 75;
+
+                    PcmReader pr = new PcmReader();
+                    int ercd = pr.StreamBegin(pd.FullPath, startFrame);
                     if (0 != ercd) {
                         r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
                             pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
@@ -1529,25 +1519,72 @@ namespace PlayPcmWin
                         return;
                     }
 
-                    // 必要に応じて量子化ビット数の変更を行う。
-                    pd = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
+                    // endFrameの計算。
+                    long endFrame   = (long)(pd.EndTick)   * pd.SampleRate / 75;
+                    if (endFrame < 0 || pr.NumFrames < endFrame) {
+                        endFrame = pr.NumFrames;
+                    }
 
-                    if (pd.GetSampleArray() != null &&
-                        0 < pd.GetSampleArray().Length) {
+                    int posFrame = 0;
+                    do {
+                        int readFrames = 16 * 1024 * 1024;
+                        if (endFrame < startFrame + posFrame + readFrames) {
+                            readFrames = (int)(endFrame - (startFrame + posFrame));
+                        }
+                        byte[] part = pr.StreamReadOne(readFrames);
+
+                        // フレーム数は本来の数endFrame - startFrameを入れる
+                        pd.SetSampleArray(endFrame - startFrame, part);
+                        // 必要に応じて量子化ビット数の変更を行う。
+                        PcmData pdAfter = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
+
+                        if (pdAfter.GetSampleArray() == null ||
+                            0 == pdAfter.GetSampleArray().Length) {
+                            break;
+                        }
+
                         // サンプルが存在する場合だけWasapiにAddする。
 
-                        if (!wasapi.AddPlayPcmData(pd.Id, pd.GetSampleArray())) {
-                            ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
-                            r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
-                            args.Result = r;
-                            Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
+                        if (0 == posFrame) {
+                            // 領域確保。
+                            int allocBytes = (int)(pdAfter.NumFrames * pdAfter.BitsPerFrame / 8);
+                            if (!wasapi.AddPlayPcmDataAllocOnly(pd.Id, allocBytes)) {
+                                ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
+                                r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                                args.Result = r;
+                                Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
+                                pr.StreamEnd();
+                                return;
+                            }
+                        }
+
+                        int posBytes = (int)((long)posFrame * pdAfter.BitsPerFrame / 8);
+
+                        bool rv = wasapi.AddPlayPcmDataPart(pd.Id, posBytes, pdAfter.GetSampleArray());
+                        System.Diagnostics.Debug.Assert(rv);
+
+                        int partFrames = pdAfter.GetSampleArray().Length / (pdAfter.BitsPerFrame / 8);
+                        posFrame += partFrames;
+
+                        pd.ForgetDataPart();
+                        part = null;
+
+                        pdAfter.ForgetDataPart();
+
+                        if (bw.CancellationPending) {
+                            Console.WriteLine("D: ReadFileSingleDoWork() Cancelled");
+                            args.Cancel = true;
+                            pr.StreamEnd();
                             return;
                         }
-                    }
-                    pd.ForgetDataPart();
 
-                    m_readFileWorker.ReportProgress(100 * (i + 1) / m_pcmDataList.Count,
-                        string.Format("wasapi.AddOutputData({0}, {1} frames)\r\n", pd.Id, pd.NumFrames));
+                        float progressPos = (float)posFrame / (endFrame - startFrame);
+                        m_readFileWorker.ReportProgress((int)(100 * (i + progressPos) / m_pcmDataList.Count),
+                            string.Format("wasapi.AddOutputData({0}, pos={1} count={2} total={3})\r\n", pd.Id,
+                            posFrame, readFrames, pd.NumFrames));
+                    } while (posFrame < endFrame - startFrame);
+
+                    pr.StreamEnd();
                 }
 
                 // ダメ押し。
@@ -1566,102 +1603,6 @@ namespace PlayPcmWin
                 r.message = ex.ToString();
                 args.Result = r;
                 Console.WriteLine("D: ReadFileSingleDoWork() {0}", ex.ToString());
-            }
-        }
-
-        /// <summary>
-        ///  バックグラウンド読み込み(並列化バージョン)。
-        ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
-        ///  @todo メモリの利用効率に改善の余地あり。
-        /// </summary>
-        private void ReadFileParallelDoWork(object o, DoWorkEventArgs args) {
-            BackgroundWorker bw = (BackgroundWorker)o;
-            int readGroupId = (int)args.Argument;
-            Console.WriteLine("D: ReadFileParallelDoWork({0}) started", readGroupId);
-
-            ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
-            try {
-                r.hr = -1;
-
-                int count = 0;
-
-                wasapi.ClearPlayList();
-                wasapi.AddPlayPcmDataStart();
-                Parallel.For(0, m_pcmDataList.Count, delegate(int i) {
-                    ++count;
-                    PcmDataLib.PcmData pd = m_pcmDataList[i];
-                    if (pd.GroupId != readGroupId) {
-                        return;
-                    }
-
-                    if (bw.CancellationPending) {
-                        Console.WriteLine("D: ReadFileParallelDoWork() Cancelled");
-                        args.Cancel = true;
-                        return;
-                    }
-
-                    // どーなのよ、という感じがするが。
-                    // 効果絶大である。
-                    GC.Collect();
-
-                    int ercd = ReadPcmDataFromFile(pd);
-                    if (0 != ercd) {
-                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
-                            pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
-                        args.Result = r;
-                        Console.WriteLine("D: ReadFileParallelDoWork() !readSuccess");
-                        return;
-                    }
-
-                    // 必要に応じて量子化ビット数の変更を行う。
-                    pd = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
-
-                    m_readFileWorker.ReportProgress(100 * count / m_pcmDataList.Count,
-                        string.Format("Read {0}, {1} frames\r\n", pd.Id, pd.NumFrames));
-                });
-
-                for (int i = 0; i < m_pcmDataList.Count; ++i) {
-                    if (bw.CancellationPending) {
-                        Console.WriteLine("D: ReadFileParallelDoWork() Cancelled 2");
-                        args.Cancel = true;
-                        return;
-                    }
-                    
-                    PcmDataLib.PcmData pd = m_pcmDataList[i];
-                    if (pd.GroupId != readGroupId) {
-                        continue;
-                    }
-
-                    if (pd.GetSampleArray() != null &&
-                        0 < pd.GetSampleArray().Length) {
-                        // サンプルが存在する場合だけWasapiにAddする。
-                        if (!wasapi.AddPlayPcmData(pd.Id, pd.GetSampleArray())) {
-                            ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
-                            r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
-                            args.Result = r;
-                            Console.WriteLine("D: ReadFileParallelDoWork() lowmemory");
-                            return;
-                        }
-                    }
-                    pd.ForgetDataPart();
-                }
-
-                // 使われていないメモリを開放する。
-                GC.Collect();
-                wasapi.AddPlayPcmDataEnd();
-
-                // 成功。
-                r.message = string.Format("再生グループ{0}番読み込み完了。\r\n", readGroupId);
-                r.hr = 0;
-                args.Result = r;
-
-                m_loadedGroupId = readGroupId;
-
-                Console.WriteLine("D: ReadFileParallelDoWork({0}) done", readGroupId);
-            } catch (Exception ex) {
-                r.message = ex.ToString();
-                args.Result = r;
-                Console.WriteLine("D: ReadFileParallelDoWork() {0}", ex.ToString());
             }
         }
 

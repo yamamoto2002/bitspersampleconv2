@@ -228,13 +228,26 @@ namespace PcmDataLib {
                 StartTick = 0;
             }
 
-            if (StartTick == 0 && EndTick == -1) {
+            long startFrame = (long)(StartTick) * SampleRate / 75;
+            long endFrame   = (long)(EndTick)   * SampleRate / 75;
+
+            TrimInternal(startFrame, endFrame);
+        }
+
+        /// <summary>
+        /// startFrameからendFrameまでの範囲にする。
+        /// </summary>
+        /// <param name="startFrame">0: 先頭 </param>
+        /// <param name="endFrame">負: 最後まで。0以上: 範囲外の最初のデータoffset。 0の場合0サンプルとなる</param>
+        public void TrimByFrame(long startFrame, long endFrame) {
+            TrimInternal(startFrame, endFrame);
+        }
+
+        private void TrimInternal(long startFrame, long endFrame) {
+            if (startFrame == 0 && endFrame < 0) {
                 // データTrimの必要はない。
                 return;
             }
-
-            long startFrame = (long)(StartTick) * SampleRate / 75;
-            long endFrame   = (long)(EndTick)   * SampleRate / 75;
 
             if (endFrame < 0 ||
                 NumFrames < endFrame) {
@@ -247,12 +260,8 @@ namespace PcmDataLib {
                 startFrame = endFrame;
             }
 
-            TrimInternal(startFrame, endFrame);
-        }
-
-        private void TrimInternal(long startFrame, long endFrame) {
             long startBytes = startFrame * BitsPerFrame / 8;
-            long endBytes = endFrame * BitsPerFrame / 8;
+            long endBytes   = endFrame   * BitsPerFrame / 8;
 
             Debug.Assert(0 <= startBytes);
             Debug.Assert(0 <= endBytes);
