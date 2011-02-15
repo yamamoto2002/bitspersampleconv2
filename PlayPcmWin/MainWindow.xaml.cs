@@ -1421,57 +1421,6 @@ namespace PlayPcmWin
             public int hr;
         }
 
-        /// <summary>
-        /// ファイルからヘッダ＋PCMデータ部分を読む。
-        /// N.B. ReadWavFileHeaderとReadFlacFileHeaderも参照。
-        /// </summary>
-        private int ReadPcmDataFromFile(PcmDataLib.PcmData pcmData, long startFrame, long endFrame) {
-            string ext = System.IO.Path.GetExtension(pcmData.FullPath);
-            if (0 == String.Compare(".flac", ext, true)) {
-                // FLACファイル読み込み。
-                PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
-                FlacDecodeIF fdif = new FlacDecodeIF();
-                int ercd = fdif.ReadAll(pcmData.FullPath, out pd);
-                if (0 == ercd) {
-                    pcmData.SetSampleArray(pd.NumFrames, pd.GetSampleArray());
-                }
-                pd = null;
-
-                pcmData.TrimByFrame(startFrame, endFrame);
-
-                return ercd;
-            } else if (0 == String.Compare(".aif", ext, true)) {
-                // AIFFファイル読み込み。
-                int ercd = -1;
-                using (BinaryReader br = new BinaryReader(
-                        File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
-                    AiffReader ar = new AiffReader();
-                    AiffReader.ResultType result = ar.ReadHeaderAndSamples(br, startFrame, endFrame);
-                    if (result == AiffReader.ResultType.Success) {
-                        pcmData.SetSampleArray(ar.NumFrames, ar.GetSampleArray());
-                        ercd = 0;
-                    }
-                    ar = null;
-                }
-
-                return ercd;
-            } else {
-                // WAVファイル読み込み。
-                using (BinaryReader br = new BinaryReader(
-                        File.Open(pcmData.FullPath, FileMode.Open, FileAccess.Read, FileShare.Read))) {
-                    WavData wavData = new WavData();
-
-                    bool readSuccess = wavData.ReadHeaderAndSamples(br, startFrame, endFrame);
-                    if (!readSuccess) {
-                        return -1;
-                    }
-                    pcmData.SetSampleArray(wavData.NumFrames, wavData.GetSampleArray());
-                }
-                return 0;
-            }
-
-        }
-
         private void ReadFileDoWork(object o, DoWorkEventArgs args) {
             System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
             sw.Start();
