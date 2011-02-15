@@ -4,6 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.72 ==
+  * Issue 42 修正
 
 ===!PlayPcmWin 2.0.71 ==
   * Issue 45 と Issue 46 (一時停止関連バグ)修正
