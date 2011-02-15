@@ -78,7 +78,7 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
-        WasapiIO_AddPlayPcmDataSetPcmPartially(int id, int posBytes, byte[] data, int bytes);
+        WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int posBytes, byte[] data, int bytes);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
@@ -305,12 +305,12 @@ namespace Wasapi {
             return WasapiIO_AddPlayPcmData(id, data, data.Length);
         }
 
-        public bool AddPlayPcmDataAllocOnly(int id, int bytes) {
+        public bool AddPlayPcmDataAllocateMemory(int id, int bytes) {
             return WasapiIO_AddPlayPcmData(id, null, bytes);
         }
 
-        public bool AddPlayPcmDataPart(int id, int posBytes, byte[] data) {
-            return WasapiIO_AddPlayPcmDataSetPcmPartially(id, posBytes, data, data.Length);
+        public bool AddPlayPcmDataSetPcmFragment(int id, int posBytes, byte[] data) {
+            return WasapiIO_AddPlayPcmDataSetPcmFragment(id, posBytes, data, data.Length);
         }
 
         public bool AddPlayPcmDataEnd() {

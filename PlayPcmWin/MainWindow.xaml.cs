@@ -1527,11 +1527,13 @@ namespace PlayPcmWin
 
                     int posFrame = 0;
                     do {
-                        int readFrames = 16 * 1024 * 1024;
+                        // 4Mフレームずつ読み出す。
+                        int readFrames = 4 * 1024 * 1024;
                         if (endFrame < startFrame + posFrame + readFrames) {
                             readFrames = (int)(endFrame - (startFrame + posFrame));
                         }
                         byte[] part = pr.StreamReadOne(readFrames);
+                        readFrames = part.Length / (pd.BitsPerFrame / 8);
 
                         // フレーム数は本来の数endFrame - startFrameを入れる
                         pd.SetSampleArray(endFrame - startFrame, part);
@@ -1548,7 +1550,7 @@ namespace PlayPcmWin
                         if (0 == posFrame) {
                             // 領域確保。
                             int allocBytes = (int)(pdAfter.NumFrames * pdAfter.BitsPerFrame / 8);
-                            if (!wasapi.AddPlayPcmDataAllocOnly(pd.Id, allocBytes)) {
+                            if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
                                 ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
                                 r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
                                 args.Result = r;
@@ -1556,15 +1558,14 @@ namespace PlayPcmWin
                                 pr.StreamEnd();
                                 return;
                             }
+                            m_readFileWorker.ReportProgress((int)(100 * i / m_pcmDataList.Count),
+                                string.Format("wasapi.AddPlayPcmData(id={0}, frames={1})\r\n", pd.Id, pd.NumFrames));
                         }
 
                         int posBytes = (int)((long)posFrame * pdAfter.BitsPerFrame / 8);
 
-                        bool rv = wasapi.AddPlayPcmDataPart(pd.Id, posBytes, pdAfter.GetSampleArray());
+                        bool rv = wasapi.AddPlayPcmDataSetPcmFragment(pd.Id, posBytes, pdAfter.GetSampleArray());
                         System.Diagnostics.Debug.Assert(rv);
-
-                        int partFrames = pdAfter.GetSampleArray().Length / (pdAfter.BitsPerFrame / 8);
-                        posFrame += partFrames;
 
                         pd.ForgetDataPart();
                         part = null;
@@ -1578,10 +1579,12 @@ namespace PlayPcmWin
                             return;
                         }
 
+                        // posFrameを進める
+
+                        posFrame += readFrames;
+
                         float progressPos = (float)posFrame / (endFrame - startFrame);
-                        m_readFileWorker.ReportProgress((int)(100 * (i + progressPos) / m_pcmDataList.Count),
-                            string.Format("wasapi.AddOutputData({0}, pos={1} count={2} total={3})\r\n", pd.Id,
-                            posFrame, readFrames, pd.NumFrames));
+                        m_readFileWorker.ReportProgress((int)(100 * (i + progressPos) / m_pcmDataList.Count), "");
                     } while (posFrame < endFrame - startFrame);
 
                     pr.StreamEnd();
@@ -1607,7 +1610,10 @@ namespace PlayPcmWin
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
-            AddLogText((string)e.UserState);
+            string s = (string)e.UserState;
+            if (0 < s.Length) {
+                AddLogText(s);
+            }
             progressBar1.Value = e.ProgressPercentage;
         }
 
