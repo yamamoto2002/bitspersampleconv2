@@ -245,19 +245,6 @@ namespace WavRWLib2
             }
         }
 
-        /// <summary>
-        /// readerのデータをcountバイトだけスキップする。
-        /// </summary>
-        public static void BinaryReaderSkip(BinaryReader reader, long count) {
-            if (reader.BaseStream.CanSeek) {
-                reader.BaseStream.Seek(count, SeekOrigin.Current);
-            } else {
-                for (long i = 0; i < count; ++i) {
-                    reader.ReadByte();
-                }
-            }
-        }
-
         private bool SkipToDataHeader(BinaryReader br) {
             while (true) {
                 m_subChunk2Id = br.ReadBytes(4);
@@ -334,7 +321,7 @@ namespace WavRWLib2
             }
 
             if (0 < startBytes) {
-                BinaryReaderSkip(br, startBytes);
+                PcmDataLib.Util.BinaryReaderSkip(br, startBytes);
             }
 
             m_rawData = br.ReadBytes((int)newNumFrames * frameBytes);
@@ -501,7 +488,7 @@ namespace WavRWLib2
         public void ReadStreamSkip(BinaryReader br, long skipFrames) {
             int frameBytes = m_fsc.BitsPerSample / 8 * m_fsc.NumChannels;
 
-            DataSubChunk.BinaryReaderSkip(br, frameBytes * skipFrames);
+            PcmDataLib.Util.BinaryReaderSkip(br, frameBytes * skipFrames);
         }
 
         public byte[] ReadStreamReadOne(BinaryReader br, long preferredFrames) {

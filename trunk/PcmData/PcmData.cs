@@ -1,7 +1,27 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 
 namespace PcmDataLib {
+
+    /// <summary>
+    /// ユーティリティー関数置き場。
+    /// </summary>
+    public class Util {
+        /// <summary>
+        /// readerのデータをcountバイトだけスキップする。
+        /// </summary>
+        public static void BinaryReaderSkip(BinaryReader reader, long count) {
+            if (reader.BaseStream.CanSeek) {
+                reader.BaseStream.Seek(count, SeekOrigin.Current);
+            } else {
+                for (long i = 0; i < count; ++i) {
+                    reader.ReadByte();
+                }
+            }
+        }
+    };
+
     /// <summary>
     /// PCMデータ情報置き場。
     /// ・PCMフォーマット情報

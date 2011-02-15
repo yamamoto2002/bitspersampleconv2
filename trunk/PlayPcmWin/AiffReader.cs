@@ -60,20 +60,6 @@ namespace PlayPcmWin {
             return ResultType.Success;
         }
 
-        /// <summary>
-        /// readerのデータをcountバイトだけスキップする。
-        /// WavRW2.csからコピペ…
-        /// </summary>
-        private static void BinaryReaderSkip(BinaryReader reader, long count) {
-            if (reader.BaseStream.CanSeek) {
-                reader.BaseStream.Seek(count, SeekOrigin.Current);
-            } else {
-                for (long i = 0; i < count; ++i) {
-                    reader.ReadByte();
-                }
-            }
-        }
-
         private UInt16 ReadBigU16(BinaryReader br) {
             UInt16 result = (UInt16)(((int)br.ReadByte() << 8) + br.ReadByte());
             return result;
@@ -106,7 +92,7 @@ namespace PlayPcmWin {
 
                 long ckSize = ReadBigU32(br);
 
-                BinaryReaderSkip(br, ckSize);
+                PcmDataLib.Util.BinaryReaderSkip(br, ckSize);
             }
         }
 
@@ -117,16 +103,16 @@ namespace PlayPcmWin {
             NumFrames = ReadBigU32(br);
             BitsPerSample = ReadBigU16(br);
             byte[] sampleRate80 = br.ReadBytes(10);
-            BinaryReaderSkip(br, ckSize - (2 + 4 + 2 + 10));
+            PcmDataLib.Util.BinaryReaderSkip(br, ckSize - (2 + 4 + 2 + 10));
 
             SampleRate = (int)IEEE754ExtendedDoubleBigEndianToDouble(sampleRate80);
             return ResultType.Success;
         }
 
-        private ResultType ReadSoundDataChunk(BinaryReader br, long startFrame, long endFrame) {
+        private ResultType ReadSoundDataChunk(BinaryReader br) {
             SkipToChunk(br, "SSND");
-            long ckSize    = ReadBigU32(br);
-            long offset    = ReadBigU32(br);
+            long ckSize = ReadBigU32(br);
+            long offset = ReadBigU32(br);
             long blockSize = ReadBigU32(br);
 
             if (offset != 0) {
@@ -135,61 +121,6 @@ namespace PlayPcmWin {
             if (blockSize != 0) {
                 return ResultType.NotSupportBlockSizeNonzero;
             }
-
-            if (16 != BitsPerSample) {
-                return ResultType.NotSupportBitsPerSample;
-            }
-
-            // 読み込むフレーム数を計算。
-            long readFrames = NumFrames - startFrame;
-            if (0 <= endFrame) {
-                System.Diagnostics.Debug.Assert(startFrame < endFrame);
-                readFrames = endFrame - startFrame;
-            }
-
-            // 読み込み開始フレームまでスキップする。
-            BinaryReaderSkip(br, startFrame * BitsPerFrame / 8);
-
-            m_sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
-            
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
-            // エンディアン変換
-            /// @todo 16bppの場合以外にも対応する必要あり。
-            {
-                // 案5 (1Mサンプルごとに並列化、この時点で2GB以下なので、long→intにする)
-                int workUnit = 1048576;
-                int sampleUnits = (int)(readFrames * NumChannels / workUnit);
-                Parallel.For(0, sampleUnits, delegate(int m) {
-                    int pos = m * workUnit * 2;
-                    for (int i = 0; i < workUnit; ++i) {
-                        byte v0 = m_sampleArray[pos + 0];
-                        byte v1 = m_sampleArray[pos + 1];
-                        m_sampleArray[pos + 1] = v0;
-                        m_sampleArray[pos + 0] = v1;
-                        pos += 2;
-                    }
-                });
-                for (int i = workUnit * sampleUnits;
-                    i < readFrames * NumChannels; ++i) {
-                    int pos = i * 2;
-                    byte v0 = m_sampleArray[pos + 0];
-                    byte v1 = m_sampleArray[pos + 1];
-                    m_sampleArray[pos + 1] = v0;
-                    m_sampleArray[pos + 0] = v1;
-                }
-            }
-
-            sw.Stop();
-            System.Console.WriteLine("{0} bytes : {1} ms", m_sampleArray.Length, sw.ElapsedMilliseconds);
-
-            /*
-            //PCMデータのテスト出力。
-            using (BinaryWriter bw = new BinaryWriter(File.Open("C:\\tmp\\test.bin", FileMode.Create))) {
-                bw.Write(m_sampleArray);
-            }
-            */
 
             return ResultType.Success;
         }
@@ -202,7 +133,19 @@ namespace PlayPcmWin {
                 return result;
             }
 
-            ReadCommonChunk(br);
+            result = ReadCommonChunk(br);
+            if (ResultType.Success != result) {
+                return result;
+            }
+
+            result = ReadSoundDataChunk(br);
+            if (ResultType.Success != result) {
+                return result;
+            }
+
+            if (16 != BitsPerSample) {
+                return ResultType.NotSupportBitsPerSample;
+            }
 
             System.Console.WriteLine("nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
                 NumChannels, BitsPerSample, SampleRate, NumFrames);
@@ -216,17 +159,6 @@ namespace PlayPcmWin {
                 NumFrames);
 
             return 0;
-        }
-
-        public ResultType ReadHeaderAndSamples(BinaryReader br, long startFrame, long endFrame) {
-            ResultType result = ReadFormChunkHeader(br);
-            if (result != ResultType.Success) {
-                return result;
-            }
-
-            ReadCommonChunk(br);
-            result = ReadSoundDataChunk(br, startFrame, endFrame);
-            return result;
         }
 
         /// <summary>
@@ -312,7 +244,7 @@ namespace PlayPcmWin {
                 skipFrames = NumFrames - m_posFrame;
             }
 
-            BinaryReaderSkip(br, skipFrames * m_bytesPerFrame / 8);
+            PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * m_bytesPerFrame / 8);
             m_posFrame += skipFrames;
             return skipFrames;
         }
@@ -338,7 +270,7 @@ namespace PlayPcmWin {
             // エンディアン変換
             /// @todo 16bppの場合以外にも対応する必要あり。
             {
-                const int workUnit = 16384;
+                const int workUnit = 256 * 1024;
                 int sampleUnits = (int)(readFrames * NumChannels / workUnit);
                 Parallel.For(0, sampleUnits, delegate(int m) {
                     int pos = m * workUnit * 2;
