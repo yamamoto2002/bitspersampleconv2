@@ -19,7 +19,7 @@ EXPORTS
 	WasapiIO_Unsetup
 	WasapiIO_AddPlayPcmDataStart
 	WasapiIO_AddPlayPcmData
-	WasapiIO_AddPlayPcmDataSetPcmPartially
+	WasapiIO_AddPlayPcmDataSetPcmFragment
 	WasapiIO_AddPlayPcmDataEnd
 	WasapiIO_ClearPlayList
 	WasapiIO_SetPlayRepeat

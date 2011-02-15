@@ -81,7 +81,7 @@ WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIO_AddPlayPcmDataSetPcmPartially(int id, int posBytes, unsigned char *data, int bytes);
+WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int posBytes, unsigned char *data, int bytes);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
