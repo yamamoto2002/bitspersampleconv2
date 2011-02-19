@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.73 ==
+  * Issue 38 修正
+
 ===!PlayPcmWin 2.0.72 ==
   * Issue 42 (省メモリ化)修正
 
