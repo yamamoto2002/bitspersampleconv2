@@ -570,6 +570,9 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
+                // dataGridの選択単位をセル単位にする(停止中は再生リスト編集可能)
+                dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
+
                 menuItemFileNew.IsEnabled        = true;
                 menuItemFileOpen.IsEnabled       = true;
                 menuItemFileSaveAs.IsEnabled     = true;
@@ -590,6 +593,9 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
+                // dataGridの選択単位を行単位にする(再生中は再生リスト編集不可)
+                dataGridPlayList.SelectionUnit = DataGridSelectionUnit.FullRow;
+
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
@@ -1683,11 +1689,20 @@ namespace PlayPcmWin
                 return;
             }
 
+            // 再生する曲のwavDataIdをdataGridの選択セルから取得する
             int wavDataId = 0;
-            if (0 <= dataGridPlayList.SelectedIndex) {
-                PcmDataLib.PcmData pcmData = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
+            var selectedCells = dataGridPlayList.SelectedCells;
+            if (0 < selectedCells.Count) {
+                var cell = selectedCells[0];
+                System.Diagnostics.Debug.Assert(cell != null);
+                PlayListItemInfo pli = cell.Item as PlayListItemInfo;
+                System.Diagnostics.Debug.Assert(pli != null);
+                var pcmData = pli.PcmData();
+
                 if (null != pcmData) {
                     wavDataId = pcmData.Id;
+                } else {
+                    // ココまで読んだ的な行は、pcmDataを持っていない
                 }
             }
 
