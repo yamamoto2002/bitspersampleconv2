@@ -571,8 +571,13 @@ namespace PlayPcmWin
                 break;
             case State.プレイリストあり:
                 // dataGridの選択単位をセル単位にする(停止中は再生リスト編集可能)
-                dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
-
+                if (0 <= dataGridPlayList.SelectedIndex) {
+                    var si = dataGridPlayList.SelectedIndex;
+                    dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
+                    dataGridPlayList.SelectedIndex = si;
+                } else {
+                    dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
+                }
                 menuItemFileNew.IsEnabled        = true;
                 menuItemFileOpen.IsEnabled       = true;
                 menuItemFileSaveAs.IsEnabled     = true;
@@ -1755,7 +1760,7 @@ namespace PlayPcmWin
                 UnsetupDevice();
 
                 if (!SetupDevice(pcmData.GroupId)) {
-                    dataGridPlayList.SelectedIndex = 0;
+                    //dataGridPlayList.SelectedIndex = 0;
                     ChangeState(State.ファイル読み込み完了);
 
                     DeviceDeselect();
@@ -1774,7 +1779,7 @@ namespace PlayPcmWin
             UpdateNextTask();
 
             if (!SetupDevice(pcmData.GroupId)) {
-                dataGridPlayList.SelectedIndex = 0;
+                //dataGridPlayList.SelectedIndex = 0;
                 ChangeState(State.ファイル読み込み完了);
 
                 DeviceDeselect();
@@ -1963,9 +1968,12 @@ namespace PlayPcmWin
                 // FALL_THROUGHする。
             }
 
-            // 再生終了後に行うタスクがない。停止する。先頭の曲を選択状態にする。
+            // 再生終了後に行うタスクがない。停止する。
             // 再生状態→ファイル読み込み完了状態。
-            dataGridPlayList.SelectedIndex = 0;
+
+            // 先頭の曲を選択状態にする。
+            //dataGridPlayList.SelectedIndex = 0;
+            
             ChangeState(State.ファイル読み込み完了);
 
             // さらに、デバイスを選択解除し、デバイス一覧を更新する。
