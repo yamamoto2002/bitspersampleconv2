@@ -61,12 +61,16 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>FlacDecodeDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(IntDir)FlacDecodeDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
       </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>copy /y $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.lib $(IntDir)
+copy /y $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.* $(OutDir)</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -84,6 +88,9 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>FlacDecodeDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>copy $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.* $(IntDir)\</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />

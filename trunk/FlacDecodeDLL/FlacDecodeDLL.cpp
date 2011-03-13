@@ -13,7 +13,11 @@
 
 #define FLACDECODE_MAXPATH (1024)
 
+/// wchar_tの文字数
+#define FLACDECODE_MAX_STRSZ (256)
+
 #ifdef _DEBUG
+/*
 #  define dprintf1(fp, x, ...) { \
     if (NULL == fp) { \
         printf(x, __VA_ARGS__); \
@@ -28,8 +32,9 @@
         fprintf(fp, x, __VA_ARGS__); fflush(fp); \
     } \
 }
-//#  define dprintf1(fp, x, ...) printf(x, __VA_ARGS__)
-//#  define dprintf(fp, x, ...) printf(x, __VA_ARGS__)
+*/
+#  define dprintf1(fp, x, ...) printf(x, __VA_ARGS__)
+#  define dprintf(fp, x, ...) printf(x, __VA_ARGS__)
 //#  define dprintf1(fp, x, ...)
 //#  define dprintf(fp, x, ...)
 #else
@@ -86,7 +91,10 @@ struct FlacDecodeInfo {
     int               retrievedFrames;
     FILE              *logFP;
 
-    char         fromFlacPath[FLACDECODE_MAXPATH];
+    char fromFlacPath[FLACDECODE_MAXPATH];
+    char titleStr[FLACDECODE_MAX_STRSZ];
+    char artistStr[FLACDECODE_MAX_STRSZ];
+    char albumStr[FLACDECODE_MAX_STRSZ];
 
     void Clear(void) {
         totalSamples  = 0;
@@ -113,6 +121,9 @@ struct FlacDecodeInfo {
         logFP           = NULL;
 
         fromFlacPath[0] = 0;
+        titleStr[0]     = 0;
+        artistStr[0]    = 0;
+        albumStr[0]     = 0;
     }
 
     FlacDecodeInfo(void) {
@@ -247,21 +258,46 @@ WriteCallback(const FLAC__StreamDecoder *decoder,
     return rv;
 }
 
+#define VC metadata->data.vorbis_comment
+
 static void
 MetadataCallback(const FLAC__StreamDecoder *decoder,
     const FLAC__StreamMetadata *metadata, void *clientData)
 {
-    FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
-
     (void)decoder;
 
-    dprintf(fdi->logFP, "%s type=%d\n", __FUNCTION__, metadata->type);
+    FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
 
+    dprintf(fdi->logFP, "%s type=%d\n", __FUNCTION__, metadata->type);
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
         fdi->totalSamples  = metadata->data.stream_info.total_samples;
         fdi->sampleRate    = metadata->data.stream_info.sample_rate;
         fdi->channels      = metadata->data.stream_info.channels;
         fdi->bitsPerSample = metadata->data.stream_info.bits_per_sample;
+    }
+    if (metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT) {
+        dprintf(fdi->logFP, "vendorstr=%s %d num=%u\n\n",
+            (const char *)VC.vendor_string.entry,
+            VC.vendor_string.length,
+            VC.num_comments);
+
+        // 曲情報は256個もないだろう。無限ループ防止。
+        int num_comments = (256 < VC.num_comments) ? 256 : VC.num_comments;
+
+        for (int i=0; i<num_comments; ++i) {
+            dprintf(fdi->logFP, "entry=%s length=%d\n\n",
+                (const char *)(VC.comments[i].entry),
+                VC.comments[i].length);
+            if (0 == strncmp("TITLE=", (const char *)(&VC.comments[i].entry[0]), 6)) {
+                strncpy_s(fdi->titleStr, (const char *)(&VC.comments[i].entry[6]), FLACDECODE_MAX_STRSZ-1);
+            }
+            if (0 == strncmp("ALBUM=", (const char *)(&VC.comments[i].entry[0]), 6)) {
+                strncpy_s(fdi->albumStr, (const char *)(&VC.comments[i].entry[6]), FLACDECODE_MAX_STRSZ-1);
+            }
+            if (0 == strncmp("ARTIST=", (const char *)(&VC.comments[i].entry[0]), 7)) {
+                strncpy_s(fdi->artistStr, (const char *)(&VC.comments[i].entry[7]), FLACDECODE_MAX_STRSZ-1);
+            }
+        }
     }
 }
 
@@ -320,6 +356,9 @@ DecodeMain(FlacDecodeInfo *fdi)
     dprintf(fdi->logFP, "%s FLAC_stream_decoder=%p\n", __FUNCTION__, fdi->decoder);
 
     FLAC__stream_decoder_set_md5_checking(fdi->decoder, true);
+    
+    FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_STREAMINFO);
+    FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
 
     init_status = FLAC__stream_decoder_init_file(
         fdi->decoder, fdi->fromFlacPath,
@@ -478,8 +517,8 @@ FlacDecodeDLL_GetSampleRate(int id)
     return fdi->sampleRate;
 }
 
-/// サンプル(==frame)総数。
-/// DecodeStart成功後に呼ぶことができる。
+// サンプル(==frame)総数。
+// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int64_t __stdcall
 FlacDecodeDLL_GetNumSamples(int id)
@@ -493,6 +532,57 @@ FlacDecodeDLL_GetNumSamples(int id)
     }
 
     return fdi->totalSamples;
+}
+
+/// タイトル文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetTitleStr(int id)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    if (fdi->errorCode != FDRT_Success) {
+        assert(!"please call FlacDecodeDLL_DecodeStart()");
+        return 0;
+    }
+
+    return fdi->titleStr;
+}
+
+/// アルバム文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetAlbumStr(int id)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    if (fdi->errorCode != FDRT_Success) {
+        assert(!"please call FlacDecodeDLL_DecodeStart()");
+        return 0;
+    }
+
+    return fdi->albumStr;
+}
+
+/// アーティスト文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetArtistStr(int id)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    if (fdi->errorCode != FDRT_Success) {
+        assert(!"please call FlacDecodeDLL_DecodeStart()");
+        return 0;
+    }
+
+    return fdi->artistStr;
 }
 
 extern "C" __declspec(dllexport)
@@ -549,7 +639,7 @@ LogClose(FlacDecodeInfo *fdi)
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
 /// 中のグローバル変数に貯める。APIの設計がスレッドセーフになってないので注意。
-/// @return 0 成功。1以上: エラー。FlacDecodeResultType参照。
+/// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
