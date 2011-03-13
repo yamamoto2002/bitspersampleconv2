@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.76 ==
-  * Issue 37 曲情報表示(FLACだけ対応)
+  * Issue 37 曲情報表示(FLAC)
 
 ===!PlayPcmWin 2.0.73 ==
   * Issue 38 修正
