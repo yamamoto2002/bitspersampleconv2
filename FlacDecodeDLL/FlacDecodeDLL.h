@@ -2,6 +2,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <Windows.h>
 
 enum FlacDecodeResultType {
     /// ヘッダの取得やデータの取得に成功。
@@ -64,23 +65,23 @@ extern "C" __declspec(dllexport)
 int64_t __stdcall
 FlacDecodeDLL_GetNumSamples(int id);
 
-/// タイトル文字列(UTF-8)。
+/// タイトル文字列(WSTR)。
 /// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetTitleStr(int id);
+bool __stdcall
+FlacDecodeDLL_GetTitleStr(int id, LPWSTR name, int nameBytes);
 
-/// アルバム文字列(UTF-8)。
+/// アルバム文字列(WSTR)。
 /// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetAlbumStr(int id);
+bool __stdcall
+FlacDecodeDLL_GetAlbumStr(int id, LPWSTR name, int nameBytes);
 
-/// アーティスト文字列(UTF-8)。
+/// アーティスト文字列(WSTR)。
 /// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetArtistStr(int id);
+bool __stdcall
+FlacDecodeDLL_GetArtistStr(int id, LPWSTR name, int nameBytes);
 
 /// リザルトコード FlacDecodeResultType を取得。
 /// ファイルの最後まで行った場合

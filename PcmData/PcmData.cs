@@ -114,14 +114,9 @@ namespace PcmDataLib {
         public string AlbumTitle { get; set; }
 
         /// <summary>
-        /// アルバム演奏者
+        /// アーティスト
         /// </summary>
-        public string AlbumPerformer { get; set; }
-
-        /// <summary>
-        /// 曲演奏者
-        /// </summary>
-        public string Performer { get; set; }
+        public string ArtistName { get; set; }
 
         /// <summary>
         /// CUEシートから読んだ場合のINDEX番号(1==音声データ、0==無音)
@@ -166,8 +161,7 @@ namespace PcmDataLib {
             StartTick   = rhs.StartTick;
             EndTick     = rhs.EndTick;
             AlbumTitle  = rhs.AlbumTitle;
-            AlbumPerformer = rhs.AlbumPerformer;
-            Performer   = rhs.Performer;
+            ArtistName   = rhs.ArtistName;
             CueSheetIndex = rhs.CueSheetIndex;
         }
 

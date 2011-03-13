@@ -101,6 +101,8 @@ namespace PlayPcmWin {
             return exitCode;
         }
 
+        // FIXME: ReadHeader()とReadStreamBegin()がコピペ!
+
         public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
             pcmData = new PcmDataLib.PcmData();
 
@@ -119,6 +121,10 @@ namespace PlayPcmWin {
             int sampleRate    = m_br.ReadInt32();
             m_numFrames       = m_br.ReadInt64();
 
+            string titleStr = m_br.ReadString();
+            string albumStr = m_br.ReadString();
+            string artistStr = m_br.ReadString();
+
             System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
                 nChannels, bitsPerSample, sampleRate, m_numFrames);
 
@@ -131,6 +137,10 @@ namespace PlayPcmWin {
                 sampleRate,
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
                 m_numFrames);
+
+            pcmData.DisplayName = titleStr;
+            pcmData.AlbumTitle = albumStr;
+            pcmData.ArtistName = artistStr;
 
             return 0;
         }
@@ -153,6 +163,10 @@ namespace PlayPcmWin {
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
             m_numFrames       = m_br.ReadInt64();
+
+            string titleStr = m_br.ReadString();
+            string albumStr = m_br.ReadString();
+            string artistStr = m_br.ReadString();
 
             pcmData.SetFormat(
                     nChannels,

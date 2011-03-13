@@ -74,12 +74,12 @@ namespace PlayPcmWin
                 }
             }
 
-            public string Performer {
+            public string ArtistName {
                 get {
-                    return m_pcmData.Performer;
+                    return m_pcmData.ArtistName;
                 }
                 set {
-                    m_pcmData.Performer = value;
+                    m_pcmData.ArtistName = value;
                 }
             }
 
@@ -1062,7 +1062,9 @@ namespace PlayPcmWin
 
             // CUEシートの情報をセットする。
             if (null == csti) {
-                pcmData.DisplayName = pcmData.FileName;
+                if (pcmData.DisplayName.Length == 0) {
+                    pcmData.DisplayName = pcmData.FileName;
+                }
                 pcmData.StartTick = 0;
                 pcmData.EndTick = -1;
                 pcmData.CueSheetIndex = 1;
@@ -1078,13 +1080,13 @@ namespace PlayPcmWin
                 pcmData.StartTick = csti.startTick;
                 pcmData.EndTick = csti.endTick;
 
-                pcmData.Performer = csti.performer;
+                pcmData.ArtistName = csti.performer;
                 pcmData.CueSheetIndex = csti.indexId;
             }
 
             if (null != csr) {
                 pcmData.AlbumTitle     = csr.GetAlbumTitle();
-                pcmData.AlbumPerformer = csr.GetAlbumPerformer();
+                pcmData.ArtistName = csr.GetAlbumPerformer();
             }
 
             var pli = new PlayListItemInfo(
@@ -1312,7 +1314,7 @@ namespace PlayPcmWin
                 CueSheetWriter csw = new CueSheetWriter();
 
                 csw.SetAlbumTitle(m_playListItems[0].AlbumTitle);
-                csw.SetAlbumPerformer(m_playListItems[0].PcmData().AlbumPerformer);
+                csw.SetAlbumPerformer(m_playListItems[0].PcmData().ArtistName);
 
                 int i = 0;
                 foreach (var pli in m_playListItems) {
@@ -1322,7 +1324,7 @@ namespace PlayPcmWin
                     cst.title = pli.Title;
                     cst.albumTitle = pli.AlbumTitle;
                     cst.indexId = pcmData.CueSheetIndex;
-                    cst.performer = pli.Performer;
+                    cst.performer = pli.ArtistName;
                     cst.readSeparatorAfter = pli.ReadSeparaterAfter;
                     cst.startTick = pcmData.StartTick;
                     cst.endTick = pcmData.EndTick;

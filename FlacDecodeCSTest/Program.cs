@@ -78,8 +78,16 @@ namespace FlacDecodeCSTest {
             int  sampleRate    = br.ReadInt32();
             long numSamples    = br.ReadInt64();
 
+            string titleStr = br.ReadString();
+            string albumStr = br.ReadString();
+            string artistStr = br.ReadString();
+
             System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
                 nChannels, bitsPerSample, sampleRate, numSamples);
+
+            System.Console.WriteLine("TITLE={0}", titleStr);
+            System.Console.WriteLine("ALBUM={0}", albumStr);
+            System.Console.WriteLine("ARTIST={0}", artistStr);
 
             StopChildProcess();
             return 0;
@@ -103,10 +111,18 @@ namespace FlacDecodeCSTest {
             int  sampleRate    = br.ReadInt32();
             long numSamples    = br.ReadInt64();
 
+            string titleStr = br.ReadString();
+            string albumStr = br.ReadString();
+            string artistStr = br.ReadString();
+
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 
             System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
                 nChannels, bitsPerSample, sampleRate, numSamples);
+
+            System.Console.WriteLine("TITLE={0}", titleStr);
+            System.Console.WriteLine("ALBUM={0}", albumStr);
+            System.Console.WriteLine("ARTIST={0}", artistStr);
 
             long pos = 0;
             while (pos < numSamples) {
