@@ -83,7 +83,7 @@
                         -->
                         <DataGridTextColumn x:Name="TitleColumn" Width="Auto" Binding="{Binding Path=Title}" Header="タイトル" />
                         <DataGridTextColumn x:Name="DurationColumn" Width="Auto" Binding="{Binding Path=Duration}" Header="長さ"/>
-                        <DataGridTextColumn x:Name="PerformerColumn" Width="Auto" Binding="{Binding Path=Performer}" Header="演奏者"/>
+                        <DataGridTextColumn x:Name="ArtistColumn" Width="Auto" Binding="{Binding Path=ArtistName}" Header="アーティスト"/>
                         <DataGridTextColumn x:Name="AlbumTitleColumn" Width="Auto" Binding="{Binding Path=AlbumTitle}" Header="アルバム名"/>
                         <DataGridTextColumn x:Name="SampleRateColumn" Width="Auto" Binding="{Binding Path=SampleRate}" Header="サンプルレート"/>
                         <DataGridTextColumn x:Name="QuantizationBitRateColumn" Width="Auto" Binding="{Binding Path=QuantizationBitRate}" Header="量子化ビット数"/>

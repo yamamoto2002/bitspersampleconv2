@@ -24,9 +24,12 @@ int _tmain(int argc, _TCHAR* argv[])
     int sampleRate     = FlacDecodeDLL_GetSampleRate(id);
     int64_t numSamples = FlacDecodeDLL_GetNumSamples(id);
 
-    const char *titleStr  = FlacDecodeDLL_GetTitleStr(id);
-    const char *albumStr  = FlacDecodeDLL_GetAlbumStr(id);
-    const char *artistStr = FlacDecodeDLL_GetArtistStr(id);
+    wchar_t titleStr[16];
+    wchar_t albumStr[16];
+    wchar_t artistStr[16];
+    FlacDecodeDLL_GetTitleStr(id, titleStr, sizeof titleStr);
+    FlacDecodeDLL_GetAlbumStr(id, albumStr, sizeof albumStr);
+    FlacDecodeDLL_GetArtistStr(id, artistStr, sizeof artistStr);
 
     printf("D: decodeId=%d bitsPerSample=%d sampleRate=%d numSamples=%lld channels=%d\n",
         id,
@@ -35,9 +38,9 @@ int _tmain(int argc, _TCHAR* argv[])
         numSamples,
         channels);
 
-    printf("D: title=%s\n", titleStr);
-    printf("D: album=%s\n", albumStr);
-    printf("D: artist=%s\n", artistStr);
+    printf("D: title=%S\n", titleStr);
+    printf("D: album=%S\n", albumStr);
+    printf("D: artist=%S\n", artistStr);
 
     FILE *fp = fopen(argv[2], "wb");
     assert(fp);

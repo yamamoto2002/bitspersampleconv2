@@ -61,7 +61,19 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetNextPcmData(int id, int numFrame, byte [] buff);
+        int FlacDecodeDLL_GetNextPcmData(int id, int numFrame, byte[] buff);
+
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        private extern static
+        bool FlacDecodeDLL_GetTitleStr(int id, System.Text.StringBuilder name, int nameBytes);
+
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        private extern static
+        bool FlacDecodeDLL_GetAlbumStr(int id, System.Text.StringBuilder name, int nameBytes);
+
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        private extern static
+        bool FlacDecodeDLL_GetArtistStr(int id, System.Text.StringBuilder name, int nameBytes);
 
         enum OperationType {
             DecodeAll,
@@ -150,13 +162,16 @@ namespace FlacDecodeCS {
              * 8          4              サンプルレート sampleRate
              * 12         4              量子化ビット数 bitsPerSample
              * 16         8              総サンプル数   numSamples
-             * 24         4              frameCount1 (ヘッダのみの場合なし)
-             * 28         ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
+             * 24         titleLen       タイトル文字列
+             * 24+titleLen albumLen      アルバム文字列
+             * 24+t+a     artistLen      アーティスト文字列
+             * 24+t+a+a   4              frameCount1 (ヘッダのみの場合なし)
+             * 24+t+a+a   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
              * ※2        4              frameCount2
              * ※2+4      ※3            PCMデータ2 frameCount2個
              * 
              * ※1…frameCount1 * nChannels * (bitsPerSample/8)
-             * ※2…※1+28
+             * ※2…※1+24+t+a+a
              */
 
             int rv = FlacDecodeDLL_DecodeStart(path);
@@ -176,10 +191,22 @@ namespace FlacDecodeCS {
             int sampleRate    = FlacDecodeDLL_GetSampleRate(id);
             long numSamples   = FlacDecodeDLL_GetNumSamples(id);
 
+            StringBuilder buf = new StringBuilder(256);
+            FlacDecodeDLL_GetTitleStr(id, buf, buf.Capacity *2);
+            string titleStr = buf.ToString();
+            FlacDecodeDLL_GetAlbumStr(id, buf, buf.Capacity*2);
+            string albumStr = buf.ToString();
+            FlacDecodeDLL_GetArtistStr(id, buf, buf.Capacity*2);
+            string artistStr = buf.ToString();
+
             bw.Write(nChannels);
             bw.Write(bitsPerSample);
             bw.Write(sampleRate);
             bw.Write(numSamples);
+
+            bw.Write(titleStr);
+            bw.Write(albumStr);
+            bw.Write(artistStr);
 
             int ercd = 0;
 

@@ -534,55 +534,58 @@ FlacDecodeDLL_GetNumSamples(int id)
     return fdi->totalSamples;
 }
 
-/// タイトル文字列(UTF-8)。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetTitleStr(int id)
+bool __stdcall
+FlacDecodeDLL_GetTitleStr(int id, LPWSTR name, int nameBytes)
 {
+    memset(name, 0, nameBytes);
+
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
 
     if (fdi->errorCode != FDRT_Success) {
         assert(!"please call FlacDecodeDLL_DecodeStart()");
-        return 0;
+        return false;
     }
 
-    return fdi->titleStr;
+    MultiByteToWideChar(CP_UTF8, 0, fdi->titleStr, -1, name, (nameBytes-1)/2);
+    return true;
 }
 
-/// アルバム文字列(UTF-8)。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetAlbumStr(int id)
+bool __stdcall
+FlacDecodeDLL_GetAlbumStr(int id, LPWSTR name, int nameBytes)
 {
+    memset(name, 0, nameBytes);
+
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
 
     if (fdi->errorCode != FDRT_Success) {
         assert(!"please call FlacDecodeDLL_DecodeStart()");
-        return 0;
+        return false;
     }
 
-    return fdi->albumStr;
+    MultiByteToWideChar(CP_UTF8, 0, fdi->albumStr, -1, name, (nameBytes-1)/2);
+    return true;
 }
 
-/// アーティスト文字列(UTF-8)。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
-char * __stdcall
-FlacDecodeDLL_GetArtistStr(int id)
+bool __stdcall
+FlacDecodeDLL_GetArtistStr(int id, LPWSTR name, int nameBytes)
 {
+    memset(name, 0, nameBytes);
+
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
 
     if (fdi->errorCode != FDRT_Success) {
         assert(!"please call FlacDecodeDLL_DecodeStart()");
-        return 0;
+        return false;
     }
 
-    return fdi->artistStr;
+    MultiByteToWideChar(CP_UTF8, 0, fdi->artistStr, -1, name, (nameBytes-1)/2);
+    return true;
 }
 
 extern "C" __declspec(dllexport)
