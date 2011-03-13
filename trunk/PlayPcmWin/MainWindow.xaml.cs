@@ -1062,7 +1062,7 @@ namespace PlayPcmWin
 
             // CUEシートの情報をセットする。
             if (null == csti) {
-                if (pcmData.DisplayName.Length == 0) {
+                if (pcmData.DisplayName == null || pcmData.DisplayName.Length == 0) {
                     pcmData.DisplayName = pcmData.FileName;
                 }
                 pcmData.StartTick = 0;
