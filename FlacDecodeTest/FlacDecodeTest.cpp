@@ -13,23 +13,31 @@ int _tmain(int argc, _TCHAR* argv[])
     }
 
     printf("D: %s:%d FlacDecodeDLL_DecodeStart %s\n", __FILE__, __LINE__, argv[1]);
-    int rv = FlacDecodeDLL_DecodeStart(argv[1]);
-    if (rv != 0) {
-        printf("E: %s:%d FlacDecodeDLL_DecodeStart %d\n", __FILE__, __LINE__, rv);
-        FlacDecodeDLL_DecodeEnd();
+    int id = FlacDecodeDLL_DecodeStart(argv[1]);
+    if (id < 0) {
+        printf("E: %s:%d FlacDecodeDLL_DecodeStart %d\n", __FILE__, __LINE__, id);
         return 1;
     }
 
-    int bitsPerSample  = FlacDecodeDLL_GetBitsPerSample();
-    int channels       = FlacDecodeDLL_GetNumOfChannels();
-    int sampleRate     = FlacDecodeDLL_GetSampleRate();
-    int64_t numSamples = FlacDecodeDLL_GetNumSamples();
+    int bitsPerSample  = FlacDecodeDLL_GetBitsPerSample(id);
+    int channels       = FlacDecodeDLL_GetNumOfChannels(id);
+    int sampleRate     = FlacDecodeDLL_GetSampleRate(id);
+    int64_t numSamples = FlacDecodeDLL_GetNumSamples(id);
 
-    printf("D: bitsPerSample=%d sampleRate=%d numSamples=%lld channels=%d\n",
+    const char *titleStr  = FlacDecodeDLL_GetTitleStr(id);
+    const char *albumStr  = FlacDecodeDLL_GetAlbumStr(id);
+    const char *artistStr = FlacDecodeDLL_GetArtistStr(id);
+
+    printf("D: decodeId=%d bitsPerSample=%d sampleRate=%d numSamples=%lld channels=%d\n",
+        id,
         bitsPerSample,
         sampleRate,
         numSamples,
         channels);
+
+    printf("D: title=%s\n", titleStr);
+    printf("D: album=%s\n", albumStr);
+    printf("D: artist=%s\n", artistStr);
 
     FILE *fp = fopen(argv[2], "wb");
     assert(fp);
@@ -42,8 +50,8 @@ int _tmain(int argc, _TCHAR* argv[])
     do {
         memset(data, 0xee, nFrames * bytesPerFrame);
 
-        int rv = FlacDecodeDLL_GetNextPcmData(nFrames, data);
-        ercd   = FlacDecodeDLL_GetLastResult();
+        int rv = FlacDecodeDLL_GetNextPcmData(id, nFrames, data);
+        ercd   = FlacDecodeDLL_GetLastResult(id);
 
         if (0 < rv) {
             fwrite(data, 1, rv * bytesPerFrame, fp);
@@ -63,11 +71,11 @@ int _tmain(int argc, _TCHAR* argv[])
     free(data);
     data = NULL;
 
-    FlacDecodeDLL_DecodeEnd();
+    FlacDecodeDLL_DecodeEnd(id);
 
     if (ercd != 1) {
         printf("D: ERROR result=%d\n", ercd);
     }
-	return 0;
+    return 0;
 }
 

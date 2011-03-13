@@ -64,6 +64,24 @@ extern "C" __declspec(dllexport)
 int64_t __stdcall
 FlacDecodeDLL_GetNumSamples(int id);
 
+/// タイトル文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetTitleStr(int id);
+
+/// アルバム文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetAlbumStr(int id);
+
+/// アーティスト文字列(UTF-8)。
+/// DecodeStart成功後に呼ぶことができる。
+extern "C" __declspec(dllexport)
+char * __stdcall
+FlacDecodeDLL_GetArtistStr(int id);
+
 /// リザルトコード FlacDecodeResultType を取得。
 /// ファイルの最後まで行った場合
 ///   GetLastError==FDRT_Completedで、GetNextPcmDataの戻り値は取得できたフレーム数となる。

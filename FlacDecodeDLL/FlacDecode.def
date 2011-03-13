@@ -7,6 +7,9 @@ EXPORTS
 	FlacDecodeDLL_GetBitsPerSample
 	FlacDecodeDLL_GetSampleRate
 	FlacDecodeDLL_GetNumSamples
+	FlacDecodeDLL_GetTitleStr
+	FlacDecodeDLL_GetAlbumStr
+	FlacDecodeDLL_GetArtistStr
 	FlacDecodeDLL_GetLastResult
-	FlacDecodeDLL_GetNextPcmData
 	FlacDecodeDLL_GetNumFramesPerBlock
+	FlacDecodeDLL_GetNextPcmData

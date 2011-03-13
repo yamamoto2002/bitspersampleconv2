@@ -67,33 +67,27 @@ namespace PlayPcmWin
 
             public string Title {
                 get {
-                    // if (m_pcmData == null) { return "-"; }
                     return m_pcmData.DisplayName;
                 }
                 set {
-                    //if (m_pcmData == null) { return; }
                     m_pcmData.DisplayName = value;
                 }
             }
 
             public string Performer {
                 get {
-                    // if (m_pcmData == null) { return "-"; }
                     return m_pcmData.Performer;
                 }
                 set {
-                    //if (m_pcmData == null) { return; }
                     m_pcmData.Performer = value;
                 }
             }
 
             public string AlbumTitle {
                 get {
-                    //if (m_pcmData == null) { return "-"; }
                     return m_pcmData.AlbumTitle;
                 }
                 set {
-                    //if (m_pcmData == null) { return; }
                     m_pcmData.AlbumTitle = value;
                 }
             }
@@ -123,7 +117,6 @@ namespace PlayPcmWin
 
             public string SampleRate {
                 get {
-                    //if (m_pcmData == null) { return "-"; }
                     return m_pcmData.SampleRate.ToString() + " Hz";
                 }
                 set {
@@ -132,7 +125,6 @@ namespace PlayPcmWin
 
             public string QuantizationBitRate {
                 get {
-                    //if (m_pcmData == null) { return "-"; }
                     return m_pcmData.BitsPerSample.ToString() + " bit";
                 }
                 set {
@@ -157,15 +149,6 @@ namespace PlayPcmWin
                     OnPropertyChanged("ReadSeparaterAfter");
                 }
             }
-
-            /*
-            public string FileGroupId {
-                get {
-                    if (m_pcmData == null) { return "-"; }
-                    return m_pcmData.GroupId.ToString();
-                }
-            }
-             */
 
             public PlayListItemInfo() {
                 m_type = ItemType.Unused;
@@ -570,7 +553,7 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
-                // dataGridの選択単位をセル単位にする(停止中は再生リスト編集可能)
+                // dataGridの選択単位をセル単位にする(停止中は再生リスト編集を主に行うであろう)
                 if (0 <= dataGridPlayList.SelectedIndex) {
                     var si = dataGridPlayList.SelectedIndex;
                     dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
@@ -598,7 +581,7 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
-                // dataGridの選択単位を行単位にする(再生中は再生リスト編集不可)
+                // dataGridの選択単位を行単位にする(再生中は再生リスト編集よりは、曲選択をしたい)
                 dataGridPlayList.SelectionUnit = DataGridSelectionUnit.FullRow;
 
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
