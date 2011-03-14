@@ -4,6 +4,20 @@ using System.Collections.Generic;
 
 namespace WavRWLib2
 {
+    class Util {
+        static public bool FourCCHeaderIs(byte[] b, int bPos, string s) {
+            System.Diagnostics.Debug.Assert(s.Length == 4);
+            if (b.Length - bPos < 4) {
+                return false;
+            }
+
+            return s[0] == b[bPos]
+                && s[1] == b[bPos + 1]
+                && s[2] == b[bPos + 2]
+                && s[3] == b[bPos + 3];
+        }
+    }
+
     class RiffChunkDescriptor
     {
         private byte[] m_chunkId;
@@ -27,12 +41,11 @@ namespace WavRWLib2
             m_format[3] = (byte)'E';
         }
 
-        public bool Read(BinaryReader br)
+        public bool Read(BinaryReader br, byte[] chunkId)
         {
-            m_chunkId = br.ReadBytes(4);
-            if (m_chunkId[0] != 'R' || m_chunkId[1] != 'I' || m_chunkId[2] != 'F' || m_chunkId[3] != 'F') {
-                Console.WriteLine("E: RiffChunkDescriptor.chunkId mismatch. \"{0}{1}{2}{3}\" should be \"RIFF\"",
-                    (char)m_chunkId[0], (char)m_chunkId[1], (char)m_chunkId[2], (char)m_chunkId[3]);
+            m_chunkId = chunkId;
+            if (!Util.FourCCHeaderIs(m_chunkId, 0, "RIFF")) {
+                System.Diagnostics.Debug.Assert(false);
                 return false;
             }
 
@@ -43,7 +56,7 @@ namespace WavRWLib2
             }
 
             m_format = br.ReadBytes(4);
-            if (m_format[0] != 'W' || m_format[1] != 'A' || m_format[2] != 'V' || m_format[3] != 'E') {
+            if (!Util.FourCCHeaderIs(m_format, 0, "WAVE")) {
                 Console.WriteLine("E: RiffChunkDescriptor.format mismatch. \"{0}{1}{2}{3}\" should be \"WAVE\"",
                     (char)m_format[0], (char)m_format[1], (char)m_format[2], (char)m_format[3]);
                 return false;
@@ -109,21 +122,12 @@ namespace WavRWLib2
             return true;
         }
 
-        public bool Read(BinaryReader br)
+        public bool Read(BinaryReader br, byte[] fourcc)
         {
-            m_subChunk1Id = br.ReadBytes(4);
-            while (m_subChunk1Id[0] != 'f' || m_subChunk1Id[1] != 'm' || m_subChunk1Id[2] != 't' || m_subChunk1Id[3] != ' ') {
-                // Windows Media Playerで取り込んだWAV。"LIST"のあとに、チャンクサイズがあるので、スキップする。
-                Console.WriteLine("D: FmtSubChunk skip \"{0}{1}{2}{3}\"",
-                    (char)m_subChunk1Id[0], (char)m_subChunk1Id[1], (char)m_subChunk1Id[2], (char)m_subChunk1Id[3]);
-
-                int waveChunkSize = br.ReadInt32();
-                if (waveChunkSize <= 0) {
-                    Console.WriteLine("E: FmtSubChunk chunk corrupted");
-                    return false;
-                }
-                br.ReadBytes(waveChunkSize);
-                m_subChunk1Id = br.ReadBytes(4);
+            m_subChunk1Id = fourcc;
+            if (!Util.FourCCHeaderIs(m_subChunk1Id, 0, "fmt ")) {
+                System.Diagnostics.Debug.Assert(false);
+                return false;
             }
 
             m_subChunk1Size = br.ReadUInt32();
@@ -245,24 +249,10 @@ namespace WavRWLib2
             }
         }
 
-        private bool SkipToDataHeader(BinaryReader br) {
-            while (true) {
-                m_subChunk2Id = br.ReadBytes(4);
-                if (m_subChunk2Id[0] != 'd' || m_subChunk2Id[1] != 'a' || m_subChunk2Id[2] != 't' || m_subChunk2Id[3] != 'a') {
-                    Console.WriteLine("D: DataSubChunk.subChunk2Id mismatch. \"{0}{1}{2}{3}\" should be \"data\". skipping.",
-                        (char)m_subChunk2Id[0], (char)m_subChunk2Id[1], (char)m_subChunk2Id[2], (char)m_subChunk2Id[3]);
-                    m_subChunk2Size = br.ReadUInt32();
-
-                    // skip this header
-                    br.ReadBytes((int)m_subChunk2Size);
-                } else {
-                    return true;
-                }
-            }
-        }
-
-        public bool ReadHeader(BinaryReader br, int numChannels, int bitsPerSample) {
-            if (!SkipToDataHeader(br)) {
+        public bool ReadHeader(BinaryReader br, byte[] fourcc, int numChannels, int bitsPerSample) {
+            m_subChunk2Id = fourcc;
+            if (!Util.FourCCHeaderIs(m_subChunk2Id, 0, "data")) {
+                System.Diagnostics.Debug.Assert(false);
                 return false;
             }
 
@@ -286,9 +276,9 @@ namespace WavRWLib2
         /// <param name="startFrame">0を指定すると最初から。</param>
         /// <param name="endFrame">負の値を指定するとファイルの最後まで。</param>
         /// <returns>false: ファイルの読み込みエラーなど</returns>
-        public bool ReadRaw(BinaryReader br, int numChannels, int bitsPerSample,
+        public bool ReadRaw(BinaryReader br, byte[] fourcc, int numChannels, int bitsPerSample,
             long startFrame, long endFrame) {
-            if (!ReadHeader(br, numChannels, bitsPerSample)) {
+            if (!ReadHeader(br, fourcc, numChannels, bitsPerSample)) {
                 return false;
             }
 
@@ -358,7 +348,7 @@ namespace WavRWLib2
         /// <summary>
         /// StartTickとEndTickを見て、DSCヘッダ以降の必要な部分だけ読み込む。
         /// </summary>
-        private bool ReadDscHeaderAndPcmDataInternal(BinaryReader br, long startFrame, long endFrame) {
+        private bool ReadDscHeaderAndPcmDataInternal(BinaryReader br, byte[] fourcc, long startFrame, long endFrame) {
             if (startFrame < 0) {
                 // データ壊れ。先頭を読む。
                 startFrame = 0;
@@ -369,35 +359,113 @@ namespace WavRWLib2
                 startFrame = endFrame;
             }
 
-            return m_dsc.ReadRaw(br, m_fsc.NumChannels, m_fsc.BitsPerSample, startFrame, endFrame);
+            return m_dsc.ReadRaw(br, fourcc, m_fsc.NumChannels, m_fsc.BitsPerSample, startFrame, endFrame);
+        }
+
+        private bool SkipUnknownChunk(BinaryReader br, byte[] fourcc) {
+            Console.WriteLine("D: SkipUnknownChunk skip \"{0}{1}{2}{3}\"",
+                (char)fourcc[0], (char)fourcc[1], (char)fourcc[2], (char)fourcc[3]);
+
+            int chunkSize = br.ReadInt32();
+            if (chunkSize <= 0) {
+                Console.WriteLine("E: SkipUnknownChunk chunk corrupted");
+                return false;
+            }
+            br.ReadBytes(chunkSize);
+            return true;
+        }
+
+        private bool ReadListHeader(BinaryReader br) {
+            uint listHeaderBytes = br.ReadUInt32();
+            if (listHeaderBytes < 4) {
+                Console.WriteLine("LIST header size is too short {0}", listHeaderBytes);
+                return false;
+            }
+            if (65535 < listHeaderBytes) {
+                Console.WriteLine("LIST header size is too large {0}", listHeaderBytes);
+                return false;
+            }
+
+            byte[] data = br.ReadBytes((int)listHeaderBytes);
+            if (!Util.FourCCHeaderIs(data, 0, "INFO")) {
+                Console.WriteLine("LIST header does not follows INFO");
+                return false;
+            }
+
+            int pos = 4;
+            while (pos+8 < data.Length) {
+                if (data[pos+6] != 0 || data[pos+7] != 0) {
+                    Console.WriteLine("LIST header contains very long text. parse aborted");
+                    return false;
+                }
+                int bytes = data[pos+4] + 256 * data[pos+5];
+                if (0 < bytes) {
+                    if (Util.FourCCHeaderIs(data, pos, "INAM")) {
+                        Title = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                    }
+                    if (Util.FourCCHeaderIs(data, pos, "IART")) {
+                        ArtistName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                    }
+                    if (Util.FourCCHeaderIs(data, pos, "IPRD")) {
+                        AlbumName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                    }
+                }
+                pos += 8 + bytes;
+            }
+            return true;
         }
 
         private bool Read(BinaryReader br, ReadMode mode, long startFrame, long endFrame) {
-            m_rcd = new RiffChunkDescriptor();
-            if (!m_rcd.Read(br)) {
-                return false;
+            bool result = true;
+            try {
+                do {
+                    var fourcc = br.ReadBytes(4);
+
+                    if (Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
+                        m_rcd = new RiffChunkDescriptor();
+                        if (!m_rcd.Read(br, fourcc)) {
+                            return false;
+                        }
+                    }
+
+                    if (Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
+                        m_fsc = new FmtSubChunk();
+                        if (!m_fsc.Read(br, fourcc)) {
+                            return false;
+                        }
+                    }
+
+                    if (Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
+                        if (!ReadListHeader(br)) {
+                            return false;
+                        }
+                    }
+
+                    if (Util.FourCCHeaderIs(fourcc, 0, "data")) {
+                        m_dsc = new DataSubChunk();
+                        switch (mode) {
+                        case ReadMode.HeaderAndPcmData:
+                            if (!ReadDscHeaderAndPcmDataInternal(br, fourcc, startFrame, endFrame)) {
+                                return false;
+                            }
+                            break;
+                        case ReadMode.OnlyHeader:
+                            if (!m_dsc.ReadHeader(br, fourcc, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
+                                return false;
+                            }
+                            // switchから抜ける
+                            break;
+                        }
+                        // do-whileから抜ける
+                        break;
+                    }
+                } while (true);
+            } catch (Exception ex) {
+                Console.WriteLine("E: WavRWLib2.WavData.Read() {0}", ex);
+                result = false;
             }
 
-            m_fsc = new FmtSubChunk();
-            if (!m_fsc.Read(br)) {
-                return false;
-            }
-
-            m_dsc = new DataSubChunk();
-            switch (mode) {
-            case ReadMode.HeaderAndPcmData:
-                if (!ReadDscHeaderAndPcmDataInternal(br, startFrame, endFrame)) {
-                    return false;
-                }
-                break;
-            case ReadMode.OnlyHeader:
-                if (!m_dsc.ReadHeader(br, m_fsc.NumChannels, m_fsc.BitsPerSample)) {
-                    return false;
-                }
-                break;
-            }
-
-            return true;
+            return result && m_rcd != null && m_fsc != null && m_dsc != null;
         }
 
         /// <summary>
@@ -445,6 +513,10 @@ namespace WavRWLib2
         public byte[] GetSampleArray() {
             return m_dsc.GetSampleArray();
         }
+
+        public string Title { get; set; }
+        public string ArtistName { get; set; }
+        public string AlbumName { get; set; }
 
         public bool Set(
                 int numChannels,
