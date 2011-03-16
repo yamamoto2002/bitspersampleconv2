@@ -3,8 +3,12 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.78 ==
+  * Issue 47 修正
+
 ===!PlayPcmWin 2.0.77 ==
   * Issue 37 曲情報表示(WAV)
+  * Issue 47 新たに発生
 
 ===!PlayPcmWin 2.0.76 ==
   * Issue 37 曲情報表示(FLAC)
