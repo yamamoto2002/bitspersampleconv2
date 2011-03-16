@@ -136,7 +136,7 @@ namespace WavRWLib2
             m_subChunk1Size = br.ReadUInt32();
 
             if (40 == m_subChunk1Size) {
-                Console.WriteLine("D: FmtSubChunk.Read() WAVEFORMATEXTENSIBLE\n");
+                // Console.WriteLine("D: FmtSubChunk.Read() WAVEFORMATEXTENSIBLE\n");
             } else if (16 != m_subChunk1Size && 18 != m_subChunk1Size) {
                 Console.WriteLine("E: FmtSubChunk.Read() subChunk1Size!=16 {0} this file type is not supported", m_subChunk1Size);
                 return false;
@@ -155,19 +155,10 @@ namespace WavRWLib2
             }
 
             NumChannels = br.ReadUInt16();
-            Console.WriteLine("D: numChannels={0}", NumChannels);
-
             SampleRate = br.ReadUInt32();
-            Console.WriteLine("D: sampleRate={0}", SampleRate);
-
             m_byteRate = br.ReadUInt32();
-            Console.WriteLine("D: byteRate={0}", m_byteRate);
-
             m_blockAlign = br.ReadUInt16();
-            Console.WriteLine("D: blockAlign={0}", m_blockAlign);
-
             BitsPerSample = br.ReadUInt16();
-            Console.WriteLine("D: bitsPerSample={0}", BitsPerSample);
 
             ushort extensibleSize = 0;
             if (16 < m_subChunk1Size) {
@@ -175,7 +166,11 @@ namespace WavRWLib2
                 extensibleSize = br.ReadUInt16();
             }
 
-            System.Diagnostics.Debug.Assert(0 == extensibleSize || 22 == extensibleSize);
+            if (0 != extensibleSize && 22 != extensibleSize) {
+                Console.WriteLine("E: FmtSubChunk.Read() cbSize != 0 nor 22 {0}", extensibleSize);
+                return false;
+            }
+
             if (22 == extensibleSize) {
                 // WAVEFORMATEX(22 bytes)
 
@@ -294,7 +289,6 @@ namespace WavRWLib2
             }
 
             m_subChunk2Size = br.ReadUInt32();
-            Console.WriteLine("D: subChunk2Size={0}", m_subChunk2Size);
             if (0x80000000 <= m_subChunk2Size) {
                 Console.WriteLine("E: file too large to handle. {0} bytes", m_subChunk2Size);
                 return false;
@@ -400,12 +394,13 @@ namespace WavRWLib2
         }
 
         private bool SkipUnknownChunk(BinaryReader br, byte[] fourcc) {
-            Console.WriteLine("D: SkipUnknownChunk skip \"{0}{1}{2}{3}\"",
-                (char)fourcc[0], (char)fourcc[1], (char)fourcc[2], (char)fourcc[3]);
+            // Console.WriteLine("D: SkipUnknownChunk skip \"{0}{1}{2}{3}\"", (char)fourcc[0], (char)fourcc[1], (char)fourcc[2], (char)fourcc[3]);
 
             int chunkSize = br.ReadInt32();
             if (chunkSize <= 0) {
-                Console.WriteLine("E: SkipUnknownChunk chunk corrupted");
+                Console.WriteLine("E: SkipUnknownChunk chunk \"{0}{1}{2}{3}\" corrupted. chunkSize={4}",
+                    (char)fourcc[0], (char)fourcc[1], (char)fourcc[2], (char)fourcc[3], chunkSize);
+
                 return false;
             }
             br.ReadBytes(chunkSize);
