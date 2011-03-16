@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace WavRWLib2
 {
@@ -121,7 +122,7 @@ namespace WavRWLib2
 
             return true;
         }
-
+        
         public bool Read(BinaryReader br, byte[] fourcc)
         {
             m_subChunk1Id = fourcc;
@@ -130,9 +131,14 @@ namespace WavRWLib2
                 return false;
             }
 
+
+
             m_subChunk1Size = br.ReadUInt32();
-            if (16 != m_subChunk1Size && 18 != m_subChunk1Size) {
-                Console.WriteLine("E: FmtSubChunk.subChunk1Size != 16 {0} this file type is not supported", m_subChunk1Size);
+
+            if (40 == m_subChunk1Size) {
+                Console.WriteLine("D: FmtSubChunk.Read() WAVEFORMATEXTENSIBLE\n");
+            } else if (16 != m_subChunk1Size && 18 != m_subChunk1Size) {
+                Console.WriteLine("E: FmtSubChunk.Read() subChunk1Size!=16 {0} this file type is not supported", m_subChunk1Size);
                 return false;
             }
 
@@ -141,6 +147,8 @@ namespace WavRWLib2
                 SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
             } else if (3 == m_audioFormat) {
                 SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SFloat;
+            } else if (0xfffe == m_audioFormat) {
+                // WAVEFORMATEXTENSIBLE
             } else {
                 Console.WriteLine("E: this wave file is not PCM format {0}. Cannot read this file", m_audioFormat);
                 return false;
@@ -161,8 +169,37 @@ namespace WavRWLib2
             BitsPerSample = br.ReadUInt16();
             Console.WriteLine("D: bitsPerSample={0}", BitsPerSample);
 
+            ushort extensibleSize = 0;
             if (16 < m_subChunk1Size) {
-                br.ReadBytes((int)(m_subChunk1Size - 16));
+                // cbSize 2bytes
+                extensibleSize = br.ReadUInt16();
+            }
+
+            System.Diagnostics.Debug.Assert(0 == extensibleSize || 22 == extensibleSize);
+            if (22 == extensibleSize) {
+                // WAVEFORMATEX(22 bytes)
+
+                ushort bitsPerSampleEx = br.ReadUInt16();
+                uint dwChannelMask = br.ReadUInt32();
+                var formatGuid = br.ReadBytes(16);
+
+                var pcmGuid   = Guid.Parse("00000001-0000-0010-8000-00aa00389b71");
+                var pcmGuidByteArray = pcmGuid.ToByteArray();
+                var floatGuid = Guid.Parse("00000003-0000-0010-8000-00aa00389b71");
+                var floatGuidByteArray = floatGuid.ToByteArray();
+                if (pcmGuidByteArray.SequenceEqual(formatGuid)) {
+                    SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
+                } else if (floatGuidByteArray.SequenceEqual(formatGuid)) {
+                    SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SFloat;
+                } else {
+                    Console.WriteLine("E: FmtSubChunk.Read() unknown format guid on WAVEFORMATEX.SubFormat.");
+                    Console.WriteLine("{3:X2}{2:X2}{1:X2}{0:X2}-{5:X2}{4:X2}-{7:X2}{6:X2}-{9:X2}{8:X2}-{10:X2}{11:X2}{12:X2}{13:X2}{14:X2}{15:X2}",
+                        formatGuid[0], formatGuid[1], formatGuid[2], formatGuid[3],
+                        formatGuid[4], formatGuid[5], formatGuid[6], formatGuid[7],
+                        formatGuid[8], formatGuid[9], formatGuid[10], formatGuid[11],
+                        formatGuid[12], formatGuid[13], formatGuid[14], formatGuid[15]);
+                    return false;
+                }
             }
 
             if (m_byteRate != SampleRate * NumChannels * BitsPerSample / 8) {
@@ -426,22 +463,16 @@ namespace WavRWLib2
                         if (!m_rcd.Read(br, fourcc)) {
                             return false;
                         }
-                    }
-
-                    if (Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
+                    } else if (Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
                         m_fsc = new FmtSubChunk();
                         if (!m_fsc.Read(br, fourcc)) {
                             return false;
                         }
-                    }
-
-                    if (Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
+                    } else if (Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
                         if (!ReadListHeader(br)) {
                             return false;
                         }
-                    }
-
-                    if (Util.FourCCHeaderIs(fourcc, 0, "data")) {
+                    } else if (Util.FourCCHeaderIs(fourcc, 0, "data")) {
                         m_dsc = new DataSubChunk();
                         switch (mode) {
                         case ReadMode.HeaderAndPcmData:
@@ -458,6 +489,10 @@ namespace WavRWLib2
                         }
                         // do-whileから抜ける
                         break;
+                    } else {
+                        if (!SkipUnknownChunk(br, fourcc)) {
+                            return false;
+                        }
                     }
                 } while (true);
             } catch (Exception ex) {
