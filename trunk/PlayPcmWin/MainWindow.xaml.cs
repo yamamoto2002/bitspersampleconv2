@@ -1003,6 +1003,7 @@ namespace PlayPcmWin
         }
 
         private StringBuilder m_loadErrorMessages;
+
         private void LoadErrorMessageAdd(string s) {
             s = "■" + s.TrimEnd('\n').TrimEnd('\r') + "。 ";
             m_loadErrorMessages.Append(s);
@@ -1174,9 +1175,9 @@ namespace PlayPcmWin
                         }
                     } else {
                         readSuccess = false;
-                        string s = string.Format("AIFFファイル読み込み失敗: {0}\r\n", result);
+                        string s = string.Format("AIFFファイル読み込み失敗、{0}: {1}\r\n", result, path);
                         AddLogText(s);
-                        m_loadErrorMessages.Append(s);
+                        LoadErrorMessageAdd(s);
                     }
                 }
             } catch (Exception ex) {
@@ -1207,10 +1208,10 @@ namespace PlayPcmWin
             if (readSuccess) {
                 CheckAddPcmData(csr, csti, path, pcmData);
             } else {
-                string s = string.Format("FLACファイル読み込み失敗: {0}\r\n{1}",
+                string s = string.Format("FLACファイル読み込み失敗、{1}: {0}\r\n",
                         path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
                 AddLogText(s);
-                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗: {0} {1}", path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
+                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗、{1}: {0}", path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
                 return false;
             }
             return true;
@@ -1292,7 +1293,16 @@ namespace PlayPcmWin
         }
 
         private void ReadFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
-            ReadFileHeader1(path, mode, csr, csti);
+            if (System.IO.Directory.Exists(path)) {
+                // pathはディレクトリである。直下のファイル一覧を作って足す。再帰的にはたぐらない。
+                var files = System.IO.Directory.GetFiles(path);
+                foreach (var file in files) {
+                    ReadFileHeader1(file, mode, csr, csti);
+                }
+            } else {
+                // pathはファイル。
+                ReadFileHeader1(path, mode, csr, csti);
+            }
         }
 
         //////////////////////////////////////////////////////////////////////////
