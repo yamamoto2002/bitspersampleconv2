@@ -34,14 +34,19 @@ namespace PlayPcmWin {
                 // FLACファイル読み込み。
                 m_format = Format.FLAC;
                 return StreamBeginFlac(path, startFrame);
+            case ".aiff":
             case ".aif":
                 // AIFFファイル読み込み。
                 m_format = Format.AIFF;
                 return StreamBeginAiff(path, startFrame);
-            default:
+            case ".wav":
+            case ".wave":
                 // WAVEファイル読み込み。
                 m_format = Format.WAVE;
                 return StreamBeginWave(path, startFrame);
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return -1;
             }
         }
 

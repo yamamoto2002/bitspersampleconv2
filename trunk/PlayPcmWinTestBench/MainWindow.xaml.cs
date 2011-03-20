@@ -267,7 +267,7 @@ namespace PlayPcmWinTestBench {
         private string BrowseOpenFile() {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Filter =
-                "WAVEファイル|*.wav";
+                "WAVEファイル|*.wav;*.wave";
             dlg.Multiselect = false;
 
             Nullable<bool> result = dlg.ShowDialog();
