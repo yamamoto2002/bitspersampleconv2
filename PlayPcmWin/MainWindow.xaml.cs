@@ -1252,7 +1252,8 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// N.B. ReadWavPcmDataも参照。
+        /// N.B. PcmReader.StreamBeginも参照(へぼい)。
+        /// MenuItemFileOpen_Clickも参照。
         /// </summary>
         private void ReadFileHeader1(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
             string ext = System.IO.Path.GetExtension(path);
@@ -1391,10 +1392,10 @@ namespace PlayPcmWin
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Filter =
-                "対応しているファイル|*.wav;*.flac;*.aif;*.cue|" +
-                "WAVEファイル|*.wav|" +
+                "対応しているファイル|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue|" +
+                "WAVEファイル|*.wav;*.wave|" +
                 "FLACファイル|*.flac|" +
-                "AIFFファイル|*.aif|" +
+                "AIFFファイル|*.aif;*.aiff|" +
                 "CUEファイル|*.cue|" +
                 "全てのファイル|*.*";
             dlg.Multiselect = true;
