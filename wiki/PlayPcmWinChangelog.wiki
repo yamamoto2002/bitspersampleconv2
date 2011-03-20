@@ -13,6 +13,7 @@
 ===!PlayPcmWin 2.0.77 ==
   * Issue 37 曲情報表示(WAV)
   * Issue 47 新たに発生
+  * Issue 48 新たに発生
 
 ===!PlayPcmWin 2.0.76 ==
   * Issue 37 曲情報表示(FLAC)
