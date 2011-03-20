@@ -131,8 +131,6 @@ namespace WavRWLib2
                 return false;
             }
 
-
-
             m_subChunk1Size = br.ReadUInt32();
 
             if (40 == m_subChunk1Size) {
@@ -449,9 +447,18 @@ namespace WavRWLib2
 
         private bool Read(BinaryReader br, ReadMode mode, long startFrame, long endFrame) {
             bool result = true;
+            bool firstHeader = true;
             try {
                 do {
                     var fourcc = br.ReadBytes(4);
+
+                    if (firstHeader) {
+                        if (!Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
+                            // ファイルの先頭がRIFFで始まっていない。WAVではない。
+                            return false;
+                        }
+                        firstHeader = false;
+                    }
 
                     if (Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
                         m_rcd = new RiffChunkDescriptor();
