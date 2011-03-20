@@ -1002,6 +1002,12 @@ namespace PlayPcmWin
             ClearWithoutUpdateUI,
         }
 
+        private StringBuilder m_loadErrorMessages;
+        private void LoadErrorMessageAdd(string s) {
+            s = "■" + s.TrimEnd('\n').TrimEnd('\r') + "。 ";
+            m_loadErrorMessages.Append(s);
+        }
+
         private void ClearPlayList(PlayListClearMode mode) {
             m_pcmDataList.Clear();
             m_playListItems.Clear();
@@ -1033,8 +1039,8 @@ namespace PlayPcmWin
             if (pcmData.NumChannels != 2) {
                 string s = string.Format("2チャンネルステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
                     path, pcmData.NumChannels);
-                MessageBox.Show(s);
                 AddLogText(s);
+                LoadErrorMessageAdd(s);
                 return false;
             }
             if (pcmData.BitsPerSample != 16
@@ -1042,8 +1048,8 @@ namespace PlayPcmWin
              && pcmData.BitsPerSample != 32) {
                 string s = string.Format("量子化ビット数が16でも24でも32でもないPCMファイルの再生には対応していません: {0} {1}bit\r\n",
                     path, pcmData.BitsPerSample);
-                MessageBox.Show(s);
                 AddLogText(s);
+                LoadErrorMessageAdd(s);
                 return false;
             }
 
@@ -1122,7 +1128,7 @@ namespace PlayPcmWin
             } catch (Exception ex) {
                 string s = string.Format("WAVファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
                 AddLogText(s);
-                MessageBox.Show(s);
+                LoadErrorMessageAdd(string.Format("WAVファイル読み込み失敗: {0}", path));
                 return false;
             }
 
@@ -1144,7 +1150,7 @@ namespace PlayPcmWin
             } else {
                 string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
                 AddLogText(s);
-                MessageBox.Show(s);
+                LoadErrorMessageAdd(s);
                 return false;
             }
             return true;
@@ -1170,13 +1176,13 @@ namespace PlayPcmWin
                         readSuccess = false;
                         string s = string.Format("AIFFファイル読み込み失敗: {0}\r\n", result);
                         AddLogText(s);
-                        MessageBox.Show(s);
+                        m_loadErrorMessages.Append(s);
                     }
                 }
             } catch (Exception ex) {
                 string s = string.Format("AIFFファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
                 AddLogText(s);
-                MessageBox.Show(s);
+                LoadErrorMessageAdd(string.Format("AIFFファイル読み込み失敗: {0}", path));
                 return false;
             }
 
@@ -1204,7 +1210,7 @@ namespace PlayPcmWin
                 string s = string.Format("FLACファイル読み込み失敗: {0}\r\n{1}",
                         path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
                 AddLogText(s);
-                MessageBox.Show(s);
+                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗: {0} {1}", path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
                 return false;
             }
             return true;
@@ -1217,16 +1223,16 @@ namespace PlayPcmWin
             CueSheetReader csr = new CueSheetReader();
             bool result = csr.ReadFromFile(path);
             if (!result) {
-                string s = string.Format("CUEファイル読み込み失敗: {0}",
+                string s = string.Format("CUEファイル読み込み失敗: {0}\r\n",
                         path);
                 AddLogText(s);
-                MessageBox.Show(s);
+                LoadErrorMessageAdd(s);
                 return false;
             }
 
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                ReadFileHeader(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
+                ReadFileHeader1(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
 
                 if ((csti.indexId == 0 &&
                     m_preference.ReplaceGapWithKokomade) ||
@@ -1248,7 +1254,7 @@ namespace PlayPcmWin
         /// <summary>
         /// N.B. ReadWavPcmDataも参照。
         /// </summary>
-        private void ReadFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+        private void ReadFileHeader1(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
             string ext = System.IO.Path.GetExtension(path);
 
             switch (ext.ToLower()) {
@@ -1263,16 +1269,29 @@ namespace PlayPcmWin
                 }
                 break;
             case ".aif":
+            case ".aiff":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
                     ReadAiffFileHeader(path, csr, csti);
                 }
                 break;
-            default:
+            case ".wav":
+            case ".wave":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
                     ReadWavFileHeader(path, csr, csti);
                 }
                 break;
+            default: {
+                    string s = string.Format("未対応ファイル: {0}\r\n",
+                            path);
+                    AddLogText(s);
+                    LoadErrorMessageAdd(s);
+                }
+                break;
             }
+        }
+
+        private void ReadFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+            ReadFileHeader1(path, mode, csr, csti);
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -1300,9 +1319,17 @@ namespace PlayPcmWin
                 return;
             }
 
+            // エラーメッセージを貯めて出す。
+            m_loadErrorMessages = new StringBuilder();
+
             for (int i = 0; i < paths.Length; ++i) {
                 ReadFileHeader(paths[i], ReadHeaderMode.ReadAll, null, null);
             }
+
+            if (0 < m_loadErrorMessages.Length) {
+                MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
             UpdateUIStatus();
         }
 
@@ -1374,12 +1401,21 @@ namespace PlayPcmWin
 
             Nullable<bool> result = dlg.ShowDialog();
 
+
             if (result == true) {
+                // エラーメッセージを貯めて出す。
+                m_loadErrorMessages = new StringBuilder();
+
                 for (int i = 0; i < dlg.FileNames.Length; ++i) {
                     ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
                 }
                 UpdateUIStatus();
+
+                if (0 < m_loadErrorMessages.Length) {
+                    MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
             }
+
         }
 
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
