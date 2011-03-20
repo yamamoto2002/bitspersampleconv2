@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.79 ==
+  * Issue 22 一部修正
+  * Issue 48 修正
+
 ===!PlayPcmWin 2.0.78 ==
   * Issue 47 修正
 
