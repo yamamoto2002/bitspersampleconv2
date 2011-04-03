@@ -65,7 +65,7 @@ WaveRTらしいです。(未確認)
 
 =表1: オーディオインターフェースごとの、使用可能なフォーマット一覧=
 
-スピーカー (Realtek High Definition Audio) (Realtek ALC889A Realtekドライバ) ※上記説明参照
+==スピーカー (Realtek High Definition Audio) (Realtek ALC889A Realtekドライバ) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ×  || ○  || ×  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -77,7 +77,7 @@ WaveRTらしいです。(未確認)
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (Creative SB X-Fi) (Creative X-Fi Titanium HD SB-XFT-HD) ※上記説明参照
+==スピーカー (Creative SB X-Fi) (Creative X-Fi Titanium HD SB-XFT-HD) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ○  || ○  || ○  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -89,7 +89,7 @@ WaveRTらしいです。(未確認)
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (Prodigy HD2 Audio) ※上記説明参照
+==スピーカー (Prodigy HD2 Audio) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ○  || ○  || ○  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -101,7 +101,7 @@ WaveRTらしいです。(未確認)
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-Multichannel (M-Audio ProFire 2626) ※上記説明参照
+==Multichannel (M-Audio ProFire 2626) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ×  || ×  || ×  || ×  || ×  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -113,7 +113,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (RME Fireface 400) ※上記説明参照
+==スピーカー (RME Fireface 400) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ×  || ×  || ×  || ×  || ×  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -125,11 +125,11 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-デジタル出力 (E-MU 0404 | USB)
+==デジタル出力 (E-MU 0404 | USB)==
 ||16/44||16/48||16/88||16/96||16/176||16/192||32/44||32/48||32/88||32/96||32/176||32/192||
 ||○   ||○   ||○   ||○   ||○    ||○    ||×   ||×   ||×   ||×   ||×    ||×    ||
 
-スピーカー (2- Lynx L22) (アナログ音声出力) ※上記説明参照
+==スピーカー (2- Lynx L22) (アナログ音声出力) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ○  || ○  || ○  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -141,7 +141,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD アナログ音声出力) ※上記説明参照
+==スピーカー (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD アナログ音声出力) ※上記説明参照==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ×  || ○  || ×  || ○  || ×  || ×  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -153,7 +153,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-デジタル オーディオ インターフェイス (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD S/PDIF出力)
+==デジタル オーディオ インターフェイス (USB Sound Blaster HD) (USB Sound Blaster Digital Music Premium HD SB-DM-PHD S/PDIF出力)==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ×  || ○  || ×  || ×  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -165,7 +165,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (USB Sound Device        ) (響音DIGI+ SD-U1SOUND-T4 C-Media 6206 マイクロソフト標準USBオーディオドライバ)※標準ドライバだとS/PDIFから音が出ません
+==スピーカー (USB Sound Device        ) (響音DIGI+ SD-U1SOUND-T4 C-Media 6206 マイクロソフト標準USBオーディオドライバ)※標準ドライバだとS/PDIFから音が出ません==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ×  || ×  || ×  || ×  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -177,11 +177,11 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-響音DIGI+ SD-U1SOUND-T4 C-Media 6206 C-Mediaドライバ S/PDIF出力
+==響音DIGI+ SD-U1SOUND-T4 C-Media 6206 C-Mediaドライバ S/PDIF出力==
 ||16/44||16/48||16/88||16/96||16/176||16/192||32/44||32/48||32/88||32/96||32/176||32/192||
 ||×   ||○   ||×   ||×   ||×    ||×    ||×   ||×   ||×   ||×   ||×    ||×    ||
 
-スピーカー (Lynx AES16e)
+==スピーカー (Lynx AES16e)==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○  || ○  || ○  || ○  || ○  || ○  || ×  || ×  ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -193,7 +193,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || ×  || ×  || ×  || ×  || ×  || ×  || ×  || ×  ||
 
-スピーカー (Cirrus Logic CS4206A (AB 03)) Mac Mini(Mid 2010)
+==スピーカー (Cirrus Logic CS4206A (AB 03)) Mac Mini(Mid 2010)==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○ || ○ || ○ || ○ || ○ || ○ || × || × ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
@@ -205,7 +205,7 @@ Multichannel (M-Audio ProFire 2626) ※上記説明参照
 || 44kHz f32V32|| 48kHz f32V32|| 88kHz f32V32|| 96kHz f32V32||176kHz f32V32||192kHz f32V32||352kHz f32V32||384kHz f32V32||
 || × || × || × || × || × || × || × || × ||
 
-デジタル オーディオ (S/PDIF) (Cirrus Logic CS4206A (AB 03)) Mac Mini (Mid 2010)
+==デジタル オーディオ (S/PDIF) (Cirrus Logic CS4206A (AB 03)) Mac Mini (Mid 2010)==
 || 44kHz i16V16|| 48kHz i16V16|| 88kHz i16V16|| 96kHz i16V16||176kHz i16V16||192kHz i16V16||352kHz i16V16||384kHz i16V16||
 || ○ || ○ || ○ || ○ || × || × || × || × ||
 || 44kHz i24V24|| 48kHz i24V24|| 88kHz i24V24|| 96kHz i24V24||176kHz i24V24||192kHz i24V24||352kHz i24V24||384kHz i24V24||
