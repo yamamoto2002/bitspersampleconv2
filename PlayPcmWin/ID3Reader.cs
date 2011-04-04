@@ -17,16 +17,23 @@ namespace PlayPcmWin {
         public string ArtistName { get; set; }
 
         /// <summary>
-        /// true: unsynchroする(ファイルから0xffが出てきたら次のバイトを捨てる)
+        /// true: unsynchro処理をほどく(ファイルから0xffが出てきたら次のバイトを捨てる)
         /// </summary>
         private bool m_unsynchro;
 
         /// <summary>
-        /// Unsynchroの捨てデータも含めた、読み込み可能バイト数
+        /// Unsynchroの捨てデータも含めた、読み込み可能バイト数。
         /// </summary>
         private long m_bytesRemain;
+
+        /// <summary>
+        /// Unsynchroの捨てデータも含めた、読み込んだバイト数。
+        /// </summary>
         private long m_readBytes;
 
+        /// <summary>
+        /// ファイルから読み込んだバイト数
+        /// </summary>
         public long ReadBytes { get { return m_readBytes; } }
 
         private void Clear() {
@@ -131,7 +138,7 @@ namespace PlayPcmWin {
 
         private ID3Result ReadTagHeader(BinaryReader br) {
             var tagIdentifier = BinaryReadBytes(br, 3);
-            if (tagIdentifier[0] != 'I' ||
+            if (    tagIdentifier[0] != 'I' ||
                     tagIdentifier[1] != 'D' ||
                     tagIdentifier[2] != '3') {
                 return ID3Result.ReadError;
@@ -249,6 +256,7 @@ namespace PlayPcmWin {
                 var frameId    = ByteArrayToBigU24(ReadBytesWithUnsynchro(br, 3));
                 int frameSize  = (int)ByteArrayToBigU24(ReadBytesWithUnsynchro(br, 3));
 
+                /*
                 Console.WriteLine("ReadFramesV22 {5:X8} \"{0}{1}{2}\" {3}bytes remain={4}",
                     (char)(0xff & (frameId >> 16)),
                     (char)(0xff & (frameId >> 8)),
@@ -256,6 +264,7 @@ namespace PlayPcmWin {
                     frameSize,
                     m_bytesRemain,
                     frameId);
+                */
 
                 switch (frameId) {
                 case 0x54414c:
