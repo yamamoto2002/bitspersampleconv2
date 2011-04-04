@@ -20,7 +20,32 @@ namespace PcmDataLib {
                 }
             }
         }
-    };
+
+        /// <summary>
+        /// FourCC形式のバイト列をsと比較する
+        /// </summary>
+        /// <param name="b">FourCC形式のバイト列を含むバッファ</param>
+        /// <param name="bPos">バイト列先頭から注目位置までのオフセット</param>
+        /// <param name="s">比較対象文字列 最大4文字</param>
+        /// <returns></returns>
+        public static bool FourCCHeaderIs(byte[] b, int bPos, string s)
+        {
+            System.Diagnostics.Debug.Assert(s.Length == 4);
+            if (b.Length - bPos < 4)
+            {
+                return false;
+            }
+
+            System.Console.WriteLine("D: b={0}{1}{2}{3} s={4}",
+                (char)b[0], (char)b[1], (char)b[2], (char)b[3], s);
+
+
+            return s[0] == b[bPos]
+                && s[1] == b[bPos + 1]
+                && s[2] == b[bPos + 2]
+                && s[3] == b[bPos + 3];
+        }
+    }
 
     /// <summary>
     /// PCMデータ情報置き場。

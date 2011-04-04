@@ -6,7 +6,7 @@
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{23DC272C-B67B-41C5-9622-A35BFA3B9D1E}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PlayPcmWin</RootNamespace>
     <AssemblyName>PlayPcmWin</AssemblyName>
@@ -107,6 +107,7 @@
     <Compile Include="AiffReader.cs" />
     <Compile Include="CueSheetRW.cs" />
     <Compile Include="FlacDecodeIF.cs" />
+    <Compile Include="ID3Reader.cs" />
     <Compile Include="PcmReader.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
