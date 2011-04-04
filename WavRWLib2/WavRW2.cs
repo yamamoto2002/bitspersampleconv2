@@ -5,20 +5,6 @@ using System.Linq;
 
 namespace WavRWLib2
 {
-    class Util {
-        static public bool FourCCHeaderIs(byte[] b, int bPos, string s) {
-            System.Diagnostics.Debug.Assert(s.Length == 4);
-            if (b.Length - bPos < 4) {
-                return false;
-            }
-
-            return s[0] == b[bPos]
-                && s[1] == b[bPos + 1]
-                && s[2] == b[bPos + 2]
-                && s[3] == b[bPos + 3];
-        }
-    }
-
     class RiffChunkDescriptor
     {
         private byte[] m_chunkId;
@@ -45,7 +31,7 @@ namespace WavRWLib2
         public bool Read(BinaryReader br, byte[] chunkId)
         {
             m_chunkId = chunkId;
-            if (!Util.FourCCHeaderIs(m_chunkId, 0, "RIFF")) {
+            if (!PcmDataLib.Util.FourCCHeaderIs(m_chunkId, 0, "RIFF")) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
@@ -57,7 +43,7 @@ namespace WavRWLib2
             }
 
             m_format = br.ReadBytes(4);
-            if (!Util.FourCCHeaderIs(m_format, 0, "WAVE")) {
+            if (!PcmDataLib.Util.FourCCHeaderIs(m_format, 0, "WAVE")) {
                 Console.WriteLine("E: RiffChunkDescriptor.format mismatch. \"{0}{1}{2}{3}\" should be \"WAVE\"",
                     (char)m_format[0], (char)m_format[1], (char)m_format[2], (char)m_format[3]);
                 return false;
@@ -126,7 +112,7 @@ namespace WavRWLib2
         public bool Read(BinaryReader br, byte[] fourcc)
         {
             m_subChunk1Id = fourcc;
-            if (!Util.FourCCHeaderIs(m_subChunk1Id, 0, "fmt ")) {
+            if (!PcmDataLib.Util.FourCCHeaderIs(m_subChunk1Id, 0, "fmt ")) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
@@ -281,7 +267,7 @@ namespace WavRWLib2
 
         public bool ReadHeader(BinaryReader br, byte[] fourcc, int numChannels, int bitsPerSample) {
             m_subChunk2Id = fourcc;
-            if (!Util.FourCCHeaderIs(m_subChunk2Id, 0, "data")) {
+            if (!PcmDataLib.Util.FourCCHeaderIs(m_subChunk2Id, 0, "data")) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
@@ -417,7 +403,7 @@ namespace WavRWLib2
             }
 
             byte[] data = br.ReadBytes((int)listHeaderBytes);
-            if (!Util.FourCCHeaderIs(data, 0, "INFO")) {
+            if (!PcmDataLib.Util.FourCCHeaderIs(data, 0, "INFO")) {
                 Console.WriteLine("LIST header does not follows INFO");
                 return false;
             }
@@ -430,13 +416,13 @@ namespace WavRWLib2
                 }
                 int bytes = data[pos+4] + 256 * data[pos+5];
                 if (0 < bytes) {
-                    if (Util.FourCCHeaderIs(data, pos, "INAM")) {
+                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "INAM")) {
                         Title = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
                     }
-                    if (Util.FourCCHeaderIs(data, pos, "IART")) {
+                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IART")) {
                         ArtistName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
                     }
-                    if (Util.FourCCHeaderIs(data, pos, "IPRD")) {
+                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IPRD")) {
                         AlbumName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
                     }
                 }
@@ -453,28 +439,28 @@ namespace WavRWLib2
                     var fourcc = br.ReadBytes(4);
 
                     if (firstHeader) {
-                        if (!Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
+                        if (!PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
                             // ファイルの先頭がRIFFで始まっていない。WAVではない。
                             return false;
                         }
                         firstHeader = false;
                     }
 
-                    if (Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
+                    if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "RIFF")) {
                         m_rcd = new RiffChunkDescriptor();
                         if (!m_rcd.Read(br, fourcc)) {
                             return false;
                         }
-                    } else if (Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
+                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
                         m_fsc = new FmtSubChunk();
                         if (!m_fsc.Read(br, fourcc)) {
                             return false;
                         }
-                    } else if (Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
+                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
                         if (!ReadListHeader(br)) {
                             return false;
                         }
-                    } else if (Util.FourCCHeaderIs(fourcc, 0, "data")) {
+                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "data")) {
                         m_dsc = new DataSubChunk();
                         switch (mode) {
                         case ReadMode.HeaderAndPcmData:
