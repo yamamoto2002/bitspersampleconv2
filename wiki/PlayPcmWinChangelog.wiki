@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.80 ==
+  * Issue 37 曲情報表示(AIFF)
+  * Issue 49 (AIFFのckSizeのPAD処理忘れ)修正
+
 ===!PlayPcmWin 2.0.79 ==
   * Issue 22 (フォルダのドラッグアンドドロップで中のファイルを再生リストに追加)作成
   * Issue 48 (画像ファイルを再生リストにドロップすると回復不可能なエラーが出る)修正
