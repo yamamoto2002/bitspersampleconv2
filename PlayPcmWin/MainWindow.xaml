@@ -106,7 +106,7 @@
         Margin="6,29,6,26"
         BorderBrush="#FFD5DFE5"
         IsExpanded="True"
-        Grid.Column="1" ExpandDirection="Right">
+        Grid.Column="1" ExpandDirection="Right" Name="expanderSettings">
             <Grid>
                 <GroupBox Header="WASAPI設定" Width="380" Height="203" Margin="6,6,6,0" Name="groupBoxWasapiSettings" VerticalAlignment="Top" Grid.Column="1">
                     <Grid Width="360">

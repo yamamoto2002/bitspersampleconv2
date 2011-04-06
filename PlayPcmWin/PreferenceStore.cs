@@ -41,6 +41,8 @@ namespace PlayPcmWin {
 
         public double WindowScale { get; set; }
 
+        public bool SettingsIsExpanded { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -64,6 +66,7 @@ namespace PlayPcmWin {
             PlayingTimeFontBold = true;
             PlayingTimeFontName = "Courier New";
             WindowScale = 1.0f;
+            SettingsIsExpanded = true;
         }
 
         /// <summary>
