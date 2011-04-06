@@ -432,6 +432,11 @@ namespace PlayPcmWin
                 Width  = m_preference.MainWindowWidth;
                 Height = m_preference.MainWindowHeight;
             }
+
+            if (!m_preference.SettingsIsExpanded) {
+                expanderSettings.IsExpanded = false;
+            }
+
             UpdateWindowSettings();
 
             AddLogText(string.Format("PlayPcmWin {0} {1}\r\n",
@@ -836,6 +841,9 @@ namespace PlayPcmWin
 
                 // 再生リピート設定を保存
                 m_preference.PlayRepeat = checkBoxContinuous.IsChecked == true;
+
+                // 設定画面の表示状態を保存
+                m_preference.SettingsIsExpanded = expanderSettings.IsExpanded;
 
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);
