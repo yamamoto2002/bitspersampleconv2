@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.82 ==
+  * Issue 52 (WASAPI設定画面が引っ込むようにする)作成
+
 ===!PlayPcmWin 2.0.80 ==
   * Issue 37 曲情報表示(AIFF)
   * Issue 49 (AIFFのckSizeのPAD処理忘れ)修正
