@@ -127,6 +127,7 @@ namespace PlayPcmWin {
                 return false;
             }
 
+            bool result = false;
             try {
                 using (StreamWriter sw = new StreamWriter(path, false, Encoding.Default)) {
                     // アルバムタイトル
@@ -188,13 +189,15 @@ namespace PlayPcmWin {
                         }
                     }
                 }
+                result = true;
             } catch (Exception e) {
                 // Let the user know what went wrong.
                 Console.WriteLine("The file could not be write:");
                 Console.WriteLine(e.Message);
-                return false;
+                result = false;
             }
-            return true;
+
+            return result;
         }
     };
 

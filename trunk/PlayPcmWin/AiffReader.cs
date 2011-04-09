@@ -90,6 +90,7 @@ namespace PlayPcmWin {
                     PcmDataLib.Util.BinaryReaderSkip(br, ChunkSizeWithPad(ckSize));
                 }
             } catch (System.IO.EndOfStreamException ex) {
+                Console.WriteLine(ex);
                 return false;
             }
         }

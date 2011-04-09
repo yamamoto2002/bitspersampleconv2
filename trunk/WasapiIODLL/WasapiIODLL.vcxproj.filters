@@ -36,9 +36,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="WasapiIODLL.def" />
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="source files">
       <UniqueIdentifier>{49216b3b-b181-47c0-87b2-12d65b06483d}</UniqueIdentifier>
     </Filter>

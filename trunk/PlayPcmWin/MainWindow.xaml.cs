@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using PcmDataLib;
 using WasapiPcmUtil;
 using System.Collections.ObjectModel;
+using System.IO.IsolatedStorage;
 
 namespace PlayPcmWin
 {
@@ -417,6 +418,12 @@ namespace PlayPcmWin
             return -1;
         }
 
+        private static readonly string m_playlistFileName = "PlayPcmWinPlayList.xml";
+
+        private void TryLoadPlaylist() {
+            // 未実装
+        }
+
         public MainWindow()
         {
             InitializeComponent();
@@ -435,6 +442,10 @@ namespace PlayPcmWin
 
             if (!m_preference.SettingsIsExpanded) {
                 expanderSettings.IsExpanded = false;
+            }
+
+            if (m_preference.StorePlaylistContent) {
+                TryLoadPlaylist();
             }
 
             UpdateWindowSettings();
@@ -535,6 +546,24 @@ namespace PlayPcmWin
             get { return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString(); }
         }
 
+        private string SampleFormatTypeToStr(WasapiCS.SampleFormatType t) {
+            switch (t) {
+            case WasapiCS.SampleFormatType.Sfloat:
+                return "32bit浮動小数点数";
+            case WasapiCS.SampleFormatType.Sint16:
+                return "16bit";
+            case WasapiCS.SampleFormatType.Sint24:
+                return "24bit";
+            case WasapiCS.SampleFormatType.Sint32:
+                return "32bit";
+            case WasapiCS.SampleFormatType.Sint32V24:
+                return "24bit(32bitアライン)";
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return "unknown";
+            }                
+        }
+
         private void UpdateUIStatus() {
             switch (m_state) {
             case State.初期化完了:
@@ -554,7 +583,6 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = true;
                 menuToolSettings.IsEnabled = true;
-                labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
@@ -582,7 +610,6 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = true;
                 menuToolSettings.IsEnabled = true;
-                labelWasapiStatus.Content = "WASAPI 停止中";
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
@@ -599,30 +626,26 @@ namespace PlayPcmWin
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled = false;
+                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                labelWasapiStatus.Content =
-                    string.Format("WASAPI {0}Hz {1}",
-                        wasapi.GetBufferFormatSampleRate(),
-                        wasapi.GetBufferFormatType());
                 statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
                 break;
             case State.ファイル読み込み完了:
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = true;
-                buttonPlay.IsEnabled = true;
-                buttonStop.IsEnabled = false;
-                buttonPause.IsEnabled = false;
+                buttonPlay.IsEnabled             = true;
+                buttonStop.IsEnabled             = false;
+                buttonPause.IsEnabled            = false;
 
-                buttonNext.IsEnabled = false;
-                buttonPrev.IsEnabled = false;
-                buttonClearPlayList.IsEnabled = false;
+                buttonNext.IsEnabled             = false;
+                buttonPrev.IsEnabled             = false;
+                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
@@ -639,41 +662,46 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = false;
-                buttonPlay.IsEnabled = false;
-                buttonStop.IsEnabled = true;
-                buttonPause.IsEnabled = true;
+                buttonPlay.IsEnabled             = false;
+                buttonStop.IsEnabled             = true;
+                buttonPause.IsEnabled            = true;
                 buttonPause.Content = "一時停止(_U)";
 
-                buttonNext.IsEnabled = true;
-                buttonPrev.IsEnabled = true;
-                buttonClearPlayList.IsEnabled = false;
+                buttonNext.IsEnabled             = true;
+                buttonPrev.IsEnabled             = true;
+                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "再生中";
+                statusBarText.Content =
+                    string.Format("再生中。WASAPI{0} {1}Hz {2} {3}ch",
+                        radioButtonShared.IsChecked == true ? "共有" : "排他",
+                        wasapi.GetBufferFormatSampleRate(),
+                        SampleFormatTypeToStr(wasapi.GetBufferFormatType()),
+                        wasapi.GetNumOfChannels());
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 break;
             case State.再生一時停止中:
-                menuItemFileNew.IsEnabled = false;
-                menuItemFileOpen.IsEnabled = false;
+                menuItemFileNew.IsEnabled    = false;
+                menuItemFileOpen.IsEnabled   = false;
                 menuItemFileSaveAs.IsEnabled = false;
-                buttonPlay.IsEnabled = false;
-                buttonStop.IsEnabled = true;
-                buttonPause.IsEnabled = true;
+                buttonPlay.IsEnabled         = false;
+                buttonStop.IsEnabled         = true;
+                buttonPause.IsEnabled        = true;
                 buttonPause.Content = "再生再開(_U)";
 
-                buttonNext.IsEnabled = false;
-                buttonPrev.IsEnabled = false;
-                buttonClearPlayList.IsEnabled = false;
+                buttonNext.IsEnabled             = false;
+                buttonPrev.IsEnabled             = false;
+                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
                 buttonInspectDevice.IsEnabled = false;
 
-                buttonSettings.IsEnabled = false;
+                buttonSettings.IsEnabled   = false;
                 menuToolSettings.IsEnabled = false;
                 statusBarText.Content = "再生一時停止中";
 
@@ -715,7 +743,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "再生グループ読み込み中";
+                statusBarText.Content = "読み込み中……";
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -985,9 +1013,17 @@ namespace PlayPcmWin
 
                 // 失敗
                 if (i == (candidateNum-1)) {
-                    string s = string.Format("エラー: wasapi.Setup({0} {1} {2} {3} {4}) 失敗。{5:X8}\n" +
-                        "このプログラムのバグか、オーディオデバイスが{0}Hz {1} レイテンシー{2}ms {3} {4}に対応していないのか、" +
-                        "どちらかです。\r\n",
+                    string s = string.Format("エラー: wasapi.Setup({0}Hz {1} レイテンシー{2}ms {3} {4}) 失敗 {5:X8}\n" +
+                        "\n" +
+                        "・再生リストの[一覧をクリア]し[対応フォーマット]ボタンを押すと再生可能なフォーマット一覧が出ます。\n" +
+                        "・RME Fireface400やM-AUDIO ProFire2626等は、機器に設定されているマスターサンプリングレートをWASAPIから変更できないため手動で合わせる必要があります。\n" +
+                        "・Creative X-Fi Titanium HDの44.1kHzと88.2kHzはタイマー駆動モードならば動作します。\n" +
+                        "・Creative USB Sound Blaster HDはイベント駆動モードのほうが安定動作します。\n" +
+                        "・Lynx AES16eのWaveRTドライバは、出力レイテンシーを20msなどの小さな値に設定すると再生できます。\n" +
+                        "・無音時に省電力のためS/PDIF出力を停止するデバイス等では、出力レイテンシーを50msなどの小さな値に設定すると曲の頭が途切れることがあるそうです。\n" +
+                        "・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。\n" +
+                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。"
+                        ,
                         startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
                         DfmToStr(m_preference.wasapiDataFeedMode),
                         ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);

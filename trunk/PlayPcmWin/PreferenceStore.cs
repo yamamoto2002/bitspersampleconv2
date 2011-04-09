@@ -43,6 +43,8 @@ namespace PlayPcmWin {
 
         public bool SettingsIsExpanded { get; set; }
 
+        public bool StorePlaylistContent { get; set; }
+
         public Preference() {
             Reset();
         }
@@ -67,6 +69,7 @@ namespace PlayPcmWin {
             PlayingTimeFontName = "Courier New";
             WindowScale = 1.0f;
             SettingsIsExpanded = true;
+            StorePlaylistContent = true;
         }
 
         /// <summary>
