@@ -2002,7 +2002,6 @@ namespace PlayPcmWin
             int playingPcmDataId = wasapi.GetNowPlayingPcmDataId();
 
             if (playingPcmDataId < 0) {
-                textBoxFileName.Text = "";
                 labelPlayingTime.Content = "--:--:--/--:--:--";
             } else {
                 dataGridPlayList.SelectedIndex
@@ -2010,7 +2009,7 @@ namespace PlayPcmWin
 
                 slider1.Value =wasapi.GetPosFrame();
                 PcmDataLib.PcmData pcmData = m_pcmDataList[playingPcmDataId];
-                textBoxFileName.Text = pcmData.FileName;
+                // textBoxFileName.Text = pcmData.FileName;
 
                 slider1.Maximum = pcmData.NumFrames;
 

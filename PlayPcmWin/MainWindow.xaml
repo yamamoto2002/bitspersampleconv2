@@ -31,7 +31,7 @@
                 <MenuItem Header="PlayPcmWinのWebページ(_W)" Click="MenuItemHelpWeb_Click" />
             </MenuItem>
         </Menu>
-        <GroupBox Header="再生リスト" Margin="6,29,6,166" Name="groupBox2">
+        <GroupBox Header="再生リスト" Margin="6,29,6,139" Name="groupBox2">
             <Grid>
                 <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
                 <DataGrid
@@ -87,8 +87,8 @@
                 </DataGrid>
             </Grid>
         </GroupBox>
-        <StackPanel Height="133" Margin="0,0,0,26" VerticalAlignment="Bottom">
-            <GroupBox Header="再生制御" Margin="6,0,0,26" Name="groupBox7" Height="133" Width="384">
+        <StackPanel Height="109" Margin="0,0,0,26" VerticalAlignment="Bottom">
+            <GroupBox Header="再生制御" Margin="6,0,0,26" Name="groupBox7" Height="109" Width="384">
                 <Grid>
                     <Button Content="再生(_P)" Height="23" HorizontalAlignment="Left" Margin="6,6,0,0" Name="buttonPlay" VerticalAlignment="Top" Width="67" IsEnabled="False" Click="buttonPlay_Click" />
                     <Button Content="停止(_S)" Height="23" HorizontalAlignment="Left" Margin="78,6,0,0" Name="buttonStop" VerticalAlignment="Top" Width="66" IsEnabled="False" Click="buttonStop_Click" />
@@ -98,7 +98,6 @@
                     <Label Content="00:00:00/00:00:00" Margin="148,30,6,0" Name="labelPlayingTime" Height="29" VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="16" FontFamily="Courier New" />
                     <Slider Margin="6,0,7,0" Name="slider1" MouseMove="slider1_MouseMove" Height="23" VerticalAlignment="Bottom" />
                     <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
-                    <TextBox Height="24" Margin="6,57,7,0" Name="textBoxFileName" VerticalAlignment="Top" IsReadOnly="True" IsTabStop="False" />
                 </Grid>
             </GroupBox>
         </StackPanel>
