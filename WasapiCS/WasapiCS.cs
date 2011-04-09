@@ -387,6 +387,10 @@ namespace Wasapi {
             return WasapiIO_GetMixFormatSampleRate();
         }
 
+        public int GetNumOfChannels() {
+            return WasapiIO_GetPcmDataNumChannels();
+        }
+
         public SampleFormatType GetBufferFormatType() {
             return (SampleFormatType)WasapiIO_GetMixFormatType();
         }
