@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.84 ==
-  * 再生制御グループの中のファイル名表示!TextBoxを削除
+  * 再生制御グループの中のファイル名表示!TextBoxを削除( revision 1856 )
 
 ===!PlayPcmWin 2.0.83 ==
   * Issue 53 (wasapi setup失敗時の対処方法説明表示)作成
