@@ -70,6 +70,11 @@ namespace PlayPcmWin {
             WindowScale = 1.0f;
             SettingsIsExpanded = true;
             StorePlaylistContent = true;
+
+            MainWindowLeft = -1;
+            MainWindowTop = -1;
+            MainWindowWidth = 850;
+            MainWindowHeight = 640;
         }
 
         /// <summary>

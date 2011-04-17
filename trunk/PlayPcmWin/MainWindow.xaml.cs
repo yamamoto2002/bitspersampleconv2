@@ -492,10 +492,18 @@ namespace PlayPcmWin
             m_preference = PreferenceStore.Load();
 
             if (m_preference.ManuallySetMainWindowDimension) {
-                Left   = m_preference.MainWindowLeft;
-                Top    = m_preference.MainWindowTop;
-                Width  = m_preference.MainWindowWidth;
-                Height = m_preference.MainWindowHeight;
+                if (0 <= m_preference.MainWindowLeft) {
+                    Left = m_preference.MainWindowLeft;
+                }
+                if (0 <= m_preference.MainWindowTop) {
+                    Top = m_preference.MainWindowTop;
+                }
+                if (100 <= m_preference.MainWindowWidth) {
+                    Width = m_preference.MainWindowWidth;
+                }
+                if (100 <= m_preference.MainWindowHeight) {
+                    Height = m_preference.MainWindowHeight;
+                }
             }
 
             if (!m_preference.SettingsIsExpanded) {
