@@ -3,7 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.86 ==
+  * Issue 61 (起動時ウィンドウサイズの問題) 修正
+
 ===!PlayPcmWin 2.0.85 ==
+  * Issue 61 (起動時ウィンドウサイズの問題) 新たに発生
   * Issue 56 (起動時に前回終了時の再生リストの内容を復元する)作成
 http://bitspersampleconv2.googlecode.com/files/ppw2085settings.png
 
