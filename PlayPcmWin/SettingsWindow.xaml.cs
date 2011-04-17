@@ -66,6 +66,9 @@ namespace PlayPcmWin {
             checkBoxManuallySetMainWindowDimension.IsChecked =
                 preference.ManuallySetMainWindowDimension;
 
+            checkBoxStorePlaylistContent.IsChecked =
+                preference.StorePlaylistContent;
+
             textBoxPlayingTimeSize.Text =
                 preference.PlayingTimeSize.ToString();
 
@@ -134,6 +137,9 @@ namespace PlayPcmWin {
 
             m_preference.ManuallySetMainWindowDimension
                 = checkBoxManuallySetMainWindowDimension.IsChecked == true;
+
+            m_preference.StorePlaylistContent
+                = checkBoxStorePlaylistContent.IsChecked == true;
 
             m_preference.ParallelRead = false;
 

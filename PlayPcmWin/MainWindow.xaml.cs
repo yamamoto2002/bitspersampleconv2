@@ -118,7 +118,7 @@ namespace PlayPcmWin
 
             public string SampleRate {
                 get {
-                    return m_pcmData.SampleRate.ToString() + " Hz";
+                    return string.Format("{0}kHz", m_pcmData.SampleRate * 0.001);
                 }
                 set {
                 }
@@ -127,6 +127,14 @@ namespace PlayPcmWin
             public string QuantizationBitRate {
                 get {
                     return m_pcmData.BitsPerSample.ToString() + " bit";
+                }
+                set {
+                }
+            }
+
+            public string BitRate {
+                get {
+                    return ((long)m_pcmData.BitsPerSample * m_pcmData.SampleRate * m_pcmData.NumChannels / 1024).ToString() + " kbps";
                 }
                 set {
                 }
@@ -418,10 +426,60 @@ namespace PlayPcmWin
             return -1;
         }
 
-        private static readonly string m_playlistFileName = "PlayPcmWinPlayList.xml";
+        /// <summary>
+        /// 保存してあった再生リストを読んでm_pcmDataListとm_playListItemsに足す。
+        /// UpdateUIは行わない。
+        /// </summary>
+        private int LoadPlaylist() {
+            int count = 0;
 
-        private void TryLoadPlaylist() {
-            // 未実装
+            // エラーメッセージを貯めて出す。作りがいまいちだが。
+            m_loadErrorMessages = new StringBuilder();
+
+            var pl = PlaylistRW.Load();
+            foreach (var p in pl.Items) {
+                int rv = ReadFileHeader(p.PathName, ReadHeaderMode.OnlyConcreteFile, null, null);
+                if (1 == rv) {
+                    // 読み込み成功。読み込んだPcmDataの曲名、アーティスト名、アルバム名、startTick等を上書きする。
+
+                    // pcmDataのメンバ。
+                    var pcmData = m_pcmDataList.Last();
+                    pcmData.DisplayName = p.Title;
+                    pcmData.AlbumTitle = p.AlbumName;
+                    pcmData.ArtistName = p.ArtistName;
+                    pcmData.StartTick = p.StartTick;
+                    pcmData.EndTick = p.EndTick;
+                    pcmData.CueSheetIndex = p.CueSheetIndex;
+
+                    // playList表のメンバ。
+                    var playListItem = m_playListItems[count];
+                    playListItem.ReadSeparaterAfter = p.ReadSeparaterAfter;
+                }
+                count += rv;
+            }
+
+            if (0 < m_loadErrorMessages.Length) {
+                MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+
+            m_loadErrorMessages = null;
+
+            return count;
+        }
+
+        private bool SavePlaylist() {
+            var s = new PlaylistSave();
+
+            for (int i=0; i<m_pcmDataList.Count; ++i) {
+                var p = m_pcmDataList[i];
+                var playListItem = m_playListItems[i];
+
+                s.Items.Add(new PlaylistItemSave().Set(
+                    p.DisplayName, p.AlbumTitle, p.ArtistName, p.FullPath,
+                    p.CueSheetIndex, p.StartTick, p.EndTick, playListItem.ReadSeparaterAfter));
+            }
+
+            return PlaylistRW.Save(s);
         }
 
         public MainWindow()
@@ -445,7 +503,7 @@ namespace PlayPcmWin
             }
 
             if (m_preference.StorePlaylistContent) {
-                TryLoadPlaylist();
+                LoadPlaylist();
             }
 
             UpdateWindowSettings();
@@ -557,11 +615,11 @@ namespace PlayPcmWin
             case WasapiCS.SampleFormatType.Sint32:
                 return "32bit";
             case WasapiCS.SampleFormatType.Sint32V24:
-                return "24bit(32bitアライン)";
+                return "32bit(有効bit数24)";
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "unknown";
-            }                
+            }
         }
 
         private void UpdateUIStatus() {
@@ -677,9 +735,9 @@ namespace PlayPcmWin
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
                 statusBarText.Content =
-                    string.Format("再生中。WASAPI{0} {1}Hz {2} {3}ch",
+                    string.Format("再生中。WASAPI{0} {1}kHz {2} {3}ch",
                         radioButtonShared.IsChecked == true ? "共有" : "排他",
-                        wasapi.GetBufferFormatSampleRate(),
+                        wasapi.GetBufferFormatSampleRate()*0.001,
                         SampleFormatTypeToStr(wasapi.GetBufferFormatType()),
                         wasapi.GetNumOfChannels());
 
@@ -875,6 +933,9 @@ namespace PlayPcmWin
 
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);
+
+                // 再生リストを保存。
+                SavePlaylist();
             }
         }
 
@@ -1161,65 +1222,64 @@ namespace PlayPcmWin
         /// <summary>
         /// WAVファイルのヘッダ部分を読み込む。
         /// </summary>
+        /// <returns>読めたらtrue</returns>
         private bool ReadWavFileHeader(string path, CueSheetReader csr, CueSheetTrackInfo csti)
         {
-            bool readSuccess = false;
+            bool result = false;
 
             WavData wavData = new WavData();
             try {
                 using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
-                    readSuccess = wavData.ReadHeader(br);
+                    if (wavData.ReadHeader(br)) {
+                        // WAVヘッダ読み込み成功。PcmDataを作って再生リストに足す。
+
+                        PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
+                        pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame, wavData.BitsPerFrame,
+                            wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
+                        if (wavData.Title != null) {
+                            pd.DisplayName = wavData.Title;
+                        }
+                        if (wavData.AlbumName != null) {
+                            pd.AlbumTitle = wavData.AlbumName;
+                        }
+                        if (wavData.ArtistName != null) {
+                            pd.ArtistName = wavData.ArtistName;
+                        }
+
+                        result = CheckAddPcmData(csr, csti, path, pd);
+                    } else {
+                        string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
+                        AddLogText(s);
+                        LoadErrorMessageAdd(s);
+                    }
                 }
             } catch (Exception ex) {
                 string s = string.Format("WAVファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
                 AddLogText(s);
                 LoadErrorMessageAdd(string.Format("WAVファイル読み込み失敗: {0}", path));
-                return false;
             }
 
-            if (readSuccess) {
-                PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
-                pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame, wavData.BitsPerFrame,
-                    wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
-                if (wavData.Title != null) {
-                    pd.DisplayName = wavData.Title;
-                }
-                if (wavData.AlbumName != null) {
-                    pd.AlbumTitle = wavData.AlbumName;
-                }
-                if (wavData.ArtistName != null) {
-                    pd.ArtistName = wavData.ArtistName;
-                }
-
-                CheckAddPcmData(csr, csti, path, pd);
-            } else {
-                string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
-                AddLogText(s);
-                LoadErrorMessageAdd(s);
-                return false;
-            }
-            return true;
+            return result;
         }
 
         /// <summary>
         /// AIFFファイルのヘッダ部分を読み込む。
         /// </summary>
+        /// <returns>読めたらtrue</returns>
         private bool ReadAiffFileHeader(string path, CueSheetReader csr, CueSheetTrackInfo csti) {
-
-            bool readSuccess = false;
+            bool result = false;
 
             AiffReader ar = new AiffReader();
             try {
                 using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
                     PcmDataLib.PcmData pd;
-                    AiffReader.ResultType result = ar.ReadHeader(br, out pd);
-                    if (result == AiffReader.ResultType.Success) {
+                    AiffReader.ResultType aiffResult = ar.ReadHeader(br, out pd);
+                    if (aiffResult == AiffReader.ResultType.Success) {
                         if (CheckAddPcmData(csr, csti, path, pd)) {
-                            readSuccess = true;
+                            result = true;
                         }
                     } else {
-                        readSuccess = false;
-                        string s = string.Format("AIFFファイル読み込み失敗、{0}: {1}\r\n", result, path);
+                        string s = string.Format("AIFFファイル読み込み失敗、{0}: {1}\r\n", aiffResult, path);
                         AddLogText(s);
                         LoadErrorMessageAdd(s);
                     }
@@ -1228,43 +1288,40 @@ namespace PlayPcmWin
                 string s = string.Format("AIFFファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
                 AddLogText(s);
                 LoadErrorMessageAdd(string.Format("AIFFファイル読み込み失敗: {0}", path));
-                return false;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// FLACファイルのヘッダ部分を読み込む。
+        /// </summary>
+        /// <returns>読めたらtrue</returns>
+        private bool ReadFlacFileHeader(string path, CueSheetReader csr, CueSheetTrackInfo csti) {
+            bool readSuccess = false;
+            PcmDataLib.PcmData pcmData;
+            FlacDecodeIF fdif = new FlacDecodeIF();
+            int flacErcd = 0;
+            flacErcd = fdif.ReadHeader(path, out pcmData);
+            if (flacErcd == 0) {
+                CheckAddPcmData(csr, csti, path, pcmData);
+                readSuccess = true;
+            } else {
+                string s = string.Format("FLACファイル読み込み失敗、{1}: {0}\r\n",
+                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
+                AddLogText(s);
+                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗、{1}: {0}",
+                    path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
             }
 
             return readSuccess;
         }
 
         /// <summary>
-        /// FLACファイルのヘッダ部分を読み込む。
-        /// </summary>
-        private bool ReadFlacFileHeader(string path, CueSheetReader csr, CueSheetTrackInfo csti) {
-            PcmDataLib.PcmData pcmData;
-
-            bool readSuccess = false;
-            int flacErcd = 0;
-
-            FlacDecodeIF fdif = new FlacDecodeIF();
-            flacErcd = fdif.ReadHeader(path, out pcmData);
-            if (flacErcd == 0) {
-                readSuccess = true;
-            }
-
-            if (readSuccess) {
-                CheckAddPcmData(csr, csti, path, pcmData);
-            } else {
-                string s = string.Format("FLACファイル読み込み失敗、{1}: {0}\r\n",
-                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
-                AddLogText(s);
-                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗、{1}: {0}", path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
-                return false;
-            }
-            return true;
-        }
-
-        /// <summary>
         /// CUEシートを読み込む。
         /// </summary>
-        private bool ReadCueSheet(string path) {
+        /// <returns>読めたファイルの数を戻す</returns>
+        private int ReadCueSheet(string path) {
             CueSheetReader csr = new CueSheetReader();
             bool result = csr.ReadFromFile(path);
             if (!result) {
@@ -1272,12 +1329,13 @@ namespace PlayPcmWin
                         path);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
-                return false;
+                return 0;
             }
 
+            int readCount = 0;
             for (int i = 0; i < csr.GetTrackInfoCount(); ++i) {
                 CueSheetTrackInfo csti = csr.GetTrackInfo(i);
-                ReadFileHeader1(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
+                readCount += ReadFileHeader1(csti.path, ReadHeaderMode.OnlyConcreteFile, csr, csti);
 
                 if ((csti.indexId == 0 &&
                     m_preference.ReplaceGapWithKokomade) ||
@@ -1287,7 +1345,7 @@ namespace PlayPcmWin
                     AddKokomade();
                 }
             }
-            return true;
+            return readCount;
         }
 
         enum ReadHeaderMode {
@@ -1300,30 +1358,32 @@ namespace PlayPcmWin
         /// N.B. PcmReader.StreamBeginも参照(へぼい)。
         /// MenuItemFileOpen_Clickも参照。
         /// </summary>
-        private void ReadFileHeader1(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+        /// <returns>読めたファイルの数を戻す</returns>
+        private int ReadFileHeader1(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+            int result = 0;
             string ext = System.IO.Path.GetExtension(path);
 
             switch (ext.ToLower()) {
             case ".cue":
                 if (mode != ReadHeaderMode.OnlyConcreteFile) {
-                    ReadCueSheet(path);
+                    result += ReadCueSheet(path);
                 }
                 break;
             case ".flac":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
-                    ReadFlacFileHeader(path, csr, csti);
+                    result += ReadFlacFileHeader(path, csr, csti) ? 1 : 0;
                 }
                 break;
             case ".aif":
             case ".aiff":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
-                    ReadAiffFileHeader(path, csr, csti);
+                    result += ReadAiffFileHeader(path, csr, csti) ? 1 : 0;
                 }
                 break;
             case ".wav":
             case ".wave":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
-                    ReadWavFileHeader(path, csr, csti);
+                    result += ReadWavFileHeader(path, csr, csti) ? 1 : 0;
                 }
                 break;
             default: {
@@ -1334,19 +1394,24 @@ namespace PlayPcmWin
                 }
                 break;
             }
+            return result;
         }
 
-        private void ReadFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+        private int ReadFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+            int result = 0;
+
             if (System.IO.Directory.Exists(path)) {
                 // pathはディレクトリである。直下のファイル一覧を作って足す。再帰的にはたぐらない。
                 var files = System.IO.Directory.GetFiles(path);
                 foreach (var file in files) {
-                    ReadFileHeader1(file, mode, csr, csti);
+                    result += ReadFileHeader1(file, mode, csr, csti);
                 }
             } else {
                 // pathはファイル。
-                ReadFileHeader1(path, mode, csr, csti);
+                result += ReadFileHeader1(path, mode, csr, csti);
             }
+
+            return result;
         }
 
         //////////////////////////////////////////////////////////////////////////
@@ -1374,7 +1439,7 @@ namespace PlayPcmWin
                 return;
             }
 
-            // エラーメッセージを貯めて出す。
+            // エラーメッセージを貯めて出す。作りがいまいちだが。
             m_loadErrorMessages = new StringBuilder();
 
             for (int i = 0; i < paths.Length; ++i) {
@@ -1384,6 +1449,8 @@ namespace PlayPcmWin
             if (0 < m_loadErrorMessages.Length) {
                 MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            
+            m_loadErrorMessages = null;
 
             UpdateUIStatus();
         }
@@ -1464,11 +1531,14 @@ namespace PlayPcmWin
                 for (int i = 0; i < dlg.FileNames.Length; ++i) {
                     ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
                 }
-                UpdateUIStatus();
 
                 if (0 < m_loadErrorMessages.Length) {
                     MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
+
+                m_loadErrorMessages = null;
+
+                UpdateUIStatus();
             }
 
         }

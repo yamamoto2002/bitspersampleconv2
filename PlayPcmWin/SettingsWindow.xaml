@@ -36,15 +36,16 @@
                     <CheckBox Content="INDEX00の後に[ここまで一括読み込み]を付ける" Height="16" Margin="6,6,6,0" Name="checkBoxPlaceKokomadeAfterIndex00" VerticalAlignment="Top" />
                 </Grid>
             </GroupBox>
-            <GroupBox Header="ウィンドウ設定" Height="115" Margin="12,311,12,0" Name="groupBox3" VerticalAlignment="Top">
+            <GroupBox Header="その他設定" Height="140" Margin="12,311,12,0" Name="groupBox3" VerticalAlignment="Top">
                 <Grid>
                     <CheckBox Content="起動時のウィンドウの位置とサイズを前回終了時の状態に合わせる" Height="16" Margin="6,6,6,0" Name="checkBoxManuallySetMainWindowDimension" VerticalAlignment="Top" />
-                    <TextBox Height="28" Margin="329,28,0,0" Name="textBoxPlayingTimeSize" VerticalAlignment="Top" HorizontalAlignment="Left" Width="53" Text="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" TextChanged="textBoxPlayingTimeSize_TextChanged" />
-                    <Label Content="再生時間表示フォント:" Height="28" Margin="6,28,0,0" Name="label1" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="146" />
-                    <Label Content="pt" Height="28" HorizontalAlignment="Left" Margin="384,28,0,0" Name="label2" VerticalAlignment="Top" VerticalContentAlignment="Center" />
-                    <ComboBox Height="24" HorizontalAlignment="Left" Margin="152,30,0,0" Name="comboBoxPlayingTimeFontNames" VerticalAlignment="Top" Width="171" SelectionChanged="comboBoxPlayingTimeFontNames_SelectionChanged"></ComboBox>
-                    <Label Content="00:00:00/00:00:00" FontFamily="Courier New" FontSize="16" Height="29" HorizontalContentAlignment="Right" Margin="154,60,0,0" Name="labelPlayingTime" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="214" />
-                    <CheckBox Content="太字" Height="16" HorizontalAlignment="Left" Margin="415,34,0,0" Name="checkBoxPlayingTimeBold" VerticalAlignment="Top" Checked="checkBoxPlayingTimeBold_Checked" Unchecked="checkBoxPlayingTimeBold_Unchecked" />
+                    <CheckBox Content="起動時に前回終了時の再生リストの内容を復元する" Height="16" Margin="6,28,6,0" Name="checkBoxStorePlaylistContent" VerticalAlignment="Top" />
+                    <TextBox Height="28" Margin="328,50,0,0" Name="textBoxPlayingTimeSize" VerticalAlignment="Top" HorizontalAlignment="Left" Width="53" Text="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" TextChanged="textBoxPlayingTimeSize_TextChanged" />
+                    <Label Content="再生時間表示フォント:" Height="28" Margin="5,50,0,0" Name="label1" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="146" />
+                    <Label Content="pt" Height="28" HorizontalAlignment="Left" Margin="383,50,0,0" Name="label2" VerticalAlignment="Top" VerticalContentAlignment="Center" />
+                    <ComboBox Height="24" HorizontalAlignment="Left" Margin="151,52,0,0" Name="comboBoxPlayingTimeFontNames" VerticalAlignment="Top" Width="171" SelectionChanged="comboBoxPlayingTimeFontNames_SelectionChanged"></ComboBox>
+                    <Label Content="00:00:00/00:00:00" FontFamily="Courier New" FontSize="16" Height="29" HorizontalContentAlignment="Right" Margin="153,82,0,0" Name="labelPlayingTime" VerticalAlignment="Top" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="214" />
+                    <CheckBox Content="太字" Height="16" HorizontalAlignment="Left" Margin="414,56,0,0" Name="checkBoxPlayingTimeBold" VerticalAlignment="Top" Checked="checkBoxPlayingTimeBold_Checked" Unchecked="checkBoxPlayingTimeBold_Unchecked" />
                 </Grid>
             </GroupBox>
         </Grid>

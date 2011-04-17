@@ -433,8 +433,11 @@ namespace PlayPcmWin {
                     Console.WriteLine("Error on line {0}: track number is not specified", lineno);
                     return true;
                 }
-                int.TryParse(tokenList[1], out m_currentTrackInfo.trackId);
                 Console.WriteLine("track tag has come");
+                if (!int.TryParse(tokenList[1], out m_currentTrackInfo.trackId)) {
+                    Console.WriteLine("Error on line {0}: track number TryParse failed", lineno);
+                    return true;
+                }
                 m_currentTrackInfo.Debug();
                 break;
             case "index":

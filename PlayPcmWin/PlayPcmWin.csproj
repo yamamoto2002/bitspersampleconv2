@@ -109,6 +109,7 @@
     <Compile Include="FlacDecodeIF.cs" />
     <Compile Include="ID3Reader.cs" />
     <Compile Include="PcmReader.cs" />
+    <Compile Include="PlaylistRW.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>

@@ -61,7 +61,7 @@ namespace PlayPcmWin {
             bitsPerSampleFixType = BitsPerSampleFixType.AutoSelect;
             PreferredDeviceName = "";
             ReplaceGapWithKokomade = false;
-            ManuallySetMainWindowDimension = false;
+            ManuallySetMainWindowDimension = true;
             ParallelRead = false;
             PlayRepeat = true;
             PlayingTimeSize = 16;
@@ -86,58 +86,56 @@ namespace PlayPcmWin {
     }
 
     sealed class PreferenceStore {
-        public static string fileName = "PlayPcmWinPreference.xml";
+        private static readonly string m_fileName = "PlayPcmWinPreference.xml";
+
         private PreferenceStore() {
         }
 
         public static Preference Load() {
-            XmlSerializer formatter = new XmlSerializer(typeof(Preference));
-            IsolatedStorageFileStream settingsFile;
-
             Preference p = new Preference();
-            try {
-                settingsFile = new IsolatedStorageFileStream(
-                    fileName, System.IO.FileMode.Open,
-                    IsolatedStorageFile.GetUserStoreForDomain());
 
-                byte[] buffer = new byte[settingsFile.Length];
-                settingsFile.Read(buffer, 0, (int)settingsFile.Length);
-                System.IO.MemoryStream stream = new System.IO.MemoryStream(buffer);
-                p = formatter.Deserialize(stream) as Preference;
-                settingsFile.Close();
+            try {
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
+                        m_fileName, System.IO.FileMode.Open,
+                        IsolatedStorageFile.GetUserStoreForDomain())) {
+                    byte[] buffer = new byte[isfs.Length];
+                    isfs.Read(buffer, 0, (int)isfs.Length);
+                    System.IO.MemoryStream stream = new System.IO.MemoryStream(buffer);
+
+                    XmlSerializer formatter = new XmlSerializer(typeof(Preference));
+                    p = formatter.Deserialize(stream) as Preference;
+                }
             } catch (System.Exception ex) {
                 Console.WriteLine(ex);
-                return p;
+                p = new Preference();
             }
 
             if (Preference.CurrentVersion != p.Version) {
-                Console.WriteLine("Version mismatch {0} != {1}", Preference.CurrentVersion, p.Version);
-                return new Preference();
+                Console.WriteLine("Preference Version mismatch {0} != {1}", Preference.CurrentVersion, p.Version);
+                p = new Preference();
             }
 
             p.ParallelRead = false;
             return p;
         }
 
-        public static void Save(Preference p) {
-            IsolatedStorageFileStream isfs = null;
-            bool bOpen = false;
+        public static bool Save(Preference p) {
+            bool result = false;
+
             try {
-                XmlSerializer s
-                    = new XmlSerializer(typeof(Preference));
-                isfs = new IsolatedStorageFileStream(fileName,
-                        System.IO.FileMode.Create,
-                        IsolatedStorageFile.GetUserStoreForDomain());
-                bOpen = true;
-                p.Version = Preference.CurrentVersion;
-                s.Serialize(isfs, p);
+                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
+                        m_fileName, System.IO.FileMode.Create,
+                        IsolatedStorageFile.GetUserStoreForDomain())) {
+                    XmlSerializer s = new XmlSerializer(typeof(Preference));
+                    p.Version = Preference.CurrentVersion;
+                    s.Serialize(isfs, p);
+                    result = true;
+                }
             } catch (System.Exception ex) {
                 Console.WriteLine(ex.ToString());
-            } finally {
-                if (bOpen) {
-                    isfs.Close();
-                }
             }
+
+            return result;
         }
     }
 }
