@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.85 ==
+  * Issue 56 (起動時に前回終了時の再生リストの内容を復元する)作成
+http://bitspersampleconv2.googlecode.com/files/ppw2085settings.png
+
 ===!PlayPcmWin 2.0.84 ==
   * 再生制御グループの中のファイル名表示!TextBoxを削除( revision 1856 )
 
