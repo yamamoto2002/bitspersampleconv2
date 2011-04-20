@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.87 ==
+  * Issue 62 (再生リストのビットレート表示計算ミス) 修正
+
 ===!PlayPcmWin 2.0.86 ==
   * Issue 61 (起動時ウィンドウサイズの問題) 修正
 
