@@ -134,7 +134,7 @@ namespace PlayPcmWin
 
             public string BitRate {
                 get {
-                    return ((long)m_pcmData.BitsPerSample * m_pcmData.SampleRate * m_pcmData.NumChannels / 1024).ToString() + " kbps";
+                    return ((long)m_pcmData.BitsPerSample * m_pcmData.SampleRate * m_pcmData.NumChannels / 1000).ToString() + " kbps";
                 }
                 set {
                 }
