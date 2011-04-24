@@ -14,11 +14,15 @@ namespace PlayPcmWin {
             Success,
             NotAiff,
             HeaderError,
-            NotSupportOffsetNonzero,
             NotSupportBlockSizeNonzero,
             NotSupportBitsPerSample,
             NotSupportID3version,
             NotSupportID3Unsynchronization,
+            NotSupportAifcVersion,
+            NotSupportAifcCompression,
+            NotFoundFverHeader,
+            NotFoundCommHeader,
+            NotFoundSsndHeader,
             ReadError
         }
 
@@ -37,6 +41,16 @@ namespace PlayPcmWin {
 
         private long m_ckSize;
 
+        private bool m_isAIFC = false;
+
+        public enum CompressionType {
+            Unknown = -1,
+            None,
+            Sowt,
+        }
+
+        private CompressionType Compression { get; set; }
+
         private ID3Reader m_Id3Reader = new ID3Reader();
 
         private ResultType ReadFormChunkHeader(BinaryReader br) {
@@ -52,7 +66,11 @@ namespace PlayPcmWin {
 
             byte[] formType = br.ReadBytes(4);
             if (!PcmDataLib.Util.FourCCHeaderIs(formType, 0, "AIFF")) {
-                return ResultType.NotAiff;
+                if (PcmDataLib.Util.FourCCHeaderIs(formType, 0, "AIFC")) {
+                    m_isAIFC = true;
+                } else {
+                    return ResultType.NotAiff;
+                }
             }
 
             return ResultType.Success;
@@ -95,6 +113,24 @@ namespace PlayPcmWin {
             }
         }
 
+        private ResultType ReadFverChunk(BinaryReader br) {
+            if (!SkipToChunk(br, "FVER")) {
+                return ResultType.NotFoundFverHeader;
+            }
+            uint ckSize = ReadBigU32(br);
+            if (4 != ckSize) {
+                return ResultType.HeaderError;
+            }
+            
+            uint timestamp = ReadBigU32(br);
+
+            if (0xa2805140 != timestamp) {
+                return ResultType.NotSupportAifcVersion;
+            }
+
+            return ResultType.Success;
+        }
+
         /// <summary>
         /// チャンクサイズが奇数の場合、近い偶数に繰上げ。
         /// </summary>
@@ -103,15 +139,36 @@ namespace PlayPcmWin {
         }
 
         private ResultType ReadCommonChunk(BinaryReader br) {
-            SkipToChunk(br, "COMM");
-            long ckSize = ReadBigU32(br);
+            if (!SkipToChunk(br, "COMM")) {
+                return ResultType.NotFoundCommHeader;
+            }
+            uint ckSize = ReadBigU32(br);
             NumChannels = ReadBigU16(br);
             NumFrames = ReadBigU32(br);
             BitsPerSample = ReadBigU16(br);
             byte[] sampleRate80 = br.ReadBytes(10);
-            PcmDataLib.Util.BinaryReaderSkip(br, ckSize - (2 + 4 + 2 + 10));
+
+            uint readSize = 2 + 4 + 2 + 10;
+
+            Compression = CompressionType.None;
+            if (4 <= ckSize-readSize) {
+                uint compressionId = ReadBigU32(br); 
+                readSize += 4;
+
+                switch (compressionId) {
+                case 0x736f7774:
+                    Compression = CompressionType.Sowt;
+                    break;
+                default:
+                    // sowt以外は未対応
+                    Compression = CompressionType.Unknown;
+                    return ResultType.NotSupportAifcCompression;
+                }
+            }
+            PcmDataLib.Util.BinaryReaderSkip(br, ckSize - readSize);
             
             SampleRate = (int)IEEE754ExtendedDoubleBigEndianToDouble(sampleRate80);
+            
             return ResultType.Success;
         }
 
@@ -126,19 +183,22 @@ namespace PlayPcmWin {
         /// <param name="mode">ReadStopBeforeSoundData サウンドデータチャンクのサウンドデータの手前で読み込みを止める。
         ///                    AllHeadersWithID3 サウンドデータチャンクの終わりまで読み進む。</param>
         private ResultType ReadSoundDataChunk(BinaryReader br, ReadHeaderMode mode) {
-            SkipToChunk(br, "SSND");
+            if (!SkipToChunk(br, "SSND")) {
+                return ResultType.NotFoundSsndHeader;
+            }
             long ckSize = ReadBigU32(br);
             long offset = ReadBigU32(br);
             long blockSize = ReadBigU32(br);
 
-            if (offset != 0) {
-                return ResultType.NotSupportOffsetNonzero;
-            }
             if (blockSize != 0) {
                 return ResultType.NotSupportBlockSizeNonzero;
             }
 
-            if (mode != ReadHeaderMode.ReadStopBeforeSoundData) {
+            if (mode == ReadHeaderMode.ReadStopBeforeSoundData) {
+                // SSNDのsound data直前まで移動。
+                // offset == unused bytes。 読み飛ばす
+                ReadStreamSkip(br, offset);
+            } else {
                 // SoundDataチャンクの最後まで移動。
                 // sizeof offset + blockSize == 8
                 PcmDataLib.Util.BinaryReaderSkip(br, ChunkSizeWithPad(ckSize) - 8);
@@ -190,6 +250,14 @@ namespace PlayPcmWin {
             ResultType result = ReadFormChunkHeader(br);
             if (result != ResultType.Success) {
                 return result;
+            }
+            
+            if (m_isAIFC) {
+                // AIFCの場合、FVERチャンクが来る(required)
+                result = ReadFverChunk(br);
+                if (ResultType.Success != result) {
+                    return result;
+                }
             }
 
             result = ReadCommonChunk(br);
@@ -340,29 +408,39 @@ namespace PlayPcmWin {
 
             byte[] sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
 
-            // エンディアン変換
-            /// @todo 16bppの場合以外にも対応する必要あり。
-            {
-                const int workUnit = 256 * 1024;
-                int sampleUnits = (int)(readFrames * NumChannels / workUnit);
-                Parallel.For(0, sampleUnits, delegate(int m) {
-                    int pos = m * workUnit * 2;
-                    for (int i = 0; i < workUnit; ++i) {
+            switch (Compression) {
+            case CompressionType.None: {
+                    // エンディアン変換
+                    /// @todo 16bppの場合以外にも対応する必要あり。
+                    /// 
+                    const int workUnit = 256 * 1024;
+                    int sampleUnits = (int)(readFrames * NumChannels / workUnit);
+                    Parallel.For(0, sampleUnits, delegate(int m) {
+                        int pos = m * workUnit * 2;
+                        for (int i = 0; i < workUnit; ++i) {
+                            byte v0 = sampleArray[pos + 0];
+                            byte v1 = sampleArray[pos + 1];
+                            sampleArray[pos + 1] = v0;
+                            sampleArray[pos + 0] = v1;
+                            pos += 2;
+                        }
+                    });
+                    for (int i = workUnit * sampleUnits;
+                        i < readFrames * NumChannels; ++i) {
+                        int pos = i * 2;
                         byte v0 = sampleArray[pos + 0];
                         byte v1 = sampleArray[pos + 1];
                         sampleArray[pos + 1] = v0;
                         sampleArray[pos + 0] = v1;
-                        pos += 2;
                     }
-                });
-                for (int i = workUnit * sampleUnits;
-                    i < readFrames * NumChannels; ++i) {
-                    int pos = i * 2;
-                    byte v0 = sampleArray[pos + 0];
-                    byte v1 = sampleArray[pos + 1];
-                    sampleArray[pos + 1] = v0;
-                    sampleArray[pos + 0] = v1;
                 }
+                break;
+            case CompressionType.Sowt:
+                // リトルエンディアンで並んでいるので変換不要。
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
             }
 
             return sampleArray;
