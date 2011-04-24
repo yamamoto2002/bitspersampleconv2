@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.89 ==
+  * Issue 54 (モノラル1チャンネル音声の再生) 作成
+
 ===!PlayPcmWin 2.0.87 ==
   * Issue 62 (再生リストのビットレート表示計算ミス) 修正
 
