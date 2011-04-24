@@ -1150,8 +1150,9 @@ namespace PlayPcmWin
         /// FLACとWAVとAIFFで共通。
         /// </summary>
         private bool CheckAddPcmData(CueSheetReader csr, CueSheetTrackInfo csti, string path, PcmDataLib.PcmData pcmData) {
-            if (pcmData.NumChannels != 2) {
-                string s = string.Format("2チャンネルステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
+            if (pcmData.NumChannels != 1 &&
+                pcmData.NumChannels != 2) {
+                string s = string.Format("1chモノラルと2chステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
                     path, pcmData.NumChannels);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
@@ -1657,25 +1658,32 @@ namespace PlayPcmWin
                             readFrames = (int)(endFrame - (startFrame + posFrame));
                         }
                         byte[] part = pr.StreamReadOne(readFrames);
+
                         readFrames = part.Length / (pd.BitsPerFrame / 8);
 
                         // フレーム数は本来の数endFrame - startFrameを入れる
                         pd.SetSampleArray(endFrame - startFrame, part);
+
                         // 必要に応じて量子化ビット数の変更を行う。
                         PcmData pdAfter = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
 
                         if (pdAfter.GetSampleArray() == null ||
                             0 == pdAfter.GetSampleArray().Length) {
+                            // サンプルが存在しないんでWasapiにAddしない。
                             break;
                         }
 
-                        // サンプルが存在する場合だけWasapiにAddする。
+                        if (pdAfter.NumChannels == 1) {
+                            // モノラル→ステレオ変換。
+                            pdAfter = pdAfter.MonoToStereo();
+                        }
 
                         if (0 == posFrame) {
-                            // 領域確保。
+                            // 最初のフレームが来たとき領域確保。
                             int allocBytes = (int)(pdAfter.NumFrames * pdAfter.BitsPerFrame / 8);
+                            
                             if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
-                                ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
+                                //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
                                 r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
                                 args.Result = r;
                                 Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");

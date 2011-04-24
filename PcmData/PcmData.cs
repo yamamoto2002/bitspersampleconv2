@@ -75,25 +75,42 @@ namespace PcmDataLib {
             SFloat
         };
 
+        /// <summary>
+        /// チャンネル数
+        /// </summary>
         public int NumChannels { get; set; }
+
+        /// <summary>
+        /// サンプルレート
+        /// </summary>
         public int SampleRate { get; set; }
 
         /// <summary>
-        /// 1サンプルのビット数(無効な0埋めビット含む)
+        /// 1サンプル値のビット数(無効な0埋めビット含む)
         /// </summary>
         public int BitsPerSample { get; set; }
 
         /// <summary>
-        /// サンプル値の有効なビット数
+        /// 1サンプル値の有効なビット数
         /// </summary>
         public int ValidBitsPerSample { get; set; }
 
+        /// <summary>
+        /// サンプル値形式(int、float)
+        /// </summary>
         public ValueRepresentationType
             SampleValueRepresentationType { get; set; }
 
         // PCMデータ ////////////////////////////////////////////////////////
 
+        /// <summary>
+        /// 総フレーム数(サンプル値の数÷チャンネル数)
+        /// </summary>
         private long   m_numFrames;
+
+        /// <summary>
+        /// サンプル値配列。
+        /// </summary>
         private byte[] m_sampleArray;
 
         // ファイル管理情報 /////////////////////////////////////////////////
@@ -200,16 +217,25 @@ namespace PcmDataLib {
 
         // プロパティIO /////////////////////////////////////////////////////
 
+        /// <summary>
+        /// 総フレーム数(サンプル値の数÷チャンネル数)
+        /// </summary>
         public long NumFrames {
             get { return m_numFrames; }
         }
 
-        public byte[] GetSampleArray() {
-            return m_sampleArray;
-        }
-
+        /// <summary>
+        /// 1フレームあたりのビット数(サンプルあたりビット数×総チャンネル数)
+        /// </summary>
         public int BitsPerFrame {
             get { return BitsPerSample * NumChannels; }
+        }
+
+        /// <summary>
+        /// サンプル値配列
+        /// </summary>
+        public byte[] GetSampleArray() {
+            return m_sampleArray;
         }
 
         public void SetSampleArray(long numFrames, byte[] sampleArray) {
@@ -409,6 +435,29 @@ namespace PcmDataLib {
             }
 
             return scale;
+        }
+
+        public PcmData MonoToStereo() {
+            System.Diagnostics.Debug.Assert(NumChannels == 1);
+            
+            // サンプルあたりビット数が8の倍数でないとこのアルゴリズムは使えない
+            System.Diagnostics.Debug.Assert((BitsPerSample & 7) == 0);
+
+            byte [] newSampleArray = new byte[m_sampleArray.Length * 2];
+            int bytesPerSample = BitsPerSample/8;
+            for (long frame = 0; frame < m_numFrames; ++frame) {
+                for (int offs = 0; offs < bytesPerSample; ++offs) {
+                    long posBytes = frame * bytesPerSample;
+                    newSampleArray[posBytes * 2 + offs] = m_sampleArray[posBytes + offs];
+                    newSampleArray[posBytes * 2 + bytesPerSample + offs] = m_sampleArray[posBytes + offs];
+                }
+            }
+            PcmData newPcmData = new PcmData();
+            newPcmData.CopyHeaderInfoFrom(this);
+            newPcmData.SetFormat(2, BitsPerSample, ValidBitsPerSample, SampleRate, SampleValueRepresentationType, NumFrames);
+            newPcmData.SetSampleArray(NumFrames, newSampleArray);
+
+            return newPcmData;
         }
 
         /// <summary>
