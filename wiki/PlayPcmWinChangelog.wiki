@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.90 ==
+  * Issue 57 (ログ出力の行数制限) 修正
+  * Issue 55 (AIFC/sowtフォーマットの読み出し) 作成
+
 ===!PlayPcmWin 2.0.89 ==
   * Issue 54 (モノラル1チャンネル音声の再生) 作成
 
