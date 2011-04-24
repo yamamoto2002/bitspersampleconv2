@@ -1385,6 +1385,8 @@ namespace PlayPcmWin
                 break;
             case ".aif":
             case ".aiff":
+            case ".aifc":
+            case ".aiffc":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
                     result += ReadAiffFileHeader(path, csr, csti) ? 1 : 0;
                 }

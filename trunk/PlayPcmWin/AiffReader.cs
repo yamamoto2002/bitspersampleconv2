@@ -49,7 +49,7 @@ namespace PlayPcmWin {
             Sowt,
         }
 
-        private CompressionType Compression { get; set; }
+        public CompressionType Compression { get; set; }
 
         private ID3Reader m_Id3Reader = new ID3Reader();
 
@@ -270,7 +270,8 @@ namespace PlayPcmWin {
                 return result;
             }
 
-            if (16 != BitsPerSample) {
+            if (16 != BitsPerSample &&
+                24 != BitsPerSample) {
                 return ResultType.NotSupportBitsPerSample;
             }
 
@@ -409,30 +410,65 @@ namespace PlayPcmWin {
             byte[] sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
 
             switch (Compression) {
-            case CompressionType.None: {
-                    // エンディアン変換
-                    /// @todo 16bppの場合以外にも対応する必要あり。
-                    /// 
-                    const int workUnit = 256 * 1024;
-                    int sampleUnits = (int)(readFrames * NumChannels / workUnit);
-                    Parallel.For(0, sampleUnits, delegate(int m) {
-                        int pos = m * workUnit * 2;
-                        for (int i = 0; i < workUnit; ++i) {
+            case CompressionType.None:
+                // エンディアン変換
+                // (コードの見た目がヘボイが、最適化のためである)
+                switch (BitsPerSample) {
+                case 24:
+                    {
+                        const int workUnit = 256 * 1024;
+                        int sampleUnits = (int)(readFrames * NumChannels / workUnit);
+                        Parallel.For(0, sampleUnits, delegate(int m) {
+                            int pos = m * workUnit * 3;
+                            for (int i = 0; i < workUnit; ++i) {
+                                byte v0 = sampleArray[pos + 0];
+                                byte v1 = sampleArray[pos + 1];
+                                byte v2 = sampleArray[pos + 2];
+                                sampleArray[pos + 0] = v2;
+                                sampleArray[pos + 1] = v1;
+                                sampleArray[pos + 2] = v0;
+                                pos += 3;
+                            }
+                        });
+                        for (int i = workUnit * sampleUnits;
+                            i < readFrames * NumChannels; ++i) {
+                            int pos = i * 3;
                             byte v0 = sampleArray[pos + 0];
                             byte v1 = sampleArray[pos + 1];
-                            sampleArray[pos + 1] = v0;
-                            sampleArray[pos + 0] = v1;
-                            pos += 2;
+                            byte v2 = sampleArray[pos + 2];
+                            sampleArray[pos + 0] = v2;
+                            sampleArray[pos + 1] = v1;
+                            sampleArray[pos + 2] = v0;
                         }
-                    });
-                    for (int i = workUnit * sampleUnits;
-                        i < readFrames * NumChannels; ++i) {
-                        int pos = i * 2;
-                        byte v0 = sampleArray[pos + 0];
-                        byte v1 = sampleArray[pos + 1];
-                        sampleArray[pos + 1] = v0;
-                        sampleArray[pos + 0] = v1;
                     }
+                    break;
+                case 16:
+                    {
+                        const int workUnit = 256 * 1024;
+                        int sampleUnits = (int)(readFrames * NumChannels / workUnit);
+                        Parallel.For(0, sampleUnits, delegate(int m) {
+                            int pos = m * workUnit * 2;
+                            for (int i = 0; i < workUnit; ++i) {
+                                byte v0 = sampleArray[pos + 0];
+                                byte v1 = sampleArray[pos + 1];
+                                sampleArray[pos + 0] = v1;
+                                sampleArray[pos + 1] = v0;
+                                pos += 2;
+                            }
+                        });
+                        for (int i = workUnit * sampleUnits;
+                            i < readFrames * NumChannels; ++i) {
+                            int pos = i * 2;
+                            byte v0 = sampleArray[pos + 0];
+                            byte v1 = sampleArray[pos + 1];
+                            sampleArray[pos + 0] = v1;
+                            sampleArray[pos + 1] = v0;
+                        }
+                    }
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
                 }
                 break;
             case CompressionType.Sowt:
