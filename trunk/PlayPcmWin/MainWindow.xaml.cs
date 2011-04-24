@@ -2204,13 +2204,29 @@ namespace PlayPcmWin
             sliderWindowScaling.Value = m_preference.WindowScale;
         }
 
+        List<string> m_logList = new List<string>();
+        int m_logLineNum = 100;
+
         /// <summary>
         /// ログを追加する。
         /// </summary>
         /// <param name="s">追加するログ。行末に\r\nを入れる必要あり。</param>
         private void AddLogText(string s) {
             System.Console.Write(s);
-            textBoxLog.Text += s;
+
+            // ログを適当なエントリ数で流れるようにする。
+            // sは複数行の文字列が入っていたり、改行が入っていなかったりするので、行数制限にはなっていない。
+            m_logList.Add(s);
+            while (m_logLineNum < m_logList.Count) {
+                m_logList.RemoveAt(0);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in m_logList) {
+                sb.Append(item);
+            }
+
+            textBoxLog.Text = sb.ToString();
             textBoxLog.ScrollToEnd();
         }
 
