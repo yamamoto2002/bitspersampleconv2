@@ -422,10 +422,10 @@ namespace PlayPcmWin {
                             int pos = m * workUnit * 3;
                             for (int i = 0; i < workUnit; ++i) {
                                 byte v0 = sampleArray[pos + 0];
-                                byte v1 = sampleArray[pos + 1];
+                                //byte v1 = sampleArray[pos + 1];
                                 byte v2 = sampleArray[pos + 2];
                                 sampleArray[pos + 0] = v2;
-                                sampleArray[pos + 1] = v1;
+                                //sampleArray[pos + 1] = v1;
                                 sampleArray[pos + 2] = v0;
                                 pos += 3;
                             }
@@ -434,10 +434,10 @@ namespace PlayPcmWin {
                             i < readFrames * NumChannels; ++i) {
                             int pos = i * 3;
                             byte v0 = sampleArray[pos + 0];
-                            byte v1 = sampleArray[pos + 1];
+                            //byte v1 = sampleArray[pos + 1];
                             byte v2 = sampleArray[pos + 2];
                             sampleArray[pos + 0] = v2;
-                            sampleArray[pos + 1] = v1;
+                            //sampleArray[pos + 1] = v1;
                             sampleArray[pos + 2] = v0;
                         }
                     }

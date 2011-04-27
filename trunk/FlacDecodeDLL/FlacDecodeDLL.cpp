@@ -91,7 +91,7 @@ struct FlacDecodeInfo {
     int               retrievedFrames;
     FILE              *logFP;
 
-    char fromFlacPath[FLACDECODE_MAXPATH];
+    wchar_t fromFlacPathUtf16[FLACDECODE_MAXPATH];
     char titleStr[FLACDECODE_MAX_STRSZ];
     char artistStr[FLACDECODE_MAX_STRSZ];
     char albumStr[FLACDECODE_MAX_STRSZ];
@@ -120,7 +120,7 @@ struct FlacDecodeInfo {
         retrievedFrames = 0;
         logFP           = NULL;
 
-        fromFlacPath[0] = 0;
+        fromFlacPathUtf16[0] = 0;
         titleStr[0]     = 0;
         artistStr[0]    = 0;
         albumStr[0]     = 0;
@@ -343,7 +343,9 @@ DecodeMain(FlacDecodeInfo *fdi)
     assert(fdi);
 
     FLAC__bool                    ok = true;
-    FLAC__StreamDecoderInitStatus init_status;
+    FLAC__StreamDecoderInitStatus init_status = FLAC__STREAM_DECODER_INIT_STATUS_ERROR_OPENING_FILE;
+    FILE *fp = NULL;
+    errno_t ercd;
 
     fdi->decoder = FLAC__stream_decoder_new();
     if(fdi->decoder == NULL) {
@@ -360,9 +362,22 @@ DecodeMain(FlacDecodeInfo *fdi)
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_STREAMINFO);
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
 
+#if 1
+    ercd = _wfopen_s(&fp, fdi->fromFlacPathUtf16, L"rb");
+    if (ercd != 0 || NULL == fp) {
+        fdi->errorCode = FDRT_FileOpenError;
+        goto end;
+    }
+
+    init_status = FLAC__stream_decoder_init_FILE(fdi->decoder, fp, WriteCallback, MetadataCallback, ErrorCallback, fdi);
+
+    // FLAC__stream_decoder_finish()がfcloseしてくれるので、忘れる。
+    fp = NULL;
+#else
     init_status = FLAC__stream_decoder_init_file(
         fdi->decoder, fdi->fromFlacPath,
         WriteCallback, MetadataCallback, ErrorCallback, fdi);
+#endif
     if(init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
         fdi->errorCode = FDRT_FlacStreamDecoderInitFailed;
         dprintf(fdi->logFP, "%s Flac decode error %d. set complete event.\n",
@@ -401,6 +416,9 @@ DecodeMain(FlacDecodeInfo *fdi)
     fdi->errorCode = FDRT_Completed;
 end:
     if (NULL != fdi->decoder) {
+        if (init_status == FLAC__STREAM_DECODER_INIT_STATUS_OK) {
+            FLAC__stream_decoder_finish(fdi->decoder);
+        }
         FLAC__stream_decoder_delete(fdi->decoder);
         fdi->decoder = NULL;
     }
@@ -642,10 +660,11 @@ LogClose(FlacDecodeInfo *fdi)
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
 /// 中のグローバル変数に貯める。APIの設計がスレッドセーフになってないので注意。
+/// @param fromFlacPath パス名(UTF-16)
 /// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
+FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoNew();
     if (NULL == fdi) {
@@ -655,7 +674,7 @@ FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
 
     LogOpen(fdi);
     dprintf1(fdi->logFP, "%s started\n", __FUNCTION__);
-    dprintf1(fdi->logFP, "%s path=\"%s\"\n", __FUNCTION__, fromFlacPath);
+    dprintf1(fdi->logFP, "%s path=\"%S\"\n", __FUNCTION__, fromFlacPath);
 
     assert(NULL == fdi->commandMutex);
     fdi->commandMutex = CreateMutex(NULL, FALSE, NULL);
@@ -672,8 +691,8 @@ FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
     CHK(fdi->commandCompleteEvent);
 
     fdi->errorCode = FDRT_Success;
-    strncpy_s(fdi->fromFlacPath, fromFlacPath,
-        sizeof fdi->fromFlacPath-1);
+    wcsncpy_s(fdi->fromFlacPathUtf16, fromFlacPath,
+        (sizeof fdi->fromFlacPathUtf16)/2-1);
 
     fdi->thread
         = CreateThread(NULL, 0, DecodeEntry, fdi, 0, NULL);
@@ -689,8 +708,11 @@ FlacDecodeDLL_DecodeStart(const char *fromFlacPath)
     dprintf1(fdi->logFP, "%s commandCompleteEvent. ercd=%d fdi->id=%d\n",
         __FUNCTION__, fdi->errorCode, fdi->id);
     if (fdi->errorCode < 0) {
+        int ercd = fdi->errorCode;
         FlacDecodeInfoDelete(fdi);
-        return fdi->errorCode;
+        fdi = NULL;
+
+        return ercd;
     }
 
     return fdi->id;

@@ -58,8 +58,9 @@ namespace PlayPcmWin {
             byte[] b = new byte[s.Length * 2];
 
             for (int i = 0; i < s.Length; ++i) {
-                b[i * 2 + 0] = (byte)((s[i] >> 0) & 0xff);
-                b[i * 2 + 1] = (byte)((s[i] >> 8) & 0xff);
+                char c = s[i];
+                b[i * 2 + 0] = (byte)((c >> 0) & 0xff);
+                b[i * 2 + 1] = (byte)((c >> 8) & 0xff);
             }
             string sSend = Convert.ToBase64String(b);
             m_childProcess.StandardInput.WriteLine(sSend);

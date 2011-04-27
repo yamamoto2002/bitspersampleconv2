@@ -25,15 +25,19 @@ enum FlacDecodeResultType {
     FDRT_Unparseable                = -10,
     FDRT_NumFrameIsNotAligned       = -11,
     FDRT_RecvBufferSizeInsufficient = -12,
-    FDRT_OtherError                 = -13
+    FDRT_OtherError                 = -13,
+
+    FDRT_FileOpenError              = -14,
+
 };
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
 /// 中のグローバル変数に貯める。APIの設計がスレッドセーフになってないので注意。
-/// @return 0以上: 成功。デコーダーIDが戻る。負: FlacDecodeResultType参照。
+/// @param fromFlacPath パス名(UTF-16)
+/// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_DecodeStart(const char *fromFlacPath);
+FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath);
 
 /// FlacDecodeを終了する。(DecodeStartで立てたスレを止めたりする)
 /// DecodeStartが失敗を戻しても、成功を戻しても、呼ぶ必要がある。
