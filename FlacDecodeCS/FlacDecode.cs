@@ -28,10 +28,11 @@ namespace FlacDecodeCS {
             Unparseable                = -10,
             NumFrameIsNotAligned       = -11,
             RecvBufferSizeInsufficient = -12,
-            OtherError                 = -13
+            OtherError                 = -13,
+            FileOpenError              = -14,
         };
 
-        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Ansi)]
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
         int FlacDecodeDLL_DecodeStart(string path);
 
@@ -63,15 +64,15 @@ namespace FlacDecodeCS {
         private extern static
         int FlacDecodeDLL_GetNextPcmData(int id, int numFrame, byte[] buff);
 
-        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
         bool FlacDecodeDLL_GetTitleStr(int id, System.Text.StringBuilder name, int nameBytes);
 
-        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
         bool FlacDecodeDLL_GetAlbumStr(int id, System.Text.StringBuilder name, int nameBytes);
 
-        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Auto)]
+        [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
         bool FlacDecodeDLL_GetArtistStr(int id, System.Text.StringBuilder name, int nameBytes);
 
@@ -178,7 +179,7 @@ namespace FlacDecodeCS {
             bw.Write(rv);
             if (rv < 0) {
                 LogWriteLine(string.Format("FLACデコード開始エラー。{0}", rv));
-                FlacDecodeDLL_DecodeEnd(-1);
+                // FlacDecodeDLL_DecodeEnd(-1);
                 return rv;
             }
 
@@ -261,21 +262,31 @@ namespace FlacDecodeCS {
             return exitCode;
         }
 
-        static void Main(string[] args) {
-            LogOpen();
-
+        static int Main1(string[] args) {
             if (1 != args.Length) {
-                LogWriteLine(string.Format("E: args[0] must be pipeHandleAsStream"));
-                return;
+                LogWriteLine(string.Format("E: FlacDecode.cs args[0] must be pipeHandleAsStream"));
+                return (int)DecodeResultType.OtherError;
             }
 
-            LogWriteLine(string.Format("FlacDecode.cs Main 開始 args[0]={0}", args[0]));
+            LogWriteLine(string.Format("FlacDecode.cs Main1 開始 args[0]={0}", args[0]));
 
             FlacDecode p = new FlacDecode();
             int exitCode = p.Run(args[0]);
 
-            LogWriteLine(string.Format("FlacDecode.cs Main 終了 exitCode={0}", exitCode));
+            LogWriteLine(string.Format("FlacDecode.cs Main1 終了 exitCode={0}", exitCode));
+            return exitCode;
+        }
 
+        static void Main(string[] args) {
+            LogOpen();
+            LogWriteLine("started");
+
+            int exitCode = (int)DecodeResultType.OtherError;
+            try {
+                exitCode = Main1(args);
+            } catch (Exception ex) {
+                LogWriteLine(string.Format("FlacDecode.cs Main {0}", ex));
+            }
             LogClose();
 
             System.Environment.ExitCode = exitCode;
