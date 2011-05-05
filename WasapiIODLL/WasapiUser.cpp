@@ -14,6 +14,10 @@
 #define FOOTER_SEND_FRAME_NUM (2)
 #define PERIODS_PER_BUFFER_ON_TIMER_DRIVEN_MODE (4)
 
+// define: レンダーバッファ上で再生データを作る
+// undef : 一旦スタック上にて再生データを作ってからレンダーバッファにコピーする
+#define CREATE_PLAYPCM_ON_RENDER_BUFFER
+
 WWDeviceInfo::WWDeviceInfo(int id, const wchar_t * name)
 {
     this->id = id;
@@ -1415,11 +1419,15 @@ bool
 WasapiUser::AudioSamplesSendProc(void)
 {
     bool    result     = true;
-    BYTE    *from      = NULL;
     BYTE    *to        = NULL;
     HRESULT hr         = 0;
     int     copyFrames = 0;
     int     writableFrames = 0;
+
+#ifndef CREATE_PLAYPCM_ON_RENDER_BUFFER
+    // fromは、使われない場合最適化で消えるが、念のため。
+    BYTE    *from      = NULL;
+#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
 
     WaitForSingleObject(m_mutex, INFINITE);
 
@@ -1441,16 +1449,27 @@ WasapiUser::AudioSamplesSendProc(void)
         }
     }
 
+#ifdef CREATE_PLAYPCM_ON_RENDER_BUFFER
+    // fromを使わず、直接レンダーバッファ(to)上で再生データを作る。
+    assert(m_renderClient);
+    HRGR(m_renderClient->GetBuffer(writableFrames, &to));
+    assert(to);
+
+    copyFrames = CreateWritableFrames(to, writableFrames);
+#else
+    // 一旦スタック上(from)で再生データを作り、レンダーバッファ(to)へ書き込む。
     from = (BYTE*)_malloca(writableFrames * m_frameBytes);
     copyFrames = CreateWritableFrames(from, writableFrames);
 
     assert(m_renderClient);
     HRGR(m_renderClient->GetBuffer(writableFrames, &to));
-
     assert(to);
+
     if (0 < copyFrames) {
         CopyMemory(to, from, copyFrames * m_frameBytes);
     }
+#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
+
     if (0 < writableFrames - copyFrames) {
         memset(&to[copyFrames*m_frameBytes], 0,
             (writableFrames - copyFrames)*m_frameBytes);
@@ -1475,8 +1494,11 @@ WasapiUser::AudioSamplesSendProc(void)
     }
 
 end:
+#ifndef CREATE_PLAYPCM_ON_RENDER_BUFFER
+    // _freea()とNULL代入は、使われない場合最適化で消えるが、念のため。
     _freea(from);
     from = NULL;
+#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
 
     ReleaseMutex(m_mutex);
     return result;
