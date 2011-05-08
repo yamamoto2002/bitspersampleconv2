@@ -21,6 +21,7 @@ namespace PlayPcmWinTestBench {
         RNGCryptoServiceProvider gen = new RNGCryptoServiceProvider();
         private BackgroundWorker m_playWorker;
         private BackgroundWorker m_USAQworker;
+        private BackgroundWorker m_FirWorker;
 
         enum AB {
             Unknown = -1,
@@ -102,6 +103,13 @@ namespace PlayPcmWinTestBench {
             m_USAQworker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_USAQworker_RunWorkerCompleted);
             m_USAQworker.WorkerSupportsCancellation = true;
 
+            m_FirWorker = new BackgroundWorker();
+            m_FirWorker.WorkerReportsProgress = true;
+            m_FirWorker.DoWork += new DoWorkEventHandler(m_FirWorker_DoWork);
+            m_FirWorker.ProgressChanged += new ProgressChangedEventHandler(m_FirWorker_ProgressChanged);
+            m_FirWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_FirWorker_RunWorkerCompleted);
+            m_FirWorker.WorkerSupportsCancellation = true;
+
             string s = "※GPU計算機能を使用するためには以下の3つの準備が要ります:\r\n"
                 + "・GPUはGeForce GTX 570以上を用意して下さい。\r\n"
                 + "・最新のNVIDIAディスプレイドライバ をインストールして下さい(バージョン260以降が必要)。\r\n"
@@ -110,6 +118,9 @@ namespace PlayPcmWinTestBench {
 
             textBoxUSResult.Text = s;
             textBoxAQResult.Text = s;
+
+            InitializeFir();
+            UpdateFreqLine();
         }
 
         private void Window_Closed(object sender, EventArgs e) {
@@ -1146,6 +1157,315 @@ namespace PlayPcmWinTestBench {
             textBoxCompatibility.Text += string.Format("DirectDraw PrimarySurface Lock {0:X8} {1}\r\n",
                 hr, hr==0 ? "成功" : "失敗");
         }
+
+        //////////////////////////////////////////////////////////////////////////////////////////
+        // FIR
+
+        private const int m_firTapN = 4096;
+        private double [] m_freqResponse20to20kLog;
+
+        private void InitializeFir() {
+            m_freqResponse20to20kLog = new double[128];
+            for (int i=0; i < m_freqResponse20to20kLog.Length; ++i) {
+                m_freqResponse20to20kLog[i] = 1;
+            }
+        }
+
+        private void UpdateFreqLine() {
+            double width = rectangleFreq.Width;
+            double height = rectangleFreq.Height;
+
+            freqLine.Points.Clear();
+            for (int i=0; i < m_freqResponse20to20kLog.Length; ++i) {
+                // 周波数軸は対数なので、そのまま等間隔にプロットする
+
+                double x = width * i / m_freqResponse20to20kLog.Length;
+
+                double v = m_freqResponse20to20kLog[i];
+                if (v < 0.25) {
+                    v = 0.25;
+                }
+                if (v > 4) {
+                    v = 4;
+                }
+                double y = height / 2 - height / 4 * Math.Log(v, 2);
+
+                if (x < width) {
+                    var point = new Point(x, y);
+                    freqLine.Points.Add(point);
+                }
+            }
+        }
+
+        private void buttonFirDo_Click(object sender, RoutedEventArgs e) {
+            var args = new FirWorkerArgs();
+            args.inputPath = textBoxFirInputPath.Text;
+            args.outputPath = textBoxFirOutputPath.Text;
+
+            textBoxFirLog.Text += string.Format("開始。{0} → {1}", args.inputPath, args.outputPath);
+            m_FirWorker.RunWorkerAsync(args);
+        }
+
+        /// <summary>
+        /// 周波数グラフからIDFT入力パラメータ配列を作成。
+        /// </summary>
+        /// <returns></returns>
+        private double[] FreqGraphToIdftInput(int sampleRate) {
+            System.Diagnostics.Debug.Assert((m_firTapN&1) == 0);
+
+            var result = new double[m_firTapN];
+            result[0] = GetAmplitudeOnFreq(0);
+            for (int i=1; i <= result.Length / 2; ++i) {
+                // 周波数は、リニアスケール
+                // i==result.Length/2のとき freq = sampleRate/2 これが最大周波数。
+                // 左右対称な感じで折り返す。
+                var freq = (double)i * sampleRate/2 / (result.Length/2);
+
+                var amp = GetAmplitudeOnFreq(freq);
+                result[i] = amp;
+                result[result.Length-i] = amp;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// グラフから読み取る。周波数→振幅
+        /// </summary>
+        private double GetAmplitudeOnFreq(double freq) {
+            int width = m_freqResponse20to20kLog.Length;
+            double lowestFreq = 20;
+            double highestFreq = 20000;
+            double octave = 3;
+            if (freq < lowestFreq) {
+                return m_freqResponse20to20kLog[0];
+            }
+            if (highestFreq <= freq) {
+                return m_freqResponse20to20kLog[m_freqResponse20to20kLog.Length - 1];
+            }
+
+            int x = (int)((Math.Log10(freq) - Math.Log10(lowestFreq)) * width / octave);
+            if (x < 0) {
+                System.Diagnostics.Debug.Assert(0 <= x);
+                return m_freqResponse20to20kLog[0];
+            }
+            if (width <= x) {
+                // 起こらないのではないだろうか？
+                return m_freqResponse20to20kLog[m_freqResponse20to20kLog.Length - 1];
+            }
+
+            return m_freqResponse20to20kLog[x];
+        }
+
+        Point m_prevFirPress;
+
+        private double PressYToMag(double y) {
+            // yが最大 = 12dB  = 4x    = 2^2
+            // yが中央 = -12dB = 1x    = 2^(0)
+            // yが最小 = -12dB = 0.25x = 2^(-2)
+            double vPowMag = 2;
+
+            double yReg = (rectangleFreq.Height * 0.5 - y) / (rectangleFreq.Height * 0.5);
+            double v = Math.Pow(2.0, vPowMag * yReg);
+            if (v < Math.Pow(2.0, -vPowMag)) {
+                v = Math.Pow(2.0, -vPowMag);
+            }
+            if (Math.Pow(2.0, vPowMag) < v) {
+                v = Math.Pow(2.0, vPowMag);
+            }
+
+            return v;
+        }
+
+        private void UpdateFreqResponse(double px0, double y0, double px1, double y1) {
+            int x0 = (int)(px0 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
+            int x1 = (int)(px1 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
+            double dy = (y1 - y0) / (x1 - x0);
+            if (x0 < x1) {
+                for (int x=x0; x < x1; ++x) {
+                    m_freqResponse20to20kLog[x] = y0 + dy;
+                }
+            }
+            if (x1 < x0) {
+                for (int x=x0; x > x1; --x) {
+                    m_freqResponse20to20kLog[x] = y0 + dy;
+                }
+            }
+            m_freqResponse20to20kLog[x1] = y1;
+        }
+
+        private void firCanvasMouseUpdate(int mx, int my) {
+            System.Diagnostics.Debug.Assert(rectangleFreq.Width == m_freqResponse20to20kLog.Length);
+
+            var pos = new Point(mx - Canvas.GetLeft(rectangleFreq), my - Canvas.GetTop(rectangleFreq));
+
+            if (pos.X < 0 || rectangleFreq.Width <= pos.X ||
+                m_prevFirPress.X < 0 || rectangleFreq.Width <= m_prevFirPress.X) {
+                m_prevFirPress = pos;
+                return;
+            }
+
+            double prevY = PressYToMag(m_prevFirPress.Y);
+            double nowY  = PressYToMag(pos.Y);
+
+            UpdateFreqResponse(m_prevFirPress.X, prevY, pos.X, nowY);
+
+            m_prevFirPress = pos;
+            UpdateFreqLine();
+        }
+
+        private void canvas1_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
+            System.Diagnostics.Debug.Assert(rectangleFreq.Width == m_freqResponse20to20kLog.Length);
+
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) {
+                return;
+            }
+
+            var pos = e.GetPosition(canvas1);
+            m_prevFirPress = new Point(pos.X - Canvas.GetLeft(rectangleFreq), pos.Y - Canvas.GetTop(rectangleFreq));
+            firCanvasMouseUpdate((int)pos.X, (int)pos.Y);
+        }
+
+        private void canvas1_MouseMove(object sender, System.Windows.Input.MouseEventArgs e) {
+            if (e.LeftButton != System.Windows.Input.MouseButtonState.Pressed) {
+                return;
+            }
+
+            var pos = e.GetPosition(canvas1);
+            firCanvasMouseUpdate((int)pos.X, (int)pos.Y);
+        }
+
+        void m_FirWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
+            string s = (string)e.Result;
+            textBoxFirLog.Text += s + "\r\n";
+            progressBarFir.Value = 0;
+        }
+
+        void m_FirWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
+            progressBarFir.Value = e.ProgressPercentage;
+        }
+
+        struct FirWorkerArgs {
+            public string inputPath;
+            public string outputPath;
+        }
+
+        void m_FirWorker_DoWork(object sender, DoWorkEventArgs e) {
+            FirWorkerArgs args = (FirWorkerArgs)e.Argument;
+
+            var dft = new WWDirectComputeCS.WWDftCpu();
+
+            // pcmファイルを読み込んでサンプル配列pcm1chを作成。
+            PcmData pcmDataIn = null;
+            try {
+                pcmDataIn = ReadWavFile(args.inputPath);
+            } catch (IOException ex) {
+                e.Result = string.Format("WAVファイル {0} 読み込み失敗\r\n{1}", args.inputPath, ex);
+                return;
+            }
+            if (null == pcmDataIn) {
+                e.Result = string.Format("WAVファイル {0} 読み込み失敗", args.inputPath);
+                return;
+            }
+            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
+
+            var from = FreqGraphToIdftInput(pcmDataIn.SampleRate);
+
+            /*
+            for (int i=0; i < from.Length / 2; ++i) {
+                System.Console.WriteLine("G{0}=({1} {2})", i, from[i * 2], from[i * 2 + 1]);
+            }
+            System.Console.WriteLine("");
+            */
+
+            double [] idftResult;
+            dft.Idft1d(from, out idftResult);
+
+            /*
+            for (int i=0; i < from.Length / 2; ++i) {
+                System.Console.WriteLine("S{0}=({1} {2})", i, idftResult[i * 2], idftResult[i * 2 + 1]);
+            }
+            System.Console.WriteLine("");
+            */
+
+            /*
+            double [] dftResult;
+            dft.Dft1d(from, out dftResult);
+
+            for (int i=0; i < from.Length / 2; ++i) {
+                System.Console.WriteLine("G{0}=({1} {2})", i, dftResult[i * 2], dftResult[i * 2 + 1]);
+            }
+            System.Console.WriteLine("");
+            */
+
+            double [] window;
+            WWWindowFunc.BlackmanWindow(idftResult.Length / 2 - 1, out window);
+            /*
+            for (int i=0; i < window.Length; ++i) {
+                System.Console.WriteLine("Window {0:D2} {1}", i, window[i]);
+            }
+            System.Console.WriteLine("");
+            */
+
+            double [] coeff;
+            dft.IdftToFirCoeff(idftResult, window, out coeff);
+            /*
+            for (int i=0; i < coeff.Length; ++i) {
+                System.Console.WriteLine("coeff {0:D2} {1}", i, coeff[i]);
+            }
+            System.Console.WriteLine("");
+            */
+
+            PcmData pcmDataOut = new PcmData();
+            pcmDataOut.CopyFrom(pcmDataIn);
+
+            var pcm1ch = new double[pcmDataOut.NumFrames];
+            for (long i=0; i < pcm1ch.Length; ++i) {
+                pcm1ch[i] = pcmDataOut.GetSampleValueInFloat(0, i);
+            }
+
+            // FIRする。
+            var fir = new WWFirCpu();
+            fir.Setup(coeff, pcm1ch);
+            var pcmFir = new double[pcm1ch.Length];
+            fir.Do(0, pcmFir.Length, pcmFir);
+            fir.Unsetup();
+
+            // 結果をファイルに書き込む。
+            for (long i=0; i < pcmFir.Length; ++i) {
+                pcmDataOut.SetSampleValueInFloat(0, i, (float)pcmFir[i]);
+            }
+            pcmDataOut.LimitLevelOnFloatRange();
+
+            bool writeResult = false;
+            try {
+                writeResult = WriteWavFile(pcmDataOut, args.outputPath);
+            } catch (IOException ex) {
+                e.Result = string.Format("WAVファイル書き込み失敗: {0}\r\n{1}", args.outputPath, ex);
+                return;
+            }
+            if (!writeResult) {
+                e.Result = string.Format("WAVファイル書き込み失敗: {0}", args.outputPath);
+                return;
+            }
+
+            e.Result = string.Format("WAVファイル書き込み成功: {0}", args.outputPath);
+            return;
+        }
+
+        private void buttonFirInputBrowse_Click(object sender, RoutedEventArgs e) {
+            string fileName = BrowseOpenFile();
+            if (0 < fileName.Length) {
+                textBoxFirInputPath.Text = fileName;
+            }
+        }
+
+        private void buttonFirOutputBrowse_Click(object sender, RoutedEventArgs e) {
+            string fileName = BrowseOpenFile();
+            if (0 < fileName.Length) {
+                textBoxFirOutputPath.Text = fileName;
+            }
+        }
+
 
     }
 }
