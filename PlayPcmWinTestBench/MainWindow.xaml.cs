@@ -1197,15 +1197,6 @@ namespace PlayPcmWinTestBench {
             }
         }
 
-        private void buttonFirDo_Click(object sender, RoutedEventArgs e) {
-            var args = new FirWorkerArgs();
-            args.inputPath = textBoxFirInputPath.Text;
-            args.outputPath = textBoxFirOutputPath.Text;
-
-            textBoxFirLog.Text += string.Format("開始。{0} → {1}", args.inputPath, args.outputPath);
-            m_FirWorker.RunWorkerAsync(args);
-        }
-
         /// <summary>
         /// 周波数グラフからIDFT入力パラメータ配列を作成。
         /// </summary>
@@ -1334,10 +1325,21 @@ namespace PlayPcmWinTestBench {
             firCanvasMouseUpdate((int)pos.X, (int)pos.Y);
         }
 
+        private void buttonFirDo_Click(object sender, RoutedEventArgs e) {
+            var args = new FirWorkerArgs();
+            args.inputPath = textBoxFirInputPath.Text;
+            args.outputPath = textBoxFirOutputPath.Text;
+
+            textBoxFirLog.Text += string.Format("開始。{0} → {1}\r\n", args.inputPath, args.outputPath);
+            buttonFirDo.IsEnabled = false;
+            m_FirWorker.RunWorkerAsync(args);
+        }
+
         void m_FirWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             string s = (string)e.Result;
             textBoxFirLog.Text += s + "\r\n";
             progressBarFir.Value = 0;
+            buttonFirDo.IsEnabled = true;
         }
 
         void m_FirWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
@@ -1418,22 +1420,41 @@ namespace PlayPcmWinTestBench {
             PcmData pcmDataOut = new PcmData();
             pcmDataOut.CopyFrom(pcmDataIn);
 
-            var pcm1ch = new double[pcmDataOut.NumFrames];
-            for (long i=0; i < pcm1ch.Length; ++i) {
-                pcm1ch[i] = pcmDataOut.GetSampleValueInFloat(0, i);
+            for (int ch=0; ch < pcmDataOut.NumChannels; ++ch) {
+                // 全てのチャンネルでループ。
+
+                var pcm1ch = new double[pcmDataOut.NumFrames];
+                for (long i=0; i < pcm1ch.Length; ++i) {
+                    pcm1ch[i] = pcmDataOut.GetSampleValueInFloat(ch, i);
+                }
+
+                // 少しずつFIRする。
+                var fir = new WWFirCpu();
+                fir.Setup(coeff, pcm1ch);
+
+                const int FIR_SAMPLE = 65536;
+                for (int offs=0; offs < pcm1ch.Length; offs += FIR_SAMPLE) {
+                    int nSample = FIR_SAMPLE;
+                    if (pcm1ch.Length < offs + nSample) {
+                        nSample = pcm1ch.Length - offs;
+                    }
+                    var pcmFir = new double[nSample];
+                    fir.Do(offs - window.Length / 2, pcmFir.Length, pcmFir);
+
+                    // 結果を出力に書き込む。
+                    for (long i=0; i < pcmFir.Length; ++i) {
+                        pcmDataOut.SetSampleValueInFloat(ch, i + offs, (float)pcmFir[i]);
+                    }
+
+                    // 進捗Update。
+                    int percentage = (int)(100L * (ch + 1) / pcmDataOut.NumChannels *
+                        (offs+1) / pcm1ch.Length);
+                    m_FirWorker.ReportProgress(percentage);
+                }
+                fir.Unsetup();
             }
 
-            // FIRする。
-            var fir = new WWFirCpu();
-            fir.Setup(coeff, pcm1ch);
-            var pcmFir = new double[pcm1ch.Length];
-            fir.Do(0, pcmFir.Length, pcmFir);
-            fir.Unsetup();
-
-            // 結果をファイルに書き込む。
-            for (long i=0; i < pcmFir.Length; ++i) {
-                pcmDataOut.SetSampleValueInFloat(0, i, (float)pcmFir[i]);
-            }
+            // 音量制限処理。
             pcmDataOut.LimitLevelOnFloatRange();
 
             bool writeResult = false;
