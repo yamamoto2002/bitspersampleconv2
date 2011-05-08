@@ -1,4 +1,8 @@
-﻿using System;
+﻿// このファイルは、
+// 行き当たりばったりで機能を追加していったため
+// PlayPcmWinの中で特にイマイチなコードである
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
