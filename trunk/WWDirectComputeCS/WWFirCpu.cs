@@ -43,8 +43,9 @@ namespace WWDirectComputeCS {
                 int sampleLength = m_sampleFrom.Length;
 
                 for (int convOffs = 0; convOffs < m_stageN; ++convOffs) {
-                    if (pos + convOffs < sampleLength) {
-                        v += m_sampleFrom[pos + convOffs] * m_coeff[convOffs];
+                    int fromPos = pos + convOffs;
+                    if (0 <= fromPos && fromPos < sampleLength) {
+                        v += m_sampleFrom[fromPos] * m_coeff[convOffs];
                     }
                 }
                 output[pos - startPos] = v;
