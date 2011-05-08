@@ -4,6 +4,78 @@
         Title="PlayPcmWinテストベンチ" Height="600" Width="800" Closed="Window_Closed" IsEnabled="True">
     <Grid>
         <TabControl Name="tabControl1">
+            <TabItem Header="FIR">
+                <Grid Name="grid3">
+                    <GroupBox Header="EQ" Height="233" HorizontalAlignment="Left" Margin="6,106,0,0" Name="groupBox14" VerticalAlignment="Top" Width="630">
+                        <Grid>
+                            <Canvas Height="163" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="600" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown">
+                                <Rectangle Canvas.Left="80" Canvas.Top="6" Height="128" Name="rectangleFreq" Stroke="Black" Width="512" Fill="White" />
+                                <Line X1="80" X2="592" Y1="38" Y2="38" Stroke="Gray" />
+                                <Line X1="80" X2="592" Y1="70" Y2="70" Stroke="Black" />
+                                <Line X1="80" X2="592" Y1="102" Y2="102" Stroke="Gray" />
+                                <Line X1="110" X2="110" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="131" X2="131" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="147" X2="147" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="161" X2="161" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="172" X2="172" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="181" X2="181" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="191" X2="191" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="199" X2="199" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="250" X2="250" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="280" X2="280" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="302" X2="302" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="318" X2="318" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="332" X2="332" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="343" X2="343" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="353" X2="353" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="362" X2="362" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="369" X2="369" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="421" X2="421" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="451" X2="451" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="472" X2="472" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="489" X2="489" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="502" X2="502" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="514" X2="514" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="524" X2="524" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="532" X2="532" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="540" X2="540" Y1="6" Y2="134" Stroke="Gray" />
+                                <Polyline Stroke="Red" Canvas.Left="80" Canvas.Top="6" Name="freqLine"></Polyline>
+                                <Label Canvas.Left="31" Canvas.Top="-3" Content="+12dB" Height="28" Name="label16" />
+                                <Label Canvas.Left="39" Canvas.Top="26" Content="+6dB" Height="28" Name="label24" />
+                                <Label Canvas.Left="48" Canvas.Top="56" Content="0dB" Height="28" Name="label17" />
+                                <Label Canvas.Left="43" Canvas.Top="87" Content="-6dB" Height="28" Name="label25" />
+                                <Label Canvas.Left="35" Canvas.Top="116" Content="-12dB" Height="28" Name="label18" />
+                                <Label Canvas.Left="61" Canvas.Top="135" Content="20Hz" Height="28" Name="label19" />
+                                <Label Canvas.Left="553" Canvas.Top="135" Content="20kHz" Height="28" Name="label20" />
+                                <Label Canvas.Left="181" Canvas.Top="135" Content="100Hz" Height="28" Name="label21" />
+                                <Label Canvas.Left="351" Canvas.Top="135" Content="1kHz" Height="28" Name="label22" />
+                                <Label Canvas.Left="510" Canvas.Top="135" Content="10kHz" Height="28" Name="label23" />
+                                <Label Canvas.Left="227" Canvas.Top="135" Content="200Hz" Height="28" Name="label26" />
+                                <Label Canvas.Left="403" Canvas.Top="135" Content="2kHz" Height="28" Name="label27" />
+                                <Label Canvas.Left="133" Canvas.Top="135" Content="50Hz" Height="28" Name="label28" />
+                                <Label Canvas.Left="296" Canvas.Top="135" Content="500Hz" Height="28" Name="label29" />
+                                <Label Canvas.Left="470" Canvas.Top="135" Content="5kHz" Height="28" Name="label30" />
+                            </Canvas>
+                            <Button Content="フラットにする" Height="23" HorizontalAlignment="Left" Margin="6,175,0,0" Name="buttonFirFlat" VerticalAlignment="Top" Width="162" Click="buttonFirFlat_Click" />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBox15" VerticalAlignment="Top" Width="474">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirInputPath" Text="C:\audio\input.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonFirInputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirInputBrowse_Click" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,418,0,0" Name="buttonFirDo" VerticalAlignment="Top" Width="107" Click="buttonFirDo_Click" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="6,0,0,3" Name="progressBarFir" VerticalAlignment="Bottom" Width="233" />
+                    <GroupBox Header="出力ファイル" Height="64" HorizontalAlignment="Left" Margin="6,345,0,0" Name="groupBox16" VerticalAlignment="Top" Width="624">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="462,7,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
+                        </Grid>
+                    </GroupBox>
+                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="245,418,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="517" />
+                </Grid>
+            </TabItem>
             <TabItem Header="アップサンプル">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
@@ -228,79 +300,6 @@
                     </Grid.RowDefinitions>
                     <Button Content="DirectDrawプライマリーサーフェスを取得し、Lockを呼び出す" Height="33" HorizontalAlignment="Left" Margin="128,40,0,0" Name="buttonCompatibility" VerticalAlignment="Top" Width="482" Click="buttonCompatibility_Click" />
                     <TextBox Grid.Row="1" Height="409" HorizontalAlignment="Left" Margin="6,0,0,0" Name="textBoxCompatibility" VerticalAlignment="Top" Width="756" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="FIR">
-                <Grid Name="grid3">
-                    <GroupBox Header="EQ" Height="209" HorizontalAlignment="Left" Margin="6,106,0,0" Name="groupBox14" VerticalAlignment="Top" Width="630">
-                        <Grid>
-                            <Canvas Height="163" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="600" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown" >
-                                <Rectangle Canvas.Left="80" Canvas.Top="6" Height="128" Name="rectangleFreq" Stroke="Black" Width="512" Fill="White" />
-                                <Line X1="80" X2="592" Y1="38" Y2="38" Stroke="Gray" />
-                                <Line X1="80" X2="592" Y1="70" Y2="70" Stroke="Black" />
-                                <Line X1="80" X2="592" Y1="102" Y2="102" Stroke="Gray" />
-                                <Line X1="110" X2="110" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="131" X2="131" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="147" X2="147" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="161" X2="161" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="172" X2="172" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="181" X2="181" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="191" X2="191" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="199" X2="199" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="250" X2="250" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="280" X2="280" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="302" X2="302" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="318" X2="318" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="332" X2="332" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="343" X2="343" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="353" X2="353" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="362" X2="362" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="369" X2="369" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="421" X2="421" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="451" X2="451" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="472" X2="472" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="489" X2="489" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="502" X2="502" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="514" X2="514" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="524" X2="524" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="532" X2="532" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="540" X2="540" Y1="6" Y2="134" Stroke="Gray" />
-                                <Polyline Stroke="Red" Canvas.Left="80" Canvas.Top="6" Name="freqLine">
-                                    
-                                </Polyline>
-                                <Label Canvas.Left="31" Canvas.Top="-3" Content="+12dB" Height="28" Name="label16" />
-                                <Label Canvas.Left="39" Canvas.Top="26" Content="+6dB" Height="28" Name="label24" />
-                                <Label Canvas.Left="48" Canvas.Top="56" Content="0dB" Height="28" Name="label17" />
-                                <Label Canvas.Left="43" Canvas.Top="87" Content="-6dB" Height="28" Name="label25" />
-                                <Label Canvas.Left="35" Canvas.Top="116" Content="-12dB" Height="28" Name="label18" />
-                                <Label Canvas.Left="61" Canvas.Top="135" Content="20Hz" Height="28" Name="label19" />
-                                <Label Canvas.Left="553" Canvas.Top="135" Content="20kHz" Height="28" Name="label20" />
-                                <Label Canvas.Left="181" Canvas.Top="135" Content="100Hz" Height="28" Name="label21" />
-                                <Label Canvas.Left="351" Canvas.Top="135" Content="1kHz" Height="28" Name="label22" />
-                                <Label Canvas.Left="510" Canvas.Top="135" Content="10kHz" Height="28" Name="label23" />
-                                <Label Canvas.Left="227" Canvas.Top="135" Content="200Hz" Height="28" Name="label26" />
-                                <Label Canvas.Left="403" Canvas.Top="135" Content="2kHz" Height="28" Name="label27" />
-                                <Label Canvas.Left="133" Canvas.Top="135" Content="50Hz" Height="28" Name="label28" />
-                                <Label Canvas.Left="296" Canvas.Top="135" Content="500Hz" Height="28" Name="label29" />
-                                <Label Canvas.Left="470" Canvas.Top="135" Content="5kHz" Height="28" Name="label30" />
-                            </Canvas>
-                        </Grid>
-                    </GroupBox>
-                    <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBox15" VerticalAlignment="Top" Width="474">
-                        <Grid>
-                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirInputPath" Text="C:\audio\input.wav" VerticalAlignment="Top" Width="450" />
-                            <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonFirInputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirInputBrowse_Click" />
-                        </Grid>
-                    </GroupBox>
-                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,418,0,0" Name="buttonFirDo" VerticalAlignment="Top" Width="107" Click="buttonFirDo_Click" />
-                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="6,0,0,3" Name="progressBarFir" VerticalAlignment="Bottom" Width="233" />
-                    <GroupBox Header="出力ファイル" Height="88" HorizontalAlignment="Left" Margin="6,321,0,0" Name="groupBox16" VerticalAlignment="Top" Width="474">
-                        <Grid>
-                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="450" />
-                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
-                        </Grid>
-                    </GroupBox>
-                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="245,418,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="517" />
                 </Grid>
             </TabItem>
         </TabControl>

@@ -1304,6 +1304,14 @@ namespace PlayPcmWinTestBench {
             UpdateFreqLine();
         }
 
+        private void buttonFirFlat_Click(object sender, RoutedEventArgs e) {
+            for (int i=0; i < m_freqResponse20to20kLog.Length; ++i) {
+                m_freqResponse20to20kLog[i] = 1.0;
+            }
+            UpdateFreqLine();
+        }
+
+
         private void canvas1_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e) {
             System.Diagnostics.Debug.Assert(rectangleFreq.Width == m_freqResponse20to20kLog.Length);
 
@@ -1447,8 +1455,9 @@ namespace PlayPcmWinTestBench {
                     }
 
                     // 進捗Update。
-                    int percentage = (int)(100L * (ch + 1) / pcmDataOut.NumChannels *
-                        (offs+1) / pcm1ch.Length);
+                    int percentage = (int)(
+                        (100L * ch  / pcmDataOut.NumChannels) +
+                        (100L * (offs+1) / pcm1ch.Length / pcmDataOut.NumChannels));
                     m_FirWorker.ReportProgress(percentage);
                 }
                 fir.Unsetup();
@@ -1481,7 +1490,7 @@ namespace PlayPcmWinTestBench {
         }
 
         private void buttonFirOutputBrowse_Click(object sender, RoutedEventArgs e) {
-            string fileName = BrowseOpenFile();
+            string fileName = BrowseSaveFile();
             if (0 < fileName.Length) {
                 textBoxFirOutputPath.Text = fileName;
             }
