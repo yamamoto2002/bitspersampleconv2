@@ -3,6 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.94 ==
+  * 直線位相FIRフィルターによるEQ
+http://bitspersampleconv2.googlecode.com/files/fir.jpg
+http://bitspersampleconv2.googlecode.com/files/wavespectra.jpg
+
 ===!PlayPcmWin 2.0.93 ==
   * 再生スレッドの処理高速化。レンダーバッファ上で再生データを組み立てることで再生スレッドでのPCMデータのコピー処理回数を2回から1回に減らす。( revision 1905 )
 
