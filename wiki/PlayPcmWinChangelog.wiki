@@ -6,6 +6,9 @@
 ===!PlayPcmWin 2.0.94 ==
   * 直線位相FIRフィルターによるEQ
 http://bitspersampleconv2.googlecode.com/files/fir.jpg
+
+↓
+
 http://bitspersampleconv2.googlecode.com/files/wavespectra.jpg
 
 ===!PlayPcmWin 2.0.93 ==
