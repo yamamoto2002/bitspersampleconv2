@@ -7,7 +7,7 @@
   * 直線位相FIRフィルターによるEQ (パラメーター調整中)
 http://bitspersampleconv2.googlecode.com/files/fir.jpg
 
-↓
+↓ ↓ ↓ ↓ ↓
 
 http://bitspersampleconv2.googlecode.com/files/wavespectra.jpg
 
