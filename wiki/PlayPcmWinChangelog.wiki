@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.94 ==
-  * 直線位相FIRフィルターによるEQ (パラメーター調整中)
+  * (PlayPcmWinテストベンチ 機能追加)直線位相FIRフィルターによるEQ (パラメーター調整中)
 http://bitspersampleconv2.googlecode.com/files/fir.jpg
 
 ↓ ↓ ↓ ↓ ↓
