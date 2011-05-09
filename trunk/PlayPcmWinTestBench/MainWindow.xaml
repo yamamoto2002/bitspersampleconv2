@@ -57,6 +57,7 @@
                                 <Label Canvas.Left="470" Canvas.Top="135" Content="5kHz" Height="28" Name="label30" />
                             </Canvas>
                             <Button Content="フラットにする" Height="23" HorizontalAlignment="Left" Margin="6,175,0,0" Name="buttonFirFlat" VerticalAlignment="Top" Width="162" Click="buttonFirFlat_Click" />
+                            <Button Content="なめらかにする" Height="23" HorizontalAlignment="Left" Margin="176,175,0,0" Name="buttonFirSmooth" VerticalAlignment="Top" Width="162" Click="buttonFirSmooth_Click" />
                         </Grid>
                     </GroupBox>
                     <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBox15" VerticalAlignment="Top" Width="474">
