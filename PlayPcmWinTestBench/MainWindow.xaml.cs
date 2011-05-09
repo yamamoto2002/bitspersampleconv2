@@ -1171,6 +1171,9 @@ namespace PlayPcmWinTestBench {
             }
         }
 
+        /// <summary>
+        /// m_freqResponse20to20kLogの最新状態を画面表示する。
+        /// </summary>
         private void UpdateFreqLine() {
             double width = rectangleFreq.Width;
             double height = rectangleFreq.Height;
@@ -1267,6 +1270,9 @@ namespace PlayPcmWinTestBench {
             return v;
         }
 
+        /// <summary>
+        /// 周波数-振幅グラフm_freqResponseに(px0, y0)-(px1, y1)の線を引く。
+        /// </summary>
         private void UpdateFreqResponse(double px0, double y0, double px1, double y1) {
             int x0 = (int)(px0 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
             int x1 = (int)(px1 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
@@ -1494,6 +1500,28 @@ namespace PlayPcmWinTestBench {
             if (0 < fileName.Length) {
                 textBoxFirOutputPath.Text = fileName;
             }
+        }
+
+        private void buttonFirSmooth_Click(object sender, RoutedEventArgs e) {
+            // テキトウの塊みたいなコードだが、動作する
+
+            for (int j=0; j < 10; ++j) {
+                for (int i=1; i < m_freqResponse20to20kLog.Length - 1; i += 2) {
+                    m_freqResponse20to20kLog[i] =
+                        (m_freqResponse20to20kLog[i - 1] +
+                         m_freqResponse20to20kLog[i] +
+                         m_freqResponse20to20kLog[i + 1]) / 3.0;
+
+                }
+                for (int i=2; i < m_freqResponse20to20kLog.Length - 1; i += 2) {
+                    m_freqResponse20to20kLog[i] =
+                        (m_freqResponse20to20kLog[i - 1] +
+                         m_freqResponse20to20kLog[i] +
+                         m_freqResponse20to20kLog[i + 1]) / 3.0;
+
+                }
+            }
+            UpdateFreqLine();
         }
 
 
