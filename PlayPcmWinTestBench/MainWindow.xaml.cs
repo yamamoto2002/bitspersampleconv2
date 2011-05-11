@@ -1165,7 +1165,7 @@ namespace PlayPcmWinTestBench {
         private double [] m_freqResponse20to20kLog;
 
         private void InitializeFir() {
-            m_freqResponse20to20kLog = new double[128];
+            m_freqResponse20to20kLog = new double[512];
             for (int i=0; i < m_freqResponse20to20kLog.Length; ++i) {
                 m_freqResponse20to20kLog[i] = 1;
             }
@@ -1276,15 +1276,17 @@ namespace PlayPcmWinTestBench {
         private void UpdateFreqResponse(double px0, double y0, double px1, double y1) {
             int x0 = (int)(px0 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
             int x1 = (int)(px1 * m_freqResponse20to20kLog.Length / rectangleFreq.Width);
-            double dy = (y1 - y0) / (x1 - x0);
-            if (x0 < x1) {
-                for (int x=x0; x < x1; ++x) {
-                    m_freqResponse20to20kLog[x] = y0 + dy;
+            if (x0 != x1) {
+                double dy = (y1 - y0) / ((double)x1 - x0);
+                if (x0 < x1) {
+                    for (int x=x0; x < x1; ++x) {
+                        m_freqResponse20to20kLog[x] = y0 + dy * (x-x0);
+                    }
                 }
-            }
-            if (x1 < x0) {
-                for (int x=x0; x > x1; --x) {
-                    m_freqResponse20to20kLog[x] = y0 + dy;
+                if (x1 < x0) {
+                    for (int x=x0; x > x1; --x) {
+                        m_freqResponse20to20kLog[x] = y0 + dy * (x-x0);
+                    }
                 }
             }
             m_freqResponse20to20kLog[x1] = y1;
@@ -1503,22 +1505,16 @@ namespace PlayPcmWinTestBench {
         }
 
         private void buttonFirSmooth_Click(object sender, RoutedEventArgs e) {
-            // テキトウの塊みたいなコードだが、動作する
 
+            double prev = m_freqResponse20to20kLog[0];
             for (int j=0; j < 10; ++j) {
-                for (int i=1; i < m_freqResponse20to20kLog.Length - 1; i += 2) {
+                for (int i=1; i < m_freqResponse20to20kLog.Length - 1; ++i) {
+                    double t = m_freqResponse20to20kLog[i];
                     m_freqResponse20to20kLog[i] =
-                        (m_freqResponse20to20kLog[i - 1] +
+                        (prev +
                          m_freqResponse20to20kLog[i] +
                          m_freqResponse20to20kLog[i + 1]) / 3.0;
-
-                }
-                for (int i=2; i < m_freqResponse20to20kLog.Length - 1; i += 2) {
-                    m_freqResponse20to20kLog[i] =
-                        (m_freqResponse20to20kLog[i - 1] +
-                         m_freqResponse20to20kLog[i] +
-                         m_freqResponse20to20kLog[i + 1]) / 3.0;
-
+                    prev = t;
                 }
             }
             UpdateFreqLine();
