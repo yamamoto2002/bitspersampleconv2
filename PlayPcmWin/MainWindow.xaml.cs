@@ -130,6 +130,9 @@ namespace PlayPcmWin
 
             public string QuantizationBitRate {
                 get {
+                    if (m_pcmData.SampleValueRepresentationType == PcmDataLib.PcmData.ValueRepresentationType.SFloat) {
+                        return m_pcmData.BitsPerSample.ToString() + " bit (浮動小数点数)";
+                    }
                     return m_pcmData.BitsPerSample.ToString() + " bit";
                 }
                 set {
