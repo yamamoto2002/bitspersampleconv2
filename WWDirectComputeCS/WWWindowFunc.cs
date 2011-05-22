@@ -11,9 +11,8 @@ namespace WWDirectComputeCS {
         /// <summary>
         /// ブラックマン窓
         /// </summary>
-        /// <param name="window">[out]窓Wk</param>
-        /// <param name="n">窓の長さn(nは奇数)</param>
-        /// <param name="alpha">窓の形状を決める実数</param>
+        /// <param name="window">[out]窓Wk 左右対称の形状が出てくる。</param>
+        /// <param name="n">窓の長さn(nは奇数) 要素番号(n-1)/2が山のピーク</param>
         public static void BlackmanWindow(int n, out double [] window) {
             window = new double[n];
             // nは奇数
