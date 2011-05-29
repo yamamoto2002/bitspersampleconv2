@@ -30,9 +30,9 @@ http://bitspersampleconv2.googlecode.com/files/PPW2084.png
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin293.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin293x64.zip
 
-非常にバグっぽい開発版 (バージョン2.0.95)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin295.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin295x64.zip
+非常にバグっぽい開発版 (バージョン2.0.94)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin294.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin294x64.zip
 
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
