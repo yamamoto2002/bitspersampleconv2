@@ -5,10 +5,10 @@
     <Grid>
         <TabControl Name="tabControl1">
             <TabItem Header="FIR">
-                <Grid Name="grid3">
-                    <GroupBox Header="EQ" Height="355" HorizontalAlignment="Left" Margin="6,71,0,0" Name="groupBox14" VerticalAlignment="Top" Width="756">
+                <Grid Name="gridFir">
+                    <GroupBox Header="EQ" Height="260" HorizontalAlignment="Left" Margin="6,71,0,0" Name="groupBoxFirEq" VerticalAlignment="Top" Width="756">
                         <Grid>
-                            <Canvas Height="292" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="732" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown">
+                            <Canvas Height="162" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="732" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown">
                                 <Rectangle Canvas.Left="80" Canvas.Top="6" Height="128" Name="rectangleFreqGain" Stroke="Black" Width="640" Fill="White" />
                                 <Line X1="80" X2="720" Y1="38" Y2="38" Stroke="Gray" />
                                 <Line X1="80" X2="720" Y1="70" Y2="70" Stroke="Black" />
@@ -69,27 +69,36 @@
                                 <Label Canvas.Left="0" Canvas.Top="135" Content="周波数→" Height="28" Name="label31" />
                                 <Label Canvas.Left="6" Canvas.Top="10" Content="利得" Height="28" Name="label32" />
                             </Canvas>
-                            <Button Content="フラットにする(_F)" Height="23" HorizontalAlignment="Left" Margin="6,301,0,0" Name="buttonFirFlat" VerticalAlignment="Top" Width="162" Click="buttonFirFlat_Click" />
-                            <Button Content="なめらかにする(_M)" Height="23" HorizontalAlignment="Left" Margin="176,301,0,0" Name="buttonFirSmooth" VerticalAlignment="Top" Width="162" Click="buttonFirSmooth_Click" />
-                            <Button Content="EQ設定保存…(_S)" Height="23" HorizontalAlignment="Left" Margin="346,301,0,0" Name="buttonEqSave" VerticalAlignment="Top" Width="162" Click="buttonEqSave_Click" />
-                            <Button Content="EQ設定読み出し…(_L)" Height="23" HorizontalAlignment="Left" Margin="514,301,0,0" Name="buttonEqLoad" VerticalAlignment="Top" Width="162" Click="buttonEqLoad_Click" />
+                            <Button Content="フラットにする(_F)" Height="23" HorizontalAlignment="Left" Margin="6,175,0,0" Name="buttonFirFlat" VerticalAlignment="Top" Width="162" Click="buttonFirFlat_Click" />
+                            <Button Content="なめらかにする(_M)" Height="23" HorizontalAlignment="Left" Margin="176,175,0,0" Name="buttonFirSmooth" VerticalAlignment="Top" Width="162" Click="buttonFirSmooth_Click" />
+                            <Button Content="EQ設定保存…(_S)" Height="23" HorizontalAlignment="Left" Margin="346,175,0,0" Name="buttonEqSave" VerticalAlignment="Top" Width="162" Click="buttonEqSave_Click" />
+                            <Button Content="EQ設定読み出し…(_L)" Height="23" HorizontalAlignment="Left" Margin="514,175,0,0" Name="buttonEqLoad" VerticalAlignment="Top" Width="162" Click="buttonEqLoad_Click" />
+                            <Label Content="FIRフィルタ長(奇数):" Height="28" HorizontalAlignment="Left" Margin="6,201,0,0" Name="label35" VerticalAlignment="Top" Width="192" HorizontalContentAlignment="Right" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="203,203,0,0" Name="textBoxFirLength" VerticalAlignment="Top" Width="62" Text="8191" HorizontalContentAlignment="Right" />
                         </Grid>
                     </GroupBox>
-                    <GroupBox Header="入力ファイル" Height="61" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox15" VerticalAlignment="Top" Width="620">
+                    <GroupBox Header="入力ファイル" Height="61" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBoxFirInputFile" VerticalAlignment="Top" Width="620">
                         <Grid>
                             <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirInputPath" Text="C:\audio\input.wav" VerticalAlignment="Top" Width="450" />
                             <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="472,7,0,0" Name="buttonFirInputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirInputBrowse_Click" />
                         </Grid>
                     </GroupBox>
-                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,498,0,0" Name="buttonFirDo" VerticalAlignment="Top" Width="107" Click="buttonFirDo_Click" />
-                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="118,0,0,6" Name="progressBarFir" VerticalAlignment="Bottom" Width="233" />
-                    <GroupBox Header="出力ファイル" Height="60" HorizontalAlignment="Left" Margin="6,432,0,0" Name="groupBox16" VerticalAlignment="Top" Width="624">
+                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,467,0,0" Name="buttonFirDo" VerticalAlignment="Top" Width="107" Click="buttonFirDo_Click" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="6,0,0,6" Name="progressBarFir" VerticalAlignment="Bottom" Width="345" />
+                    <GroupBox Header="出力ファイル" Height="124" HorizontalAlignment="Left" Margin="6,337,0,0" Name="groupBoxFirOutputFile" VerticalAlignment="Top" Width="756">
                         <Grid>
-                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="450" />
-                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="462,7,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,66,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="462,67,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
+                            <GroupBox Header="出力サンプルデータ形式" Height="54" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox17" VerticalAlignment="Top" Width="530">
+                                <Grid>
+                                    <RadioButton Content="16bit integer" HorizontalAlignment="Left" Margin="7,6,0,0" Name="radioButtonFir16bit" Width="115" Height="16" VerticalAlignment="Top" />
+                                    <RadioButton Content="24bit integer" Height="16" HorizontalAlignment="Left" Margin="167,6,0,0" Name="radioButtonFir24bit" VerticalAlignment="Top" Width="133" IsChecked="True" />
+                                    <RadioButton Content="32bit float" Height="16" HorizontalAlignment="Left" Margin="327,6,0,0" Name="radioButtonFir32bitFloat" VerticalAlignment="Top" Width="108" />
+                                </Grid>
+                            </GroupBox>
                         </Grid>
                     </GroupBox>
-                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="369,494,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="393" Height="30" />
+                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="369,467,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="393" Height="57" />
                 </Grid>
             </TabItem>
             <TabItem Header="アップサンプル">
