@@ -467,7 +467,7 @@ namespace PcmDataLib {
             minV = 0.0;
 
             for (int i = 0; i < NumFrames * NumChannels; ++i) {
-                float v = BitConverter.ToSingle(m_sampleArray, i * 8);
+                double v = BitConverter.ToDouble(m_sampleArray, i * 8);
                 if (v < minV) {
                     minV = v;
                 }

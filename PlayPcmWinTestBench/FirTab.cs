@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using PcmDataLib;
 using WWDirectComputeCS;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace PlayPcmWinTestBench {
 
@@ -32,25 +33,34 @@ namespace PlayPcmWinTestBench {
         //////////////////////////////////////////////////////////////////////////////////////////
         // FIR
 
-        private const int m_firTapN = 8192;
+        private int m_firTapN = 8192;
 
         // 20Hz～20kHzの範囲の、周波数が対数軸で等間隔になるようにサンプルしたデータが並んでいるテーブル
         private double [] m_freqGainTable;
 
         Point m_prevFreqGainPress = new Point(-1, -1);
 
+        private BackgroundWorker m_FirWorker;
 
         private void InitFirTab() {
+            m_FirWorker = new BackgroundWorker();
+            m_FirWorker.WorkerReportsProgress = true;
+            m_FirWorker.DoWork += new DoWorkEventHandler(m_FirWorker_DoWork);
+            m_FirWorker.ProgressChanged += new ProgressChangedEventHandler(m_FirWorker_ProgressChanged);
+            m_FirWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(m_FirWorker_RunWorkerCompleted);
+            m_FirWorker.WorkerSupportsCancellation = true;
+
             // ファイルからEQ設定を読み込んでグラフにセットする。
             var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
             FirSave p = xmlRW.Load();
 
-            m_freqGainTable = new double[640];
+            InitializeFreqGainTable();
             if (m_freqGainTable.Length == p.FreqGainTable.Count) {
                 for (int i=0; i < m_freqGainTable.Length; ++i) {
                     m_freqGainTable[i] = p.FreqGainTable[i];
                 }
             }
+
             DrawFreqResponse();
         }
 
@@ -258,34 +268,73 @@ namespace PlayPcmWinTestBench {
             m_prevFreqGainPress.Y = -1;
         }
 
+        struct FirWorkerArgs {
+            public string inputPath;
+            public string outputPath;
+            public int outputBitsPerSample;
+            public bool outputSampleIsFloat;
+        }
+
+        /// <summary>
+        /// FIR実行
+        /// </summary>
         private void buttonFirDo_Click(object sender, RoutedEventArgs e) {
+
+            int filterLength;
+            if (!Int32.TryParse(textBoxFirLength.Text, out filterLength)) {
+                MessageBox.Show("FIRフィルタ長は正の奇数の数値を半角数字で入力してください。処理中断。");
+                return;
+            }
+            if ((filterLength & 1) == 0 || filterLength <= 0) {
+                MessageBox.Show("FIRフィルタ長は正の奇数の数値を半角数字で入力してください。処理中断。");
+                return;
+            }
+            m_firTapN = filterLength + 1;
+
             var args = new FirWorkerArgs();
             args.inputPath = textBoxFirInputPath.Text;
             args.outputPath = textBoxFirOutputPath.Text;
+            if (radioButtonFir16bit.IsChecked == true) {
+                args.outputBitsPerSample = 16;
+                args.outputSampleIsFloat = false;
+            }
+            if (radioButtonFir24bit.IsChecked == true) {
+                args.outputBitsPerSample = 24;
+                args.outputSampleIsFloat = false;
+            }
+            if (radioButtonFir32bitFloat.IsChecked == true) {
+                args.outputBitsPerSample = 32;
+                args.outputSampleIsFloat = true;
+            }
 
-            textBoxFirLog.Text += string.Format("開始。{0} → {1}\r\n", args.inputPath, args.outputPath);
+            AddFirLog(string.Format("開始。{0} → {1}\r\n", args.inputPath, args.outputPath));
             buttonFirDo.IsEnabled = false;
+            groupBoxFirInputFile.IsEnabled = false;
+            groupBoxFirEq.IsEnabled = false;
+            groupBoxFirOutputFile.IsEnabled = false;
             m_FirWorker.RunWorkerAsync(args);
         }
 
         void m_FirWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) {
             string s = (string)e.Result;
-            textBoxFirLog.Text += s + "\r\n";
+            AddFirLog(s + "\r\n");
             progressBarFir.Value = 0;
+
             buttonFirDo.IsEnabled = true;
+            groupBoxFirInputFile.IsEnabled = true;
+            groupBoxFirEq.IsEnabled = true;
+            groupBoxFirOutputFile.IsEnabled = true;
         }
 
         void m_FirWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
             progressBarFir.Value = e.ProgressPercentage;
         }
 
-        struct FirWorkerArgs {
-            public string inputPath;
-            public string outputPath;
-        }
-
         void m_FirWorker_DoWork(object sender, DoWorkEventArgs e) {
             FirWorkerArgs args = (FirWorkerArgs)e.Argument;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
 
             var dft = new WWDirectComputeCS.WWDftCpu();
 
@@ -301,7 +350,7 @@ namespace PlayPcmWinTestBench {
                 e.Result = string.Format("WAVファイル {0} 読み込み失敗", args.inputPath);
                 return;
             }
-            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(32, PcmData.ValueRepresentationType.SFloat);
+            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(64, PcmData.ValueRepresentationType.SFloat);
 
             var from = FreqGraphToIdftInput(pcmDataIn.SampleRate);
 
@@ -323,15 +372,15 @@ namespace PlayPcmWinTestBench {
             System.Console.WriteLine("");
             */
 
-            PcmData pcmDataOut = new PcmData();
-            pcmDataOut.CopyFrom(pcmDataIn);
+            PcmData pcmDataEq = new PcmData();
+            pcmDataEq.CopyFrom(pcmDataIn);
 
-            for (int ch=0; ch < pcmDataOut.NumChannels; ++ch) {
+            for (int ch=0; ch < pcmDataEq.NumChannels; ++ch) {
                 // 全てのチャンネルでループ。
 
-                var pcm1ch = new double[pcmDataOut.NumFrames];
+                var pcm1ch = new double[pcmDataEq.NumFrames];
                 for (long i=0; i < pcm1ch.Length; ++i) {
-                    pcm1ch[i] = pcmDataOut.GetSampleValueInFloat(ch, i);
+                    pcm1ch[i] = pcmDataEq.GetSampleValueInDouble(ch, i);
                 }
 
                 // 少しずつFIRする。
@@ -351,25 +400,30 @@ namespace PlayPcmWinTestBench {
                     // 結果を出力に書き込む。
                     for (long i=0; i < pcmFir.Length; ++i) {
                         var re = pcmFir[i];
-                        pcmDataOut.SetSampleValueInFloat(ch, i + offs,
+                        pcmDataEq.SetSampleValueInDouble(ch, i + offs,
                             (float)(re));
                     }
 
                     // 進捗Update。
                     int percentage = (int)(
-                        (100L * ch / pcmDataOut.NumChannels) +
-                        (100L * (offs + 1) / pcm1ch.Length / pcmDataOut.NumChannels));
+                        (100L * ch / pcmDataEq.NumChannels) +
+                        (100L * (offs + 1) / pcm1ch.Length / pcmDataEq.NumChannels));
                     m_FirWorker.ReportProgress(percentage);
                 }
                 fir.Unsetup();
             }
 
             // 音量制限処理。
-            pcmDataOut.LimitLevelOnFloatRange();
+            pcmDataEq.LimitLevelOnDoubleRange();
+
+            PcmData pcmDataOutput
+                = pcmDataEq.BitsPerSampleConvertTo(
+                    args.outputBitsPerSample,
+                    args.outputSampleIsFloat ? PcmData.ValueRepresentationType.SFloat : PcmData.ValueRepresentationType.SInt);
 
             bool writeResult = false;
             try {
-                writeResult = WriteWavFile(pcmDataOut, args.outputPath);
+                writeResult = WriteWavFile(pcmDataOutput, args.outputPath);
             } catch (IOException ex) {
                 e.Result = string.Format("WAVファイル書き込み失敗: {0}\r\n{1}", args.outputPath, ex);
                 return;
@@ -379,19 +433,21 @@ namespace PlayPcmWinTestBench {
                 return;
             }
 
-            e.Result = string.Format("WAVファイル書き込み成功: {0}", args.outputPath);
+            sw.Stop();
+            e.Result = string.Format("WAVファイル書き込み成功: {0}\r\n所要時間 {1}秒",
+                args.outputPath, sw.ElapsedMilliseconds/1000);
             return;
         }
 
         private void buttonFirInputBrowse_Click(object sender, RoutedEventArgs e) {
-            string fileName = BrowseOpenFile();
+            string fileName = BrowseOpenFile(m_filterWav);
             if (0 < fileName.Length) {
                 textBoxFirInputPath.Text = fileName;
             }
         }
 
         private void buttonFirOutputBrowse_Click(object sender, RoutedEventArgs e) {
-            string fileName = BrowseSaveFile();
+            string fileName = BrowseSaveFile(m_filterSaveWav);
             if (0 < fileName.Length) {
                 textBoxFirOutputPath.Text = fileName;
             }
@@ -414,25 +470,52 @@ namespace PlayPcmWinTestBench {
         }
 
         private static readonly string m_firGainFileName = "FirGainTable.xml";
+        private static readonly string m_ppwEqFilter = "PlayPcmWin EQファイル|*.ppweq";
 
         private void buttonEqSave_Click(object sender, RoutedEventArgs e) {
+            string fileName = BrowseSaveFile(m_ppwEqFilter);
+            if (fileName.Length <= 0) {
+                AddFirLog("EQ保存処理中断。\r\n");
+                return;
+            }
+
             FirSave p = new FirSave();
             p.FreqGainTable.Clear();
             p.FreqGainTable.AddRange(m_freqGainTable);
-            var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
-            xmlRW.Save(p);
+            var xmlRW = new WWXmlRW.XmlRW<FirSave>(fileName, false);
+            bool result = xmlRW.Save(p);
+            if (result) {
+                AddFirLog(string.Format("EQ保存処理成功。{0}\r\n", fileName));
+            } else {
+                AddFirLog(string.Format("EQ保存処理失敗。{0}\r\n", fileName));
+            }
         }
 
         private void buttonEqLoad_Click(object sender, RoutedEventArgs e) {
-            var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
-            FirSave p = xmlRW.Load();
-            if (m_freqGainTable.Length == p.FreqGainTable.Count) {
+            string fileName = BrowseOpenFile(m_ppwEqFilter);
+            if (fileName.Length <= 0) {
+                AddFirLog("EQ読み出し処理中断。\r\n");
+                return;
+            }
+
+            var xmlRW = new WWXmlRW.XmlRW<FirSave>(fileName, false);
+            FirSave p;
+            bool result = xmlRW.Load(out p);
+            if (result == true && m_freqGainTable.Length == p.FreqGainTable.Count) {
                 for (int i=0; i < m_freqGainTable.Length; ++i) {
                     m_freqGainTable[i] = p.FreqGainTable[i];
                 }
+                DrawFreqResponse();
+
+                AddFirLog(string.Format("EQ読み出し処理成功。{0}\r\n", fileName));
+            } else {
+                AddFirLog(string.Format("EQ読み出し処理失敗。{0}\r\n", fileName));
             }
-            DrawFreqResponse();
         }
 
+        private void AddFirLog(string s) {
+            textBoxFirLog.Text += s;
+            textBoxFirLog.ScrollToEnd();
+        }
     }
 }
