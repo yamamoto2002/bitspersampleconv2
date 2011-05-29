@@ -8,37 +8,46 @@
                 <Grid Name="grid3">
                     <GroupBox Header="EQ" Height="355" HorizontalAlignment="Left" Margin="6,71,0,0" Name="groupBox14" VerticalAlignment="Top" Width="756">
                         <Grid>
-                            <Canvas Height="292" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="654" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown">
-                                <Rectangle Canvas.Left="80" Canvas.Top="6" Height="128" Name="rectangleFreqGain" Stroke="Black" Width="512" Fill="White" />
-                                <Line X1="80" X2="592" Y1="38" Y2="38" Stroke="Gray" />
-                                <Line X1="80" X2="592" Y1="70" Y2="70" Stroke="Black" />
-                                <Line X1="80" X2="592" Y1="102" Y2="102" Stroke="Gray" />
-                                <Line X1="110" X2="110" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="131" X2="131" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="147" X2="147" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="161" X2="161" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="172" X2="172" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="181" X2="181" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="191" X2="191" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="199" X2="199" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="250" X2="250" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="280" X2="280" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="302" X2="302" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="318" X2="318" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="332" X2="332" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="343" X2="343" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="353" X2="353" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="362" X2="362" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="369" X2="369" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="421" X2="421" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="451" X2="451" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="472" X2="472" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="489" X2="489" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="502" X2="502" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="514" X2="514" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="524" X2="524" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="532" X2="532" Y1="6" Y2="134" Stroke="Gray" />
-                                <Line X1="540" X2="540" Y1="6" Y2="134" Stroke="Gray" />
+                            <Canvas Height="292" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvas1" VerticalAlignment="Top" Width="732" MouseMove="canvas1_MouseMove" MouseDown="canvas1_MouseDown">
+                                <Rectangle Canvas.Left="80" Canvas.Top="6" Height="128" Name="rectangleFreqGain" Stroke="Black" Width="640" Fill="White" />
+                                <Line X1="80" X2="720" Y1="38" Y2="38" Stroke="Gray" />
+                                <Line X1="80" X2="720" Y1="70" Y2="70" Stroke="Black" />
+                                <Line X1="80" X2="720" Y1="102" Y2="102" Stroke="Gray" />
+                                <Line X1="108.174601448909" X2="108.174601448909" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="128.164799306237" X2="128.164799306237" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="143.670401387526" X2="143.670401387526" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="156.339400755146" X2="156.339400755146" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="167.050887096044" X2="167.050887096044" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="176.329598612474" X2="176.329598612474" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="184.514002204055" X2="184.514002204055" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="191.835200693763" X2="191.835200693763" Y1="6" Y2="134" Stroke="Black" />
+                                <Line X1="240" X2="240" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="268.174601448909" X2="268.174601448909" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="288.164799306237" X2="288.164799306237" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="303.670401387526" X2="303.670401387526" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="316.339400755146" X2="316.339400755146" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="327.050887096044" X2="327.050887096044" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="336.329598612474" X2="336.329598612474" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="344.514002204055" X2="344.514002204055" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="351.835200693763" X2="351.835200693763" Y1="6" Y2="134" Stroke="Black" />
+                                <Line X1="400" X2="400" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="428.174601448909" X2="428.174601448909" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="448.164799306237" X2="448.164799306237" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="463.670401387526" X2="463.670401387526" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="476.339400755146" X2="476.339400755146" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="487.050887096044" X2="487.050887096044" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="496.329598612474" X2="496.329598612474" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="504.514002204055" X2="504.514002204055" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="511.835200693763" X2="511.835200693763" Y1="6" Y2="134" Stroke="Black" />
+                                <Line X1="560" X2="560" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="588.174601448909" X2="588.174601448909" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="608.164799306237" X2="608.164799306237" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="623.670401387526" X2="623.670401387526" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="636.339400755146" X2="636.339400755146" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="647.050887096044" X2="647.050887096044" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="656.329598612474" X2="656.329598612474" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="664.514002204055" X2="664.514002204055" Y1="6" Y2="134" Stroke="Gray" />
+                                <Line X1="671.835200693763" X2="671.835200693763" Y1="6" Y2="134" Stroke="Black" />
                                 <Polyline Stroke="Red" Canvas.Left="80" Canvas.Top="6" Name="freqGainLine"></Polyline>
                                 <Label Canvas.Left="31" Canvas.Top="-3" Content="+12dB" Height="28" Name="label16" />
                                 <Label Canvas.Left="39" Canvas.Top="26" Content="+6dB" Height="28" Name="label24" />
@@ -46,17 +55,19 @@
                                 <Label Canvas.Left="43" Canvas.Top="87" Content="-6dB" Height="28" Name="label25" />
                                 <Label Canvas.Left="35" Canvas.Top="116" Content="-12dB" Height="28" Name="label18" />
                                 <Label Canvas.Left="61" Canvas.Top="135" Content="20Hz" Height="28" Name="label19" />
-                                <Label Canvas.Left="565" Canvas.Top="135" Content="20kHz" Height="28" Name="label20" />
-                                <Label Canvas.Left="181" Canvas.Top="135" Content="100Hz" Height="28" Name="label21" />
-                                <Label Canvas.Left="351" Canvas.Top="135" Content="1kHz" Height="28" Name="label22" />
-                                <Label Canvas.Left="515" Canvas.Top="135" Content="10kHz" Height="28" Name="label23" />
-                                <Label Canvas.Left="227" Canvas.Top="135" Content="200Hz" Height="28" Name="label26" />
-                                <Label Canvas.Left="403" Canvas.Top="135" Content="2kHz" Height="28" Name="label27" />
+                                <Label Canvas.Left="539" Canvas.Top="135" Content="20kHz" Height="28" Name="label20" />
+                                <Label Canvas.Left="170" Canvas.Top="135" Content="100Hz" Height="28" Name="label21" />
+                                <Label Canvas.Left="338" Canvas.Top="135" Content="1kHz" Height="28" Name="label22" />
+                                <Label Canvas.Left="483" Canvas.Top="135" Content="10kHz" Height="28" Name="label23" />
+                                <Label Canvas.Left="221" Canvas.Top="135" Content="200Hz" Height="28" Name="label26" />
+                                <Label Canvas.Left="383" Canvas.Top="135" Content="2kHz" Height="28" Name="label27" />
                                 <Label Canvas.Left="133" Canvas.Top="135" Content="50Hz" Height="28" Name="label28" />
-                                <Label Canvas.Left="296" Canvas.Top="135" Content="500Hz" Height="28" Name="label29" />
-                                <Label Canvas.Left="470" Canvas.Top="135" Content="5kHz" Height="28" Name="label30" />
-                                <Label Canvas.Left="608" Canvas.Top="135" Content="周波数" Height="28" Name="label31" />
-                                <Label Canvas.Left="0" Canvas.Top="56" Content="利得" Height="28" Name="label32" />
+                                <Label Canvas.Left="285" Canvas.Top="135" Content="500Hz" Height="28" Name="label29" />
+                                <Label Canvas.Left="444" Canvas.Top="135" Content="5kHz" Height="28" Name="label30" />
+                                <Label Canvas.Left="601" Canvas.Top="135" Content="50kHz" Height="28" Name="label33" />
+                                <Label Canvas.Left="644" Canvas.Top="135" Content="100kHz" Height="28" Name="label34" />
+                                <Label Canvas.Left="0" Canvas.Top="135" Content="周波数→" Height="28" Name="label31" />
+                                <Label Canvas.Left="6" Canvas.Top="10" Content="利得" Height="28" Name="label32" />
                             </Canvas>
                             <Button Content="フラットにする(_F)" Height="23" HorizontalAlignment="Left" Margin="6,301,0,0" Name="buttonFirFlat" VerticalAlignment="Top" Width="162" Click="buttonFirFlat_Click" />
                             <Button Content="なめらかにする(_M)" Height="23" HorizontalAlignment="Left" Margin="176,301,0,0" Name="buttonFirSmooth" VerticalAlignment="Top" Width="162" Click="buttonFirSmooth_Click" />

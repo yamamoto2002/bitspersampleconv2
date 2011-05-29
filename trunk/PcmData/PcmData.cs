@@ -350,7 +350,47 @@ namespace PcmDataLib {
         }
 
         /// <summary>
-        /// サンプル値取得。フォーマットがSFloatの場合のみ使用可能。
+        /// サンプル値取得。フォーマットが64bit SFloatの場合のみ使用可能。
+        /// </summary>
+        /// <param name="ch">チャンネル番号</param>
+        /// <param name="pos">サンプル番号</param>
+        /// <returns>サンプル値。-1.0～+1.0位</returns>
+        public double GetSampleValueInDouble(int ch, long pos) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 64);
+            Debug.Assert(0 <= ch && ch < NumChannels);
+
+            if (pos < 0 || NumFrames <= pos) {
+                return 0.0;
+            }
+
+            long offset = pos * BitsPerFrame/8 + ch * BitsPerSample/8;
+            Debug.Assert(offset <= 0x7fffffffL);
+
+            return BitConverter.ToDouble(m_sampleArray, (int)offset);
+        }
+
+        /// <summary>
+        /// double サンプル値セット。フォーマットが64bit SFloatの場合のみ使用可能。
+        /// </summary>
+        public void SetSampleValueInDouble(int ch, long pos, double val) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 64);
+            Debug.Assert(0 <= ch && ch < NumChannels);
+
+            if (pos < 0 || NumFrames <= pos) {
+                return;
+            }
+
+            long offset = pos * BitsPerFrame / 8 + ch * BitsPerSample / 8;
+            Debug.Assert(offset <= 0x7fffffffL);
+
+            var byteArray = BitConverter.GetBytes(val);
+            Buffer.BlockCopy(byteArray, 0, m_sampleArray, (int)offset, 8);
+        }
+
+        /// <summary>
+        /// float サンプル値取得。フォーマットが32bit SFloatの場合のみ使用可能。
         /// </summary>
         /// <param name="ch">チャンネル番号</param>
         /// <param name="pos">サンプル番号</param>
@@ -364,14 +404,14 @@ namespace PcmDataLib {
                 return 0.0f;
             }
 
-            long offset = pos * BitsPerFrame/8 + ch * BitsPerSample/8;
+            long offset = pos * BitsPerFrame / 8 + ch * BitsPerSample / 8;
             Debug.Assert(offset <= 0x7fffffffL);
 
             return BitConverter.ToSingle(m_sampleArray, (int)offset);
         }
 
         /// <summary>
-        /// サンプル値セット。フォーマットがSFloatの場合のみ使用可能。
+        /// サンプル値セット。フォーマットが32bit SFloatの場合のみ使用可能。
         /// </summary>
         public void SetSampleValueInFloat(int ch, long pos, float val) {
             Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
@@ -389,7 +429,24 @@ namespace PcmDataLib {
             Buffer.BlockCopy(byteArray, 0, m_sampleArray, (int)offset, 4);
         }
 
-        public void Scale(float scale) {
+        /// <summary>
+        /// doubleのバッファをスケーリングする。ダブルバッファとは関係ない
+        /// </summary>
+        public void ScaleDoubleBuffer(double scale) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 64);
+            for (int i = 0; i < NumFrames * NumChannels; ++i) {
+                double v = BitConverter.ToDouble(m_sampleArray, i * 8);
+                v *= scale;
+                var byteArray = BitConverter.GetBytes(v);
+                Buffer.BlockCopy(byteArray, 0, m_sampleArray, i * 8, 8);
+            }
+        }
+
+        /// <summary>
+        /// floatのバッファをスケーリングする。
+        /// </summary>
+        public void ScaleFloatBuffer(float scale) {
             Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
             Debug.Assert(ValidBitsPerSample == 32);
             for (int i = 0; i < NumFrames * NumChannels; ++i) {
@@ -400,7 +457,30 @@ namespace PcmDataLib {
             }
         }
 
-        public void FindMaxMinValue(out float maxV, out float minV) {
+        /// <summary>
+        /// doubleのバッファで最大値、最小値を取得
+        /// </summary>
+        public void FindMaxMinValueOnDoubleBuffer(out double maxV, out double minV) {
+            Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+            Debug.Assert(ValidBitsPerSample == 64);
+            maxV = 0.0;
+            minV = 0.0;
+
+            for (int i = 0; i < NumFrames * NumChannels; ++i) {
+                float v = BitConverter.ToSingle(m_sampleArray, i * 8);
+                if (v < minV) {
+                    minV = v;
+                }
+                if (maxV < v) {
+                    maxV = v;
+                }
+            }
+        }
+
+        /// <summary>
+        /// floatのバッファで最大値、最小値を取得
+        /// </summary>
+        public void FindMaxMinValueOnFloatBuffer(out float maxV, out float minV) {
             Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
             Debug.Assert(ValidBitsPerSample == 32);
             maxV = 0.0f;
@@ -417,10 +497,38 @@ namespace PcmDataLib {
             }
         }
 
+        /// <summary>
+        /// doubleのバッファで音量制限する。
+        /// </summary>
+        /// <returns>スケーリングが行われた場合、スケールの倍数。行われなかった場合1.0</returns>
+        public double LimitLevelOnDoubleRange() {
+            double maxV;
+            double minV;
+            FindMaxMinValueOnDoubleBuffer(out maxV, out minV);
+
+            double scale = 1.0;
+            if (1.0 < maxV) {
+                scale = 1.0 / maxV;
+            }
+            if (minV < -1.0 && -1.0 / minV < scale) {
+                scale = -1.0 / minV;
+            }
+
+            if (scale < 1.0) {
+                ScaleDoubleBuffer(scale);
+            }
+
+            return scale;
+        }
+
+        /// <summary>
+        /// floatのバッファで音量制限する。
+        /// </summary>
+        /// <returns>スケーリングが行われた場合、スケールの倍数。行われなかった場合1.0f</returns>
         public float LimitLevelOnFloatRange() {
             float maxV;
             float minV;
-            FindMaxMinValue(out maxV, out minV);
+            FindMaxMinValueOnFloatBuffer(out maxV, out minV);
 
             float scale = 1.0f;
             if (0.99999988079071044921875f < maxV) {
@@ -431,7 +539,7 @@ namespace PcmDataLib {
             }
 
             if (scale < 1.0f) {
-                Scale(scale);
+                ScaleFloatBuffer(scale);
             }
 
             return scale;
@@ -469,7 +577,32 @@ namespace PcmDataLib {
         public PcmData BitsPerSampleConvertTo(int newBitsPerSample, ValueRepresentationType newValueRepType) {
             byte [] newSampleArray        = null;
 
-            if (newBitsPerSample == 32) {
+            /// @todo 次に項目を増やすときは、2次元のテーブルにリファクタリングする
+            if (newBitsPerSample == 64) {
+                Debug.Assert(newValueRepType == ValueRepresentationType.SFloat);
+                switch (BitsPerSample) {
+                case 16:
+                    newSampleArray = ConvI16toF64(GetSampleArray());
+                    break;
+                case 24:
+                    newSampleArray = ConvI24toF64(GetSampleArray());
+                    break;
+                case 32:
+                    if (SampleValueRepresentationType == ValueRepresentationType.SFloat) {
+                        newSampleArray = ConvF32toF64(GetSampleArray());
+                    } else {
+                        newSampleArray = ConvI32toF64(GetSampleArray());
+                    }
+                    break;
+                case 64:
+                    Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+                    newSampleArray = (byte[])GetSampleArray().Clone();
+                    break;
+                default:
+                    Debug.Assert(false);
+                    return null;
+                }
+            } else if (newBitsPerSample == 32) {
                 if (newValueRepType == ValueRepresentationType.SFloat) {
                     switch (BitsPerSample) {
                     case 16:
@@ -484,6 +617,10 @@ namespace PcmDataLib {
                         } else {
                             newSampleArray = ConvI32toF32(GetSampleArray());
                         }
+                        break;
+                    case 64:
+                        Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+                        newSampleArray = ConvF64toF32(GetSampleArray());
                         break;
                     default:
                         Debug.Assert(false);
@@ -503,6 +640,10 @@ namespace PcmDataLib {
                         } else {
                             newSampleArray = (byte[])GetSampleArray().Clone();
                         }
+                        break;
+                    case 64:
+                        Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+                        newSampleArray = ConvF64toI32(GetSampleArray());
                         break;
                     default:
                         Debug.Assert(false);
@@ -527,6 +668,10 @@ namespace PcmDataLib {
                         newSampleArray = ConvI32toI24(GetSampleArray());
                     }
                     break;
+                case 64:
+                    Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+                    newSampleArray = ConvF64toI24(GetSampleArray());
+                    break;
                 default:
                     Debug.Assert(false);
                     return null;
@@ -545,6 +690,10 @@ namespace PcmDataLib {
                     } else {
                         newSampleArray = ConvI32toI16(GetSampleArray());
                     }
+                    break;
+                case 64:
+                    Debug.Assert(SampleValueRepresentationType == ValueRepresentationType.SFloat);
+                    newSampleArray = ConvF64toI16(GetSampleArray());
                     break;
                 default:
                     Debug.Assert(false);
@@ -668,6 +817,9 @@ namespace PcmDataLib {
             return to;
         }
 
+        ////////////////////////////////////////////////////////////////////
+        // F32
+
         private byte[] ConvF32toI16(byte[] from) {
             int nSample = from.Length / 4;
             byte[] to = new byte[nSample * 2];
@@ -699,7 +851,6 @@ namespace PcmDataLib {
             }
             return to;
         }
-
         private byte[] ConvF32toI32(byte[] from) {
             int nSample = from.Length / 4;
             byte[] to = new byte[nSample * 4];
@@ -781,5 +932,164 @@ namespace PcmDataLib {
             return to;
         }
 
+        ////////////////////////////////////////////////////////////////
+        // F64
+
+        private byte[] ConvF64toI16(byte[] from) {
+            int nSample = from.Length / 8;
+            byte[] to = new byte[nSample * 2];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                double dv = System.BitConverter.ToDouble(from, fromPos);
+                int iv = (int)(dv * 32768.0);
+                if (32767 < iv) {
+                    iv = 32767;
+                }
+                to[toPos++] = (byte)(iv & 0xff);
+                to[toPos++] = (byte)((iv >> 8) & 0xff);
+                fromPos += 8;
+            }
+            return to;
+        }
+        private byte[] ConvF64toI24(byte[] from) {
+            int nSample = from.Length / 8;
+            byte[] to = new byte[nSample * 3];
+            int fromPos = 0;
+            int toPos   = 0;
+            for (int i = 0; i < nSample; ++i) {
+                double dv = System.BitConverter.ToDouble(from, fromPos);
+                int iv = (int)(dv * 8388608.0);
+                if (8388607 < iv) {
+                    iv = 8388607;
+                }
+                to[toPos++] = (byte)(iv & 0xff);
+                to[toPos++] = (byte)((iv >> 8) & 0xff);
+                to[toPos++] = (byte)((iv >> 16) & 0xff);
+                fromPos += 8;
+            }
+            return to;
+        }
+        private byte[] ConvF64toI32(byte[] from) {
+            int nSample = from.Length / 8;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos   = 0;
+            for (int i = 0; i < nSample; ++i) {
+                double dv = System.BitConverter.ToDouble(from, fromPos);
+
+                int iv = 0;
+                if ((long)(dv * Int32.MaxValue) == (long)Int32.MaxValue) {
+                    iv = Int32.MaxValue;
+                } else {
+                    iv = (int)(dv * Int32.MaxValue);
+                }
+
+                to[toPos++] = (byte)((iv >> 0) & 0xff);
+                to[toPos++] = (byte)((iv >> 8)  & 0xff);
+                to[toPos++] = (byte)((iv >> 16) & 0xff);
+                to[toPos++] = (byte)((iv >> 24) & 0xff);
+                fromPos += 8;
+            }
+            return to;
+        }
+        private byte[] ConvF64toF32(byte[] from) {
+            int nSample = from.Length / 8;
+            byte[] to = new byte[nSample * 4];
+            int fromPos = 0;
+            int toPos   = 0;
+            for (int i = 0; i < nSample; ++i) {
+                double dv = System.BitConverter.ToDouble(from, fromPos);
+                float fv = (float)dv;
+                if (0.99999988079071044921875f < fv) {
+                    fv = 0.99999988079071044921875f;
+                }
+
+                byte [] b = System.BitConverter.GetBytes(fv);
+                to[toPos++] = b[0];
+                to[toPos++] = b[1];
+                to[toPos++] = b[2];
+                to[toPos++] = b[3];
+                fromPos += 8;
+            }
+            return to;
+        }
+
+        private byte[] ConvI16toF64(byte[] from) {
+            int nSample = from.Length / 2;
+            byte[] to = new byte[nSample * 8];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                short iv = (short)(from[fromPos]
+                    + (from[fromPos + 1] << 8));
+                double dv = ((double)iv) * (1.0 / 32768.0);
+
+                byte [] b = System.BitConverter.GetBytes(dv);
+
+                for (int j=0; j < 8; ++j) {
+                    to[toPos++] = b[j];
+                }
+                fromPos += 2;
+            }
+            return to;
+        }
+        private byte[] ConvI24toF64(byte[] from) {
+            int nSample = from.Length / 3;
+            byte[] to = new byte[nSample * 8];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                int iv = ((int)from[fromPos] << 8)
+                    + ((int)from[fromPos + 1] << 16)
+                    + ((int)from[fromPos + 2] << 24);
+                double dv = ((double)iv) * (1.0 / 2147483648.0);
+
+                byte [] b = System.BitConverter.GetBytes(dv);
+
+                for (int j=0; j < 8; ++j) {
+                    to[toPos++] = b[j];
+                }
+                fromPos += 3;
+            }
+            return to;
+        }
+        private byte[] ConvI32toF64(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 8];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                int iv = ((int)from[fromPos + 1] << 8)
+                    + ((int)from[fromPos + 2] << 16)
+                    + ((int)from[fromPos + 3] << 24);
+                double dv = ((double)iv) * (1.0 / 2147483648.0);
+
+                byte [] b = System.BitConverter.GetBytes(dv);
+
+                for (int j=0; j < 8; ++j) {
+                    to[toPos++] = b[j];
+                }
+                fromPos += 4;
+            }
+            return to;
+        }
+        private byte[] ConvF32toF64(byte[] from) {
+            int nSample = from.Length / 4;
+            byte[] to = new byte[nSample * 8];
+            int fromPos = 0;
+            int toPos = 0;
+            for (int i = 0; i < nSample; ++i) {
+                float fv = System.BitConverter.ToSingle(from, fromPos);
+                double dv = (double)fv;
+
+                byte [] b = System.BitConverter.GetBytes(dv);
+                for (int j=0; j < 8; ++j) {
+                    to[toPos++] = b[j];
+                }
+                fromPos += 4;
+            }
+            return to;
+        }
     }
 }

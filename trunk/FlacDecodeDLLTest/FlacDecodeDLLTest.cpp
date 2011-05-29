@@ -1,4 +1,4 @@
-#include "FlacDecodeDLL.cpp"
+#include "FlacDecodeDLL.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

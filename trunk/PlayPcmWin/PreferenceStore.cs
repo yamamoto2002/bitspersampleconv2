@@ -6,7 +6,11 @@ using PcmDataLib;
 using WasapiPcmUtil;
 
 namespace PlayPcmWin {
-    public class Preference {
+    public class Preference : WWXmlRW.SaveLoadContents {
+        // SaveLoadContents IF
+        public int GetCurrentVersion() { return CurrentVersion; }
+        public int GetVersion() { return Version; }
+
         public const int DefaultLatencyMilliseconds = 170;
         public const int CurrentVersion = 3;
 
@@ -97,50 +101,19 @@ namespace PlayPcmWin {
         }
 
         public static Preference Load() {
-            Preference p = new Preference();
+            var xmlRW = new WWXmlRW.XmlRW<Preference>(m_fileName);
 
-            try {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
-                        m_fileName, System.IO.FileMode.Open,
-                        IsolatedStorageFile.GetUserStoreForDomain())) {
-                    byte[] buffer = new byte[isfs.Length];
-                    isfs.Read(buffer, 0, (int)isfs.Length);
-                    System.IO.MemoryStream stream = new System.IO.MemoryStream(buffer);
+            Preference p = xmlRW.Load();
 
-                    XmlSerializer formatter = new XmlSerializer(typeof(Preference));
-                    p = formatter.Deserialize(stream) as Preference;
-                }
-            } catch (System.Exception ex) {
-                Console.WriteLine(ex);
-                p = new Preference();
-            }
-
-            if (Preference.CurrentVersion != p.Version) {
-                Console.WriteLine("Preference Version mismatch {0} != {1}", Preference.CurrentVersion, p.Version);
-                p = new Preference();
-            }
-
+            // 読み込んだ値が都合によりサポートされていない場合、ロード後に強制的に上書きする
             p.ParallelRead = false;
+
             return p;
         }
 
         public static bool Save(Preference p) {
-            bool result = false;
-
-            try {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
-                        m_fileName, System.IO.FileMode.Create,
-                        IsolatedStorageFile.GetUserStoreForDomain())) {
-                    XmlSerializer s = new XmlSerializer(typeof(Preference));
-                    p.Version = Preference.CurrentVersion;
-                    s.Serialize(isfs, p);
-                    result = true;
-                }
-            } catch (System.Exception ex) {
-                Console.WriteLine(ex.ToString());
-            }
-
-            return result;
+            var xmlRW = new WWXmlRW.XmlRW<Preference>(m_fileName);
+            return xmlRW.Save(p);
         }
     }
 }

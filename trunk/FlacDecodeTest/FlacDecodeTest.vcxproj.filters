@@ -15,19 +15,89 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>ヘッダー ファイル</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>ソース ファイル</Filter>
-    </ClCompile>
     <ClCompile Include="FlacDecodeTest.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitmath.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitreader.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitwriter.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\cpu.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\crc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\fixed.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\float.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\format.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\lpc.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\md5.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\memory.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\metadata_iterators.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\metadata_object.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_decoder_aspect.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_encoder_aspect.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_helper.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_mapping.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_decoder.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_encoder.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_encoder_framing.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\window.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libogg-1.2.0\src\bitwise.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\libogg-1.2.0\src\framing.c">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\bitreader_asm.nasm" />
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\cpu_asm.nasm" />
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\fixed_asm.nasm" />
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\stream_encoder_asm.nasm" />
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\lpc_asm.nasm" />
   </ItemGroup>
 </Project>

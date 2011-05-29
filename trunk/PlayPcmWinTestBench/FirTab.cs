@@ -7,8 +7,27 @@ using System.Windows;
 using System.Windows.Controls;
 using PcmDataLib;
 using WWDirectComputeCS;
+using System.Collections.Generic;
 
 namespace PlayPcmWinTestBench {
+
+    public class FirSave : WWXmlRW.SaveLoadContents {
+        // SaveLoadContents IF
+        public int GetCurrentVersion() { return CurrentVersion; }
+        public int GetVersion() { return Version; }
+
+        public static readonly int CurrentVersion = 1;
+        public int Version { get; set; }
+        public int FreqGainTableItemNum { get { return FreqGainTable.Count; } }
+        public List<double> FreqGainTable;
+
+        public FirSave() {
+            Version = CurrentVersion;
+
+            FreqGainTable = new List<double>();
+        }
+    }
+
     public partial class MainWindow : Window {
         //////////////////////////////////////////////////////////////////////////////////////////
         // FIR
@@ -20,8 +39,23 @@ namespace PlayPcmWinTestBench {
 
         Point m_prevFreqGainPress = new Point(-1, -1);
 
-        private void InitializeFirTable() {
-            m_freqGainTable = new double[512];
+
+        private void InitFirTab() {
+            // ファイルからEQ設定を読み込んでグラフにセットする。
+            var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
+            FirSave p = xmlRW.Load();
+
+            m_freqGainTable = new double[640];
+            if (m_freqGainTable.Length == p.FreqGainTable.Count) {
+                for (int i=0; i < m_freqGainTable.Length; ++i) {
+                    m_freqGainTable[i] = p.FreqGainTable[i];
+                }
+            }
+            DrawFreqResponse();
+        }
+
+        private void InitializeFreqGainTable() {
+            m_freqGainTable = new double[640];
             for (int i=0; i < m_freqGainTable.Length; ++i) {
                 m_freqGainTable[i] = 1.0;
             }
@@ -63,8 +97,10 @@ namespace PlayPcmWinTestBench {
         private double GetValueOnFreq(double[] freqValueTable, double freq) {
             int width = freqValueTable.Length;
             double lowestFreq = 20;
-            double highestFreq = 20000;
-            double octave = 3;
+            double highestFreq = 200 * 1000;
+
+            // 20Hz ～200kHz …10の4乗倍
+            double magnitude10 = 4;
             if (freq < lowestFreq) {
                 return freqValueTable[0];
             }
@@ -72,7 +108,7 @@ namespace PlayPcmWinTestBench {
                 return freqValueTable[freqValueTable.Length - 1];
             }
 
-            int x = (int)((Math.Log10(freq) - Math.Log10(lowestFreq)) * width / octave);
+            int x = (int)((Math.Log10(freq) - Math.Log10(lowestFreq)) * width / magnitude10);
             if (x < 0) {
                 System.Diagnostics.Debug.Assert(0 <= x);
                 return freqValueTable[0];
@@ -191,7 +227,7 @@ namespace PlayPcmWinTestBench {
         }
 
         private void buttonFirFlat_Click(object sender, RoutedEventArgs e) {
-            InitializeFirTable();
+            InitializeFreqGainTable();
             DrawFreqResponse();
         }
 
@@ -377,12 +413,25 @@ namespace PlayPcmWinTestBench {
             DrawFreqResponse();
         }
 
-        private void buttonEqSave_Click(object sender, RoutedEventArgs e) {
+        private static readonly string m_firGainFileName = "FirGainTable.xml";
 
+        private void buttonEqSave_Click(object sender, RoutedEventArgs e) {
+            FirSave p = new FirSave();
+            p.FreqGainTable.Clear();
+            p.FreqGainTable.AddRange(m_freqGainTable);
+            var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
+            xmlRW.Save(p);
         }
 
         private void buttonEqLoad_Click(object sender, RoutedEventArgs e) {
-
+            var xmlRW = new WWXmlRW.XmlRW<FirSave>(m_firGainFileName);
+            FirSave p = xmlRW.Load();
+            if (m_freqGainTable.Length == p.FreqGainTable.Count) {
+                for (int i=0; i < m_freqGainTable.Length; ++i) {
+                    m_freqGainTable[i] = p.FreqGainTable[i];
+                }
+            }
+            DrawFreqResponse();
         }
 
     }
