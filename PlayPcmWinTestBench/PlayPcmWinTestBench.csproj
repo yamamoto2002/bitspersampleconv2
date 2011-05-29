@@ -182,6 +182,10 @@
       <Project>{01EAC382-2F85-4FAE-ACC0-970298B17FF3}</Project>
       <Name>WWDirectComputeCS</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WWXmlRW\WWXmlRW.csproj">
+      <Project>{AB557C03-95F9-4D3A-B2CB-16EC26D884CD}</Project>
+      <Name>WWXmlRW</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="PlayPcmWin64.ico" />

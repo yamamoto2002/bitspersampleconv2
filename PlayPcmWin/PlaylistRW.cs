@@ -52,7 +52,11 @@ namespace PlayPcmWin {
         }
     }
 
-    public class PlaylistSave {
+    public class PlaylistSave : WWXmlRW.SaveLoadContents {
+        // SaveLoadContents IF
+        public int GetCurrentVersion() { return CurrentVersion; }
+        public int GetVersion() { return Version; }
+
         public static readonly int CurrentVersion = 1;
         public int Version { get; set; }
         public int ItemNum { get { return Items.Count(); } }
@@ -79,48 +83,17 @@ namespace PlayPcmWin {
         private static readonly string m_fileName = "PlayPcmWinPlayList.xml";
 
         public static PlaylistSave Load() {
-            PlaylistSave p = new PlaylistSave();
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName);
+            PlaylistSave p = xmlRW.Load();
 
-            try {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
-                        m_fileName, System.IO.FileMode.Open,
-                        IsolatedStorageFile.GetUserStoreForDomain())) {
-                    byte[] buffer = new byte[isfs.Length];
-                    isfs.Read(buffer, 0, (int)isfs.Length);
-                    System.IO.MemoryStream stream = new System.IO.MemoryStream(buffer);
-                    XmlSerializer formatter = new XmlSerializer(typeof(PlaylistSave));
-                    p = formatter.Deserialize(stream) as PlaylistSave;
-                    isfs.Close();
-                }
-            } catch (System.Exception ex) {
-                Console.WriteLine(ex);
-                p = new PlaylistSave();
-            }
-
-            if (PlaylistSave.CurrentVersion != p.Version) {
-                Console.WriteLine("PlayList Version mismatch {0} != {1}", PlaylistSave.CurrentVersion, p.Version);
-                p = new PlaylistSave();
-            }
+            // TODO: ロード後に、強制的に上書きしたいパラメータがある場合はここで上書きする。
 
             return p;
         }
 
         public static bool Save(PlaylistSave p) {
-            bool result = false;
-
-            try {
-                using (IsolatedStorageFileStream isfs = new IsolatedStorageFileStream(
-                        m_fileName, System.IO.FileMode.Create,
-                        IsolatedStorageFile.GetUserStoreForDomain())) {
-                    XmlSerializer s = new XmlSerializer(typeof(PlaylistSave));
-                    s.Serialize(isfs, p);
-                    result = true;
-                }
-            } catch (System.Exception ex) {
-                Console.WriteLine(ex.ToString());
-            }
-
-            return result;
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName);
+            return xmlRW.Save(p);
         }
     }
 }

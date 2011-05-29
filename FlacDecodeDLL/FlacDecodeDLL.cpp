@@ -374,9 +374,14 @@ DecodeMain(FlacDecodeInfo *fdi)
     // FLAC__stream_decoder_finish()がfcloseしてくれるので、忘れる。
     fp = NULL;
 #else
-    init_status = FLAC__stream_decoder_init_file(
-        fdi->decoder, fdi->fromFlacPath,
-        WriteCallback, MetadataCallback, ErrorCallback, fdi);
+    {
+        char path[MAX_PATH];
+        memset(path, 0, sizeof path);
+        WideCharToMultiByte(CP_ACP, 0, fdi->fromFlacPathUtf16, -1, path, sizeof path-1, NULL, false);
+        init_status = FLAC__stream_decoder_init_file(
+            fdi->decoder, path,
+            WriteCallback, MetadataCallback, ErrorCallback, fdi);
+    }
 #endif
     if(init_status != FLAC__STREAM_DECODER_INIT_STATUS_OK) {
         fdi->errorCode = FDRT_FlacStreamDecoderInitFailed;

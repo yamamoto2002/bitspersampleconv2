@@ -118,8 +118,7 @@ namespace PlayPcmWinTestBench {
             textBoxUSResult.Text = s;
             textBoxAQResult.Text = s;
 
-            InitializeFirTable();
-            DrawFreqResponse();
+            InitFirTab();
         }
 
         private void Window_Closed(object sender, EventArgs e) {

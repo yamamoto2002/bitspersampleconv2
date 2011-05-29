@@ -40,14 +40,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>C:\work\BpsConvWin2\FlacDecodeDLL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\$(Configuration)\;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <LibraryPath>$(SolutionDir)bin\x86\$(Configuration)\;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
     <OutDir>bin\x86\$(Configuration)\</OutDir>
     <IntDir>obj\x86\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>C:\work\BpsConvWin2\FlacDecodeDLL;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)bin\$(Configuration)\;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
+    <IncludePath>C:\work\flac-1.2.1\src\libFLAC\include;C:\work\libogg-1.2.0\include;C:\work\flac-1.2.1\include;C:\work\BpsConvWin2\FlacDecodeDLL;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\work\flac-1.2.1\Release;$(SolutionDir)bin\x86\$(Configuration)\;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
     <OutDir>bin\x86\$(Configuration)\</OutDir>
     <IntDir>obj\x86\$(Configuration)\</IntDir>
   </PropertyGroup>
@@ -68,40 +68,84 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>copy /y $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.lib $(IntDir)
-copy /y $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.* $(OutDir)</Command>
+      <Command>copy $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.* $(IntDir)\</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_USRDLL;FLAC__NO_DLL;FLAC__HAS_OGG;FLAC__CPU_IA32;FLAC__HAS_NASM;FLAC__USE_3DNOW;VERSION="1.2.0";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>FlacDecodeDLL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PreBuildEvent>
-      <Command>copy $(ProjectDir)..\FlacDecodeDLL\$(OutDir)FlacDecodeDLL.* $(IntDir)\</Command>
+      <Command>copy C:\work\flac-1.2.1\Release\libflac_static.pdb $(OutDir)</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitmath.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitreader.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\bitwriter.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\cpu.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\crc.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\fixed.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\float.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\format.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\lpc.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\md5.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\memory.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\metadata_iterators.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\metadata_object.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_decoder_aspect.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_encoder_aspect.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_helper.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\ogg_mapping.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_decoder.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_encoder.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\stream_encoder_framing.c" />
+    <ClCompile Include="..\..\flac-1.2.1\src\libFLAC\window.c" />
+    <ClCompile Include="..\..\libogg-1.2.0\src\bitwise.c" />
+    <ClCompile Include="..\..\libogg-1.2.0\src\framing.c" />
     <ClCompile Include="FlacDecodeTest.cpp" />
-    <ClCompile Include="stdafx.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\bitreader_asm.nasm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -f win32 -d OBJ_FORMAT_win32 -i C:\work\flac-1.2.1\src\libFLAC\ia32\ %(FullPath) -o $(IntDIr)%(FileName).obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDIr)%(FileName).obj</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\cpu_asm.nasm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -f win32 -d OBJ_FORMAT_win32 -i C:\work\flac-1.2.1\src\libFLAC\ia32\ %(FullPath) -o $(IntDIr)%(FileName).obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDIr)%(FileName).obj</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\fixed_asm.nasm">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -f win32 -d OBJ_FORMAT_win32 -i C:\work\flac-1.2.1\src\libFLAC\ia32\ %(FullPath) -o $(IntDIr)%(FileName).obj</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDIr)%(FileName).obj</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\lpc_asm.nasm">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDIr)%(FileName).obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -f win32 -d OBJ_FORMAT_win32 -i C:\work\flac-1.2.1\src\libFLAC\ia32\ %(FullPath) -o $(IntDIr)%(FileName).obj</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\..\flac-1.2.1\src\libFLAC\ia32\stream_encoder_asm.nasm">
+      <FileType>Document</FileType>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDIr)%(FileName).obj</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -f win32 -d OBJ_FORMAT_win32 -i C:\work\flac-1.2.1\src\libFLAC\ia32\ %(FullPath) -o $(IntDIr)%(FileName).obj</Command>
+    </CustomBuild>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
