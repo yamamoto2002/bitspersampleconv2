@@ -5,6 +5,7 @@
 
 ===!PlayPcmWin 2.0.96 ==
   * (PlayPcmWinテストベンチ)FIR EQ EQ設定保存・読み出し機能追加
+http://bitspersampleconv2.googlecode.com/files/PPW2096ss.png
 
 ===!PlayPcmWin 2.0.94 ==
   * (PlayPcmWinテストベンチ 機能追加)直線位相FIRフィルターによるEQ (パラメーター調整中)
