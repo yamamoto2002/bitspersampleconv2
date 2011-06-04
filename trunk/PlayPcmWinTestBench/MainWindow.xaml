@@ -85,11 +85,11 @@
                     </GroupBox>
                     <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,467,0,0" Name="buttonFirDo" VerticalAlignment="Top" Width="107" Click="buttonFirDo_Click" />
                     <ProgressBar Height="23" HorizontalAlignment="Left" Margin="6,0,0,6" Name="progressBarFir" VerticalAlignment="Bottom" Width="345" />
-                    <GroupBox Header="出力ファイル" Height="124" HorizontalAlignment="Left" Margin="6,337,0,0" Name="groupBoxFirOutputFile" VerticalAlignment="Top" Width="756">
+                    <GroupBox Header="出力ファイル" Height="124" HorizontalAlignment="Left" Margin="300,337,0,0" Name="groupBoxFirOutputFile" VerticalAlignment="Top" Width="462">
                         <Grid>
-                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,66,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="450" />
-                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="462,67,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
-                            <GroupBox Header="出力サンプルデータ形式" Height="54" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox17" VerticalAlignment="Top" Width="530">
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,66,0,0" Name="textBoxFirOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="317" />
+                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="327,66,0,0" Name="buttonFirOutputBrowse" VerticalAlignment="Top" Width="120" Click="buttonFirOutputBrowse_Click" />
+                            <GroupBox Header="出力サンプルデータ形式" Height="54" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox17" VerticalAlignment="Top" Width="440">
                                 <Grid>
                                     <RadioButton Content="16bit integer" HorizontalAlignment="Left" Margin="7,6,0,0" Name="radioButtonFir16bit" Width="115" Height="16" VerticalAlignment="Top" />
                                     <RadioButton Content="24bit integer" Height="16" HorizontalAlignment="Left" Margin="167,6,0,0" Name="radioButtonFir24bit" VerticalAlignment="Top" Width="133" IsChecked="True" />
@@ -99,6 +99,14 @@
                         </Grid>
                     </GroupBox>
                     <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="369,467,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="393" Height="57" />
+                    <GroupBox Header="窓関数" Height="124" HorizontalAlignment="Left" Margin="6,337,0,0" Name="groupBox14" VerticalAlignment="Top" Width="288">
+                        <Grid>
+                            <Label Content="カイザー窓α(4&lt;α&lt;9):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="6,53,0,0" Name="label36" VerticalAlignment="Top" Width="192" />
+                            <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="202,55,0,0" Name="textBoxKaiserAlpha" Text="6.0" VerticalAlignment="Top" Width="44" />
+                            <RadioButton Content="ブラックマン窓" Height="16" HorizontalAlignment="Left" Margin="6,7,0,0" Name="radioButtonFirBlackman" VerticalAlignment="Top" Width="173" IsChecked="True" />
+                            <RadioButton Content="カイザー窓" Height="16" HorizontalAlignment="Left" Margin="6,31,0,0" Name="radioButtonFirKaiser" VerticalAlignment="Top" Width="173" />
+                        </Grid>
+                    </GroupBox>
                 </Grid>
             </TabItem>
             <TabItem Header="アップサンプル">
