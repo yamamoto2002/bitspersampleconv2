@@ -266,6 +266,15 @@ WasapiIO_AddPlayPcmDataEnd(void)
 
 extern "C" __declspec(dllexport)
 void __stdcall
+WasapiIO_RemovePlayPcmDataAt(int id)
+{
+    assert(self);
+    self->playPcmGroup.RemoveAt(id);
+    self->UpdatePlayRepeat(self->playPcmGroup.GetRepatFlag());
+}
+
+extern "C" __declspec(dllexport)
+void __stdcall
 WasapiIO_ClearPlayList(void)
 {
     assert(self);

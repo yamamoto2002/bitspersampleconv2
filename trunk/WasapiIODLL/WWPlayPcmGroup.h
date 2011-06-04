@@ -45,6 +45,8 @@ public:
     bool AddPlayPcmData(int id, BYTE *data, int bytes);
 
     bool AddPlayPcmDataEnd(void);
+    
+    void RemoveAt(int id);
 
     void SetPlayRepeat(bool b);
 
@@ -53,6 +55,8 @@ public:
     WWPcmData *FirstPcmData(void);
     WWPcmData *LastPcmData(void);
 
+    bool GetRepatFlag(void) { return m_repeat; }
+
 private:
     std::vector<WWPcmData> m_playPcmDataList;
 
@@ -60,6 +64,8 @@ private:
     WWPcmDataFormatType m_format;
     int                 m_numChannels;
     int                 m_frameBytes;
+
+    bool                m_repeat;
 
     void PlayPcmDataListDebug(void);
 };

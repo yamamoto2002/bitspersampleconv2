@@ -7,6 +7,7 @@
 
 WWPlayPcmGroup::WWPlayPcmGroup(void)
 {
+    m_repeat = false;
     Clear();
 }
 
@@ -82,6 +83,20 @@ WWPlayPcmGroup::AddPlayPcmDataEnd(void)
 }
 
 void
+WWPlayPcmGroup::RemoveAt(int id)
+{
+    assert(0 <= id && id < m_playPcmDataList.size());
+
+    WWPcmData *pcmData = &m_playPcmDataList[id];
+    pcmData->Term();
+
+    m_playPcmDataList.erase(m_playPcmDataList.begin()+id);
+
+    // 連続再生のリンクリストをつなげ直す。
+    SetPlayRepeat(m_repeat);
+}
+
+void
 WWPlayPcmGroup::Clear(void)
 {
     for (size_t i=0; i<m_playPcmDataList.size(); ++i) {
@@ -99,6 +114,7 @@ void
 WWPlayPcmGroup::SetPlayRepeat(bool repeat)
 {
     dprintf("D: %s(%d)\n", __FUNCTION__, (int)repeat);
+    m_repeat = repeat;
 
     if (m_playPcmDataList.size() < 1) {
         dprintf("D: %s(%d) pcmDataList.size() == %d nothing to do\n",

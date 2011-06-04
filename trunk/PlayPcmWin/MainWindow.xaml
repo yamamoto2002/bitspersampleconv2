@@ -19,7 +19,8 @@
             <MenuItem Name="menuFile" Header="ファイル(_F)">
                 <MenuItem Header="再生リストをクリアー(_N)..." Click="MenuItemFileNew_Click" Name="menuItemFileNew" />
                 <MenuItem Header="開く(_O)..." Click="MenuItemFileOpen_Click" Name="menuItemFileOpen" />
-                <MenuItem Header="名前をつけて保存(_A)..." Click="MenuItemFileSaveAs_Click" Name="menuItemFileSaveAs" />
+                <MenuItem Header="再生リストをCUEシートとして保存(_C)..." Click="MenuItemFileSaveCueAs_Click" Name="menuItemFileSaveCueAs" />
+                <MenuItem Header="再生リストを保存(_S)..." Click="MenuItemFileSaveAs_Click" Name="menuItemFileSaveAs" />
                 <Separator />
                 <MenuItem Header="終了(_X)" Click="MenuItemFileExit_Click" />
             </MenuItem>
@@ -33,7 +34,8 @@
         </Menu>
         <GroupBox Header="再生リスト" Margin="6,29,6,139" Name="groupBox2">
             <Grid>
-                <Button Content="一覧をクリアー(_C)" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonClearPlayList" Width="179" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
+                <Button Content="再生リストをクリア(_C)" HorizontalAlignment="Left" Margin="6,0,0,8" Name="buttonClearPlayList" Width="156" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
+                <Button Content="選択曲除外(_R)" HorizontalAlignment="Left" Margin="170,0,0,8" Name="buttonRemovePlayList" Width="112" Height="23" VerticalAlignment="Bottom" Click="buttonRemovePlayList_Click" />
                 <DataGrid
                     Name="dataGridPlayList"
                     Margin="6,6,6,37"
@@ -53,7 +55,7 @@
                     DragLeave="dataGridPlayList_CheckDropTarget"
                     DragOver="dataGridPlayList_CheckDropTarget"
                     Drop="dataGridPlayList_Drop"
-                    MouseMove="dataGridPlayList_MouseMove" AllowDrop="True">
+                    MouseMove="dataGridPlayList_MouseMove" AllowDrop="True" SelectedCellsChanged="dataGridPlayList_SelectedCellsChanged">
                     
                     <DataGrid.RowHeaderStyle>
                         <Style TargetType="{x:Type DataGridRowHeader}">
