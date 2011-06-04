@@ -268,11 +268,18 @@ namespace PlayPcmWinTestBench {
             m_prevFreqGainPress.Y = -1;
         }
 
+        enum WindowFuncType {
+            Blackman,
+            Kaiser
+        };
+
         struct FirWorkerArgs {
             public string inputPath;
             public string outputPath;
             public int outputBitsPerSample;
             public bool outputSampleIsFloat;
+            public double kaiserAlpha;
+            public WindowFuncType windowFunc;
         }
 
         /// <summary>
@@ -305,6 +312,21 @@ namespace PlayPcmWinTestBench {
             if (radioButtonFir32bitFloat.IsChecked == true) {
                 args.outputBitsPerSample = 32;
                 args.outputSampleIsFloat = true;
+            }
+            
+            if (!Double.TryParse(textBoxKaiserAlpha.Text, out args.kaiserAlpha)) {
+                MessageBox.Show("カイザー窓α値は4.0<α<9.0の範囲の数値を半角数字で入力してください。処理中断。");
+                return;
+            }
+            if (args.kaiserAlpha <= 4.0 || 9.0 <= args.kaiserAlpha) {
+                MessageBox.Show("カイザー窓α値は4.0<α<9.0の範囲の数値を半角数字で入力してください。処理中断。");
+                return;
+            }
+
+            if (radioButtonFirBlackman.IsChecked == true) {
+                args.windowFunc = WindowFuncType.Blackman;
+            } else {
+                args.windowFunc = WindowFuncType.Kaiser;
             }
 
             AddFirLog(string.Format("開始。{0} → {1}\r\n", args.inputPath, args.outputPath));
@@ -359,7 +381,12 @@ namespace PlayPcmWinTestBench {
 
             // 窓関数の要素数は、IDFT結果の複素数の個数 -1個。
             double [] window;
-            WWWindowFunc.BlackmanWindow((idftResult.Length / 2) - 1, out window);
+
+            if (args.windowFunc == WindowFuncType.Blackman) {
+                WWWindowFunc.BlackmanWindow((idftResult.Length / 2) - 1, out window);
+            } else {
+                WWWindowFunc.KaiserWindow((idftResult.Length / 2) - 1, args.kaiserAlpha, out window);
+            }
 
             // FIR coeffの個数は、window.Length個。
             double [] coeff;
