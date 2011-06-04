@@ -51,14 +51,17 @@ namespace PlayPcmWin
         /// </summary>
         class PlayListItemInfo : INotifyPropertyChanged {
             private static int m_nextRowId = 1;
-            public static void ResetRowId() {
-                m_nextRowId = 1;
+            public static void SetNextRowId(int id) {
+                m_nextRowId = id;
             }
 
             private int m_rowId;
             public int RowId {
                 get {
                     return m_rowId;
+                }
+                set {
+                    m_rowId = value;
                 }
             }
 
@@ -417,6 +420,12 @@ namespace PlayPcmWin
             return count;
         }
 
+        private void RenumberPcmDataId() {
+            for (int i = 0; i < m_pcmDataList.Count(); ++i) {
+                m_pcmDataList[i].Id = i;
+            }
+        }
+
         /// <summary>
         /// 指定されたWavDataIdの、プレイリスト位置番号(プレイリスト内のindex)を戻す。
         /// </summary>
@@ -437,13 +446,18 @@ namespace PlayPcmWin
         /// 保存してあった再生リストを読んでm_pcmDataListとm_playListItemsに足す。
         /// UpdateUIは行わない。
         /// </summary>
-        private int LoadPlaylist() {
+        private int LoadPlaylist(string path) {
             int count = 0;
 
             // エラーメッセージを貯めて出す。作りがいまいちだが。
             m_loadErrorMessages = new StringBuilder();
 
-            var pl = PlaylistRW.Load();
+            PlaylistSave pl;
+            if (path.Length == 0) {
+                pl = PlaylistRW.Load();
+            } else {
+                pl = PlaylistRW.LoadFrom(path);
+            }
             foreach (var p in pl.Items) {
                 int rv = ReadFileHeader(p.PathName, ReadHeaderMode.OnlyConcreteFile, null, null);
                 if (1 == rv) {
@@ -474,7 +488,7 @@ namespace PlayPcmWin
             return count;
         }
 
-        private bool SavePlaylist() {
+        private bool SavePlaylist(string path) {
             var s = new PlaylistSave();
 
             for (int i=0; i<m_pcmDataList.Count; ++i) {
@@ -486,7 +500,11 @@ namespace PlayPcmWin
                     p.CueSheetIndex, p.StartTick, p.EndTick, playListItem.ReadSeparaterAfter));
             }
 
-            return PlaylistRW.Save(s);
+            if (path.Length == 0) {
+                return PlaylistRW.Save(s);
+            } else {
+                return PlaylistRW.SaveAs(s, path);
+            }
         }
 
         public MainWindow()
@@ -518,7 +536,7 @@ namespace PlayPcmWin
             }
 
             if (m_preference.StorePlaylistContent) {
-                LoadPlaylist();
+                LoadPlaylist(string.Empty);
             }
 
             UpdateWindowSettings();
@@ -527,7 +545,7 @@ namespace PlayPcmWin
                     AssemblyVersion,
                     IntPtr.Size == 8 ? "64bit" : "32bit"));
 
-            PlayListItemInfo.ResetRowId();
+            PlayListItemInfo.SetNextRowId(1);
             dataGridPlayList.ItemsSource = m_playListItems;
 
             m_groupIdNextAdd = 0;
@@ -638,20 +656,24 @@ namespace PlayPcmWin
         }
 
         private void UpdateUIStatus() {
+            dataGridPlayList.UpdateLayout();
+
             switch (m_state) {
             case State.初期化完了:
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = true;
                 menuItemFileSaveAs.IsEnabled     = false;
+                menuItemFileSaveCueAs.IsEnabled  = false;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = true;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled    = true;
 
                 buttonSettings.IsEnabled = true;
@@ -670,15 +692,17 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = true;
                 menuItemFileOpen.IsEnabled       = true;
                 menuItemFileSaveAs.IsEnabled     = true;
+                menuItemFileSaveCueAs.IsEnabled  = true;
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled    = true;
                 groupBoxWasapiSettings.IsEnabled = true;
 
+                buttonClearPlayList.IsEnabled = true;
+                buttonRemovePlayList.IsEnabled = (dataGridPlayList.SelectedIndex >= 0);
                 buttonInspectDevice.IsEnabled    = false;
 
                 buttonSettings.IsEnabled = true;
@@ -693,15 +717,17 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = true;
+                menuItemFileSaveCueAs.IsEnabled  = true;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
@@ -712,15 +738,17 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = true;
+                menuItemFileSaveCueAs.IsEnabled  = true;
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
@@ -735,6 +763,7 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = false;
+                menuItemFileSaveCueAs.IsEnabled  = false;
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = true;
                 buttonPause.IsEnabled            = true;
@@ -742,9 +771,10 @@ namespace PlayPcmWin
 
                 buttonNext.IsEnabled             = true;
                 buttonPrev.IsEnabled             = true;
-                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
@@ -762,6 +792,7 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled    = false;
                 menuItemFileOpen.IsEnabled   = false;
                 menuItemFileSaveAs.IsEnabled = false;
+                menuItemFileSaveCueAs.IsEnabled  = false;
                 buttonPlay.IsEnabled         = false;
                 buttonStop.IsEnabled         = true;
                 buttonPause.IsEnabled        = true;
@@ -769,9 +800,10 @@ namespace PlayPcmWin
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
-                buttonClearPlayList.IsEnabled    = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled   = false;
@@ -784,15 +816,17 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = false;
+                menuItemFileSaveCueAs.IsEnabled  = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
-                buttonClearPlayList.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
@@ -803,15 +837,17 @@ namespace PlayPcmWin
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
                 menuItemFileSaveAs.IsEnabled     = false;
+                menuItemFileSaveCueAs.IsEnabled  = false;
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
-                buttonClearPlayList.IsEnabled = false;
                 groupBoxWasapiSettings.IsEnabled = false;
 
+                buttonClearPlayList.IsEnabled    = false;
+                buttonRemovePlayList.IsEnabled = false;
                 buttonInspectDevice.IsEnabled = false;
 
                 buttonSettings.IsEnabled = false;
@@ -949,8 +985,8 @@ namespace PlayPcmWin
                 // 設定ファイルを書き出す。
                 PreferenceStore.Save(m_preference);
 
-                // 再生リストを保存。
-                SavePlaylist();
+                // 再生リストをIsolatedStorageに保存。
+                SavePlaylist(string.Empty);
             }
         }
 
@@ -1132,7 +1168,7 @@ namespace PlayPcmWin
         private void ClearPlayList(PlayListClearMode mode) {
             m_pcmDataList.Clear();
             m_playListItems.Clear();
-            PlayListItemInfo.ResetRowId();
+            PlayListItemInfo.SetNextRowId(1);
 
             wasapi.ClearPlayList();
 
@@ -1473,7 +1509,7 @@ namespace PlayPcmWin
             UpdateUIStatus();
         }
 
-        private void MenuItemFileSaveAs_Click(object sender, RoutedEventArgs e) {
+        private void MenuItemFileSaveCueAs_Click(object sender, RoutedEventArgs e) {
             if (m_pcmDataList.Count() == 0) {
                 MessageBox.Show("保存するデータはありません");
                 return;
@@ -1516,6 +1552,28 @@ namespace PlayPcmWin
                 }
             }
         }
+
+        private void MenuItemFileSaveAs_Click(object sender, RoutedEventArgs e) {
+            if (m_pcmDataList.Count() == 0) {
+                MessageBox.Show("保存するデータはありません");
+                return;
+            }
+
+            System.Diagnostics.Debug.Assert(0 < m_pcmDataList.Count());
+            var pcmData0 = m_pcmDataList[0];
+
+            Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
+            dlg.InitialDirectory = System.IO.Path.GetDirectoryName(pcmData0.FullPath);
+            dlg.Filter = "PPWPLファイル|*.ppwpl";
+            Nullable<bool> result = dlg.ShowDialog();
+
+            if (result == true) {
+                if (!SavePlaylist(dlg.FileName)) {
+                    MessageBox.Show(
+                        string.Format("ファイル保存失敗: {0}", dlg.FileName));
+                }
+            }
+        }
         
         private void MenuItemFileNew_Click(object sender, RoutedEventArgs e) {
             ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
@@ -1531,11 +1589,12 @@ namespace PlayPcmWin
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.Filter =
-                "対応しているファイル|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue|" +
+                "対応しているファイル|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|" +
                 "WAVEファイル|*.wav;*.wave|" +
                 "FLACファイル|*.flac|" +
                 "AIFFファイル|*.aif;*.aiff|" +
                 "CUEファイル|*.cue|" +
+                "PPWPLファイル|*.ppwpl|" +
                 "全てのファイル|*.*";
             dlg.Multiselect = true;
 
@@ -1543,19 +1602,23 @@ namespace PlayPcmWin
 
 
             if (result == true) {
-                // エラーメッセージを貯めて出す。
-                m_loadErrorMessages = new StringBuilder();
+                if (0 == System.IO.Path.GetExtension(dlg.FileName).CompareTo(".ppwpl")) {
+                    // PPWプレイリストを読み込み
+                    LoadPlaylist(dlg.FileName);
+                } else {
+                    // エラーメッセージを貯めて出す。
+                    m_loadErrorMessages = new StringBuilder();
 
-                for (int i = 0; i < dlg.FileNames.Length; ++i) {
-                    ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
+                    for (int i = 0; i < dlg.FileNames.Length; ++i) {
+                        ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
+                    }
+
+                    if (0 < m_loadErrorMessages.Length) {
+                        MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                    m_loadErrorMessages = null;
                 }
-
-                if (0 < m_loadErrorMessages.Length) {
-                    MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-                m_loadErrorMessages = null;
-
                 UpdateUIStatus();
             }
 
@@ -2404,8 +2467,30 @@ namespace PlayPcmWin
             m_preference.wasapiDataFeedMode = WasapiDataFeedMode.TimerDriven;
         }
 
-        private void buttonClearPlayList_Click(object sender, RoutedEventArgs e) {
-            ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
+        private void buttonRemovePlayList_Click(object sender, RoutedEventArgs e) {
+            var selectedCells = dataGridPlayList.SelectedCells;
+            if (0 == selectedCells.Count) {
+                return;
+            }
+
+            if (selectedCells.Count == m_playListItems.Count) {
+                // すべて消える。再生開始などが出来なくなるので別処理。
+                ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
+            } else {
+                // 再生リストの一部項目が消える。
+                int idx;
+                while (0 <= (idx = dataGridPlayList.SelectedIndex)) {
+                    m_pcmDataList.RemoveAt(idx);
+                    m_playListItems.RemoveAt(idx);
+                    dataGridPlayList.UpdateLayout();
+                }
+                GC.Collect();
+
+                RenumberPcmDataId();
+
+                progressBar1.Value = 0;
+                UpdateUIStatus();
+            }
         }
 
         private void buttonPrev_Click(object sender, RoutedEventArgs e) {
@@ -2447,7 +2532,23 @@ namespace PlayPcmWin
             m_playListMouseDown = false;
         }
 
+        private void dataGridPlayList_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e) {
+            /*
+                if (m_state == State.プレイリストあり && 0 <= dataGridPlayList.SelectedIndex) {
+                    buttonRemovePlayList.IsEnabled = true;
+                } else {
+                    buttonRemovePlayList.IsEnabled = false;
+                }
+            */
+        }
+
         private void dataGridPlayList_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (m_state == State.プレイリストあり && 0 <= dataGridPlayList.SelectedIndex) {
+                buttonRemovePlayList.IsEnabled = true;
+            } else {
+                buttonRemovePlayList.IsEnabled = false;
+            }
+
             if (null == wasapi) {
                 return;
             }
@@ -2713,6 +2814,10 @@ namespace PlayPcmWin
                 // グループ番号をリナンバーする。
                 PcmDataListItemsRenumber();
             }
+        }
+
+        private void buttonClearPlayList_Click(object sender, RoutedEventArgs e) {
+            ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
         }
 
     }

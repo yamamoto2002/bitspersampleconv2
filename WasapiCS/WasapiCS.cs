@@ -90,6 +90,10 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void
+        WasapiIO_RemovePlayPcmDataAt(int id);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static void
         WasapiIO_SetPlayRepeat(bool repeat);
 
         [DllImport("WasapiIODLL.dll")]
@@ -315,6 +319,10 @@ namespace Wasapi {
 
         public bool AddPlayPcmDataEnd() {
             return WasapiIO_AddPlayPcmDataEnd();
+        }
+
+        public void RemovePlayPcmDataAt(int id) {
+            WasapiIO_RemovePlayPcmDataAt(id);
         }
 
         public void ClearPlayList() {

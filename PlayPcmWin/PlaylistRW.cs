@@ -82,17 +82,35 @@ namespace PlayPcmWin {
     class PlaylistRW {
         private static readonly string m_fileName = "PlayPcmWinPlayList.xml";
 
+        private static void OverwritePlaylist(PlaylistSave p) {
+            // TODO: ロード後に、強制的に上書きしたいパラメータがある場合はここで上書きする。
+        }
+
         public static PlaylistSave Load() {
-            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName);
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName, true);
             PlaylistSave p = xmlRW.Load();
 
-            // TODO: ロード後に、強制的に上書きしたいパラメータがある場合はここで上書きする。
+            OverwritePlaylist(p);
+
+            return p;
+        }
+
+        public static PlaylistSave LoadFrom(string path) {
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(path, false);
+            PlaylistSave p = xmlRW.Load();
+
+            OverwritePlaylist(p);
 
             return p;
         }
 
         public static bool Save(PlaylistSave p) {
-            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName);
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(m_fileName, true);
+            return xmlRW.Save(p);
+        }
+
+        public static bool SaveAs(PlaylistSave p, string path) {
+            var xmlRW = new WWXmlRW.XmlRW<PlaylistSave>(path, false);
             return xmlRW.Save(p);
         }
     }

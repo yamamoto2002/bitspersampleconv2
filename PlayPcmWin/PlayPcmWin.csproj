@@ -212,6 +212,9 @@
   <ItemGroup>
     <Resource Include="PlayPcmWin64.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="PlayPcmWinLicense.txt" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y $(ProjectDir)..\FlacDecodeDLL\bin\x86\$(ConfigurationName)\* $(TargetDir);
