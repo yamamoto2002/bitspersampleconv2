@@ -4,6 +4,9 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 2.0.99 ==
+  * (PlayPcmWinテストベンチ)FIR EQとヒルベルト変換FIR 音量制限発動時にログを出力するようにした。
+
+===!PlayPcmWin 2.0.99 ==
   * (PlayPcmWinテストベンチ)ヒルベルト変換FIR プログレスバーが進まない問題を修正。
 
 ===!PlayPcmWin 2.0.98 ==
