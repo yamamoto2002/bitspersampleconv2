@@ -500,7 +500,7 @@ namespace PcmDataLib {
         /// <summary>
         /// doubleのバッファで音量制限する。
         /// </summary>
-        /// <returns>スケーリングが行われた場合、スケールの倍数。行われなかった場合1.0</returns>
+        /// <returns>スケーリングが行われた場合、スケールの倍数(1.0より小さい)。行われなかった場合1.0</returns>
         public double LimitLevelOnDoubleRange() {
             double maxV;
             double minV;
