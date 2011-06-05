@@ -3,8 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 3.0.0 ==
+===!PlayPcmWin 3.0.1 ==
   * (PlayPcmWinテストベンチ)FIR EQとヒルベルト変換FIR 音量制限発動時にログを出力するようにした。
+  * (PlayPcmWinテストベンチ)ヒルベルト変換 位相が90度遅れるようにした
 
 ===!PlayPcmWin 2.0.99 ==
   * (PlayPcmWinテストベンチ)ヒルベルト変換FIR プログレスバーが進まない問題を修正。
