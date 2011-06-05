@@ -4,7 +4,7 @@
         Title="PlayPcmWinテストベンチ" Height="600" Width="800" Closed="Window_Closed" IsEnabled="True">
     <Grid>
         <TabControl Name="tabControl1">
-            <TabItem Header="FIR">
+            <TabItem Header="FIR EQ" Name="tabItemFirEq">
                 <Grid Name="gridFir">
                     <GroupBox Header="EQ" Height="260" HorizontalAlignment="Left" Margin="6,71,0,0" Name="groupBoxFirEq" VerticalAlignment="Top" Width="756">
                         <Grid>
@@ -99,7 +99,7 @@
                         </Grid>
                     </GroupBox>
                     <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="369,467,6,3" Name="textBoxFirLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="393" Height="57" />
-                    <GroupBox Header="窓関数" Height="124" HorizontalAlignment="Left" Margin="6,337,0,0" Name="groupBox14" VerticalAlignment="Top" Width="288">
+                    <GroupBox Header="窓関数" Height="124" HorizontalAlignment="Left" Margin="6,337,0,0" Name="groupBoxFirWindow" VerticalAlignment="Top" Width="288">
                         <Grid>
                             <Label Content="カイザー窓α(4&lt;α&lt;9):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="6,53,0,0" Name="label36" VerticalAlignment="Top" Width="192" />
                             <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="202,55,0,0" Name="textBoxKaiserAlpha" Text="6.0" VerticalAlignment="Top" Width="44" />
@@ -109,7 +109,47 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="アップサンプル">
+            <TabItem Header="ヒルベルト変換FIR" Name="tabItemHilbert">
+                <Grid Name="grid3">
+                    <GroupBox Header="入力ファイル" Height="61" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBoxHilbInput" VerticalAlignment="Top" Width="620">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxHilbInputPath" Text="C:\audio\input.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="472,7,0,0" Name="buttonHilbReferInputPath" VerticalAlignment="Top" Width="120" Click="buttonHilbInputBrowse_Click" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="6,466,0,0" Name="buttonHilbOutputStart" VerticalAlignment="Top" Width="107" Click="buttonHilbOutputStart_Click" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="6,0,0,7" Name="progressBarHilb" VerticalAlignment="Bottom" Width="345" />
+                    <GroupBox Header="出力ファイル" Height="124" HorizontalAlignment="Left" Margin="6,336,0,0" Name="groupBoxHilbOutput" VerticalAlignment="Top" Width="462">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,66,0,0" Name="textBoxHilbOutputPath" Text="C:\audio\output.wav" VerticalAlignment="Top" Width="317" />
+                            <Button Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="327,66,0,0" Name="buttonHilbReferOutputPath" VerticalAlignment="Top" Width="120" Click="buttonHilbOutputBrowse_Click" />
+                            <GroupBox Header="出力サンプルデータ形式" Height="54" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox18" VerticalAlignment="Top" Width="440">
+                                <Grid>
+                                    <RadioButton Content="16bit integer" Height="16" HorizontalAlignment="Left" Margin="7,6,0,0" Name="radioButtonHilbSint16" VerticalAlignment="Top" Width="115" />
+                                    <RadioButton Content="24bit integer" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="167,6,0,0" Name="radioButtonHilbSint24" VerticalAlignment="Top" Width="133" />
+                                    <RadioButton Content="32bit float" Height="16" HorizontalAlignment="Left" Margin="327,6,0,0" Name="radioButtonHilbFloat32" VerticalAlignment="Top" Width="108" />
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </GroupBox>
+                    <TextBox AcceptsReturn="True" AcceptsTab="True" Height="57" IsReadOnly="True" Margin="369,466,6,4" Name="textBoxHilbLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Width="393" />
+                    <GroupBox Header="設定" Height="193" HorizontalAlignment="Left" Margin="6,77,0,0" Name="groupBoxHilbSettings" VerticalAlignment="Top" Width="318">
+                        <Grid>
+                            <Label Content="FIRフィルタ長(奇数):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="6,6,0,0" Name="label38" VerticalAlignment="Top" Width="192" />
+                            <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="203,8,0,0" Name="textBoxHilbFilterN" Text="8191" VerticalAlignment="Top" Width="62" />
+                            <GroupBox Header="窓関数" Height="124" HorizontalAlignment="Left" Margin="13,40,0,0" Name="groupBox19" VerticalAlignment="Top" Width="288">
+                                <Grid>
+                                    <Label Content="カイザー窓α(4&lt;α&lt;9):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="6,53,0,0" Name="label37" VerticalAlignment="Top" Width="192" />
+                                    <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="202,55,0,0" Name="textBoxHilbKaiserAlpha" Text="6.0" VerticalAlignment="Top" Width="44" />
+                                    <RadioButton Content="ブラックマン窓" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonHilbBlackman" VerticalAlignment="Top" Width="173" />
+                                    <RadioButton Content="カイザー窓" Height="16" HorizontalAlignment="Left" Margin="6,31,0,0" Name="radioButtonHilbKaiser" VerticalAlignment="Top" Width="173" />
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+            <TabItem Header="アップサンプル" Name="tabItemUpsample">
                 <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="348" />
@@ -168,7 +208,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="ABXテスト" Name="tabItem1" DataContext="{Binding}">
+            <TabItem Header="ABXテスト" Name="tabItemAbx" DataContext="{Binding}">
                 <Grid>
                     <GroupBox Header="A" Height="265" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBoxA" VerticalAlignment="Top" Width="377">
                         <Grid>
@@ -257,7 +297,7 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
-            <TabItem Header="音質劣化" IsEnabled="True">
+            <TabItem Header="音質劣化" IsEnabled="True" Name="tabItemJitterAdd">
                 <Grid Name="grid1">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="112" />
@@ -325,7 +365,7 @@
                     <Button Content="処理中断(_C)" Height="23" HorizontalAlignment="Left" Margin="119,9,0,0" Name="buttonAQAbort" VerticalAlignment="Top" Width="120" Grid.Row="3" Click="buttonAQAbort_Click" />
                 </Grid>
             </TabItem>
-            <TabItem Header="互換性フラグ実験">
+            <TabItem Header="互換性フラグ実験" Name="tabItemCompatibilityFlag">
                 <Grid Name="grid2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="112" />

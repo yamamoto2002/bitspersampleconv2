@@ -715,6 +715,11 @@ namespace PcmDataLib {
                 // FLOAT32は、全てのビット(=32)を有効にしないと意味ないデータになると思われる。
                 newValidBitsPerSample = 32;
             }
+            if (newBitsPerSample == 64 &&
+                newValueRepType == ValueRepresentationType.SFloat) {
+                // FLOAT64は、全てのビット(=64)を有効にしないと意味ないデータになると思われる。
+                newValidBitsPerSample = 64;
+            }
 
             PcmData newPcmData = new PcmData();
             newPcmData.CopyHeaderInfoFrom(this);

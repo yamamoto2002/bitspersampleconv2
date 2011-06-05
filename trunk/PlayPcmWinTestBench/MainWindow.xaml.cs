@@ -24,6 +24,7 @@ namespace PlayPcmWinTestBench {
             InitUpsampleTab();
             InitAbxTab();
             InitFirTab();
+            InitHilbTab();
         }
 
         private void Window_Closed(object sender, EventArgs e) {
