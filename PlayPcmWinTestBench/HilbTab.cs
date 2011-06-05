@@ -106,7 +106,7 @@ namespace PlayPcmWinTestBench {
         }
 
         void m_HilbWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
-            progressBarFir.Value = e.ProgressPercentage;
+            progressBarHilb.Value = e.ProgressPercentage;
         }
 
         private bool HilbertDo(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput) {
