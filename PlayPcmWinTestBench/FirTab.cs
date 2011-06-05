@@ -33,6 +33,9 @@ namespace PlayPcmWinTestBench {
         //////////////////////////////////////////////////////////////////////////////////////////
         // FIR
 
+        /// <summary>
+        /// タップ数。偶数。
+        /// </summary>
         private int m_firTapN = 8192;
 
         // 20Hz～20kHzの範囲の、周波数が対数軸で等間隔になるようにサンプルしたデータが並んでいるテーブル
@@ -286,13 +289,9 @@ namespace PlayPcmWinTestBench {
         /// FIR実行
         /// </summary>
         private void buttonFirDo_Click(object sender, RoutedEventArgs e) {
-
             int filterLength;
-            if (!Int32.TryParse(textBoxFirLength.Text, out filterLength)) {
-                MessageBox.Show("FIRフィルタ長は正の奇数の数値を半角数字で入力してください。処理中断。");
-                return;
-            }
-            if ((filterLength & 1) == 0 || filterLength <= 0) {
+            if (!Int32.TryParse(textBoxFirLength.Text, out filterLength) ||
+                (filterLength & 1) == 0 || filterLength <= 0) {
                 MessageBox.Show("FIRフィルタ長は正の奇数の数値を半角数字で入力してください。処理中断。");
                 return;
             }
@@ -314,11 +313,8 @@ namespace PlayPcmWinTestBench {
                 args.outputSampleIsFloat = true;
             }
             
-            if (!Double.TryParse(textBoxKaiserAlpha.Text, out args.kaiserAlpha)) {
-                MessageBox.Show("カイザー窓α値は4.0<α<9.0の範囲の数値を半角数字で入力してください。処理中断。");
-                return;
-            }
-            if (args.kaiserAlpha <= 4.0 || 9.0 <= args.kaiserAlpha) {
+            if (!Double.TryParse(textBoxKaiserAlpha.Text, out args.kaiserAlpha) ||
+                args.kaiserAlpha <= 4.0 || 9.0 <= args.kaiserAlpha) {
                 MessageBox.Show("カイザー窓α値は4.0<α<9.0の範囲の数値を半角数字で入力してください。処理中断。");
                 return;
             }
@@ -334,6 +330,7 @@ namespace PlayPcmWinTestBench {
             groupBoxFirInputFile.IsEnabled = false;
             groupBoxFirEq.IsEnabled = false;
             groupBoxFirOutputFile.IsEnabled = false;
+            groupBoxFirWindow.IsEnabled = false;
             m_FirWorker.RunWorkerAsync(args);
         }
 
@@ -346,33 +343,17 @@ namespace PlayPcmWinTestBench {
             groupBoxFirInputFile.IsEnabled = true;
             groupBoxFirEq.IsEnabled = true;
             groupBoxFirOutputFile.IsEnabled = true;
+            groupBoxFirWindow.IsEnabled = true;
         }
 
         void m_FirWorker_ProgressChanged(object sender, ProgressChangedEventArgs e) {
             progressBarFir.Value = e.ProgressPercentage;
         }
 
-        void m_FirWorker_DoWork(object sender, DoWorkEventArgs e) {
-            FirWorkerArgs args = (FirWorkerArgs)e.Argument;
+        delegate bool FirDelegate(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput);
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-
+        private bool FirDo(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput) {
             var dft = new WWDirectComputeCS.WWDftCpu();
-
-            // pcmファイルを読み込んでサンプル配列pcm1chを作成。
-            PcmData pcmDataIn = null;
-            try {
-                pcmDataIn = ReadWavFile(args.inputPath);
-            } catch (IOException ex) {
-                e.Result = string.Format("WAVファイル {0} 読み込み失敗\r\n{1}", args.inputPath, ex);
-                return;
-            }
-            if (null == pcmDataIn) {
-                e.Result = string.Format("WAVファイル {0} 読み込み失敗", args.inputPath);
-                return;
-            }
-            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(64, PcmData.ValueRepresentationType.SFloat);
 
             var from = FreqGraphToIdftInput(pcmDataIn.SampleRate);
 
@@ -443,27 +424,67 @@ namespace PlayPcmWinTestBench {
             // 音量制限処理。
             pcmDataEq.LimitLevelOnDoubleRange();
 
-            PcmData pcmDataOutput
+            pcmDataOutput
                 = pcmDataEq.BitsPerSampleConvertTo(
                     args.outputBitsPerSample,
                     args.outputSampleIsFloat ? PcmData.ValueRepresentationType.SFloat : PcmData.ValueRepresentationType.SInt);
+            return true;
+        }
+
+        private bool FirDoCommon(FirWorkerArgs args, FirDelegate Do, out string result) {
+            // pcmファイルを読み込んでサンプル配列pcm1chを作成。
+            PcmData pcmDataIn = null;
+            try {
+                pcmDataIn = ReadWavFile(args.inputPath);
+            } catch (IOException ex) {
+                result = string.Format("WAVファイル {0} 読み込み失敗\r\n{1}", args.inputPath, ex);
+                return false;
+            }
+            if (null == pcmDataIn) {
+                result = string.Format("WAVファイル {0} 読み込み失敗", args.inputPath);
+                return false;
+            }
+            pcmDataIn = pcmDataIn.BitsPerSampleConvertTo(64, PcmData.ValueRepresentationType.SFloat);
+
+            PcmData pcmDataOutput;
+
+            if (!Do(args, pcmDataIn, out pcmDataOutput)) {
+                result = "FIR処理失敗";
+                return false;
+            }
 
             bool writeResult = false;
             try {
                 writeResult = WriteWavFile(pcmDataOutput, args.outputPath);
             } catch (IOException ex) {
-                e.Result = string.Format("WAVファイル書き込み失敗: {0}\r\n{1}", args.outputPath, ex);
-                return;
+                result = string.Format("WAVファイル書き込み失敗: {0}\r\n{1}", args.outputPath, ex);
+                return false;
             }
             if (!writeResult) {
-                e.Result = string.Format("WAVファイル書き込み失敗: {0}", args.outputPath);
+                result = string.Format("WAVファイル書き込み失敗: {0}", args.outputPath);
+                return false;
+            }
+
+            result = string.Empty;
+            return true;
+        }
+
+        void m_FirWorker_DoWork(object sender, DoWorkEventArgs e) {
+            FirWorkerArgs args = (FirWorkerArgs)e.Argument;
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
+            string result;
+            if (!FirDoCommon(args, FirDo, out result)) {
+                e.Result = result;
+                sw.Stop();
                 return;
             }
 
             sw.Stop();
             e.Result = string.Format("WAVファイル書き込み成功: {0}\r\n所要時間 {1}秒",
                 args.outputPath, sw.ElapsedMilliseconds/1000);
-            return;
         }
 
         private void buttonFirInputBrowse_Click(object sender, RoutedEventArgs e) {
