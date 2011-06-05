@@ -3,7 +3,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 2.0.99 ==
+===!PlayPcmWin 3.0.0 ==
   * (PlayPcmWinテストベンチ)FIR EQとヒルベルト変換FIR 音量制限発動時にログを出力するようにした。
 
 ===!PlayPcmWin 2.0.99 ==
