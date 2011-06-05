@@ -350,9 +350,9 @@ namespace PlayPcmWinTestBench {
             progressBarFir.Value = e.ProgressPercentage;
         }
 
-        delegate bool FirDelegate(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput);
+        delegate bool FirDelegate(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOut);
 
-        private bool FirDo(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput) {
+        private bool FirDo(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOut) {
             var dft = new WWDirectComputeCS.WWDftCpu();
 
             var from = FreqGraphToIdftInput(pcmDataIn.SampleRate);
@@ -380,15 +380,15 @@ namespace PlayPcmWinTestBench {
             System.Console.WriteLine("");
             */
 
-            PcmData pcmDataEq = new PcmData();
-            pcmDataEq.CopyFrom(pcmDataIn);
+            pcmDataOut = new PcmData();
+            pcmDataOut.CopyFrom(pcmDataIn);
 
-            for (int ch=0; ch < pcmDataEq.NumChannels; ++ch) {
+            for (int ch=0; ch < pcmDataOut.NumChannels; ++ch) {
                 // 全てのチャンネルでループ。
 
-                var pcm1ch = new double[pcmDataEq.NumFrames];
+                var pcm1ch = new double[pcmDataOut.NumFrames];
                 for (long i=0; i < pcm1ch.Length; ++i) {
-                    pcm1ch[i] = pcmDataEq.GetSampleValueInDouble(ch, i);
+                    pcm1ch[i] = pcmDataOut.GetSampleValueInDouble(ch, i);
                 }
 
                 // 少しずつFIRする。
@@ -408,26 +408,18 @@ namespace PlayPcmWinTestBench {
                     // 結果を出力に書き込む。
                     for (long i=0; i < pcmFir.Length; ++i) {
                         var re = pcmFir[i];
-                        pcmDataEq.SetSampleValueInDouble(ch, i + offs,
+                        pcmDataOut.SetSampleValueInDouble(ch, i + offs,
                             (float)(re));
                     }
 
                     // 進捗Update。
                     int percentage = (int)(
-                        (100L * ch / pcmDataEq.NumChannels) +
-                        (100L * (offs + 1) / pcm1ch.Length / pcmDataEq.NumChannels));
+                        ( 100L * ch / pcmDataOut.NumChannels ) +
+                        ( 100L * ( offs + 1 ) / pcm1ch.Length / pcmDataOut.NumChannels ) );
                     m_FirWorker.ReportProgress(percentage);
                 }
                 fir.Unsetup();
             }
-
-            // 音量制限処理。
-            pcmDataEq.LimitLevelOnDoubleRange();
-
-            pcmDataOutput
-                = pcmDataEq.BitsPerSampleConvertTo(
-                    args.outputBitsPerSample,
-                    args.outputSampleIsFloat ? PcmData.ValueRepresentationType.SFloat : PcmData.ValueRepresentationType.SInt);
             return true;
         }
 
@@ -453,6 +445,14 @@ namespace PlayPcmWinTestBench {
                 return false;
             }
 
+            // 音量制限処理。
+            double scale = pcmDataOutput.LimitLevelOnDoubleRange();
+
+            PcmData pcmDataWrite
+                = pcmDataOutput.BitsPerSampleConvertTo(
+                    args.outputBitsPerSample,
+                    args.outputSampleIsFloat ? PcmData.ValueRepresentationType.SFloat : PcmData.ValueRepresentationType.SInt);
+
             bool writeResult = false;
             try {
                 writeResult = WriteWavFile(pcmDataOutput, args.outputPath);
@@ -465,7 +465,12 @@ namespace PlayPcmWinTestBench {
                 return false;
             }
 
-            result = string.Empty;
+            if (scale == 1.0) {
+                result = string.Format("WAVファイル書き込み成功: {0}", args.outputPath);
+            } else {
+                result = string.Format("WAVファイル書き込み成功: {0}\r\nレベルオーバーのため音量を{1:0.##}倍しました({2:0.##}dB)",
+                    args.outputPath, scale, 20.0 * Math.Log10(scale));
+            }
             return true;
         }
 
@@ -483,8 +488,8 @@ namespace PlayPcmWinTestBench {
             }
 
             sw.Stop();
-            e.Result = string.Format("WAVファイル書き込み成功: {0}\r\n所要時間 {1}秒",
-                args.outputPath, sw.ElapsedMilliseconds/1000);
+            e.Result = string.Format("{0}\r\n所要時間 {1}秒",
+                result, sw.ElapsedMilliseconds / 1000);
         }
 
         private void buttonFirInputBrowse_Click(object sender, RoutedEventArgs e) {

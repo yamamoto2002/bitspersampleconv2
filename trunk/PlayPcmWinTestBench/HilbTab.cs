@@ -136,15 +136,15 @@ namespace PlayPcmWinTestBench {
             System.Console.WriteLine("");
             */
 
-            PcmData pcmDataEq = new PcmData();
-            pcmDataEq.CopyFrom(pcmDataIn);
+            pcmDataOutput = new PcmData();
+            pcmDataOutput.CopyFrom(pcmDataIn);
 
-            for (int ch=0; ch < pcmDataEq.NumChannels; ++ch) {
+            for (int ch=0; ch < pcmDataOutput.NumChannels; ++ch) {
                 // 全てのチャンネルでループ。
 
-                var pcm1ch = new double[pcmDataEq.NumFrames];
+                var pcm1ch = new double[pcmDataOutput.NumFrames];
                 for (long i=0; i < pcm1ch.Length; ++i) {
-                    pcm1ch[i] = pcmDataEq.GetSampleValueInDouble(ch, i);
+                    pcm1ch[i] = pcmDataOutput.GetSampleValueInDouble(ch, i);
                 }
 
                 // 少しずつFIRする。
@@ -164,26 +164,19 @@ namespace PlayPcmWinTestBench {
                     // 結果を出力に書き込む。
                     for (long i=0; i < pcmFir.Length; ++i) {
                         var re = pcmFir[i];
-                        pcmDataEq.SetSampleValueInDouble(ch, i + offs,
+                        pcmDataOutput.SetSampleValueInDouble(ch, i + offs,
                             (float)(re));
                     }
 
                     // 進捗Update。
                     int percentage = (int)(
-                        (100L * ch / pcmDataEq.NumChannels) +
-                        (100L * (offs + 1) / pcm1ch.Length / pcmDataEq.NumChannels));
+                        ( 100L * ch / pcmDataOutput.NumChannels ) +
+                        ( 100L * ( offs + 1 ) / pcm1ch.Length / pcmDataOutput.NumChannels ) );
                     m_HilbWorker.ReportProgress(percentage);
                 }
                 fir.Unsetup();
             }
 
-            // 音量制限処理。
-            pcmDataEq.LimitLevelOnDoubleRange();
-
-            pcmDataOutput
-                = pcmDataEq.BitsPerSampleConvertTo(
-                    args.outputBitsPerSample,
-                    args.outputSampleIsFloat ? PcmData.ValueRepresentationType.SFloat : PcmData.ValueRepresentationType.SInt);
             return true;
         }
 
@@ -200,8 +193,8 @@ namespace PlayPcmWinTestBench {
             }
 
             sw.Stop();
-            e.Result = string.Format("WAVファイル書き込み成功: {0}\r\n所要時間 {1}秒",
-                args.outputPath, sw.ElapsedMilliseconds / 1000);
+            e.Result = string.Format("{0}\r\n所要時間 {1}秒",
+                result, sw.ElapsedMilliseconds / 1000);
         }
     }
 }
