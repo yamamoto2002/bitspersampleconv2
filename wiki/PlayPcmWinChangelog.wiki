@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 2.0.99 ==
+  * (PlayPcmWinテストベンチ)ヒルベルト変換FIR プログレスバーが進まない問題を修正。
+
 ===!PlayPcmWin 2.0.98 ==
   * (PlayPcmWinテストベンチ 機能追加)ヒルベルト変換FIR
   * (PlayPcmWinテストベンチ 機能追加)窓関数にカイザー窓追加
