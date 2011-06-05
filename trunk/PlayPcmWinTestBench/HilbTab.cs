@@ -124,9 +124,11 @@ namespace PlayPcmWinTestBench {
             }
 
             // FIR coeffの個数は、window.Length個。
+            // ヒルベルト変換パラメータは未来から過去の方向に並んでいるので左右をひっくり返す。
             double [] coeff = new double[m_hilbFirLength];
             for (int i=0; i<coeff.Length; ++i) {
-                coeff[i] = hilb[i] * window[i];
+                int pos = coeff.Length - i - 1;
+                coeff[i] = hilb[pos] * window[i];
             }
 
             /*
