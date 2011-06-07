@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.2 ==
-  * (PlayPcmWinテストベンチ)FIR EQとヒルベルト変換FIR Issue 67 (出力WAVファイルのフォーマットが64ビットfloat固定になるバグ)修正
+  * (PlayPcmWinテストベンチ)Issue 67 (FIR EQとヒルベルト変換FIR 出力WAVファイルのフォーマットが64ビットfloat固定になるバグ)修正
 
 ===!PlayPcmWin 3.0.1 ==
   * (PlayPcmWinテストベンチ)FIR EQとヒルベルト変換FIR 音量制限発動時にログを出力するようにした。
