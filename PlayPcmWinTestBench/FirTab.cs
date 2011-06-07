@@ -455,7 +455,7 @@ namespace PlayPcmWinTestBench {
 
             bool writeResult = false;
             try {
-                writeResult = WriteWavFile(pcmDataOutput, args.outputPath);
+                writeResult = WriteWavFile(pcmDataWrite, args.outputPath);
             } catch (IOException ex) {
                 result = string.Format("WAVファイル書き込み失敗: {0}\r\n{1}", args.outputPath, ex);
                 return false;
