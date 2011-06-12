@@ -375,8 +375,8 @@ namespace PlayPcmWinTestBench {
             }
 
             int tickPerSecond;
-            if (!Int32.TryParse(textBoxASScrollSpeed.Text, out tickPerSecond) || tickPerSecond <= 0 || 1000 < tickPerSecond) {
-                MessageBox.Show("時間軸進行速度は1以上1000以下の数値を指定してください");
+            if (!Int32.TryParse(textBoxASScrollSpeed.Text, out tickPerSecond) || tickPerSecond <= 0 || 10000 < tickPerSecond) {
+                MessageBox.Show("時間軸進行速度は1以上10000以下の数値を指定してください");
                 return;
             }
 
