@@ -283,6 +283,7 @@ namespace PlayPcmWinTestBench {
             public bool outputSampleIsFloat;
             public double kaiserAlpha;
             public WindowFuncType windowFunc;
+            public int firLength;
         }
 
         /// <summary>
@@ -423,7 +424,7 @@ namespace PlayPcmWinTestBench {
             return true;
         }
 
-        private bool FirDoCommon(FirWorkerArgs args, FirDelegate Do, out string result) {
+        private bool FirDoLoadConvertSave(FirWorkerArgs args, FirDelegate Do, out string result) {
             // pcmファイルを読み込んでサンプル配列pcm1chを作成。
             PcmData pcmDataIn = null;
             try {
@@ -481,7 +482,7 @@ namespace PlayPcmWinTestBench {
             sw.Start();
 
             string result;
-            if (!FirDoCommon(args, FirDo, out result)) {
+            if (!FirDoLoadConvertSave(args, FirDo, out result)) {
                 e.Result = result;
                 sw.Stop();
                 return;
