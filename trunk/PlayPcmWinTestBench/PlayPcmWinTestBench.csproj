@@ -120,6 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AnalyticSignalTab.cs" />
     <Compile Include="HilbTab.cs" />
     <Compile Include="UpsampleTab.cs" />
     <Page Include="MainWindow.xaml">

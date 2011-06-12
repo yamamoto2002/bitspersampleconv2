@@ -109,6 +109,77 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
+            <TabItem Header="解析信号観察" Name="tabItemAnalyticSignal">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <GroupBox Header="入力ファイル" Height="61" HorizontalAlignment="Left" Margin="6,6,0,0" Name="groupBox14" VerticalAlignment="Top" Width="756">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxASInputPath" Text="C:\audio\input.wav" VerticalAlignment="Top" Width="606" />
+                            <Button Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="618,7,0,0" Name="buttonASInputRefer" VerticalAlignment="Top" Width="120" Click="buttonASInputBrowse_Click" />
+                        </Grid>
+                    </GroupBox>
+                    <GroupBox Header="ヒルベルト変換の設定" Height="113" HorizontalAlignment="Left" Margin="6,67,0,0" Name="groupBox15" VerticalAlignment="Top" Width="756">
+                        <Grid>
+                            <Label Content="FIRフィルタ長(奇数):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="6,4,0,0" Name="label39" VerticalAlignment="Top" Width="192" />
+                            <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="203,6,0,0" Name="textBoxASFilterLength" Text="8191" VerticalAlignment="Top" Width="62" />
+                            <GroupBox Header="窓関数" Height="83" HorizontalAlignment="Left" Margin="271,0,0,0" Name="groupBox16" VerticalAlignment="Top" Width="335">
+                                <Grid>
+                                    <Label Content="カイザー窓α(4&lt;α&lt;9):" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="128,26,0,0" Name="label40" VerticalAlignment="Top" Width="141" />
+                                    <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="273,28,0,0" Name="textBoxASKaiserAlpha" Text="6.0" VerticalAlignment="Top" Width="44" />
+                                    <RadioButton Content="ブラックマン窓" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="6,7,0,0" Name="radioButtonASBlackman" VerticalAlignment="Top" Width="173" />
+                                    <RadioButton Content="カイザー窓" Height="16" HorizontalAlignment="Left" Margin="6,31,0,0" Name="radioButtonASKaiser" VerticalAlignment="Top" Width="121" IsChecked="True" />
+                                </Grid>
+                            </GroupBox>
+                        </Grid>
+                    </GroupBox>
+                    <Button Content="解析信号作成(_R)" Height="23" HorizontalAlignment="Left" Margin="6,186,0,0" Name="buttonASCreate" VerticalAlignment="Top" Width="268" Click="buttonASCreate_Click" />
+                    <GroupBox Header="解析信号ビュー" Height="312" HorizontalAlignment="Left" Margin="6,215,0,0" Name="groupBox20" VerticalAlignment="Top" Width="756">
+                        <Grid>
+                            <Canvas Height="256" HorizontalAlignment="Left" Margin="6,6,0,0" Name="canvasAS" VerticalAlignment="Top" Width="512" >
+                                <Line X1="0" X2="512" Y1="128" Y2="128" Stroke="Black" Name="lineASTimeH"/>
+                                <Line X1="128" X2="128" Y1="0" Y2="256" Stroke="Black" Name="lineASTimeV"/>
+                                <TextBlock Canvas.Left="0" Canvas.Top="131" Width="124" Height="23" Name="textBlockASTimeOrigin" Text="0.0" TextAlignment="Right" />
+                                <TextBlock Canvas.Left="105" Canvas.Top="-7" Height="23" Name="textBlockASTimeP1" Text="1.0" />
+                                <TextBlock Canvas.Left="130" Canvas.Top="245" Height="23" Name="textBlockASTimeM1" Text="-1.0" />
+                                <TextBlock Canvas.Left="460" Canvas.Top="131" Height="23" Name="textBlockASTimeX" Text="時間→" />
+                                <TextBlock Canvas.Left="60" Canvas.Top="1" Height="23" Name="textBlockASTimeY" Text="振幅↑" />
+                                <Line X1="128" X2="384" Y1="128" Y2="128" Stroke="Black" Name="lineASH"/>
+                                <Line X1="256" X2="256" Y1="0" Y2="256" Stroke="Black" Name="lineASV"/>
+                                <Ellipse Canvas.Top="0" Canvas.Left="128" Height="256" Width="256" Stroke="Gray" StrokeThickness="1" Name="ellipseASGauss" />
+                                <TextBlock Canvas.Left="226" Canvas.Top="-7" Height="23" Name="textBlockASP1i" Text="1.0i" Width="29" />
+                                <TextBlock Canvas.Left="221" Canvas.Top="246" Height="23" Name="textBlockASM1i" Text="-1.0i" Width="34" />
+                                <TextBlock Canvas.Left="373" Canvas.Top="133" Height="23" Name="textBlockASP1" Text="1.0" Width="25" />
+                                <TextBlock Canvas.Left="116" Canvas.Top="131" Height="23" Name="textBlockASM1" Text="-1.0" Width="33" />
+                                <TextBlock Canvas.Left="233" Canvas.Top="131" Height="23" Name="textBlockASOrigin" Text="0.0" Width="23" />
+                                <GroupBox Header="視点変更" Height="76" Name="groupBox21" Width="119" Canvas.Left="0" Canvas.Top="199">
+                                    <Grid>
+                                        <RadioButton Content="ガウス平面" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="radioButtonASViewGauss" VerticalAlignment="Top" Width="190" IsChecked="True" Checked="radioButtonASViewGauss_Checked" />
+                                        <RadioButton Content="時間軸-実数軸" Height="16" HorizontalAlignment="Left" Margin="6,28,0,0" Name="radioButtonASViewTime" VerticalAlignment="Top" Width="190" Checked="radioButtonASViewTime_Checked" />
+                                    </Grid>
+                                </GroupBox>
+                            </Canvas>
+                            <GroupBox Header="時間軸制御" Height="173" HorizontalAlignment="Left" Margin="526,108,0,0" Name="groupBox22" VerticalAlignment="Top" Width="212">
+                                <Grid>
+                                    <Button Content="進める(_S)" Height="23" HorizontalAlignment="Left" Margin="6,36,0,0" Name="buttonASScrollStart" VerticalAlignment="Top" Width="90" Click="buttonASScrollStart_Click" />
+                                    <Slider Height="23" HorizontalAlignment="Left" Margin="6,65,0,0" Name="sliderASScrollPos" VerticalAlignment="Top" Width="188" ValueChanged="sliderASScrollPos_ValueChanged" SmallChange="1" LargeChange="100" Maximum="10000" />
+                                    <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxASScrollSpeed" VerticalAlignment="Top" Width="56" Text="60" HorizontalContentAlignment="Right" />
+                                    <Label Content="サンプル/秒" Height="28" HorizontalAlignment="Right" Margin="0,4,6,0" Name="label42" VerticalAlignment="Top" Width="124" />
+                                    <Label Content="0/0" Height="28" HorizontalAlignment="Left" Margin="6,94,0,0" Name="labelASTime" VerticalAlignment="Top" Width="188" />
+                                    <Button Content="10サンプル進める(_T)" Height="23" HorizontalAlignment="Left" Margin="6,0,0,6" Name="buttonASAdvanceStep" VerticalAlignment="Bottom" Width="188" Click="buttonASAdvanceStep_Click" />
+                                    <Button Content="止める(_E)" Height="23" HorizontalAlignment="Left" Margin="104,36,0,0" Name="buttonASScrollStop" VerticalAlignment="Top" Width="90" Click="buttonASScrollStop_Click" />
+                                </Grid>
+                            </GroupBox>
+                            <ListBox Height="42" Margin="661,5,6,0" Name="listBoxASChannel" VerticalAlignment="Top" SelectionChanged="listBoxASChannel_SelectionChanged">
+                                <ListBoxItem Name="listBoxItemAS1ch" Content="左" IsSelected="True" />
+                                <ListBoxItem Name="listBoxItemAS2ch" Content="右" />
+                            </ListBox>
+                            <Label Content="チャンネル:" Height="28" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="526,7,0,0" Name="label41" VerticalAlignment="Top" Width="129" />
+                            <Label Content="表示サンプル数:" Height="28" HorizontalAlignment="Left" Margin="532,62,0,0" Name="label43" VerticalAlignment="Top" Width="123" HorizontalContentAlignment="Right" />
+                            <TextBox Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="661,62,0,0" Name="textBoxASDispSamples" Text="100" VerticalAlignment="Top" Width="77" TextChanged="textBoxASDispSamples_TextChanged" />
+                        </Grid>
+                    </GroupBox>
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="280,0,0,318" Name="progressBarAS" VerticalAlignment="Bottom" Width="482" />
+                </Grid>
+            </TabItem>
             <TabItem Header="ヒルベルト変換FIR" Name="tabItemHilbert">
                 <Grid Name="grid3">
                     <GroupBox Header="入力ファイル" Height="61" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBoxHilbInput" VerticalAlignment="Top" Width="620">

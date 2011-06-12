@@ -14,11 +14,6 @@ namespace PlayPcmWinTestBench {
         //////////////////////////////////////////////////////////////////////////////////////////
         // ヒルベルト変換
 
-        /// <summary>
-        /// FIRフィルタの長さ。奇数。
-        /// </summary> 
-        private int m_hilbFirLength = 8191;
-
         private BackgroundWorker m_HilbWorker;
 
         private void InitHilbTab() {
@@ -50,15 +45,13 @@ namespace PlayPcmWinTestBench {
         }
 
         private void buttonHilbOutputStart_Click(object sender, RoutedEventArgs e) {
-            int filterLength;
-            if (!Int32.TryParse(textBoxHilbFilterN.Text, out filterLength) ||
-                (filterLength & 1) == 0 || filterLength <= 0) {
+            var args = new FirWorkerArgs();
+            if (!Int32.TryParse(textBoxHilbFilterN.Text, out args.firLength) ||
+                (args.firLength & 1) == 0 || args.firLength <= 0) {
                 MessageBox.Show("FIRフィルタ長は正の奇数の数値を半角数字で入力してください。処理中断。");
                 return;
             }
-            m_hilbFirLength = filterLength;
 
-            var args = new FirWorkerArgs();
             args.inputPath = textBoxHilbInputPath.Text;
             args.outputPath = textBoxHilbOutputPath.Text;
             if (radioButtonHilbSint16.IsChecked == true) {
@@ -112,20 +105,20 @@ namespace PlayPcmWinTestBench {
         private bool HilbertDo(FirWorkerArgs args, PcmData pcmDataIn, out PcmData pcmDataOutput) {
             var dft = new WWDirectComputeCS.WWDftCpu();
 
-            var hilb = WWHilbert.HilbertFirCoeff(m_hilbFirLength);
-            System.Diagnostics.Debug.Assert(hilb.Length == m_hilbFirLength);
+            var hilb = WWHilbert.HilbertFirCoeff(args.firLength);
+            System.Diagnostics.Debug.Assert(hilb.Length == args.firLength);
 
             // 窓関数
             double [] window;
             if (args.windowFunc == WindowFuncType.Blackman) {
-                WWWindowFunc.BlackmanWindow(m_hilbFirLength, out window);
+                WWWindowFunc.BlackmanWindow(args.firLength, out window);
             } else {
-                WWWindowFunc.KaiserWindow(m_hilbFirLength, args.kaiserAlpha, out window);
+                WWWindowFunc.KaiserWindow(args.firLength, args.kaiserAlpha, out window);
             }
 
             // FIR coeffの個数は、window.Length個。
             // ヒルベルト変換パラメータは未来から過去の方向に並んでいるので左右をひっくり返す。
-            double [] coeff = new double[m_hilbFirLength];
+            double [] coeff = new double[args.firLength];
             for (int i=0; i<coeff.Length; ++i) {
                 int pos = coeff.Length - i - 1;
                 coeff[i] = hilb[pos] * window[i];
@@ -189,7 +182,7 @@ namespace PlayPcmWinTestBench {
             sw.Start();
 
             string result;
-            if (!FirDoCommon(args, HilbertDo, out result)) {
+            if (!FirDoLoadConvertSave(args, HilbertDo, out result)) {
                 e.Result = result;
                 return;
             }
