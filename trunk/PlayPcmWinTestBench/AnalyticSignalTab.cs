@@ -302,7 +302,12 @@ namespace PlayPcmWinTestBench {
                     double offsY = canvasAS.Height / 2;
 
                     var e = new Ellipse();
-                    e.Fill = Brushes.Red;
+
+                    byte gradation = (byte)( 255.0f * i / (m_ASdrawEllipseCount-1));
+                    SolidColorBrush b = new SolidColorBrush();
+                    b.Color = Color.FromRgb((byte)(255-gradation), 0, gradation);
+                    e.Fill = b;
+
                     e.StrokeThickness = 0;
                     e.Width = 4;
                     e.Height = 4;
@@ -329,11 +334,16 @@ namespace PlayPcmWinTestBench {
                     double offsY = canvasAS.Height / 2;
 
                     var e = new Ellipse();
-                    e.Fill = Brushes.Red;
+
+                    byte gradation = (byte)(255.0f * i / (m_ASdrawEllipseCount - 1));
+                    SolidColorBrush b = new SolidColorBrush();
+                    b.Color = Color.FromRgb((byte)(255 - gradation), 0, gradation);
+                    e.Fill = b;
+
                     e.StrokeThickness = 0;
                     e.Width = 4;
                     e.Height = 4;
-                    e.Margin = new Thickness(i * xscale + offsX - e.Width / 2, x * yscale + offsY - e.Height / 2, 0, 0);
+                    e.Margin = new Thickness(i * xscale + offsX - e.Width / 2, -x * yscale + offsY - e.Height / 2, 0, 0);
                     m_ASellipseList.Add(e);
                     canvasAS.Children.Add(e);
                 }
