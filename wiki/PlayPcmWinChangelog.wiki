@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.5 ==
+  * (PlayPcmWinテストベンチ)解析信号観察画面
+http://bitspersampleconv2.googlecode.com/files/as.png
+
 ===!PlayPcmWin 3.0.2 ==
   * (PlayPcmWinテストベンチ)Issue 67 (FIR EQとヒルベルト変換FIR 出力WAVファイルのフォーマットが64ビットfloat固定になるバグ)修正
 
