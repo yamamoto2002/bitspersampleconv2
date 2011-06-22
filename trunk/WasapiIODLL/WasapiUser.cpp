@@ -1256,7 +1256,7 @@ WasapiUser::UpdatePlayPcmDataWhenPlaying(WWPcmData &pcmData)
     ReleaseMutex(m_mutex);
 }
 
-int
+int64_t
 WasapiUser::GetTotalFrameNum(void)
 {
     WWPcmData *nowPlaying = m_nowPlayingPcmData;
@@ -1267,10 +1267,10 @@ WasapiUser::GetTotalFrameNum(void)
     return nowPlaying->nFrames;
 }
 
-int
+int64_t
 WasapiUser::GetPosFrame(void)
 {
-    int result = 0;
+    int64_t result = 0;
 
     WWPcmData *nowPlaying = m_nowPlayingPcmData;
 
@@ -1285,7 +1285,7 @@ WasapiUser::GetPosFrame(void)
 }
 
 bool
-WasapiUser::SetPosFrame(int v)
+WasapiUser::SetPosFrame(int64_t v)
 {
     if (m_dataFlow != eRender) {
         assert(0);
@@ -1320,7 +1320,7 @@ WasapiUser::SetPosFrame(int v)
 }
 
 void
-WasapiUser::SetupCaptureBuffer(int bytes)
+WasapiUser::SetupCaptureBuffer(int64_t bytes)
 {
     if (m_dataFlow != eCapture) {
         assert(0);
@@ -1338,8 +1338,8 @@ WasapiUser::SetupCaptureBuffer(int bytes)
     m_capturedPcmData->stream = (BYTE*)malloc(bytes);
 }
 
-int
-WasapiUser::GetCapturedData(BYTE *data, int bytes)
+int64_t
+WasapiUser::GetCapturedData(BYTE *data, int64_t bytes)
 {
     if (m_dataFlow != eCapture) {
         assert(0);
@@ -1356,7 +1356,7 @@ WasapiUser::GetCapturedData(BYTE *data, int bytes)
     return bytes;
 }
 
-int
+int64_t
 WasapiUser::GetCaptureGlitchCount(void)
 {
     return m_glitchCount;
@@ -1387,10 +1387,10 @@ WasapiUser::CreateWritableFrames(BYTE *pData_return, int wantFrames)
         int copyFrames = wantFrames;
         if (pcmData->nFrames <= pcmData->posFrame + wantFrames) {
             // pcmDataが持っているフレーム数よりも要求フレーム数が多い。
-            copyFrames = pcmData->nFrames - pcmData->posFrame;
+            copyFrames = (int)(pcmData->nFrames - pcmData->posFrame);
         }
 
-        dprintf("pcmData=%p next=%p posFrame=%d copyFrames=%d nFrames=%d\n",
+        dprintf("pcmData=%p next=%p posFrame=%lld copyFrames=%d nFrames=%lld\n",
             pcmData, pcmData->next, pcmData->posFrame, copyFrames, pcmData->nFrames);
 
         CopyMemory(&pData_return[pos*m_frameBytes],
@@ -1424,11 +1424,6 @@ WasapiUser::AudioSamplesSendProc(void)
     int     copyFrames = 0;
     int     writableFrames = 0;
 
-#ifndef CREATE_PLAYPCM_ON_RENDER_BUFFER
-    // fromは、使われない場合最適化で消えるが、念のため。
-    BYTE    *from      = NULL;
-#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
-
     WaitForSingleObject(m_mutex, INFINITE);
 
     writableFrames = m_bufferFrameNum;
@@ -1449,26 +1444,11 @@ WasapiUser::AudioSamplesSendProc(void)
         }
     }
 
-#ifdef CREATE_PLAYPCM_ON_RENDER_BUFFER
-    // fromを使わず、直接レンダーバッファ(to)上で再生データを作る。
     assert(m_renderClient);
     HRGR(m_renderClient->GetBuffer(writableFrames, &to));
     assert(to);
 
     copyFrames = CreateWritableFrames(to, writableFrames);
-#else
-    // 一旦スタック上(from)で再生データを作り、レンダーバッファ(to)へ書き込む。
-    from = (BYTE*)_malloca(writableFrames * m_frameBytes);
-    copyFrames = CreateWritableFrames(from, writableFrames);
-
-    assert(m_renderClient);
-    HRGR(m_renderClient->GetBuffer(writableFrames, &to));
-    assert(to);
-
-    if (0 < copyFrames) {
-        CopyMemory(to, from, copyFrames * m_frameBytes);
-    }
-#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
 
     if (0 < writableFrames - copyFrames) {
         memset(&to[copyFrames*m_frameBytes], 0,
@@ -1494,12 +1474,6 @@ WasapiUser::AudioSamplesSendProc(void)
     }
 
 end:
-#ifndef CREATE_PLAYPCM_ON_RENDER_BUFFER
-    // _freea()とNULL代入は、使われない場合最適化で消えるが、念のため。
-    _freea(from);
-    from = NULL;
-#endif // CREATE_PLAYPCM_ON_RENDER_BUFFER
-
     ReleaseMutex(m_mutex);
     return result;
 }
@@ -1706,10 +1680,7 @@ WasapiUser::AudioSamplesRecvProc(void)
         memset(&m_capturedPcmData->stream[m_capturedPcmData->posFrame * m_frameBytes],
             0, writeFrames * m_frameBytes);
     } else {
-        m_capturedPcmData->posFrame,
-            devicePosition;
-
-        dprintf("numFramesAvailable=%d fb=%d pos=%d devPos=%lld nextPos=%d te=%d\n",
+        dprintf("numFramesAvailable=%u fb=%d pos=%lld devPos=%llu nextPos=%lld te=%d\n",
             numFramesAvailable, m_frameBytes,
             m_capturedPcmData->posFrame,
             devicePosition,

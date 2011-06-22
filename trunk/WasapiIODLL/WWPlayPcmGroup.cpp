@@ -28,14 +28,14 @@ WWPlayPcmGroup::Term(void)
 }
 
 bool
-WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int bytes)
+WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int64_t bytes)
 {
     assert(1 <= m_numChannels);
     assert(1 <= m_sampleRate);
     assert(1 <= m_frameBytes);
 
     if (0 == bytes) {
-        dprintf("E: %s(%d, %p, %d) arg check failed\n", __FUNCTION__, id, data, bytes);
+        dprintf("E: %s(%d, %p, %lld) arg check failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
 
@@ -43,7 +43,7 @@ WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int bytes)
     if (!pcmData.Init(id, m_format, m_numChannels,
             bytes/m_frameBytes,
             m_frameBytes, WWPcmDataContentPcmData)) {
-        dprintf("E: %s(%d, %p, %d) malloc failed\n", __FUNCTION__, id, data, bytes);
+        dprintf("E: %s(%d, %p, %lld) malloc failed\n", __FUNCTION__, id, data, bytes);
         return false;
     }
 

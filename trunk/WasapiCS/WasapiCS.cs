@@ -74,11 +74,11 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
-        WasapiIO_AddPlayPcmData(int id, byte[] data, int bytes);
+        WasapiIO_AddPlayPcmData(int id, byte[] data, long bytes);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
-        WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int posBytes, byte[] data, int bytes);
+        WasapiIO_AddPlayPcmDataSetPcmFragment(int id, long posBytes, byte[] data, long bytes);
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
@@ -106,14 +106,14 @@ namespace Wasapi {
 
         [DllImport("WasapiIODLL.dll")]
         private extern static void
-        WasapiIO_SetupCaptureBuffer(int bytes);
+        WasapiIO_SetupCaptureBuffer(long bytes);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int
-        WasapiIO_GetCapturedData(byte[] data, int bytes);
+        private extern static long
+        WasapiIO_GetCapturedData(byte[] data, long bytes);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int
+        private extern static long
         WasapiIO_GetCaptureGlitchCount();
 
         [DllImport("WasapiIODLL.dll")]
@@ -137,16 +137,16 @@ namespace Wasapi {
         WasapiIO_Unpause();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int
+        private extern static long
         WasapiIO_GetPosFrame();
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static int
+        private extern static long
         WasapiIO_GetTotalFrameNum();
 
         [DllImport("WasapiIODLL.dll")]
         private extern static bool
-        WasapiIO_SetPosFrame(int v);
+        WasapiIO_SetPosFrame(long v);
         
         [DllImport("WasapiIODLL.dll")]
         private extern static int
@@ -306,14 +306,14 @@ namespace Wasapi {
         }
 
         public bool AddPlayPcmData(int id, byte[] data) {
-            return WasapiIO_AddPlayPcmData(id, data, data.Length);
+            return WasapiIO_AddPlayPcmData(id, data, data.LongLength);
         }
 
-        public bool AddPlayPcmDataAllocateMemory(int id, int bytes) {
+        public bool AddPlayPcmDataAllocateMemory(int id, long bytes) {
             return WasapiIO_AddPlayPcmData(id, null, bytes);
         }
 
-        public bool AddPlayPcmDataSetPcmFragment(int id, int posBytes, byte[] data) {
+        public bool AddPlayPcmDataSetPcmFragment(int id, long posBytes, byte[] data) {
             return WasapiIO_AddPlayPcmDataSetPcmFragment(id, posBytes, data, data.Length);
         }
 
@@ -347,15 +347,15 @@ namespace Wasapi {
             WasapiIO_SetNowPlayingPcmDataId(id);
         }
 
-        public void SetupCaptureBuffer(int bytes) {
+        public void SetupCaptureBuffer(long bytes) {
             WasapiIO_SetupCaptureBuffer(bytes);
         }
 
-        public int GetCapturedData(byte[] data) {
-            return WasapiIO_GetCapturedData(data, data.Length);
+        public long GetCapturedData(byte[] data) {
+            return WasapiIO_GetCapturedData(data, data.LongLength);
         }
 
-        public int GetCaptureGlitchCount() {
+        public long GetCaptureGlitchCount() {
             return WasapiIO_GetCaptureGlitchCount();
         }
 
@@ -379,15 +379,15 @@ namespace Wasapi {
             return WasapiIO_Unpause();
         }
 
-        public int GetPosFrame() {
+        public long GetPosFrame() {
             return WasapiIO_GetPosFrame();
         }
 
-        public int GetTotalFrameNum() {
+        public long GetTotalFrameNum() {
             return WasapiIO_GetTotalFrameNum();
         }
 
-        public bool SetPosFrame(int v) {
+        public bool SetPosFrame(long v) {
             return WasapiIO_SetPosFrame(v);
         }
 
