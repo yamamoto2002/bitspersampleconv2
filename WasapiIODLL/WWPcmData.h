@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <mmsystem.h>
 #include <MMReg.h>
+#include <stdint.h>
 
 /// PCMデータの用途。
 enum WWPcmDataContentType {
@@ -51,9 +52,11 @@ struct WWPcmData {
     WWPcmDataContentType contentType;
     int       nChannels;
 
-    int       nFrames;
+    /// bytes per frame
     int       frameBytes;
-    int       posFrame;
+
+    int64_t   nFrames;
+    int64_t   posFrame;
     BYTE      *stream;
 
     WWPcmData(void) {
@@ -74,24 +77,24 @@ struct WWPcmData {
     /// @param frameBytes 1フレームのバイト数。
     ///     (1サンプル1チャンネルのバイト数×チャンネル数)
     bool Init(int id, WWPcmDataFormatType format, int nChannels,
-        int nFrames, int frameBytes, WWPcmDataContentType dataType);
+        int64_t nFrames, int frameBytes, WWPcmDataContentType dataType);
     void Term(void);
 
     void CopyFrom(WWPcmData *rhs);
 
     /** create splice data from the two adjacent sample data */
     void UpdateSpliceDataWithStraightLine(
-        WWPcmData *fromPcmData, int fromPosFrame,
-        WWPcmData *toPcmData,   int toPosFrame);
+        WWPcmData *fromPcmData, int64_t fromPosFrame,
+        WWPcmData *toPcmData,   int64_t toPosFrame);
 
 private:
     /** get sample value on posFrame.
      * 24 bit signed int value is returned when Sint32V24
      */
-    int GetSampleValueInt(int ch, int posFrame);
-    float GetSampleValueFloat(int ch, int posFrame);
+    int GetSampleValueInt(int ch, int64_t posFrame);
+    float GetSampleValueFloat(int ch, int64_t posFrame);
 
-    bool SetSampleValueInt(int ch, int posFrame, int value);
-    bool SetSampleValueFloat(int ch, int posFrame, float value);
+    bool SetSampleValueInt(int ch, int64_t posFrame, int value);
+    bool SetSampleValueFloat(int ch, int64_t posFrame, float value);
 };
 

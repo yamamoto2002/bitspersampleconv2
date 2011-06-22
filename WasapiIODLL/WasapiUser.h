@@ -106,9 +106,9 @@ public:
     int GetNowPlayingPcmDataId(void);
 
     // recording buffer setup
-    void SetupCaptureBuffer(int bytes);
-    int GetCapturedData(BYTE *data, int bytes);
-    int GetCaptureGlitchCount(void);
+    void SetupCaptureBuffer(int64_t bytes);
+    int64_t GetCapturedData(BYTE *data, int64_t bytes);
+    int64_t GetCaptureGlitchCount(void);
 
     /// 再生リピートの更新。
     void UpdatePlayRepeat(
@@ -129,13 +129,13 @@ public:
     HRESULT Unpause(void);
 
     /// negative number returns when playing pregap
-    int GetPosFrame(void);
+    int64_t GetPosFrame(void);
 
     /// return total frames without pregap frame num
-    int GetTotalFrameNum(void);
+    int64_t GetTotalFrameNum(void);
 
     /// v must be 0 or greater number
-    bool SetPosFrame(int v);
+    bool SetPosFrame(int64_t v);
 
     EDataFlow GetDataFlow(void) const {
         return m_dataFlow;
@@ -156,7 +156,11 @@ private:
     HANDLE       m_audioSamplesReadyEvent;
 
     IAudioClient *m_audioClient;
+
+    /// bytes per frame
     int          m_frameBytes;
+
+    /// wasapi audio buffer frame size
     UINT32       m_bufferFrameNum;
 
     int          m_sampleRate;
@@ -181,7 +185,7 @@ private:
     int          m_footerNeedSendCount;
 
     EDataFlow    m_dataFlow;
-    int          m_glitchCount;
+    int64_t      m_glitchCount;
     int          m_footerCount;
 
     int          m_useDeviceId;
@@ -211,6 +215,7 @@ private:
     void ClearCapturedPcmData(void);
     void ClearPlayPcmData(void);
 
+    /// WASAPIレンダーバッファに詰めるデータを作る。
     int CreateWritableFrames(BYTE *pData_return, int wantFrames);
 
     /// 再生リンクリストをつなげる。

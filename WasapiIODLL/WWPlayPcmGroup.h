@@ -42,7 +42,7 @@ public:
     ///             data==NULLの場合、PCMデータのメモリ領域だけ確保。
     /// @param bytes dataのバイト数。
     /// @return true: 追加成功。false: 追加失敗。
-    bool AddPlayPcmData(int id, BYTE *data, int bytes);
+    bool AddPlayPcmData(int id, BYTE *data, int64_t bytes);
 
     bool AddPlayPcmDataEnd(void);
     
@@ -63,6 +63,8 @@ private:
     int                 m_sampleRate;
     WWPcmDataFormatType m_format;
     int                 m_numChannels;
+
+    /// bytes per frame
     int                 m_frameBytes;
 
     bool                m_repeat;

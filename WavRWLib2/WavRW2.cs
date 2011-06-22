@@ -273,10 +273,6 @@ namespace WavRWLib2
             }
 
             m_subChunk2Size = br.ReadUInt32();
-            if (0x80000000 <= m_subChunk2Size) {
-                Console.WriteLine("E: file too large to handle. {0} bytes", m_subChunk2Size);
-                return false;
-            }
 
             int frameBytes = bitsPerSample / 8 * numChannels;
             m_numFrames = m_subChunk2Size / frameBytes;

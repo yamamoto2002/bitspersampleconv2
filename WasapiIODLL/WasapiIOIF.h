@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include "WasapiUser.h"
+#include <stdint.h>
 
 extern "C" __declspec(dllexport)
 HRESULT __stdcall
@@ -77,11 +78,11 @@ WasapiIO_AddPlayPcmDataStart(void);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIO_AddPlayPcmData(int id, unsigned char *data, int bytes);
+WasapiIO_AddPlayPcmData(int id, unsigned char *data, int64_t bytes);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int posBytes, unsigned char *data, int bytes);
+WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int64_t posBytes, unsigned char *data, int64_t bytes);
 
 extern "C" __declspec(dllexport)
 bool __stdcall
@@ -105,14 +106,14 @@ WasapiIO_SetNowPlayingPcmDataId(int id);
 
 extern "C" __declspec(dllexport)
 void __stdcall
-WasapiIO_SetupCaptureBuffer(int bytes);
+WasapiIO_SetupCaptureBuffer(int64_t bytes);
 
 extern "C" __declspec(dllexport)
-int __stdcall
-WasapiIO_GetCapturedData(unsigned char *data, int bytes);
+int64_t __stdcall
+WasapiIO_GetCapturedData(unsigned char *data, int64_t bytes);
 
 extern "C" __declspec(dllexport)
-int __stdcall
+int64_t __stdcall
 WasapiIO_GetCaptureGlitchCount(void);
 
 extern "C" __declspec(dllexport)
@@ -136,11 +137,11 @@ int __stdcall
 WasapiIO_Unpause(void);
 
 extern "C" __declspec(dllexport)
-int __stdcall
+int64_t __stdcall
 WasapiIO_GetPosFrame(void);
 
 extern "C" __declspec(dllexport)
-int __stdcall
+int64_t __stdcall
 WasapiIO_GetTotalFrameNum(void);
 
 extern "C" __declspec(dllexport)

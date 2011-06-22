@@ -145,8 +145,8 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
 
     next = NULL;
 
-    long bytes = nFrames * frameBytes;
-    assert(0 < bytes && bytes < 0xffffffffL);
+    int64_t bytes = nFrames * frameBytes;
+    assert(0 < bytes);
 
     stream = (BYTE*)malloc(bytes);
     CopyMemory(stream, rhs->stream, bytes);
@@ -155,7 +155,7 @@ WWPcmData::CopyFrom(WWPcmData *rhs)
 bool
 WWPcmData::Init(
         int aId, WWPcmDataFormatType aFormat, int anChannels,
-        int anFrames, int aframeBytes, WWPcmDataContentType dataType)
+        int64_t anFrames, int aframeBytes, WWPcmDataContentType dataType)
 {
     assert(stream == NULL);
 
@@ -170,25 +170,25 @@ WWPcmData::Init(
     frameBytes = aframeBytes;
     stream   = NULL;
 
-    long bytes = anFrames * aframeBytes;
-    if (0xffffffff < bytes || bytes < 0) {
+    int64_t bytes = anFrames * aframeBytes;
+    if (bytes < 0) {
         return false;
     }
 
-    BYTE *p = (BYTE *)malloc((size_t)bytes);
+    BYTE *p = (BYTE *)malloc(bytes);
     if (NULL == p) {
         // 失敗…
         return false;
     }
 
-    ZeroMemory(p, (size_t)bytes);
+    ZeroMemory(p, bytes);
     nFrames = anFrames;
     stream = p;
     return true;
 }
 
 int
-WWPcmData::GetSampleValueInt(int ch, int posFrame)
+WWPcmData::GetSampleValueInt(int ch, int64_t posFrame)
 {
     assert(format != WWPcmDataFormatSfloat);
     assert(0 <= ch && ch < nChannels);
@@ -241,7 +241,7 @@ WWPcmData::GetSampleValueInt(int ch, int posFrame)
 }
 
 float
-WWPcmData::GetSampleValueFloat(int ch, int posFrame)
+WWPcmData::GetSampleValueFloat(int ch, int64_t posFrame)
 {
     assert(format == WWPcmDataFormatSfloat);
     assert(0 <= ch && ch < nChannels);
@@ -256,7 +256,7 @@ WWPcmData::GetSampleValueFloat(int ch, int posFrame)
 }
 
 bool
-WWPcmData::SetSampleValueInt(int ch, int posFrame, int value)
+WWPcmData::SetSampleValueInt(int ch, int64_t posFrame, int value)
 {
     assert(format != WWPcmDataFormatSfloat);
     assert(0 <= ch && ch < nChannels);
@@ -310,7 +310,7 @@ WWPcmData::SetSampleValueInt(int ch, int posFrame, int value)
 }
 
 bool
-WWPcmData::SetSampleValueFloat(int ch, int posFrame, float value)
+WWPcmData::SetSampleValueFloat(int ch, int64_t posFrame, float value)
 {
     assert(format == WWPcmDataFormatSfloat);
     assert(0 <= ch && ch < nChannels);
@@ -331,18 +331,18 @@ struct PcmSpliceInfoFloat {
 };
 
 struct PcmSpliceInfoInt {
-    int deltaX;
-    int error;
-    int ystep;
-    int deltaError;
+    int64_t deltaX;
+    int64_t error;
+    int     ystep;
+    int64_t deltaError;
     int deltaErrorDirection;
     int y;
 };
 
 void
 WWPcmData::UpdateSpliceDataWithStraightLine(
-        WWPcmData *fromPcmData, int fromPosFrame,
-        WWPcmData *toPcmData,   int toPosFrame)
+        WWPcmData *fromPcmData, int64_t fromPosFrame,
+        WWPcmData *toPcmData,   int64_t toPosFrame)
 {
     assert(0 < nFrames);
 
@@ -384,13 +384,13 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
                 int y1 = toPcmData->GetSampleValueInt(ch, toPosFrame);
                 p[ch].deltaX = nFrames;
                 p[ch].error  = p[ch].deltaX/2;
-                p[ch].ystep  = ((int64_t)y1 - y0)/p[ch].deltaX;
+                p[ch].ystep  = (int)(((int64_t)y1 - y0)/p[ch].deltaX);
                 p[ch].deltaError = abs(y1 - y0) - abs(p[ch].ystep * p[ch].deltaX);
                 p[ch].deltaErrorDirection = (y1-y0) >= 0 ? 1 : -1;
                 p[ch].y = y0;
             }
 
-            for (int x=0; x<nFrames; ++x) {
+            for (int64_t x=0; x<nFrames; ++x) {
                 for (int ch=0; ch<nChannels; ++ch) {
                     SetSampleValueInt(ch, x, p[ch].y);
                     // printf("(%d %d)", x, y);

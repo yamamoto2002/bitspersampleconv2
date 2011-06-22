@@ -1722,7 +1722,7 @@ namespace PlayPcmWin
                         endFrame = pr.NumFrames;
                     }
 
-                    int posFrame = 0;
+                    long posFrame = 0;
                     do {
                         // 4Mフレームずつ読み出す。
                         int readFrames = 4 * 1024 * 1024;
@@ -1752,7 +1752,7 @@ namespace PlayPcmWin
 
                         if (0 == posFrame) {
                             // 最初のフレームが来たとき領域確保。
-                            int allocBytes = (int)(pdAfter.NumFrames * pdAfter.BitsPerFrame / 8);
+                            long allocBytes = pdAfter.NumFrames * pdAfter.BitsPerFrame / 8;
                             
                             if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
                                 //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
@@ -1766,7 +1766,7 @@ namespace PlayPcmWin
                                 string.Format("wasapi.AddPlayPcmData(id={0}, frames={1})\r\n", pd.Id, pd.NumFrames));
                         }
 
-                        int posBytes = (int)((long)posFrame * pdAfter.BitsPerFrame / 8);
+                        long posBytes = posFrame * pdAfter.BitsPerFrame / 8;
 
                         bool rv = wasapi.AddPlayPcmDataSetPcmFragment(pd.Id, posBytes, pdAfter.GetSampleArray());
                         System.Diagnostics.Debug.Assert(rv);
