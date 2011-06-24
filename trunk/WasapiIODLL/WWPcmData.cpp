@@ -174,6 +174,12 @@ WWPcmData::Init(
     if (bytes < 0) {
         return false;
     }
+#ifdef _X86_
+    if (0x7fffffffL < bytes) {
+        // cannot alloc 2GB buffer on 32bit build
+        return false;
+    }
+#endif
 
     BYTE *p = (BYTE *)malloc(bytes);
     if (NULL == p) {
@@ -331,10 +337,10 @@ struct PcmSpliceInfoFloat {
 };
 
 struct PcmSpliceInfoInt {
-    int64_t deltaX;
-    int64_t error;
-    int     ystep;
-    int64_t deltaError;
+    int deltaX;
+    int error;
+    int ystep;
+    int deltaError;
     int deltaErrorDirection;
     int y;
 };
@@ -344,7 +350,7 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
         WWPcmData *fromPcmData, int64_t fromPosFrame,
         WWPcmData *toPcmData,   int64_t toPosFrame)
 {
-    assert(0 < nFrames);
+    assert(0 < nFrames && nFrames <= 0x7fffffff);
 
     switch (fromPcmData->format) {
     case WWPcmDataFormatSfloat:
@@ -382,15 +388,15 @@ WWPcmData::UpdateSpliceDataWithStraightLine(
             for (int ch=0; ch<nChannels; ++ch) {
                 int y0 = fromPcmData->GetSampleValueInt(ch, fromPosFrame);
                 int y1 = toPcmData->GetSampleValueInt(ch, toPosFrame);
-                p[ch].deltaX = nFrames;
+                p[ch].deltaX = (int)nFrames;
                 p[ch].error  = p[ch].deltaX/2;
-                p[ch].ystep  = (int)(((int64_t)y1 - y0)/p[ch].deltaX);
+                p[ch].ystep  = ((int64_t)y1 - y0)/p[ch].deltaX;
                 p[ch].deltaError = abs(y1 - y0) - abs(p[ch].ystep * p[ch].deltaX);
                 p[ch].deltaErrorDirection = (y1-y0) >= 0 ? 1 : -1;
                 p[ch].y = y0;
             }
 
-            for (int64_t x=0; x<nFrames; ++x) {
+            for (int x=0; x<(int)nFrames; ++x) {
                 for (int ch=0; ch<nChannels; ++ch) {
                     SetSampleValueInt(ch, x, p[ch].y);
                     // printf("(%d %d)", x, y);

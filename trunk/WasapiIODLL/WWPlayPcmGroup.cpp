@@ -34,6 +34,14 @@ WWPlayPcmGroup::AddPlayPcmData(int id, BYTE *data, int64_t bytes)
     assert(1 <= m_sampleRate);
     assert(1 <= m_frameBytes);
 
+#ifdef _X86_
+    if (0x7fffffffL < bytes) {
+        // cannot alloc 2GB buffer on 32bit build
+        dprintf("E: %s(%d, %p, %lld) cannot alloc 2GB buffer on 32bit build\n", __FUNCTION__, id, data, bytes);
+        return false;
+    }
+#endif
+
     if (0 == bytes) {
         dprintf("E: %s(%d, %p, %lld) arg check failed\n", __FUNCTION__, id, data, bytes);
         return false;
