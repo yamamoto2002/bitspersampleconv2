@@ -1319,13 +1319,19 @@ WasapiUser::SetPosFrame(int64_t v)
     return true;
 }
 
-void
+bool
 WasapiUser::SetupCaptureBuffer(int64_t bytes)
 {
     if (m_dataFlow != eCapture) {
         assert(0);
-        return;
+        return false;
     }
+#ifdef _X86_
+    if (0x7fffffffL < bytes) {
+        // cannot alloc 2GB buffer on 32bit build
+        return false;
+    }
+#endif
 
     ClearCapturedPcmData();
 
@@ -1336,6 +1342,8 @@ WasapiUser::SetupCaptureBuffer(int64_t bytes)
     m_capturedPcmData->posFrame = 0;
     m_capturedPcmData->nFrames = bytes/m_frameBytes;
     m_capturedPcmData->stream = (BYTE*)malloc(bytes);
+
+    return  m_capturedPcmData->stream != NULL;
 }
 
 int64_t

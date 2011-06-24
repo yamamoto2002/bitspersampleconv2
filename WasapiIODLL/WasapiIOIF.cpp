@@ -238,6 +238,12 @@ bool __stdcall
 WasapiIO_AddPlayPcmDataSetPcmFragment(int id, int64_t posBytes, unsigned char *data, int64_t bytes)
 {
     assert(self);
+#ifdef _X86_
+    if (0x7fffffffL < posBytes + bytes) {
+        // cannot alloc 2GB buffer on 32bit build
+        return false;
+    }
+#endif
 
     WWPcmData *p = self->playPcmGroup.FindPcmDataById(id);
     if (NULL == p) {
@@ -315,11 +321,11 @@ WasapiIO_SetNowPlayingPcmDataId(int id)
 }
 
 extern "C" __declspec(dllexport)
-void __stdcall
+bool __stdcall
 WasapiIO_SetupCaptureBuffer(int64_t bytes)
 {
     assert(self);
-    self->wasapi.SetupCaptureBuffer(bytes);
+    return self->wasapi.SetupCaptureBuffer(bytes);
 }
 
 extern "C" __declspec(dllexport)

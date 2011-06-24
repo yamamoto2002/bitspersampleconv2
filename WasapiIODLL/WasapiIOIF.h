@@ -105,7 +105,7 @@ void __stdcall
 WasapiIO_SetNowPlayingPcmDataId(int id);
 
 extern "C" __declspec(dllexport)
-void __stdcall
+bool __stdcall
 WasapiIO_SetupCaptureBuffer(int64_t bytes);
 
 extern "C" __declspec(dllexport)

@@ -105,7 +105,7 @@ namespace Wasapi {
         WasapiIO_SetNowPlayingPcmDataId(int id);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void
+        private extern static bool
         WasapiIO_SetupCaptureBuffer(long bytes);
 
         [DllImport("WasapiIODLL.dll")]
@@ -347,8 +347,8 @@ namespace Wasapi {
             WasapiIO_SetNowPlayingPcmDataId(id);
         }
 
-        public void SetupCaptureBuffer(long bytes) {
-            WasapiIO_SetupCaptureBuffer(bytes);
+        public bool SetupCaptureBuffer(long bytes) {
+            return WasapiIO_SetupCaptureBuffer(bytes);
         }
 
         public long GetCapturedData(byte[] data) {

@@ -106,7 +106,7 @@ public:
     int GetNowPlayingPcmDataId(void);
 
     // recording buffer setup
-    void SetupCaptureBuffer(int64_t bytes);
+    bool SetupCaptureBuffer(int64_t bytes);
     int64_t GetCapturedData(BYTE *data, int64_t bytes);
     int64_t GetCaptureGlitchCount(void);
 
