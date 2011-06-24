@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.6 ==
-  * Issue 69 ファイルサイズが大きい(2GB～4GB)WAVファイルの読み込みが失敗する問題を修正
+  * Issue 69 ファイルサイズが大きい(ファイルサイズが2GB～4GBの範囲の)WAVファイルの読み込みが失敗する問題を修正
 
 ===!PlayPcmWin 3.0.5 ==
   * (PlayPcmWinテストベンチ)解析信号観察画面
