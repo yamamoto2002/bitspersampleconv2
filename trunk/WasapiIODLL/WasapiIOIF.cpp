@@ -403,7 +403,7 @@ WasapiIO_GetTotalFrameNum(void)
 
 extern "C" __declspec(dllexport)
 bool __stdcall
-WasapiIO_SetPosFrame(int v)
+WasapiIO_SetPosFrame(int64_t v)
 {
     assert(self);
     return self->wasapi.SetPosFrame(v);
