@@ -171,8 +171,9 @@ namespace PlayPcmWin {
 
                     NumFrames = m_waveR.NumFrames;
 
-                    m_waveR.ReadStreamSkip(m_br, startFrame);
-                    ercd = 0;
+                    if (m_waveR.ReadStreamSkip(m_br, startFrame)) {
+                        ercd = 0;
+                    }
                 }
             } catch (Exception ex) {
                 Console.WriteLine("E: StreamBeginWave {0}", ex);
