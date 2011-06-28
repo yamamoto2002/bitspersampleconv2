@@ -1730,7 +1730,13 @@ namespace PlayPcmWin
                             readFrames = (int)(endFrame - (startFrame + posFrame));
                         }
                         byte[] part = pr.StreamReadOne(readFrames);
-
+                        if (null == part) {
+                            r.message = string.Format("突然ストリームの終わりに達しました。");
+                            args.Result = r;
+                            Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
+                            pr.StreamEnd();
+                            return;
+                        }
                         readFrames = part.Length / (pd.BitsPerFrame / 8);
 
                         // フレーム数は本来の数endFrame - startFrameを入れる
@@ -1741,7 +1747,7 @@ namespace PlayPcmWin
 
                         if (pdAfter.GetSampleArray() == null ||
                             0 == pdAfter.GetSampleArray().Length) {
-                            // サンプルが存在しないんでWasapiにAddしない。
+                            // サンプルが存在しないのでWasapiにAddしない。
                             break;
                         }
 

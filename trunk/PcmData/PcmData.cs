@@ -21,6 +21,14 @@ namespace PcmDataLib {
             }
         }
 
+        public static bool BinaryReaderSeekFromBegin(BinaryReader reader, long offset) {
+            if (!reader.BaseStream.CanSeek) {
+                return false;
+            }
+            reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+            return true;
+        }
+
         /// <summary>
         /// FourCC形式のバイト列をsと比較する
         /// </summary>
