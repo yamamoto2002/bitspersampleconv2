@@ -12,7 +12,7 @@ namespace WavRWLib2
         /// <summary>
         /// チャンクサイズはあてにならない。
         /// </summary>
-        private uint   m_chunkSize;
+        public uint ChunkSize { get; set; }
         private byte[] m_format;
 
         public void Create(uint chunkSize)
@@ -23,7 +23,7 @@ namespace WavRWLib2
             m_chunkId[2] = (byte)'F';
             m_chunkId[3] = (byte)'F';
 
-            m_chunkSize = chunkSize;
+            ChunkSize = chunkSize;
 
             m_format = new byte[4];
             m_format[0] = (byte)'W';
@@ -41,9 +41,9 @@ namespace WavRWLib2
                 return 0;
             }
 
-            m_chunkSize = br.ReadUInt32();
-            if (m_chunkSize < 36) {
-                Console.WriteLine("E: chunkSize is too small {0}", m_chunkSize);
+            ChunkSize = br.ReadUInt32();
+            if (ChunkSize < 36) {
+                Console.WriteLine("E: chunkSize is too small {0}", ChunkSize);
                 return 0;
             }
 
@@ -60,7 +60,7 @@ namespace WavRWLib2
         public void Write(BinaryWriter bw)
         {
             bw.Write(m_chunkId);
-            bw.Write(m_chunkSize);
+            bw.Write(ChunkSize);
             bw.Write(m_format);
         }
     }
@@ -274,8 +274,8 @@ namespace WavRWLib2
 
     class DataSubChunk
     {
-        private byte[] m_subChunk2Id;
-        private long   m_subChunk2Size;
+        private byte[] m_chunkId;
+        public uint ChunkSize { get; set; }
 
         private byte[] m_rawData;
 
@@ -290,8 +290,8 @@ namespace WavRWLib2
         }
 
         public void Clear() {
-            m_subChunk2Id = null;
-            m_subChunk2Size = 0;
+            m_chunkId = null;
+            ChunkSize = 0;
             m_rawData = null;
             NumFrames = 0;
         }
@@ -303,12 +303,17 @@ namespace WavRWLib2
 
         public void Create(long numSamples, byte[] rawData) {
             SetRawData(numSamples, rawData);
-            m_subChunk2Id = new byte[4];
-            m_subChunk2Id[0] = (byte)'d';
-            m_subChunk2Id[1] = (byte)'a';
-            m_subChunk2Id[2] = (byte)'t';
-            m_subChunk2Id[3] = (byte)'a';
-            m_subChunk2Size = rawData.LongLength;
+            m_chunkId = new byte[4];
+            m_chunkId[0] = (byte)'d';
+            m_chunkId[1] = (byte)'a';
+            m_chunkId[2] = (byte)'t';
+            m_chunkId[3] = (byte)'a';
+            if (UInt32.MaxValue < rawData.LongLength) {
+                // RF64形式。別途ds64チャンクを用意して、そこにdata chunkのバイト数を入れる。
+                ChunkSize = UInt32.MaxValue;
+            } else {
+                ChunkSize = (uint)rawData.LongLength;
+            }
         }
 
         public void TrimRawData(long newNumSamples, long startBytes, long endBytes) {
@@ -334,18 +339,18 @@ namespace WavRWLib2
         /// 4バイトしか進まない。
         /// </summary>
         public long ReadHeader(BinaryReader br, long offset, byte[] fourcc, int numChannels, int bitsPerSample) {
-            m_subChunk2Id = fourcc;
-            if (!PcmDataLib.Util.FourCCHeaderIs(m_subChunk2Id, 0, "data")) {
+            m_chunkId = fourcc;
+            if (!PcmDataLib.Util.FourCCHeaderIs(m_chunkId, 0, "data")) {
                 System.Diagnostics.Debug.Assert(false);
                 return 0;
             }
 
-            m_subChunk2Size = br.ReadUInt32();
+            ChunkSize = br.ReadUInt32();
 
             Offset = offset + 4;
 
             int frameBytes = bitsPerSample / 8 * numChannels;
-            NumFrames = m_subChunk2Size / frameBytes;
+            NumFrames = ChunkSize / frameBytes;
 
             m_rawData = null;
             return 4;
@@ -398,11 +403,8 @@ namespace WavRWLib2
         }
 
         public void Write(BinaryWriter bw) {
-            bw.Write(m_subChunk2Id);
-
-            uint subChunk2Size = (uint)m_subChunk2Size;
-            bw.Write(subChunk2Size);
-
+            bw.Write(m_chunkId);
+            bw.Write(ChunkSize);
             bw.Write(m_rawData);
         }
     }
@@ -479,9 +481,9 @@ namespace WavRWLib2
                 return 0;
             }
 
-            // PADの処理。listHeaderBytesが奇数の場合、1バイト読み進める
-            long result = listHeaderBytes;
+            long result = 4 + listHeaderBytes;
             if (1 == (listHeaderBytes & 1)) {
+                // PADの処理。listHeaderBytesが奇数の場合、1バイト読み進める
                 br.ReadBytes(1);
                 ++result;
             }
@@ -495,17 +497,43 @@ namespace WavRWLib2
                 int bytes = data[pos+4] + 256 * data[pos+5];
                 if (0 < bytes) {
                     if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "INAM")) {
-                        Title = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                        Title = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
                     if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IART")) {
-                        ArtistName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                        ArtistName = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
                     if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IPRD")) {
-                        AlbumName = System.Text.Encoding.UTF8.GetString(data, pos + 8, bytes).Trim(new char[] { '\0' });
+                        AlbumName = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
                 }
-                pos += 8 + bytes;
+                pos += 8 + ((bytes+1)&(~1));
             }
+            return result;
+        }
+
+        private string JapaneseTextByteArrayToString(byte[] bytes, int index, int count) {
+            string result = "不明";
+
+            // 最後の'\0'を削る
+            while (0 < count && bytes[index + count - 1] == 0) {
+                --count;
+            }
+            if (0 == count) {
+                return result;
+            }
+
+            var part = new byte[count];
+            Buffer.BlockCopy(bytes, index, part, 0, count);
+
+            var encoding = JCodeInspect.DetectEncoding(part);
+            if (encoding == System.Text.Encoding.GetEncoding(932)) {
+                // SJIS
+                result = System.Text.Encoding.GetEncoding(932).GetString(part);
+            } else {
+                // UTF-8
+                result = System.Text.Encoding.UTF8.GetString(part);
+            }
+            
             return result;
         }
 
@@ -559,13 +587,34 @@ namespace WavRWLib2
 
                         advance = dsc.ReadHeader(br, offset, fourcc, m_fsc.NumChannels, m_fsc.BitsPerSample);
 
-                        // ds64チャンクが存在する場合、m_dsc.m_subChunk2Sizeは、正しくない。
-                        // ds64の値で上書きする。
                         if (m_ds64 != null) {
+                            // ds64チャンクが存在する場合(RF64形式)
+                            // dsc.ChunkSizeは正しくないので、そこから算出するdsc.NumFramesも正しくない。
+                            // dsc.NumFrameをds64の値で上書きする。
                             dsc.NumFrames = m_ds64.DataSize / frameBytes;
-                        } 
+                        } else {
+                            const long MASK = UInt32.MaxValue;
+                            if (MASK < br.BaseStream.Length && m_rcd.ChunkSize != MASK) {
+                                // RIFF chunkSizeが0xffffffffではないのにファイルサイズが4GB以上ある。
+                                // このファイルはdsc.ChunkSize情報の信憑性が薄い。
+                                // dsc.ChunkSizeの上位ビットが桁あふれによって消失している可能性があるので、
+                                // dsc.ChunkSizeの上位ビットをファイルサイズから類推して付加し、
+                                // dsc.NumFrameを更新する。
 
-                        // data chunkの後にさらにdata chunkが続いたりするので、読み込みを続行する。
+                                long remainBytes = br.BaseStream.Length - (offset + advance);
+                                long maskedRemainBytes =  remainBytes & 0xffffffffL;
+                                if (maskedRemainBytes <= dsc.ChunkSize && m_rcd.ChunkSize - maskedRemainBytes < 4096) {
+                                    long realChunkSize = dsc.ChunkSize;
+                                    while (realChunkSize + 0x100000000L <= remainBytes) {
+                                        realChunkSize += 0x100000000L;
+                                    }
+                                    dsc.NumFrames = realChunkSize / frameBytes;
+                                }
+                            }
+                        }
+
+                        // マルチデータチャンク形式の場合、data chunkの後にさらにdata chunkが続いたりするので、
+                        // 読み込みを続行する。
                         long skipBytes = (dsc.NumFrames * frameBytes + 1) & (~1L);
                         PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
                         advance += skipBytes;

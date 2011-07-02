@@ -246,6 +246,12 @@ namespace PcmDataLib {
             return m_sampleArray;
         }
 
+        /// <summary>
+        /// サンプル配列と総フレーム数NumFramesを入れる。
+        /// 注: 読み込み途中の一時データで、総フレーム数NumFramesよりもsampleArrayのフレーム数が少ないことがある。
+        /// </summary>
+        /// <param name="numFrames"> 総フレーム数</param>
+        /// <param name="sampleArray">サンプル配列</param>
         public void SetSampleArray(long numFrames, byte[] sampleArray) {
             m_numFrames = numFrames;
             m_sampleArray = null;
@@ -555,17 +561,25 @@ namespace PcmDataLib {
 
         public PcmData MonoToStereo() {
             System.Diagnostics.Debug.Assert(NumChannels == 1);
-            
+
             // サンプルあたりビット数が8の倍数でないとこのアルゴリズムは使えない
             System.Diagnostics.Debug.Assert((BitsPerSample & 7) == 0);
 
-            byte [] newSampleArray = new byte[m_sampleArray.Length * 2];
-            int bytesPerSample = BitsPerSample/8;
-            for (long frame = 0; frame < m_numFrames; ++frame) {
-                for (int offs = 0; offs < bytesPerSample; ++offs) {
-                    long posBytes = frame * bytesPerSample;
-                    newSampleArray[posBytes * 2 + offs] = m_sampleArray[posBytes + offs];
-                    newSampleArray[posBytes * 2 + bytesPerSample + offs] = m_sampleArray[posBytes + offs];
+            byte [] newSampleArray = new byte[m_sampleArray.LongLength * 2];
+
+            {
+                int bytesPerSample = BitsPerSample / 8;
+
+                // NumFramesは総フレーム数。sampleArrayのフレーム数はこれよりも少ないことがある。
+                // 実際に存在するサンプル数sampleFramesだけ処理する。
+                long sampleFrames = m_sampleArray.LongLength / bytesPerSample;
+                long fromPosBytes = 0;
+                for (long frame = 0; frame < sampleFrames; ++frame) {
+                    for (int offs = 0; offs < bytesPerSample; ++offs) {
+                        newSampleArray[fromPosBytes * 2 + offs] = m_sampleArray[fromPosBytes + offs];
+                        newSampleArray[fromPosBytes * 2 + bytesPerSample + offs] = m_sampleArray[fromPosBytes + offs];
+                    }
+                    fromPosBytes += bytesPerSample;
                 }
             }
             PcmData newPcmData = new PcmData();
