@@ -461,7 +461,7 @@ namespace WavRWLib2
             // PADの処理。chunkSizeが奇数の場合、1バイト読み進める。
             long skipBytes = (chunkSize + 1) & (~1L);
             PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
-            return skipBytes;
+            return skipBytes + 4;
         }
 
         private long ReadListChunk(BinaryReader br) {
@@ -476,16 +476,16 @@ namespace WavRWLib2
             }
 
             byte[] data = br.ReadBytes((int)listHeaderBytes);
-            if (!PcmDataLib.Util.FourCCHeaderIs(data, 0, "INFO")) {
-                Console.WriteLine("LIST header does not follows INFO");
-                return 0;
-            }
-
             long result = 4 + listHeaderBytes;
             if (1 == (listHeaderBytes & 1)) {
                 // PADの処理。listHeaderBytesが奇数の場合、1バイト読み進める
                 br.ReadBytes(1);
                 ++result;
+            }
+
+            if (!PcmDataLib.Util.FourCCHeaderIs(data, 0, "INFO")) {
+                Console.WriteLine("LIST header does not follows INFO");
+                return result;
             }
 
             int pos = 4;
