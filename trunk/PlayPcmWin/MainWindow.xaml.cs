@@ -446,11 +446,8 @@ namespace PlayPcmWin
         /// 保存してあった再生リストを読んでm_pcmDataListとm_playListItemsに足す。
         /// UpdateUIは行わない。
         /// </summary>
-        private int LoadPlaylist(string path) {
+        private int ReadPlaylist(string path) {
             int count = 0;
-
-            // エラーメッセージを貯めて出す。作りがいまいちだが。
-            m_loadErrorMessages = new StringBuilder();
 
             PlaylistSave pl;
             if (path.Length == 0) {
@@ -478,12 +475,6 @@ namespace PlayPcmWin
                 }
                 count += rv;
             }
-
-            if (0 < m_loadErrorMessages.Length) {
-                MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-
-            m_loadErrorMessages = null;
 
             return count;
         }
@@ -536,7 +527,16 @@ namespace PlayPcmWin
             }
 
             if (m_preference.StorePlaylistContent) {
-                LoadPlaylist(string.Empty);
+                // エラーメッセージを貯めて出す。作りがいまいちだが。
+                m_loadErrorMessages = new StringBuilder();
+
+                ReadPlaylist(string.Empty);
+
+                if (0 < m_loadErrorMessages.Length) {
+                    MessageBox.Show(m_loadErrorMessages.ToString(), "前回終了時の再生リストを復元しようとして読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                m_loadErrorMessages = null;
             }
 
             UpdateWindowSettings();
@@ -1419,7 +1419,7 @@ namespace PlayPcmWin
             case ".ppwpl":
                 if (mode != ReadHeaderMode.OnlyConcreteFile) {
                     // PPWプレイリストを読み込み
-                    LoadPlaylist(path);
+                    result += ReadPlaylist(path);
                 }
                 break;
             case ".cue":
