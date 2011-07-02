@@ -1416,8 +1416,15 @@ namespace PlayPcmWin
             string ext = System.IO.Path.GetExtension(path);
 
             switch (ext.ToLower()) {
+            case ".ppwpl":
+                if (mode != ReadHeaderMode.OnlyConcreteFile) {
+                    // PPWプレイリストを読み込み
+                    LoadPlaylist(path);
+                }
+                break;
             case ".cue":
                 if (mode != ReadHeaderMode.OnlyConcreteFile) {
+                    // CUEシートを読み込み。
                     result += ReadCueSheet(path);
                 }
                 break;
@@ -1602,23 +1609,18 @@ namespace PlayPcmWin
 
 
             if (result == true) {
-                if (0 == System.IO.Path.GetExtension(dlg.FileName).CompareTo(".ppwpl")) {
-                    // PPWプレイリストを読み込み
-                    LoadPlaylist(dlg.FileName);
-                } else {
-                    // エラーメッセージを貯めて出す。
-                    m_loadErrorMessages = new StringBuilder();
+                // エラーメッセージを貯めて出す。
+                m_loadErrorMessages = new StringBuilder();
 
-                    for (int i = 0; i < dlg.FileNames.Length; ++i) {
-                        ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
-                    }
-
-                    if (0 < m_loadErrorMessages.Length) {
-                        MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-
-                    m_loadErrorMessages = null;
+                for (int i = 0; i < dlg.FileNames.Length; ++i) {
+                    ReadFileHeader(dlg.FileNames[i], ReadHeaderMode.ReadAll, null, null);
                 }
+
+                if (0 < m_loadErrorMessages.Length) {
+                    MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+
+                m_loadErrorMessages = null;
                 UpdateUIStatus();
             }
 
@@ -1629,7 +1631,9 @@ namespace PlayPcmWin
                 string.Format("PlayPcmWin バージョン {0}\r\n\r\n" +
                     "PlayPcmWinは libFLACを使用しています。\r\n" +
                     "libFLACのライセンスは、New BSD Licenseです。" +
-                    "libFlacLicense.txtをご覧ください。",
+                    "libFlacLicense.txtをご覧ください。\r\n\r\n" +
+                    "PlayPcmWinは Jcode.pmの文字コード判別関数を使用しています。\r\n" +
+                    "Jcode.pmのCopyright: Copyright 1999-2005 Dan Kogai",
                     AssemblyVersion));
         }
 
@@ -1739,7 +1743,8 @@ namespace PlayPcmWin
                         }
                         readFrames = part.Length / (pd.BitsPerFrame / 8);
 
-                        // フレーム数は本来の数endFrame - startFrameを入れる
+                        // フレーム数NumFramesは本来の数endFrame - startFrameを入れる。
+                        // sampleArrayはそのうちの一部、startFrameからendFrameまでのデータが入っている。
                         pd.SetSampleArray(endFrame - startFrame, part);
 
                         // 必要に応じて量子化ビット数の変更を行う。
