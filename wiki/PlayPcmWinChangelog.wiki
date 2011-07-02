@@ -4,8 +4,8 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.15 ==
-  * Issue 70 修正
-  * Issue 73 修正
+  * Issue 70 (ppwplファイルをD&Dで取り込めない問題)修正
+  * Issue 73 (Samplitudeが出力したWAVの読み込み)修正
 
 ===!PlayPcmWin 3.0.13 ==
   * Issue 69 64ビット版で、ファイルサイズが4GBを超える壊れたWAVファイルの読み込みに対応
