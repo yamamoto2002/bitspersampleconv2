@@ -8,7 +8,6 @@
   * Issue 73 (Samplitudeが出力したWAVの読み込み)修正
 
 ===!PlayPcmWin 3.0.13 ==
-  * Issue 69 64ビット版で、ファイルサイズが4GBを超える壊れたWAVファイルの読み込みに対応
   * Issue 72 (Windows Media Player 12の付加するアーティスト名等の文字化け)修正
 
 ===!PlayPcmWin 3.0.11 ==
