@@ -63,13 +63,13 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 
 = RF64形式のWAVファイルを出力する =
 
-・ファイルの先頭には、'RIFF'の代わりに、'RF64'と書きこむ。
-・RIFF chunkSizeには0xffffffffを書き込む。
-・RIFFチャンクのすぐ後にDS64チャンクを書き込む。
-・DS64チャンクには、riffSize(ファイルサイズ - 8)、dataSize(PCMデータのバイト数)、sampleCount(PCMサンプルの総数。24ビットステレオの場合dataSize÷6)、tableLength 0を書き込む。
-・Formatチャンクはいつも通り書きこむ。
-・dataチャンクのchunkSizeには0xffffffffを書き込む。
-・Adobe AuditionはDATAチャンクの後にXMPメタデータを付けてくるが、必須ではないと思う。
+  * ファイルの先頭には、'RIFF'の代わりに、'RF64'と書きこむ。
+  * RIFF chunkSizeには0xffffffffを書き込む。
+  * RIFFチャンクのすぐ後にDS64チャンクを書き込む。
+  * DS64チャンクには、riffSize(ファイルサイズ - 8)、dataSize(PCMデータのバイト数)、sampleCount(PCMサンプルの総数。24ビットステレオの場合dataSize÷6)、tableLength 0を書き込む。
+  * Formatチャンクはいつも通り書きこむ。
+  * dataチャンクのchunkSizeには0xffffffffを書き込む。
+  * Adobe AuditionはDATAチャンクの後にXMPメタデータを付けてくるが、必須ではないと思う。
 
 = 仕様書 =
 
