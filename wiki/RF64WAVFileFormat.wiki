@@ -44,7 +44,7 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 ||0x38 (56) ||    2 || 1 = WAVE_FORMAT_PCM      || Format formatType      ||
 ||0x3a (58) ||    2 || 2 = 2ch stereo           || Format channelCount    ||
 ||0x3c (60) ||    4 || 0x2ee00 (192000) = 192000 Hz      || Format sampleRate      ||
-||0x40 (64) ||    4 || 0x119400 (1152000) = 192000 x 2ch x 24bit / 8 || Format bytesPerSecond   ||
+||0x40 (64) ||    4 || 0x119400 (1152000) = 192000 x 2ch x 24bit ÷ 8 || Format bytesPerSecond   ||
 ||0x44 (68) ||    2 || 6 = 6 bytes / sample      || Format blockAlignment     ||
 ||0x46 (70) ||    2 || 0x18 (24) = 量子化ビット数24bit || Format bitsPerSample     ||
 ||0x48 (72) ||    2 || 0  extra data なし        || Format cbSize     ||
