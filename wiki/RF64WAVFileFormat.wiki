@@ -69,7 +69,7 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
   * DS64チャンクには、riffSize(ファイルサイズ - 8)、dataSize(PCMデータのバイト数)、sampleCount(PCMサンプルの総数。24ビットステレオの場合dataSize÷6)、tableLength 0を書き込む。
   * Formatチャンクはいつも通り書きこむ。
   * dataチャンクのchunkSizeには0xffffffffを書き込む。
-  * Adobe AuditionはDATAチャンクの後にXMPメタデータを付けてくるが、必須ではないと思う。
+  * Adobe AuditionはDATAチャンクの後に長大なXMPメタデータを付けてくるが、必須ではないと思う。
 
 = 仕様書 =
 
