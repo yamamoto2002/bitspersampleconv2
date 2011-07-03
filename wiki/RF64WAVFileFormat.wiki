@@ -31,7 +31,7 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 
 ||オフセット||サイズ||値 カッコ内は10進数表記   || 内容                   ||
 ||0         ||    4 || 'RF64'                   || RF64 chunkId           ||
-||4         ||    4 || 0xffffffff               || RF64 chunkSize         ||
+||4         ||    4 || 0xffffffff = ds64.riffSizeを参照 || RF64 chunkSize         ||
 ||8         ||    4 || 'WAVE'                   || RF64 rf64Type          ||
 ||0xc (12)  ||    4 || 'ds64'                   || DataSize64 chunkId     ||
 ||0x10 (16) ||    4 || 0x1c (28)                || DataSize64 chunkSize   ||
