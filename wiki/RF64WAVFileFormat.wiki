@@ -37,7 +37,7 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 ||0x10 (16) ||    4 || 0x1c (28)                || DataSize64 chunkSize   ||
 ||0x14 (20) ||    8 || 0x14355d48c (5424665740) || DataSize64 riffSize    ||
 ||0x1c (28) ||    8 || 0x14355c000 (5424660480) || DataSize64 dataSize    ||
-||0x24 (36) ||    8 || 0x35e3a000 (904110080)   || DataSize64 sampleCount ||
+||0x24 (36) ||    8 || 0x35e3a000 (904110080) ※1  || DataSize64 sampleCount ||
 ||0x2c (44) ||    4 || 0                        || DataSize64 tableLength ||
 ||0x30 (48) ||    4 || 'fmt '                   || Format chunkId         ||
 ||0x34 (52) ||    4 || 0x12 (18)                || Format chunkSize       ||
@@ -53,6 +53,8 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 ||0x52 (82) ||   5424660480 || PCMデータ || Data waveData     ||
 
 ↑表2: 表1のバイナリデータの意味
+
+※1… 1サンプルあたり6バイトなので、DataSize64.sampleCountを6倍するとDataSize64.dataSizeになる。
 
 
 = 仕様書 =
