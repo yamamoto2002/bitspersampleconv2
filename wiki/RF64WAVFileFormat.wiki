@@ -26,8 +26,7 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 }}}
 ↑表1: ヘッダ部分のバイナリダンプ
 
-  * このファイルのファイルサイズ 0x14355d494 (5424665748)バイト
-  * DATAチャンクのサイズ 0x14355d48c (5424665740)バイト
+  * このファイルのファイルサイズは 0x14355d494 (5424665748)バイト
 
 ||オフセット||サイズ||値 カッコ内は10進数表記   || 内容                   ||
 ||0         ||    4 || 'RF64'                   || RF64 chunkId           ||
@@ -50,12 +49,16 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 ||0x48 (72) ||    2 || 0  extra data なし        || Format cbSize     ||
 ||0x4a (74) ||    4 || 'data'                    || Data chunkId     ||
 ||0x4e (78) ||    4 || 0xffffffff = ds64.dataSizeを参照 || Data chunkSize     ||
-||0x52 (82) ||   5424660480 || PCMデータ || Data waveData     ||
+||0x52 (82) ||   0x14355c000 || PCMデータ || Data waveData     ||
+||0x14355c052 ||   4 || '_PMX' || XMPメタデータ chunkId     ||
+||0x14355c056 ||   4 || 0x1439(5177) || XMPメタデータ chunkSize     ||
+||0x14355c05a ||   0x1439 ※2 || XMPメタデータのXML || XMPメタデータ 内容     ||
+||0x14355d493 ||   1 ※2 || XMPメタデータのXMLのpad || pad    ||
 
 ↑表2: 表1のバイナリデータの意味
 
 ※1… 1サンプルあたり6バイトなので、DataSize64.sampleCountを6倍するとDataSize64.dataSizeになる。
-
+※2… WAVファイルのチャンクは、chunkSizeが奇数の場合、そのチャンクの終わりに1バイトの0を連結する。
 
 = 仕様書 =
 
