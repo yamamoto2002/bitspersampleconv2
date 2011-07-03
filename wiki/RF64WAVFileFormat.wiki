@@ -1,0 +1,9 @@
+#summary RF64 WAVファイルフォーマットについて
+#labels Featured
+
+= RF64 WAVファイルフォーマットについて =
+
+RIFF WAVEファイル形式は、素の状態では、DATAチャンクのバイト数を表す
+chunkSizeが32ビット整数のため、4GBを超えるサイズのDATAチャンクを持つことが出来ない。
+
+RF64形式は、4GBを超えるサイズのDATAチャンクを持つことができる
