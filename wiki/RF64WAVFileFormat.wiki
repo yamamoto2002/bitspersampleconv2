@@ -8,8 +8,6 @@ chunkSizeが32ビット整数のため、4GBを超えるRIFFチャンクサイ�
 
 RF64形式は、4GBを超えるサイズのDATAチャンクを持つことができる
 
-
-
 = 実際の出力を観察する =
 
 Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部分
@@ -74,3 +72,12 @@ Adobe Audition CS 5.5で出力したRF64形式のWAVファイルのヘッダ部�
 = 仕様書 =
 
 http://tech.ebu.ch/docs/tech/tech3306-2009.pdf
+
+= Adobe AuditionがRF64保存に切り替えるタイミングについて =
+
+Adobe Auditionは、WAV保存する場合、4GBを超えると自動でRF64形式保存に切り替わる。
+
+DATAチャンクよりも先にRIFFチャンクが0xffffffffを超える。
+
+通常のWAV形式保存からRF64形式保存に移行するトリガーは、RIFFチャンクが0xffffffffを超えるタイミングか、それよりもちょっと手前となるだろう。
+実際何バイトでRF64形式に切り替えるかは調べる価値があるだろう(未調査)
