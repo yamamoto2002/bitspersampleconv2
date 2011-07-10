@@ -594,8 +594,8 @@ namespace WavRWLib2
                             dsc.NumFrames = m_ds64.DataSize / frameBytes;
                         } else {
                             const long MASK = UInt32.MaxValue;
-                            if (MASK < br.BaseStream.Length && m_rcd.ChunkSize != MASK) {
-                                // RIFF chunkSizeが0xffffffffではないのにファイルサイズが4GB以上ある。
+                            if (MASK < (br.BaseStream.Length -8) && m_rcd.ChunkSize != MASK) {
+                                // RIFF chunkSizeが0xffffffffではないのにファイルサイズが4GB+8(8==RIFFチャンクのヘッダサイズ)以上ある。
                                 // このファイルはdsc.ChunkSize情報の信憑性が薄い。
                                 // dsc.ChunkSizeの上位ビットが桁あふれによって消失している可能性があるので、
                                 // dsc.ChunkSizeの上位ビットをファイルサイズから類推して付加し、
