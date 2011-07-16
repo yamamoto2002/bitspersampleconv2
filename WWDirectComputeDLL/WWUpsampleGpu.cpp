@@ -3,15 +3,15 @@
 #include <assert.h>
 #include <float.h>
 
-/// 1ƒXƒŒƒbƒhƒOƒ‹[ƒv‚ÉŠ‘®‚·‚éƒXƒŒƒbƒh‚Ì”BTGSM‚ğ‹¤—L‚·‚éB
-/// 2‚Ìæ”B
-/// ‚±‚Ì”’l‚ğ‘‚«Š·‚¦‚½‚çƒVƒF[ƒ_[‚à‘‚«Š·‚¦‚é•K—v‚ ‚èB
+/// 1ã‚¹ãƒ¬ãƒƒãƒ‰ã‚°ãƒ«ãƒ¼ãƒ—ã«æ‰€å±ã™ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã®æ•°ã€‚TGSMã‚’å…±æœ‰ã™ã‚‹ã€‚
+/// 2ã®ä¹—æ•°ã€‚
+/// ã“ã®æ•°å€¤ã‚’æ›¸ãæ›ãˆãŸã‚‰ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã‚‚æ›¸ãæ›ãˆã‚‹å¿…è¦ã‚ã‚Šã€‚
 #define GROUP_THREAD_COUNT 1024
 
 #define PI_D 3.141592653589793238462643
 #define PI_F 3.141592653589793238462643f
 
-/// ƒVƒF[ƒ_[‚É“n‚·’è”B16ƒoƒCƒg‚Ì”{”‚Å‚È‚¢‚Æ‚¢‚¯‚È‚¢‚ç‚µ‚¢B
+/// ã‚·ã‚§ãƒ¼ãƒ€ãƒ¼ã«æ¸¡ã™å®šæ•°ã€‚16ãƒã‚¤ãƒˆã®å€æ•°ã§ãªã„ã¨ã„ã‘ãªã„ã‚‰ã—ã„ã€‚
 struct ConstShaderParams {
     unsigned int c_convOffs;
     unsigned int c_dispatchCount;
@@ -65,8 +65,8 @@ PrepareResamplePosArray(
 {
     for (int i=0; i<sampleTotalTo; ++i) {
         double resamplePos = (double)i * sampleRateFrom / sampleRateTo;
-        /* -0.5 <= fraction<+0.5‚É‚È‚é‚æ‚¤‚ÉresamplePos‚ğ‘I‚ÔB
-         * ÅŒã‚Ì‚Ù‚¤‚Å”ÍˆÍŠO‚ğw‚³‚È‚¢‚æ‚¤‚É‚·‚éB
+        /* -0.5 <= fraction<+0.5ã«ãªã‚‹ã‚ˆã†ã«resamplePosã‚’é¸ã¶ã€‚
+         * æœ€å¾Œã®ã»ã†ã§ç¯„å›²å¤–ã‚’æŒ‡ã•ãªã„ã‚ˆã†ã«ã™ã‚‹ã€‚
          */
         int resamplePosI = (int)(resamplePos+0.5);
         if (resamplePosI < 0) {
@@ -117,13 +117,13 @@ WWUpsampleGpu::Setup(
     m_sampleRateTo    = sampleRateTo;
     m_sampleTotalTo   = sampleTotalTo;
 
-    // sinPreComputeArray‚Ì¸“x‚ğ‚‚ß‚é‚½‚ßdoubleprec‚ÌfractionArrayD‚©‚çŒvZ‚·‚éB
-    // ‚±‚¤‚·‚é‚±‚Æ‚Å˜c‚ªŒ¸‚é‚Æ—Ç‚¢‚È‚ŸB
+    // sinPreComputeArrayã®ç²¾åº¦ã‚’é«˜ã‚ã‚‹ãŸã‚doubleprecã®fractionArrayDã‹ã‚‰è¨ˆç®—ã™ã‚‹ã€‚
+    // ã“ã†ã™ã‚‹ã“ã¨ã§æ­ªãŒæ¸›ã‚‹ã¨è‰¯ã„ãªãã€‚
     sinPreComputeArray = new float[sampleTotalTo];
     assert(sinPreComputeArray);
     PrepareSinPreComputeArray(fractionArrayD, sampleTotalTo, sinPreComputeArray);
 
-    // ‚±‚±‚Åsingleprec‚ÌfractionArrayFì¬B
+    // ã“ã“ã§singleprecã®fractionArrayFä½œæˆã€‚
     float *fractionArrayF = new float[sampleTotalTo];
     assert(fractionArrayF);
     for (int i=0; i<sampleTotalTo; ++i) {
@@ -138,7 +138,7 @@ WWUpsampleGpu::Setup(
     printf("sampleTotal=%d\n", i);
     */
 
-    // HLSL‚Ì#define‚ğì‚éB
+    // HLSLã®#defineã‚’ä½œã‚‹ã€‚
     char      convStartStr[32];
     sprintf_s(convStartStr, "%d", -convolutionN);
     char      convEndStr[32];
@@ -179,11 +179,11 @@ WWUpsampleGpu::Setup(
 
     HRG(m_pDCU->Init());
 
-    // HLSL ComputeShader‚ğƒRƒ“ƒpƒCƒ‹‚µ‚ÄGPU‚É‘—‚éB
+    // HLSL ComputeShaderã‚’ã‚³ãƒ³ãƒ‘ã‚¤ãƒ«ã—ã¦GPUã«é€ã‚‹ã€‚
     HRG(m_pDCU->CreateComputeShader(L"SincConvolution2.hlsl", "CSMain", defines, &m_pCS));
     assert(m_pCS);
 
-    // “ü—Íƒf[ƒ^‚ğGPUƒƒ‚ƒŠ[‚É‘—‚é
+    // å…¥åŠ›ãƒ‡ãƒ¼ã‚¿ã‚’GPUãƒ¡ãƒ¢ãƒªãƒ¼ã«é€ã‚‹
     HRG(m_pDCU->SendReadOnlyDataAndCreateShaderResourceView(
         sizeof sampleFrom[0], sampleTotalFrom, sampleFrom, "SampleFromBuffer", &m_pBuf0Srv));
     assert(m_pBuf0Srv);
@@ -200,12 +200,12 @@ WWUpsampleGpu::Setup(
         sizeof sinPreComputeArray[0], sampleTotalTo, sinPreComputeArray, "SinPreComputeBuffer", &m_pBuf3Srv));
     assert(m_pBuf3Srv);
     
-    // Œ‹‰Êo—Í—Ìˆæ‚ğGPU‚Éì¬B
+    // çµæœå‡ºåŠ›é ˜åŸŸã‚’GPUã«ä½œæˆã€‚
     HRG(m_pDCU->CreateBufferAndUnorderedAccessView(
         sizeof(float), sampleTotalTo, NULL, "OutputBuffer", &m_pBufResultUav));
     assert(m_pBufResultUav);
 
-    // ’è”’u‚«ê‚ğGPU‚Éì¬B
+    // å®šæ•°ç½®ãå ´ã‚’GPUã«ä½œæˆã€‚
     HRG(m_pDCU->CreateConstantBuffer(sizeof(ConstShaderParams), 1, "ConstShaderParams", &m_pBufConst));
 
 end:
@@ -273,13 +273,13 @@ WWUpsampleGpu::Dispatch(
     HRESULT hr = S_OK;
     bool result = true;
 
-    // GPUã‚ÅComputeShaderÀsB
+    // GPUä¸Šã§ComputeShaderå®Ÿè¡Œã€‚
     ID3D11ShaderResourceView* aRViews[]
         = { m_pBuf0Srv, m_pBuf1Srv, m_pBuf2Srv, m_pBuf3Srv };
     ConstShaderParams shaderParams;
     ZeroMemory(&shaderParams, sizeof shaderParams);
 #if 1
-    // ‚·‚±‚µ‚¾‚¯‘¬‚¢B’†‚Åƒ‹[ƒv‚·‚é‚æ‚¤‚É‚µ‚½B
+    // ã™ã“ã—ã ã‘é€Ÿã„ã€‚ä¸­ã§ãƒ«ãƒ¼ãƒ—ã™ã‚‹ã‚ˆã†ã«ã—ãŸã€‚
     shaderParams.c_convOffs = 0;
     shaderParams.c_dispatchCount = m_convolutionN*2/GROUP_THREAD_COUNT;
     shaderParams.c_sampleToStartPos = startPos;
@@ -287,7 +287,7 @@ WWUpsampleGpu::Dispatch(
         m_pBufResultUav,
         m_pBufConst, &shaderParams, sizeof shaderParams, count, 1, 1));
 #else
-    // ’x‚¢
+    // é…ã„
     for (int i=0; i<convolutionN*2/GROUP_THREAD_COUNT; ++i) {
         shaderParams.c_convOffs = i * GROUP_THREAD_COUNT;
         shaderParams.c_dispatchCount = convolutionN*2/GROUP_THREAD_COUNT;
@@ -320,7 +320,7 @@ WWUpsampleGpu::GetResultFromGpuMemory(
     assert(outputTo);
     assert(outputToElemNum <= m_sampleTotalTo);
 
-    // ŒvZŒ‹‰Ê‚ğCPUƒƒ‚ƒŠ[‚É‚Á‚Ä‚­‚éB
+    // è¨ˆç®—çµæœã‚’CPUãƒ¡ãƒ¢ãƒªãƒ¼ã«æŒã£ã¦ãã‚‹ã€‚
     HRG(m_pDCU->RecvResultToCpuMemory(m_pBufResultUav, outputTo,
         outputToElemNum * sizeof(float)));
 end:
