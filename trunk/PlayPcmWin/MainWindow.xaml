@@ -32,7 +32,7 @@
                 <MenuItem Header="PlayPcmWinのWebページ(_W)" Click="MenuItemHelpWeb_Click" />
             </MenuItem>
         </Menu>
-        <GroupBox Header="再生リスト" Margin="6,29,6,139" Name="groupBox2">
+        <GroupBox Header="再生リスト(エクスプローラーからD＆Dして下さい)" Margin="6,29,6,139" Name="groupBox2">
             <Grid>
                 <Button Content="再生リストをクリア(_C)" HorizontalAlignment="Left" Margin="6,0,0,8" Name="buttonClearPlayList" Width="156" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
                 <Button Content="選択曲除外(_R)" HorizontalAlignment="Left" Margin="170,0,0,8" Name="buttonRemovePlayList" Width="112" Height="23" VerticalAlignment="Bottom" Click="buttonRemovePlayList_Click" />
@@ -157,7 +157,7 @@
         <StatusBar Height="23" Name="statusBar1" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
             <StatusBarItem Content="abcde" Name="statusBarText" />
         </StatusBar>
-        <ProgressBar Height="23" Name="progressBar1" VerticalAlignment="Bottom" Margin="200,0,0,0" HorizontalAlignment="Left" Width="200" Visibility="Collapsed" />
+        <ProgressBar Height="23" Name="progressBar1" VerticalAlignment="Bottom" Margin="200,0,0,0" HorizontalAlignment="Left" Width="200" Visibility="Hidden" />
         <Slider Height="23" Margin="0,0,1,1" Name="sliderWindowScaling" VerticalAlignment="Bottom" Maximum="1.25" Minimum="0.8" Value="1" Visibility="Hidden" Grid.Column="1" HorizontalAlignment="Right" Width="52" SmallChange="0.0048828125" LargeChange="0.0625" />
     </Grid>
 </Window>

@@ -65,5 +65,58 @@ namespace PlayPcmWinTestBench {
                 hr, hr==0 ? "成功" : "失敗");
         }
 
+        private void buttonTest1_Click(object sender, RoutedEventArgs e) {
+            {
+                double[] v = { 0, 0, 1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0, 7, 0};
+
+                var dft = new WWDirectComputeCS.WWDftCpu();
+                double [] rvD;
+                dft.Dft1d(v, out rvD);
+
+                var rvF = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+                var rvIF = WWDirectComputeCS.WWFFTCpu.ComplexIFFT(rvF);
+
+            }
+            {
+                double[] v = { 1, 1, 1, 1 };
+
+                var dft = new WWDirectComputeCS.WWDftCpu();
+                double [] rvD;
+                dft.Dft1d(v, out rvD);
+
+                var rvF = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+
+            }
+            {
+                double[] v = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
+                var dft = new WWDirectComputeCS.WWDftCpu();
+                double [] rvD;
+                dft.Dft1d(v, out rvD);
+
+                var rvF = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+
+            }
+            {
+                double[] v = { 1, 0, 1, 0, 1, 0, 1, 0 };
+                var rv = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+            }
+            {
+                double[] v = { 0, 1, 0, 1, 0, 1, 0, 1 };
+                var rv = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+            }
+
+            {
+                double[] v = { 0, 0, 1, 0, 0, 0, -1, 0 };
+                var rv = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+            }
+
+            {
+                double[] v = { 1, 0, 0, 0, -1, 0, 0, 0 };
+                var rv = WWDirectComputeCS.WWFFTCpu.ComplexFFT(v);
+            }
+
+        }
+
     }
 }
