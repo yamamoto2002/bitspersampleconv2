@@ -439,11 +439,12 @@
             <TabItem Header="互換性フラグ実験" Name="tabItemCompatibilityFlag">
                 <Grid Name="grid2">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="112" />
-                        <RowDefinition Height="415" />
+                        <RowDefinition Height="180" />
+                        <RowDefinition Height="347" />
                     </Grid.RowDefinitions>
                     <Button Content="DirectDrawプライマリーサーフェスを取得し、Lockを呼び出す" Height="33" HorizontalAlignment="Left" Margin="128,40,0,0" Name="buttonCompatibility" VerticalAlignment="Top" Width="482" Click="buttonCompatibility_Click" />
-                    <TextBox Grid.Row="1" Height="409" HorizontalAlignment="Left" Margin="6,0,0,0" Name="textBoxCompatibility" VerticalAlignment="Top" Width="756" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                    <TextBox Grid.Row="1" Height="275" HorizontalAlignment="Left" Name="textBoxCompatibility" VerticalAlignment="Top" Width="756" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                    <Button Content="テスト1" Height="23" HorizontalAlignment="Left" Margin="52,107,0,0" Name="button1" VerticalAlignment="Top" Width="75" Click="buttonTest1_Click" />
                 </Grid>
             </TabItem>
         </TabControl>
