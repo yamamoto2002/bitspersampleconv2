@@ -617,9 +617,19 @@ namespace WavRWLib2
                         // 読み込みを続行する。
                         long skipBytes = (dsc.NumFrames * frameBytes + 1) & (~1L);
                         PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
-                        advance += skipBytes;
 
-                        m_dscList.Add(dsc);
+                        if (br.BaseStream.Length < (offset + advance) + skipBytes) {
+                            // ファイルが途中で切れている。
+                            dsc.NumFrames = (br.BaseStream.Length - (offset + advance)) / frameBytes;
+                        }
+
+                        if (0 < dsc.NumFrames) {
+                            m_dscList.Add(dsc);
+                        } else {
+                            // ファイルがDSCヘッダ部分を最後に切れていて、サンプルデータが1フレーム分すらも無いとき。
+                        }
+
+                        advance += skipBytes;
                     } else {
                         advance = SkipUnknownChunk(br, fourcc);
                     }
