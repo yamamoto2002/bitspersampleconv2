@@ -34,6 +34,8 @@ http://bitspersampleconv2.googlecode.com/files/PPW3016.png
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin316.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin316x64.zip
 
+=32ビット版と64ビット版の違いについて=
+
 || Windows  || !PlayPcmWin || 結果 ||
 || 32ビット版 || 32ビット版   || ○ ||
 || 64ビット版 || 64ビット版   || ○ ||
