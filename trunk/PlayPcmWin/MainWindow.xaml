@@ -32,7 +32,7 @@
                 <MenuItem Header="PlayPcmWinのWebページ(_W)" Click="MenuItemHelpWeb_Click" />
             </MenuItem>
         </Menu>
-        <GroupBox Header="再生リスト(エクスプローラーからD＆Dして下さい)" Margin="6,29,6,139" Name="groupBox2">
+        <GroupBox Header="再生リスト(エクスプローラーからドロップして下さい)" Margin="6,29,6,139" Name="groupBox2">
             <Grid>
                 <Button Content="再生リストをクリア(_C)" HorizontalAlignment="Left" Margin="6,0,0,8" Name="buttonClearPlayList" Width="156" Height="23" VerticalAlignment="Bottom" Click="buttonClearPlayList_Click" />
                 <Button Content="選択曲除外(_R)" HorizontalAlignment="Left" Margin="170,0,0,8" Name="buttonRemovePlayList" Width="112" Height="23" VerticalAlignment="Bottom" Click="buttonRemovePlayList_Click" />

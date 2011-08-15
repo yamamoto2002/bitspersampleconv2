@@ -279,6 +279,49 @@
                     </GroupBox>
                 </Grid>
             </TabItem>
+            <TabItem Header="FFTリサンプル" Name="tabItemFftResample" IsEnabled="False">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                    <GroupBox Header="入力ファイル" Height="90" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBox23" VerticalAlignment="Top" Width="474">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFftResampleInputPath" Text="C:\wav\input.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Click="buttonUSBrowseOpen_Click" Content="参照(_B)…" Height="23" HorizontalAlignment="Left" Margin="336,36,0,0" Name="buttonFftResampleBrowseInputPath" VerticalAlignment="Top" Width="120" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Click="buttonUSOutputStart_Click" Content="出力(_R)" Height="23" HorizontalAlignment="Left" Margin="10,352,0,0" Name="buttonFftResampleDo" VerticalAlignment="Top" Width="120" />
+                    <ProgressBar Height="23" HorizontalAlignment="Left" Margin="10,0,0,6" Name="progressBarFftResample" VerticalAlignment="Bottom" Width="244" />
+                    <GroupBox Header="出力ファイル" Height="65" HorizontalAlignment="Left" Margin="10,281,0,0" Name="groupBox24" VerticalAlignment="Top" Width="621">
+                        <Grid>
+                            <TextBox Height="24" HorizontalAlignment="Left" Margin="6,6,0,0" Name="textBoxFftResampleOutputPath" Text="C:\wav\output.wav" VerticalAlignment="Top" Width="450" />
+                            <Button Click="buttonUSBrowseSaveAs_Click" Content="参照(_W)…" Height="23" HorizontalAlignment="Left" Margin="466,7,0,0" Name="buttonFftResampleBrowseOutputPath" VerticalAlignment="Top" Width="120" />
+                        </Grid>
+                    </GroupBox>
+                    <TextBox AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" Margin="260,352,2,0" Name="textBoxFftResampleLog" Text="" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" />
+                    <GroupBox Header="出力サンプリング周波数" Height="64" HorizontalAlignment="Left" Margin="10,106,0,0" Name="groupBox25" VerticalAlignment="Top" Width="206">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="190*" />
+                                <ColumnDefinition Width="113*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="周波数(Hz)" Height="24" HorizontalAlignment="Right" HorizontalContentAlignment="Right" Margin="0,6,18,0" Name="label44" VerticalAlignment="Top" VerticalContentAlignment="Center" Width="79" />
+                            <TextBox Grid.ColumnSpan="2" Height="24" HorizontalAlignment="Left" HorizontalContentAlignment="Right" Margin="109,6,0,0" Name="textBoxFftResampleFreq" Text="96000" VerticalAlignment="Top" Width="79" />
+                        </Grid>
+                    </GroupBox>
+                    <Button Click="buttonUSAbort_Click" Content="処理中断(_C)" Height="23" HorizontalAlignment="Left" IsEnabled="False" Margin="134,352,0,0" Name="buttonFftResampleAbort" VerticalAlignment="Top" Width="120" />
+                    <GroupBox Header="出力ビットフォーマット" Height="55" HorizontalAlignment="Left" Margin="10,221,0,0" Name="groupBox26" VerticalAlignment="Top" Width="621">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="236*" />
+                                <ColumnDefinition Width="373*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <RadioButton Content="16bit" Height="16" HorizontalAlignment="Left" Margin="6,6,0,0" Name="radioButtonFftResampleSint16" VerticalAlignment="Top" Width="182" />
+                            <RadioButton Content="24bit" Height="16" HorizontalAlignment="Left" IsChecked="True" Margin="194,6,0,0" Name="radioButtonFftResampleSint24" VerticalAlignment="Top" Width="182" Grid.ColumnSpan="2" />
+                            <RadioButton Content="32bit Float" Height="16" HorizontalAlignment="Left" Margin="185,6,0,0" Name="radioButtonFftResampleSfloat32" VerticalAlignment="Top" Width="182" Grid.Column="1" />
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
             <TabItem Header="ABXテスト" Name="tabItemAbx" DataContext="{Binding}">
                 <Grid>
                     <GroupBox Header="A" Height="265" HorizontalAlignment="Left" Margin="10,10,0,0" Name="groupBoxA" VerticalAlignment="Top" Width="377">
