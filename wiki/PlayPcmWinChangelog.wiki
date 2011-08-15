@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.16 ==
+  * 最後の方のサンプルが切れてなくなっているWAVファイルの再生に対応
+
 ===!PlayPcmWin 3.0.15 ==
   * Issue 70 (ppwplファイルをD&Dで取り込めない問題)修正
   * Issue 73 (Samplitudeが出力したWAVの読み込み)修正
