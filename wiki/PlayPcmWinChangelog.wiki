@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.18 ==
+
+  * FLAC カバーアート画像の表示
+
 ===!PlayPcmWin 3.0.16 ==
   * Issue 74 最後の方のサンプルデータが切れてなくなっているWAVファイルの再生に対応
 
