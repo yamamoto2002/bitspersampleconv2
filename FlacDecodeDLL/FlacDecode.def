@@ -13,3 +13,5 @@ EXPORTS
 	FlacDecodeDLL_GetLastResult
 	FlacDecodeDLL_GetNumFramesPerBlock
 	FlacDecodeDLL_GetNextPcmData
+	FlacDecodeDLL_GetPictureBytes
+	FlacDecodeDLL_GetPictureData

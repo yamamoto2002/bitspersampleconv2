@@ -147,11 +147,11 @@ namespace WWDirectComputeCS {
         /// IDFT結果からFIR coeffを作成。
         /// </summary>
         /// <param name="idft">IDFT結果(複素数。r0,i0,r1,i1…の順でデータを並べる)。複素数の個数n。Length==2n(4の倍数)</param>
-        /// <param name="window">窓関数。要素数n-1</param>
-        /// <param name="coeff">[out]FIR coeff。要素数n-1</param>
+        /// <param name="window">窓関数。実数。要素数n-1</param>
+        /// <param name="coeff">[out]FIR coeff。実数。要素数n-1</param>
         /// <returns>0:成功。0以外:失敗。</returns>
-        public int IdftToFirCoeff(double[] idftArray, double[] window, out double[] coeff) {
-            int result = IdftToImpulseResponse(idftArray, out coeff);
+        public int IdftComplexToFirCoeff1d(double[] idftComplexArray, double[] window, out double[] coeff) {
+            int result = IdftToImpulseResponse(idftComplexArray, out coeff);
             if (0 != result) {
                 return result;
             }
