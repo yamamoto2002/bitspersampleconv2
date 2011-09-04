@@ -655,8 +655,43 @@ namespace PlayPcmWin
             }
         }
 
+        private void DispCoverart(byte[] pictureData) {
+
+            if (null == pictureData || pictureData.Length <= 0) {
+                imageCoverArt.Source = null;
+                // imageCoverArt.Visibility = System.Windows.Visibility.Collapsed;
+                return;
+            }
+
+            using (var stream = new MemoryStream(pictureData)) {
+                BitmapImage bi = new BitmapImage();
+                bi.BeginInit();
+                bi.CacheOption = BitmapCacheOption.OnLoad;
+                bi.UriSource = null;
+                bi.StreamSource = stream;
+                bi.EndInit();
+                
+                imageCoverArt.Source = bi;
+                // imageCoverArt.Visibility = System.Windows.Visibility.Visible;
+            }
+        }
+
+        private void UpdateCoverart() {
+            if (dataGridPlayList.SelectedIndex < 0) {
+                DispCoverart(null);
+                return;
+            }
+            PcmDataLib.PcmData w = m_playListItems[dataGridPlayList.SelectedIndex].PcmData();
+            if (null != w && 0 < w.PictureBytes) {
+                DispCoverart(w.PictureData);
+            } else {
+                DispCoverart(null);
+            }
+        }
+
         private void UpdateUIStatus() {
             dataGridPlayList.UpdateLayout();
+            UpdateCoverart();
 
             switch (m_state) {
             case State.初期化完了:
@@ -686,6 +721,7 @@ namespace PlayPcmWin
                     var si = dataGridPlayList.SelectedIndex;
                     dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
                     dataGridPlayList.SelectedIndex = si;
+
                 } else {
                     dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
                 }
@@ -2554,6 +2590,8 @@ namespace PlayPcmWin
         }
 
         private void dataGridPlayList_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            UpdateCoverart();
+
             if (m_state == State.プレイリストあり && 0 <= dataGridPlayList.SelectedIndex) {
                 buttonRemovePlayList.IsEnabled = true;
             } else {

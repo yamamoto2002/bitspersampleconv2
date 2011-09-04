@@ -372,7 +372,7 @@ namespace PlayPcmWinTestBench {
 
             // FIR coeffの個数は、window.Length個。
             double [] coeff;
-            dft.IdftToFirCoeff(idftResult, window, out coeff);
+            dft.IdftComplexToFirCoeff1d(idftResult, window, out coeff);
 
             /*
             for (int i=0; i < coeff.Length; ++i) {

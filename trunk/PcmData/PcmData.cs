@@ -174,6 +174,16 @@ namespace PcmDataLib {
         public int CueSheetIndex { get; set; }
 
         /// <summary>
+        /// 画像バイト数
+        /// </summary>
+        public int PictureBytes { get; set; }
+
+        /// <summary>
+        /// 画像データバイト列
+        /// </summary>
+        public byte[] PictureData { get; set; }
+
+        /// <summary>
         /// 長さ(秒)
         /// </summary>
         public int DurationSeconds {
@@ -213,6 +223,8 @@ namespace PcmDataLib {
             AlbumTitle  = rhs.AlbumTitle;
             ArtistName   = rhs.ArtistName;
             CueSheetIndex = rhs.CueSheetIndex;
+            PictureBytes = rhs.PictureBytes;
+            PictureData = rhs.PictureData;
         }
 
         /// <summary>
@@ -265,6 +277,11 @@ namespace PcmDataLib {
         /// </summary>
         public void ForgetDataPart() {
             m_sampleArray = null;
+        }
+
+        public void SetPicture(int bytes, byte[] data) {
+            PictureBytes = bytes;
+            PictureData = data;
         }
 
         /// <summary>

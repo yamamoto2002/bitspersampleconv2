@@ -30,6 +30,30 @@ int wmain(int argc, wchar_t* argv[])
     FlacDecodeDLL_GetAlbumStr(id, albumStr, sizeof albumStr);
     FlacDecodeDLL_GetArtistStr(id, artistStr, sizeof artistStr);
 
+    {
+        int pictureBytes = FlacDecodeDLL_GetPictureBytes(id);
+        if (0 < pictureBytes) {
+            char *pictureData = (char*)malloc(pictureBytes);
+            assert(pictureData);
+            int rv = FlacDecodeDLL_GetPictureData(id, 0, pictureBytes, pictureData);
+            if (0 < rv) {
+                FILE *fp = NULL;
+                errno_t erno = _wfopen_s(&fp, L"image.bin", L"wb");
+                assert(erno == 0);
+                assert(fp);
+
+                fwrite(pictureData, 1, pictureBytes, fp);
+
+                fclose(fp);
+                fp = NULL;
+
+            }
+
+            free(pictureData);
+            pictureData = NULL;
+        }
+    }
+
     printf("D: decodeId=%d bitsPerSample=%d sampleRate=%d numSamples=%lld channels=%d\n",
         id,
         bitsPerSample,
@@ -41,45 +65,48 @@ int wmain(int argc, wchar_t* argv[])
     printf("D: album=%S\n", albumStr);
     printf("D: artist=%S\n", artistStr);
 
-    FILE *fp = NULL;
-    errno_t erno = _wfopen_s(&fp, argv[2], L"wb");
-    assert(erno == 0);
-    assert(fp);
+    {
+        FILE *fp = NULL;
+        errno_t erno = _wfopen_s(&fp, argv[2], L"wb");
+        assert(erno == 0);
+        assert(fp);
 
-    int     ercd    = 0;
-    int     nFrames = 1048576;
-    int     bytesPerFrame = channels * bitsPerSample / 8;
-    int64_t pcmPos  = 0;
-    char *data   = (char *)malloc(nFrames * bytesPerFrame);
-    do {
-        memset(data, 0xee, nFrames * bytesPerFrame);
+        int     ercd    = 0;
+        int     nFrames = 1048576;
+        int     bytesPerFrame = channels * bitsPerSample / 8;
+        int64_t pcmPos  = 0;
+        char *data   = (char *)malloc(nFrames * bytesPerFrame);
+        do {
+            memset(data, 0xee, nFrames * bytesPerFrame);
 
-        int rv = FlacDecodeDLL_GetNextPcmData(id, nFrames, data);
-        ercd   = FlacDecodeDLL_GetLastResult(id);
+            int rv = FlacDecodeDLL_GetNextPcmData(id, nFrames, data);
+            ercd   = FlacDecodeDLL_GetLastResult(id);
 
-        if (0 < rv) {
-            fwrite(data, 1, rv * bytesPerFrame, fp);
-            pcmPos += rv;
+            if (0 < rv) {
+                fwrite(data, 1, rv * bytesPerFrame, fp);
+                pcmPos += rv;
+            }
+            printf("D: GetNextPcmData get %d samples. total %lld\n", rv, pcmPos);
+
+            if (rv <= 0 || ercd == FDRT_Completed) {
+                printf("D: GetNextPcmData rv=%d ercd=%d\n", rv, ercd);
+                break;
+            }
+        } while (true);
+
+        fclose(fp);
+        fp = NULL;
+
+        free(data);
+        data = NULL;
+
+        if (ercd != 1) {
+            printf("D: ERROR result=%d\n", ercd);
         }
-        printf("D: GetNextPcmData get %d samples. total %lld\n", rv, pcmPos);
-
-        if (rv <= 0 || ercd == FDRT_Completed) {
-            printf("D: GetNextPcmData rv=%d ercd=%d\n", rv, ercd);
-            break;
-        }
-    } while (true);
-
-    fclose(fp);
-    fp = NULL;
-
-    free(data);
-    data = NULL;
+    }
 
     FlacDecodeDLL_DecodeEnd(id);
 
-    if (ercd != 1) {
-        printf("D: ERROR result=%d\n", ercd);
-    }
     return 0;
 }
 

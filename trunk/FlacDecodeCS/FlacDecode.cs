@@ -76,6 +76,14 @@ namespace FlacDecodeCS {
         private extern static
         bool FlacDecodeDLL_GetArtistStr(int id, System.Text.StringBuilder name, int nameBytes);
 
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetPictureBytes(int id);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, byte[] buff);
+
         enum OperationType {
             DecodeAll,
             DecodeHeaderOnly
@@ -165,14 +173,16 @@ namespace FlacDecodeCS {
              * 16         8              総サンプル数   numSamples
              * 24         titleLen       タイトル文字列
              * 24+titleLen albumLen      アルバム文字列
-             * 24+t+a     artistLen      アーティスト文字列
-             * 24+t+a+a   4              frameCount1 (ヘッダのみの場合なし)
-             * 24+t+a+a   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
+             * 24+t+al     artistLen      アーティスト文字列
+             * 24+t+al+ar  4             画像データバイト数
+             * 28+t+al+ar  pictureBytes   画像データ
+             * 28+t+al+ar+pic   4              frameCount1 (ヘッダのみの場合なし)
+             * 32+t+al+ar+pic   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
              * ※2        4              frameCount2
              * ※2+4      ※3            PCMデータ2 frameCount2個
              * 
              * ※1…frameCount1 * nChannels * (bitsPerSample/8)
-             * ※2…※1+24+t+a+a
+             * ※2…32+t+al+ar+pic+※1
              */
 
             int rv = FlacDecodeDLL_DecodeStart(path);
@@ -188,17 +198,44 @@ namespace FlacDecodeCS {
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne id={0}", id));
 
             int nChannels     = FlacDecodeDLL_GetNumOfChannels(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumChannels() {0}", nChannels));
+
             int bitsPerSample = FlacDecodeDLL_GetBitsPerSample(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetBitsPerSample() {0}", bitsPerSample));
+
             int sampleRate    = FlacDecodeDLL_GetSampleRate(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetSampleRate() {0}", sampleRate));
+
             long numSamples   = FlacDecodeDLL_GetNumSamples(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumSamples() {0}", numSamples));
 
             StringBuilder buf = new StringBuilder(256);
             FlacDecodeDLL_GetTitleStr(id, buf, buf.Capacity *2);
             string titleStr = buf.ToString();
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne titleStr {0}", titleStr));
+            
             FlacDecodeDLL_GetAlbumStr(id, buf, buf.Capacity*2);
             string albumStr = buf.ToString();
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne albumStr {0}", albumStr));
+            
             FlacDecodeDLL_GetArtistStr(id, buf, buf.Capacity*2);
             string artistStr = buf.ToString();
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne artistStr {0}", artistStr));
+
+            int pictureBytes = FlacDecodeDLL_GetPictureBytes(id);
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne pictureBytes {0}", pictureBytes));
+            
+            byte[] pictureData = null;
+            if (0 < pictureBytes) {
+                pictureData = new byte[pictureBytes];
+                FlacDecodeDLL_GetPictureData(id, 0, pictureBytes, pictureData);
+            }
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne output start"));
 
             bw.Write(nChannels);
             bw.Write(bitsPerSample);
@@ -208,6 +245,11 @@ namespace FlacDecodeCS {
             bw.Write(titleStr);
             bw.Write(albumStr);
             bw.Write(artistStr);
+
+            bw.Write(pictureBytes);
+            if (0 < pictureBytes) {
+                bw.Write(pictureData);
+            }
 
             int ercd = 0;
 

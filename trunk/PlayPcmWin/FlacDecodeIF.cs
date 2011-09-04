@@ -13,6 +13,8 @@ namespace PlayPcmWin {
         private AnonymousPipeServerStream m_pss;
         private int m_bytesPerFrame;
         private long m_numFrames;
+        private int m_pictureBytes;
+        private byte[] m_pictureData;
 
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
@@ -126,6 +128,12 @@ namespace PlayPcmWin {
             string albumStr = m_br.ReadString();
             string artistStr = m_br.ReadString();
 
+            m_pictureBytes = m_br.ReadInt32();
+            m_pictureData  = new byte[0];
+            if (0 < m_pictureBytes) {
+                m_pictureData = m_br.ReadBytes(m_pictureBytes);
+            }
+
             System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
                 nChannels, bitsPerSample, sampleRate, m_numFrames);
 
@@ -142,6 +150,8 @@ namespace PlayPcmWin {
             pcmData.DisplayName = titleStr;
             pcmData.AlbumTitle = albumStr;
             pcmData.ArtistName = artistStr;
+
+            pcmData.SetPicture(m_pictureBytes, m_pictureData);
 
             return 0;
         }
@@ -168,6 +178,12 @@ namespace PlayPcmWin {
             string titleStr = m_br.ReadString();
             string albumStr = m_br.ReadString();
             string artistStr = m_br.ReadString();
+
+            m_pictureBytes = m_br.ReadInt32();
+            m_pictureData = new byte[0];
+            if (0 < m_pictureBytes) {
+                m_pictureData = m_br.ReadBytes(m_pictureBytes);
+            }
 
             pcmData.SetFormat(
                     nChannels,
@@ -210,6 +226,14 @@ namespace PlayPcmWin {
 
         public long NumFrames {
             get { return m_numFrames; }
+        }
+
+        public int PictureBytes {
+            get { return m_pictureBytes; }
+        }
+
+        public byte[] GetPictureData() {
+            return m_pictureData;
         }
 
         public int ReadStreamEnd()

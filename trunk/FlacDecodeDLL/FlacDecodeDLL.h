@@ -109,3 +109,14 @@ extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetNextPcmData(int id, int numFrame, char *buff_return);
 
+/// 画像データのバイト数
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetPictureBytes(int id);
+
+/// 画像データ
+/// @param offs 元データ列のoffsバイト目からpictureBytesバイトコピーする。
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_return);
+

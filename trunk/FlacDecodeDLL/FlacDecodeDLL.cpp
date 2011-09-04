@@ -11,10 +11,17 @@
 // x86 CPUにしか対応してない。
 // x64やビッグエンディアンには対応してない。
 
+/// ファイルパス制限
 #define FLACDECODE_MAXPATH (1024)
 
 /// wchar_tの文字数
 #define FLACDECODE_MAX_STRSZ (256)
+
+/// コメント個数制限 1024個
+#define FLACDECODE_COMMENT_MAX (1024)
+
+/// 画像サイズ制限 10MB
+#define FLACDECODE_IMAGE_BYTES_MAX (10 * 1024 * 1024) 
 
 #ifdef _DEBUG
 /*
@@ -96,6 +103,9 @@ struct FlacDecodeInfo {
     char artistStr[FLACDECODE_MAX_STRSZ];
     char albumStr[FLACDECODE_MAX_STRSZ];
 
+    int               pictureBytes;
+    char              *pictureData;
+
     void Clear(void) {
         totalSamples  = 0;
         sampleRate    = 0;
@@ -124,10 +134,18 @@ struct FlacDecodeInfo {
         titleStr[0]     = 0;
         artistStr[0]    = 0;
         albumStr[0]     = 0;
+
+        pictureBytes      = 0;
+        pictureData       = NULL;
     }
 
     FlacDecodeInfo(void) {
         Clear();
+    }
+
+    ~FlacDecodeInfo(void) {
+        delete [] pictureData;
+        pictureData = NULL;
     }
 };
 
@@ -258,7 +276,8 @@ WriteCallback(const FLAC__StreamDecoder *decoder,
     return rv;
 }
 
-#define VC metadata->data.vorbis_comment
+#define VC  metadata->data.vorbis_comment
+#define PIC metadata->data.picture
 
 static void
 MetadataCallback(const FLAC__StreamDecoder *decoder,
@@ -269,20 +288,22 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
     FlacDecodeInfo *fdi = (FlacDecodeInfo*)clientData;
 
     dprintf(fdi->logFP, "%s type=%d\n", __FUNCTION__, metadata->type);
+
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
         fdi->totalSamples  = metadata->data.stream_info.total_samples;
         fdi->sampleRate    = metadata->data.stream_info.sample_rate;
         fdi->channels      = metadata->data.stream_info.channels;
         fdi->bitsPerSample = metadata->data.stream_info.bits_per_sample;
     }
+
     if (metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT) {
         dprintf(fdi->logFP, "vendorstr=%s %d num=%u\n\n",
             (const char *)VC.vendor_string.entry,
             VC.vendor_string.length,
             VC.num_comments);
 
-        // 曲情報は256個もないだろう。無限ループ防止。
-        int num_comments = (256 < VC.num_comments) ? 256 : VC.num_comments;
+        // 曲情報は1024個もないだろう。無限ループ防止。
+        int num_comments = (FLACDECODE_COMMENT_MAX < VC.num_comments) ? FLACDECODE_COMMENT_MAX : VC.num_comments;
 
         for (int i=0; i<num_comments; ++i) {
             dprintf(fdi->logFP, "entry=%s length=%d\n\n",
@@ -297,6 +318,20 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
             if (0 == strncmp("ARTIST=", (const char *)(&VC.comments[i].entry[0]), 7)) {
                 strncpy_s(fdi->artistStr, (const char *)(&VC.comments[i].entry[7]), FLACDECODE_MAX_STRSZ-1);
             }
+        }
+    }
+
+    if (metadata->type == FLAC__METADATA_TYPE_PICTURE) {
+        dprintf(fdi->logFP, "picture bytes=%d\n", PIC.data_length);
+
+        if (PIC.data && 0 < PIC.data_length && PIC.data_length <= FLACDECODE_IMAGE_BYTES_MAX) {
+            fdi->pictureBytes = PIC.data_length;
+
+            delete [] fdi->pictureData;
+            fdi->pictureData = new char[fdi->pictureBytes];
+            assert(fdi->pictureData);
+
+            memcpy(fdi->pictureData, PIC.data, fdi->pictureBytes);
         }
     }
 }
@@ -361,6 +396,7 @@ DecodeMain(FlacDecodeInfo *fdi)
     
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_STREAMINFO);
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
+    FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_PICTURE);
 
 #if 1
     ercd = _wfopen_s(&fp, fdi->fromFlacPathUtf16, L"rb");
@@ -830,3 +866,35 @@ FlacDecodeDLL_GetNextPcmData(int id, int numFrame, char *buff_return)
     return fdi->retrievedFrames;
 }
 
+/// 画像データのサイズ
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetPictureBytes(int id)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    return fdi->pictureBytes;
+}
+
+/// 画像データ
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_return)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    int copyBytes = fdi->pictureBytes - offs;
+
+    if (copyBytes <= 0) {
+        return 0;
+    }
+
+    if (pictureBytes < copyBytes) {
+        copyBytes = pictureBytes;
+    }
+
+    memcpy(picture_return, &fdi->pictureData[offs], copyBytes);
+    return copyBytes;
+}

@@ -82,6 +82,12 @@ namespace FlacDecodeCSTest {
             string albumStr = br.ReadString();
             string artistStr = br.ReadString();
 
+            int pictureBytes = br.ReadInt32();
+            byte[] pictureData = new byte[0];
+            if (0 < pictureBytes) {
+                br.ReadBytes(pictureBytes);
+            }
+
             System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
                 nChannels, bitsPerSample, sampleRate, numSamples);
 
@@ -114,6 +120,12 @@ namespace FlacDecodeCSTest {
             string titleStr = br.ReadString();
             string albumStr = br.ReadString();
             string artistStr = br.ReadString();
+
+            int pictureBytes = br.ReadInt32();
+            byte[] pictureData = new byte[0];
+            if (0 < pictureBytes) {
+                br.ReadBytes(pictureBytes);
+            }
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 
