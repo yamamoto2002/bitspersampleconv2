@@ -104,7 +104,7 @@
                         <CheckBox Content="リピート" Height="16" HorizontalAlignment="Left" Margin="6,35,0,0" Name="checkBoxContinuous" VerticalAlignment="Top" Width="89" IsChecked="True" Checked="checkBoxContinuous_CheckedChanged" Unchecked="checkBoxContinuous_CheckedChanged" />
                     </Grid>
                     <Grid>
-                        <Image RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Left" Name="imageCoverArt" Stretch="Uniform" Width="80" />
+                        <Image RenderOptions.BitmapScalingMode="Fant" HorizontalAlignment="Left" Name="imageCoverArt" Stretch="Uniform" Width="80" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
