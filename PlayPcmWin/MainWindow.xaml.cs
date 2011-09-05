@@ -526,6 +526,11 @@ namespace PlayPcmWin
                 expanderSettings.IsExpanded = false;
             }
 
+            // プレイリスト読み出し
+
+            PlayListItemInfo.SetNextRowId(1);
+            m_groupIdNextAdd = 0;
+
             if (m_preference.StorePlaylistContent) {
                 // エラーメッセージを貯めて出す。作りがいまいちだが。
                 m_loadErrorMessages = new StringBuilder();
@@ -545,10 +550,7 @@ namespace PlayPcmWin
                     AssemblyVersion,
                     IntPtr.Size == 8 ? "64bit" : "32bit"));
 
-            PlayListItemInfo.SetNextRowId(1);
             dataGridPlayList.ItemsSource = m_playListItems;
-
-            m_groupIdNextAdd = 0;
 
             int hr = 0;
             wasapi = new WasapiCS();
