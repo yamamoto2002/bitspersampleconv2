@@ -36,6 +36,18 @@ namespace PlayPcmWin {
         /// </summary>
         public long ReadBytes { get { return m_readBytes; } }
 
+        /// <summary>
+        /// 画像データバイト数(無いときは0)
+        /// </summary>
+        public int PictureBytes { get; set; }
+
+        /// <summary>
+        /// 画像データ
+        /// </summary>
+        public byte[] PictureData { get { return m_pictureData; } }
+
+        private byte[] m_pictureData;
+
         private void Clear() {
             AlbumName = string.Empty;
             TitleName = string.Empty;
@@ -43,6 +55,9 @@ namespace PlayPcmWin {
             m_unsynchro = false;
             m_bytesRemain = 0;
             m_readBytes = 0;
+
+            PictureBytes = 0;
+            m_pictureData = null;
         }
 
         private byte[] BinaryReadBytes(BinaryReader br, int bytes) {
@@ -212,6 +227,49 @@ namespace PlayPcmWin {
             return result;
         }
 
+        private int SkipTextString(BinaryReader br) {
+            byte[] textChar;
+
+            int advance = 0;
+            do {
+                textChar = ReadBytesWithUnsynchro(br, 1);
+                ++advance;
+            } while (textChar[0] != 0);
+
+            return advance;
+        }
+
+        private byte[] ReadAttachedPictureFrameV22(BinaryReader br, int frameSize) {
+            var encoding    = ReadBytesWithUnsynchro(br, 1);
+            var imageFormat = ReadBytesWithUnsynchro(br, 3);
+            var pictureType = ReadBytesWithUnsynchro(br, 1);
+
+            int pos = 5;
+
+            // skip description string
+            pos += SkipTextString(br);
+
+            // pictureData
+            return ReadBytesWithUnsynchro(br, frameSize - pos);
+        }
+
+        private byte[] ReadAttachedPictureFrameV23(BinaryReader br, int frameSize) {
+            var encoding    = ReadBytesWithUnsynchro(br, 1);
+
+            int pos = 1;
+            // skip MIME type
+            pos += SkipTextString(br);
+
+            var pictureType = ReadBytesWithUnsynchro(br, 1);
+            ++pos;
+
+            // skip Description string
+            pos += SkipTextString(br);
+
+            // pictureData
+            return ReadBytesWithUnsynchro(br, frameSize - pos);
+        }
+
         private void SkipFrameContent(BinaryReader br, int frameSize, int frameFlags) {
             ReadBytesWithUnsynchro(br, frameSize);
         }
@@ -226,16 +284,21 @@ namespace PlayPcmWin {
 
                 switch (frameId) {
                 case 0x54414c42:
-                    // "TALB" アルバム名
+                    // "TALB" Album
                     AlbumName = ReadNameFrame(br, frameSize, frameFlags);
                     break;
                 case 0x54495432:
-                    // "TIT2" 曲名
+                    // "TIT2" Title
                     TitleName = ReadNameFrame(br, frameSize, frameFlags);
                     break;
                 case 0x54504531:
-                    // "TPE1" メインアーティスト
+                    // "TPE1" artist
                     ArtistName = ReadNameFrame(br, frameSize, frameFlags);
+                    break;
+                case 0x41504943:
+                    // "APIC" attached picture
+                    m_pictureData = ReadAttachedPictureFrameV23(br, frameSize);
+                    PictureBytes = m_pictureData.Length;
                     break;
                 case 0:
                     // 終わり
@@ -268,16 +331,21 @@ namespace PlayPcmWin {
 
                 switch (frameId) {
                 case 0x54414c:
-                    // "TAL" アルバム名
+                    // "TAL" Album name
                     AlbumName = ReadNameFrame(br, frameSize, 0);
                     break;
                 case 0x545432:
-                    // "TT2" 曲名
+                    // "TT2" Title
                     TitleName = ReadNameFrame(br, frameSize, 0);
                     break;
                 case 0x545031:
-                    // "TP1" メインアーティスト
+                    // "TP1" Artist
                     ArtistName = ReadNameFrame(br, frameSize, 0);
+                    break;
+                case 0x504943:
+                    // "PIC" Attached Picture
+                    m_pictureData = ReadAttachedPictureFrameV22(br, frameSize);
+                    PictureBytes = m_pictureData.Length;
                     break;
                 case 0:
                     // 終わり

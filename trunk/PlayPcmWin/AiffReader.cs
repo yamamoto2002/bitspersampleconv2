@@ -244,6 +244,16 @@ namespace PlayPcmWin {
         public string AlbumName { get { return m_Id3Reader.AlbumName; } }
         public string ArtistName { get { return m_Id3Reader.ArtistName; } }
 
+        /// <summary>
+        /// 画像データバイト数(無いときは0)
+        /// </summary>
+        public int PictureBytes { get { return m_Id3Reader.PictureBytes; } }
+
+        /// <summary>
+        /// 画像データ
+        /// </summary>
+        public byte[] PictureData { get { return m_Id3Reader.PictureData; } }
+        
         private ResultType ReadHeader1(BinaryReader br, out PcmDataLib.PcmData pcmData, ReadHeaderMode mode) {
             pcmData = new PcmDataLib.PcmData();
 
@@ -293,6 +303,9 @@ namespace PlayPcmWin {
                     pcmData.DisplayName = TitleName;
                     pcmData.AlbumTitle = AlbumName;
                     pcmData.ArtistName = ArtistName;
+                    if (0 < PictureBytes) {
+                        pcmData.SetPicture(PictureBytes, PictureData);
+                    }
                 }
             }
 
