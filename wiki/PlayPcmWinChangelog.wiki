@@ -4,15 +4,15 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.23 ==
-  * Exact Audio Copyが出力するfolder.jpgカバーアート画像の表示
+  * Issue 58 Exact Audio Copyが出力するfolder.jpgカバーアート画像の表示
 
 ===!PlayPcmWin 3.0.21 ==
-  * AIFF カバーアート画像の表示
+  * Issue 58 AIFF カバーアート画像の表示
 
 ===!PlayPcmWin 3.0.20 ==
 
   * 再生リストの項目をつまんで再生曲順を入れ替える機能
-  * カバーアート画像表示設定追加
+  * Issue 58 カバーアート画像表示設定追加
 http://bitspersampleconv2.googlecode.com/files/coverartSettings.png
   * Issue 76 修正
 
