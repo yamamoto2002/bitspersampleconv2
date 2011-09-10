@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.24 ==
+  * 再生リストにJPEGファイルをドロップしたときの動作を無視するように変更
+
 ===!PlayPcmWin 3.0.23 ==
   * Issue 58 Exact Audio Copyが出力するfolder.jpgカバーアート画像の表示
 
