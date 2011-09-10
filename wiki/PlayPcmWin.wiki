@@ -26,9 +26,9 @@ http://bitspersampleconv2.googlecode.com/files/PPW3021.png
 
 =ダウンロード=
 
-安定版　(バージョン3.0.23)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin323.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin323x64.zip
+安定版　(バージョン3.0.24)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin324.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin324x64.zip
 
 非常にバグっぽい開発版
   * なし
