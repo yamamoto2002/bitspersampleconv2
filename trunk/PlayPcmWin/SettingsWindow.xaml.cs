@@ -69,6 +69,9 @@ namespace PlayPcmWin {
             checkBoxStorePlaylistContent.IsChecked =
                 preference.StorePlaylistContent;
 
+            checkBoxCoverart.IsChecked =
+                preference.DispCoverart;
+
             textBoxPlayingTimeSize.Text =
                 preference.PlayingTimeSize.ToString();
 
@@ -140,6 +143,9 @@ namespace PlayPcmWin {
 
             m_preference.StorePlaylistContent
                 = checkBoxStorePlaylistContent.IsChecked == true;
+
+            m_preference.DispCoverart
+                = checkBoxCoverart.IsChecked == true;
 
             m_preference.ParallelRead = false;
 

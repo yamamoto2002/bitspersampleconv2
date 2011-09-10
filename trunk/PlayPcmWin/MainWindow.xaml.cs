@@ -526,7 +526,7 @@ namespace PlayPcmWin
                 expanderSettings.IsExpanded = false;
             }
 
-            // プレイリスト読み出し
+            // 再生リスト読み出し
 
             PlayListItemInfo.SetNextRowId(1);
             m_groupIdNextAdd = 0;
@@ -679,6 +679,17 @@ namespace PlayPcmWin
         }
 
         private void UpdateCoverart() {
+            if (!m_preference.DispCoverart) {
+                // do not display coverart
+                imageCoverArt.Source = null;
+                imageCoverArt.Visibility = System.Windows.Visibility.Collapsed;
+                return;
+            }
+
+            // display coverart
+
+            imageCoverArt.Visibility = System.Windows.Visibility.Visible;
+
             if (dataGridPlayList.SelectedIndex < 0) {
                 DispCoverart(null);
                 return;
@@ -718,15 +729,12 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作って下さい。";
                 break;
             case State.プレイリストあり:
-                // dataGridの選択単位をセル単位にする(停止中は再生リスト編集を主に行うであろう)
-                if (0 <= dataGridPlayList.SelectedIndex) {
-                    var si = dataGridPlayList.SelectedIndex;
-                    dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
-                    dataGridPlayList.SelectedIndex = si;
-
-                } else {
-                    dataGridPlayList.SelectionUnit = DataGridSelectionUnit.CellOrRowHeader;
+                if (0 < dataGridPlayList.Items.Count &&
+                        dataGridPlayList.SelectedIndex < 0) {
+                    // プレイリストに項目があり、選択されている曲が存在しない時、最初の曲を選択状態にする
+                    dataGridPlayList.SelectedIndex = 0;
                 }
+
                 menuItemFileNew.IsEnabled        = true;
                 menuItemFileOpen.IsEnabled       = true;
                 menuItemFileSaveAs.IsEnabled     = true;
@@ -748,9 +756,6 @@ namespace PlayPcmWin
                 statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
                 break;
             case State.デバイスSetup完了:
-                // dataGridの選択単位を行単位にする(再生中は再生リスト編集よりは、曲選択をしたい)
-                dataGridPlayList.SelectionUnit = DataGridSelectionUnit.FullRow;
-
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
                 menuItemFileNew.IsEnabled        = false;
                 menuItemFileOpen.IsEnabled       = false;
@@ -1172,7 +1177,7 @@ namespace PlayPcmWin
                         "・Lynx AES16eのWaveRTドライバは、出力レイテンシーを20msなどの小さな値に設定すると再生できます。\n" +
                         "・無音時に省電力のためS/PDIF出力を停止するデバイス等では、出力レイテンシーを50msなどの小さな値に設定すると曲の頭が途切れることがあるそうです。\n" +
                         "・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。\n" +
-                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。"
+                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。Ayre QB-9も同様のようです。"
                         ,
                         startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
                         DfmToStr(m_preference.wasapiDataFeedMode),
@@ -2323,6 +2328,8 @@ namespace PlayPcmWin
                 : FontWeights.Normal;
 
             sliderWindowScaling.Value = m_preference.WindowScale;
+
+            UpdateUIStatus();
         }
 
         List<string> m_logList = new List<string>();

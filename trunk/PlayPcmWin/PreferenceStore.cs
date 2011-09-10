@@ -49,6 +49,19 @@ namespace PlayPcmWin {
 
         public bool StorePlaylistContent { get; set; }
 
+        public bool DispCoverart { get; set; }
+
+        public enum PlayListDispModeType {
+            /// <summary>
+            /// 選択モード
+            /// </summary>
+            Select,
+            /// <summary>
+            /// 項目編集モード
+            /// </summary>
+            EditItem,
+        }
+
         public Preference() {
             Reset();
         }
@@ -74,6 +87,7 @@ namespace PlayPcmWin {
             WindowScale = 1.0f;
             SettingsIsExpanded = true;
             StorePlaylistContent = true;
+            DispCoverart = true;
 
             MainWindowLeft = -1;
             MainWindowTop = -1;
