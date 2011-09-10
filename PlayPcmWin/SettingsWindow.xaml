@@ -38,9 +38,9 @@
             </GroupBox>
             <GroupBox Header="その他設定" Height="140" Margin="12,311,12,0" Name="groupBox3" VerticalAlignment="Top">
                 <Grid>
-                    <CheckBox Content="起動時のウィンドウの位置とサイズを前回終了時の状態に合わせる" Height="16" Margin="6,6,346,0" Name="checkBoxManuallySetMainWindowDimension" VerticalAlignment="Top" Width="390" />
-                    <CheckBox Content="起動時に前回終了時の再生リストの内容を復元する" Height="16" Margin="6,28,350,0" Name="checkBoxStorePlaylistContent" VerticalAlignment="Top" Width="390" />
-                    <CheckBox Content="カバーアート画像を表示する" Height="16" Margin="420,6,0,0" Name="checkBoxCoverart" VerticalAlignment="Top" Width="200" IsChecked="True" />
+                    <CheckBox Content="起動時のウィンドウの位置とサイズを前回終了時の状態に合わせる" Height="16" Margin="6,6,0,0" Name="checkBoxManuallySetMainWindowDimension" VerticalAlignment="Top" Width="390" HorizontalAlignment="Left" />
+                    <CheckBox Content="起動時に前回終了時の再生リストの内容を復元する" Height="16" Margin="6,28,0,0" Name="checkBoxStorePlaylistContent" VerticalAlignment="Top" Width="390" HorizontalAlignment="Left" />
+                    <CheckBox Content="カバーアート画像を表示する" Height="16" Margin="420,6,0,0" Name="checkBoxCoverart" VerticalAlignment="Top" Width="200" IsChecked="True" HorizontalAlignment="Left" />
                     <TextBox Height="28" Margin="328,50,0,0" Name="textBoxPlayingTimeSize" VerticalAlignment="Top" HorizontalAlignment="Left" Width="53" Text="16" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" TextChanged="textBoxPlayingTimeSize_TextChanged" />
                     <Label Content="再生時間表示フォント:" Height="28" Margin="5,50,0,0" Name="label1" VerticalAlignment="Top" HorizontalContentAlignment="Left" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="146" />
                     <Label Content="pt" Height="28" HorizontalAlignment="Left" Margin="383,50,0,0" Name="label2" VerticalAlignment="Top" VerticalContentAlignment="Center" />
