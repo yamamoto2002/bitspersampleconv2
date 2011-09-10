@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.23 ==
+  * Exact Audio Copyが出力するfolder.jpgカバーアート画像の表示
+
 ===!PlayPcmWin 3.0.21 ==
   * AIFF カバーアート画像の表示
 
