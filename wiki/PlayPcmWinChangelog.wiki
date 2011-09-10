@@ -8,6 +8,7 @@
   * 再生リストの項目をつまんで再生曲順を入れ替える機能
   * カバーアート画像表示設定追加
 http://bitspersampleconv2.googlecode.com/files/coverartSettings.png
+  * Issue 76 修正
 
 ===!PlayPcmWin 3.0.18 ==
 
