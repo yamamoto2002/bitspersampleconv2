@@ -6,7 +6,7 @@
 ===!PlayPcmWin 3.0.20 ==
 
   * カバーアート画像表示設定追加
-
+http://bitspersampleconv2.googlecode.com/files/coverartSettings.png
 
 ===!PlayPcmWin 3.0.18 ==
 
