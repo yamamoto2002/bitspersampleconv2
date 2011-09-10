@@ -1230,6 +1230,56 @@ namespace PlayPcmWin
             }
         }
 
+        private byte[] ReadWholeFile(string path) {
+            byte[] result = new byte[0];
+
+            if (System.IO.File.Exists(path)) {
+                // ファイルが存在する。
+                try {
+                    using (var br = new BinaryReader(
+                            File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
+                        if (br.BaseStream.Length <= 0x7fffffff) {
+                            result = br.ReadBytes((int)br.BaseStream.Length);
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.Console.WriteLine(ex);
+                    result = new byte[0];
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// カバーアート画像を追加する。
+        /// </summary>
+        /// <returns>true: カバーアート画像が付いている。false: カバーアート画像がついていない。</returns>
+        private bool AddCoverart(string path, PcmDataLib.PcmData pcmData) {
+            if (0 < pcmData.PictureBytes) {
+                // 既に追加されている。
+                return true;
+            }
+
+            var dirPath = System.IO.Path.GetDirectoryName(path);
+
+            var pictureData = ReadWholeFile(string.Format("{0}\\{1}.jpg", dirPath,
+                System.IO.Path.GetFileNameWithoutExtension(path)));
+            if (0 < pictureData.Length) {
+                // ファイル名.jpgが存在。
+                pcmData.SetPicture(pictureData.Length, pictureData);
+                return true;
+            }
+
+            pictureData = ReadWholeFile(string.Format("{0}\\folder.jpg", dirPath));
+            if (0 < pictureData.Length) {
+                // folder.jpgが存在。
+                pcmData.SetPicture(pictureData.Length, pictureData);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// サブルーチン
         /// PcmData読み込み成功後に行う処理。
@@ -1295,6 +1345,9 @@ namespace PlayPcmWin
                 pcmData.AlbumTitle     = csr.GetAlbumTitle();
                 pcmData.ArtistName = csr.GetAlbumPerformer();
             }
+
+            // カバーアート画像を追加する
+            AddCoverart(path, pcmData);
 
             var pli = new PlayListItemInfo(
                 PlayListItemInfo.ItemType.AudioData,
