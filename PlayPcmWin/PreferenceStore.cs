@@ -91,7 +91,7 @@ namespace PlayPcmWin {
 
             MainWindowLeft = -1;
             MainWindowTop = -1;
-            MainWindowWidth = 850;
+            MainWindowWidth = 1000;
             MainWindowHeight = 640;
         }
 
