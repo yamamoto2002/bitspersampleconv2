@@ -72,6 +72,9 @@ namespace PlayPcmWin {
             checkBoxCoverart.IsChecked =
                 preference.DispCoverart;
 
+            checkBoxRefrainRedraw.IsChecked =
+                preference.RefrainRedraw;
+
             textBoxPlayingTimeSize.Text =
                 preference.PlayingTimeSize.ToString();
 
@@ -146,6 +149,9 @@ namespace PlayPcmWin {
 
             m_preference.DispCoverart
                 = checkBoxCoverart.IsChecked == true;
+
+            m_preference.RefrainRedraw
+                = checkBoxRefrainRedraw.IsChecked == true;
 
             m_preference.ParallelRead = false;
 
