@@ -51,6 +51,8 @@ namespace PlayPcmWin {
 
         public bool DispCoverart { get; set; }
 
+        public bool RefrainRedraw { get; set; }
+
         public enum PlayListDispModeType {
             /// <summary>
             /// 選択モード
@@ -88,6 +90,7 @@ namespace PlayPcmWin {
             SettingsIsExpanded = true;
             StorePlaylistContent = true;
             DispCoverart = true;
+            RefrainRedraw = false;
 
             MainWindowLeft = -1;
             MainWindowTop = -1;
