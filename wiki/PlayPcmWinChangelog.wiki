@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.25 ==
+  * 再生中の画面再描画処理をやめ、再生中のCPU負荷を最小限にする機能。
+http://bitspersampleconv2.googlecode.com/files/ppw3025ss.png
+
 ===!PlayPcmWin 3.0.24 ==
   * 再生リストにJPEGファイルをドロップしたときの動作を無視するように変更
 
