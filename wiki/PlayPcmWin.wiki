@@ -30,8 +30,9 @@ http://bitspersampleconv2.googlecode.com/files/PPW3021.png
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin324.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin324x64.zip
 
-非常にバグっぽい開発版
-  * なし
+非常にバグっぽい開発版　(バージョン3.0.25)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin325.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin325x64.zip
 
 =32ビット版と64ビット版の違いについて=
 
