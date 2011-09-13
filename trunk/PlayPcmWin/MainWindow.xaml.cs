@@ -37,6 +37,14 @@ namespace PlayPcmWin
         private static string PLAYING_TIME_UNKNOWN = "--:--:--/--:--:--";
         private static string PLAYING_TIME_ALLZERO = "00:00:00/00:00:00";
 
+        /// <summary>
+        /// アルバムのカバーアート画像のファイル名
+        /// </summary>
+        private static string[] ALBUM_IMAGE_FILENAMES = {
+            "folder.jpg",
+            "cover.jpg",
+        };
+
         private WasapiCS wasapi;
 
         private Wasapi.WasapiCS.StateChangedCallback m_wasapiStateChangedDelegate;
@@ -673,16 +681,21 @@ namespace PlayPcmWin
                 return;
             }
 
-            using (var stream = new MemoryStream(pictureData)) {
-                BitmapImage bi = new BitmapImage();
-                bi.BeginInit();
-                bi.CacheOption = BitmapCacheOption.OnLoad;
-                bi.UriSource = null;
-                bi.StreamSource = stream;
-                bi.EndInit();
-                
-                imageCoverArt.Source = bi;
-                // imageCoverArt.Visibility = System.Windows.Visibility.Visible;
+            try {
+                using (var stream = new MemoryStream(pictureData)) {
+                    BitmapImage bi = new BitmapImage();
+                    bi.BeginInit();
+                    bi.CacheOption = BitmapCacheOption.OnLoad;
+                    bi.UriSource = null;
+                    bi.StreamSource = stream;
+                    bi.EndInit();
+
+                    imageCoverArt.Source = bi;
+                    // imageCoverArt.Visibility = System.Windows.Visibility.Visible;
+                }
+            } catch (Exception ex) {
+                System.Console.WriteLine("E: DispCoverart {0}", ex);
+                imageCoverArt.Source = null;
             }
         }
 
@@ -1288,11 +1301,13 @@ namespace PlayPcmWin
                 return true;
             }
 
-            pictureData = ReadWholeFile(string.Format("{0}\\folder.jpg", dirPath));
-            if (0 < pictureData.Length) {
-                // folder.jpgが存在。
-                pcmData.SetPicture(pictureData.Length, pictureData);
-                return true;
+            foreach (string albumImageFilename in ALBUM_IMAGE_FILENAMES) {
+                pictureData = ReadWholeFile(string.Format("{0}\\{1}", dirPath, albumImageFilename));
+                if (0 < pictureData.Length) {
+                    // アルバムのカバーアート画像(folder.jpg等)が存在。
+                    pcmData.SetPicture(pictureData.Length, pictureData);
+                    return true;
+                }
             }
 
             return false;
