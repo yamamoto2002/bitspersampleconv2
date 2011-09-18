@@ -24,6 +24,7 @@ using PcmDataLib;
 using WasapiPcmUtil;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
+using System.Security.Cryptography;
 
 namespace PlayPcmWin
 {
@@ -621,6 +622,7 @@ namespace PlayPcmWin
             }
 
             checkBoxContinuous.IsChecked = m_preference.PlayRepeat;
+            checkBoxShuffle.IsChecked = m_preference.Shuffle;
 
             SetupBackgroundWorkers();
 
@@ -745,6 +747,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
+                checkBoxShuffle.IsEnabled        = true;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -772,6 +775,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
+                checkBoxShuffle.IsEnabled = true;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -794,6 +798,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
+                checkBoxShuffle.IsEnabled        = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -815,6 +820,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
+                checkBoxShuffle.IsEnabled        = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -841,6 +847,7 @@ namespace PlayPcmWin
                 buttonStop.IsEnabled             = true;
                 buttonPause.IsEnabled            = true;
                 buttonPause.Content = "一時停止(_U)";
+                checkBoxShuffle.IsEnabled        = false;
 
                 buttonNext.IsEnabled             = true;
                 buttonPrev.IsEnabled             = true;
@@ -870,6 +877,7 @@ namespace PlayPcmWin
                 buttonStop.IsEnabled         = true;
                 buttonPause.IsEnabled        = true;
                 buttonPause.Content = "再生再開(_U)";
+                checkBoxShuffle.IsEnabled    = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -893,6 +901,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
+                checkBoxShuffle.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -914,6 +923,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
+                checkBoxShuffle.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -1051,6 +1061,7 @@ namespace PlayPcmWin
 
                 // 再生リピート設定を保存
                 m_preference.PlayRepeat = checkBoxContinuous.IsChecked == true;
+                m_preference.Shuffle = checkBoxShuffle.IsChecked == true;
 
                 // 設定画面の表示状態を保存
                 m_preference.SettingsIsExpanded = expanderSettings.IsExpanded;
@@ -1143,10 +1154,10 @@ namespace PlayPcmWin
             }
             m_preference.LatencyMillisec = latencyMillisec;
 
-            int startWavDataId = GetFirstWavDataIdOnGroup(m_pcmDataListForDisp, loadGroupId);
+            int startWavDataId = GetFirstWavDataIdOnGroup(m_pcmDataListForPlay, loadGroupId);
             System.Diagnostics.Debug.Assert(0 <= startWavDataId);
 
-            PcmDataLib.PcmData startPcmData = m_pcmDataListForDisp[startWavDataId];
+            PcmDataLib.PcmData startPcmData = FindPcmDataById(m_pcmDataListForPlay, startWavDataId);
 
             // 1つのフォーマットに対して複数のデバイス設定選択肢がありうる。
 
@@ -1207,7 +1218,7 @@ namespace PlayPcmWin
                         "・Lynx AES16eのWaveRTドライバは、出力レイテンシーを20msなどの小さな値に設定すると再生できます。\n" +
                         "・無音時に省電力のためS/PDIF出力を停止するデバイス等では、出力レイテンシーを50msなどの小さな値に設定すると曲の頭が途切れることがあるそうです。\n" +
                         "・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。\n" +
-                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。Ayre QB-9も同様のようです。"
+                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。"
                         ,
                         startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
                         DfmToStr(m_preference.wasapiDataFeedMode),
@@ -1348,6 +1359,7 @@ namespace PlayPcmWin
             pcmData.FullPath = path;
             pcmData.FileName = System.IO.Path.GetFileName(path);
             pcmData.Id = m_pcmDataListForDisp.Count();
+            pcmData.Ordinal = pcmData.Id;
             pcmData.GroupId = m_groupIdNextAdd;
 
             // CUEシートの情報をセットする。
@@ -1833,8 +1845,8 @@ namespace PlayPcmWin
 
                 wasapi.ClearPlayList();
                 wasapi.AddPlayPcmDataStart();
-                for (int i = 0; i < m_pcmDataListForDisp.Count; ++i) {
-                    PcmDataLib.PcmData pd = m_pcmDataListForDisp[i];
+                for (int i = 0; i < m_pcmDataListForPlay.Count; ++i) {
+                    PcmDataLib.PcmData pd = m_pcmDataListForPlay[i];
                     if (pd.GroupId != readGroupId) {
                         continue;
                     }
@@ -1908,7 +1920,7 @@ namespace PlayPcmWin
                                 pr.StreamEnd();
                                 return;
                             }
-                            m_readFileWorker.ReportProgress((int)(100 * i / m_pcmDataListForDisp.Count),
+                            m_readFileWorker.ReportProgress((int)(100 * i / m_pcmDataListForPlay.Count),
                                 string.Format("wasapi.AddPlayPcmData(id={0}, frames={1})\r\n", pd.Id, pd.NumFrames));
                         }
 
@@ -1934,7 +1946,7 @@ namespace PlayPcmWin
                         posFrame += readFrames;
 
                         float progressPos = (float)posFrame / (endFrame - startFrame);
-                        m_readFileWorker.ReportProgress((int)(100 * (i + progressPos) / m_pcmDataListForDisp.Count), "");
+                        m_readFileWorker.ReportProgress((int)(100 * (i + progressPos) / m_pcmDataListForPlay.Count), "");
                     } while (posFrame < endFrame - startFrame);
 
                     pr.StreamEnd();
@@ -1972,11 +1984,11 @@ namespace PlayPcmWin
         /// </summary>
         private void UpdatePlayRepeat() {
             bool repeat = false;
-            // GroupIdが0しかない場合、リピート設定が可能。
-            if (0 == CountWaveDataOnPlayGroup(m_pcmDataListForDisp, 1)) {
-                if (checkBoxContinuous.IsChecked == true) {
-                    repeat = true;
-                }
+            // シャッフルではなく、GroupIdが0しかない場合、リピート設定が可能。
+            if (checkBoxContinuous.IsChecked == true &&
+                    checkBoxShuffle.IsChecked == false &&
+                    0 == CountWaveDataOnPlayGroup(m_pcmDataListForPlay, 1)) {
+                repeat = true;
             }
             wasapi.SetPlayRepeat(repeat);
         }
@@ -2079,29 +2091,99 @@ namespace PlayPcmWin
             m_readFileWorker.RunWorkerAsync(loadGroupId);
         }
 
+        /// <summary>
+        /// 0 <= r < nMaxPlus1の範囲の整数値rをランダムに戻す。
+        /// </summary>
+        private int GetRandomNumber(RNGCryptoServiceProvider gen, int nMaxPlus1) {
+            byte[] v = new byte[4];
+            gen.GetBytes(v);
+            return (BitConverter.ToInt32(v, 0) & 0x7fffffff) % nMaxPlus1;
+        }
+
+        /// <summary>
+        /// シャッフルした再生リストm_pcmDataListForPlayを作成する
+        /// </summary>
+        private void CreateShuffledPlayList() {
+            // 適当にシャッフルされた番号が入っている配列pcmDataIdxArrayを作成。
+            var pcmDataIdxArray = new int[m_pcmDataListForDisp.Count];
+            for (int i=0; i < pcmDataIdxArray.Length; ++i) {
+                pcmDataIdxArray[i] = i;
+            }
+            
+            var gen = new RNGCryptoServiceProvider();
+            int N = pcmDataIdxArray.Length;
+            for (int i=0; i < N * 100; ++i) {
+                var a = GetRandomNumber(gen, N);
+                var b = GetRandomNumber(gen, N);
+                if (a == b) {
+                    // 入れ替え元と入れ替え先が同じ。あんまり意味ないのでスキップする。
+                    continue;
+                }
+
+                // a番目とb番目を入れ替える
+                var tmp = pcmDataIdxArray[a];
+                pcmDataIdxArray[a] = pcmDataIdxArray[b];
+                pcmDataIdxArray[b] = tmp;
+            }
+
+            // m_pcmDataListForPlayを作成。
+            m_pcmDataListForPlay = new List<PcmData>();
+            for (int i=0; i < pcmDataIdxArray.Length; ++i) {
+                var idx = pcmDataIdxArray[i];
+
+                // 再生順番号Ordinalを付け直す
+                // GroupIdをバラバラの番号にする(1曲ずつ読み込む)
+                var pcmData = new PcmData();
+                pcmData.CopyFrom(m_pcmDataListForDisp[idx]);
+                pcmData.Ordinal = i;
+                pcmData.GroupId = i;
+
+                m_pcmDataListForPlay.Add(pcmData);
+            }
+        }
+
+        /// <summary>
+        /// 表示順に並んでいるプレイリストm_pcmDataListForPlayを作成。
+        /// </summary>
+        private void CreateNormalPlayList() {
+            m_pcmDataListForPlay = new List<PcmData>();
+            for (int i=0; i < m_pcmDataListForDisp.Count; ++i) {
+                var idx = i;
+                m_pcmDataListForPlay.Add(m_pcmDataListForDisp[idx]);
+            }
+        }
+
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
             if (!UseDevice(listBoxDevices.SelectedIndex, (string)listBoxDevices.SelectedItem)) {
                 return;
             }
 
-            // 再生する曲のwavDataIdをdataGridの選択セルから取得する
-            int wavDataId = 0;
-            var selectedCells = dataGridPlayList.SelectedCells;
-            if (0 < selectedCells.Count) {
-                var cell = selectedCells[0];
-                System.Diagnostics.Debug.Assert(cell != null);
-                PlayListItemInfo pli = cell.Item as PlayListItemInfo;
-                System.Diagnostics.Debug.Assert(pli != null);
-                var pcmData = pli.PcmData();
+            if (true == checkBoxShuffle.IsChecked) {
+                // シャッフル再生する
+                CreateShuffledPlayList();
+                ReadStartPlayByWavDataId(m_pcmDataListForPlay[0].Id);
+            } else {
+                // 選択されている曲から順番に再生する。
+                // 再生する曲のwavDataIdをdataGridの選択セルから取得する
+                int wavDataId = 0;
+                var selectedCells = dataGridPlayList.SelectedCells;
+                if (0 < selectedCells.Count) {
+                    var cell = selectedCells[0];
+                    System.Diagnostics.Debug.Assert(cell != null);
+                    PlayListItemInfo pli = cell.Item as PlayListItemInfo;
+                    System.Diagnostics.Debug.Assert(pli != null);
+                    var pcmData = pli.PcmData();
 
-                if (null != pcmData) {
-                    wavDataId = pcmData.Id;
-                } else {
-                    // ココまで読んだ的な行は、pcmDataを持っていない
+                    if (null != pcmData) {
+                        wavDataId = pcmData.Id;
+                    } else {
+                        // ココまで読んだ的な行は、pcmDataを持っていない
+                    }
                 }
-            }
 
-            ReadStartPlayByWavDataId(wavDataId);
+                CreateNormalPlayList();
+                ReadStartPlayByWavDataId(wavDataId);
+            }
         }
 
         private void buttonPause_Click(object sender, RoutedEventArgs e) {
@@ -2134,6 +2216,15 @@ namespace PlayPcmWin
             }
         }
 
+        private PcmData FindPcmDataById(List<PcmData> pcmDataList, int wavDataId) {
+            for (int i=0; i < pcmDataList.Count; ++i) {
+                PcmData pcmData = pcmDataList[i];
+                if (pcmData.Id == wavDataId) {
+                    return pcmData;
+                }
+            }
+            return null;
+        }
 
         /// <summary>
         /// wavDataIdのGroupがロードされていたら直ちに再生開始する。
@@ -2142,7 +2233,7 @@ namespace PlayPcmWin
         private bool ReadStartPlayByWavDataId(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
-            PcmDataLib.PcmData pcmData = m_pcmDataListForDisp[wavDataId];
+            PcmDataLib.PcmData pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
 
             if (pcmData.GroupId != m_loadedGroupId) {
                 // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
@@ -2185,7 +2276,7 @@ namespace PlayPcmWin
         /// m_taskにセットする。
         /// </summary>
         private void UpdateNextTask() {
-            if (0 == CountWaveDataOnPlayGroup(m_pcmDataListForDisp, 1)) {
+            if (0 == CountWaveDataOnPlayGroup(m_pcmDataListForPlay, 1)) {
                 // ファイルグループが1個しかない場合、
                 // wasapiUserの中で自発的にループ再生する。
                 // ファイルの再生が終わった=停止。
@@ -2203,10 +2294,10 @@ namespace PlayPcmWin
             //         停止する。先頭の曲を選択状態にする。
             int nextGroupId = m_loadedGroupId + 1;
 
-            if (0 < CountWaveDataOnPlayGroup(m_pcmDataListForDisp, nextGroupId)) {
+            if (0 < CountWaveDataOnPlayGroup(m_pcmDataListForPlay, nextGroupId)) {
                 m_task.Set(TaskType.PlaySpecifiedGroup, 
                     nextGroupId,
-                    GetFirstWavDataIdOnGroup(m_pcmDataListForDisp, nextGroupId));
+                    GetFirstWavDataIdOnGroup(m_pcmDataListForPlay, nextGroupId));
                 return;
             }
 
@@ -2225,7 +2316,8 @@ namespace PlayPcmWin
         /// <returns>false: 再生開始できなかった。</returns>
         private bool StartPlay(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
-            if (m_pcmDataListForDisp[wavDataId].GroupId != m_loadedGroupId) {
+            var playPcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            if (playPcmData.GroupId != m_loadedGroupId) {
                 System.Diagnostics.Debug.Assert(false);
                 return false;
             }
@@ -2314,7 +2406,7 @@ namespace PlayPcmWin
                     = GetPlayListIndexOfWaveDataId(playingPcmDataId);
 
                 slider1.Value =wasapi.GetPosFrame();
-                PcmDataLib.PcmData pcmData = m_pcmDataListForDisp[playingPcmDataId];
+                PcmDataLib.PcmData pcmData = FindPcmDataById(m_pcmDataListForPlay, playingPcmDataId);
                 // textBoxFileName.Text = pcmData.FileName;
 
                 slider1.Maximum = pcmData.NumFrames;
@@ -2469,7 +2561,8 @@ namespace PlayPcmWin
         private void ChangePlayWavDataById(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
-            int groupId = m_pcmDataListForDisp[wavDataId].GroupId;
+            var pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            int groupId = pcmData.GroupId;
 
             int playingId = wasapi.GetNowPlayingPcmDataId();
             if (playingId < 0 && 0 <= m_loadingGroupId) {
@@ -2487,7 +2580,8 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (m_pcmDataListForDisp[playingId].GroupId == groupId) {
+            var playPcmData = FindPcmDataById(m_pcmDataListForPlay, playingId);
+            if (playPcmData.GroupId == groupId) {
                 // 同一ファイルグループのファイルの場合、すぐにこの曲が再生可能。
                 wasapi.UpdatePlayPcmDataById(wavDataId);
                 AddLogText(string.Format("wasapi.UpdatePlayPcmDataById({0})\r\n",
@@ -2644,25 +2738,37 @@ namespace PlayPcmWin
 
         private void buttonPrev_Click(object sender, RoutedEventArgs e) {
             int wavDataId = wasapi.GetNowPlayingPcmDataId();
-            --wavDataId;
-            if (wavDataId < 0) {
-                wavDataId = 0;
+            var playingPcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            if (null == playingPcmData) {
+                return;
             }
 
-            ChangePlayWavDataById(wavDataId);
+            var ordinal = playingPcmData.Ordinal;
+            --ordinal;
+            if (ordinal < 0) {
+                ordinal = 0;
+            }
+
+            ChangePlayWavDataById(m_pcmDataListForPlay[ordinal].Id);
         }
 
         private void buttonNext_Click(object sender, RoutedEventArgs e) {
             int wavDataId = wasapi.GetNowPlayingPcmDataId();
-            ++wavDataId;
-            if (wavDataId < 0) {
-                wavDataId = 0;
+            var playingPcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            if (null == playingPcmData) {
+                return;
             }
-            if (m_pcmDataListForDisp.Count <= wavDataId) {
-                wavDataId = 0;
+
+            var ordinal = playingPcmData.Ordinal;
+            ++ordinal;
+            if (ordinal < 0) {
+                ordinal = 0;
             }
-            
-            ChangePlayWavDataById(wavDataId);
+            if (m_pcmDataListForPlay.Count <= ordinal) {
+                ordinal = 0;
+            }
+
+            ChangePlayWavDataById(m_pcmDataListForPlay[ordinal].Id);
         }
 
         private void checkBoxContinuous_CheckedChanged(object sender, RoutedEventArgs e) {

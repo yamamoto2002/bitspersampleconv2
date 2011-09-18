@@ -53,6 +53,8 @@ namespace PlayPcmWin {
 
         public bool RefrainRedraw { get; set; }
 
+        public bool Shuffle { get; set; }
+
         public enum PlayListDispModeType {
             /// <summary>
             /// 選択モード
@@ -91,6 +93,7 @@ namespace PlayPcmWin {
             StorePlaylistContent = true;
             DispCoverart = true;
             RefrainRedraw = false;
+            Shuffle = false;
 
             MainWindowLeft = -1;
             MainWindowTop = -1;
