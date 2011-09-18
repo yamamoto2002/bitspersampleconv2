@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.28 ==
+  * Issue 29 シャッフル再生。
+
 ===!PlayPcmWin 3.0.26 ==
   * Issue 58 cover.jpg対応。
 
