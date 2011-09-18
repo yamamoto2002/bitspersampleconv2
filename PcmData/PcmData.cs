@@ -124,9 +124,14 @@ namespace PcmDataLib {
         // ファイル管理情報 /////////////////////////////////////////////////
 
         /// <summary>
-        /// 連番
+        /// 識別番号
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// 連番(再生順)
+        /// </summary>
+        public int Ordinal { get; set; }
 
         /// <summary>
         /// ファイルグループ番号。
@@ -214,6 +219,7 @@ namespace PcmDataLib {
             m_numFrames = rhs.m_numFrames;
             m_sampleArray = null;
             Id          = rhs.Id;
+            Ordinal     = rhs.Ordinal;
             GroupId     = rhs.GroupId;
             FileName    = rhs.FileName;
             FullPath    = rhs.FullPath;
@@ -232,7 +238,11 @@ namespace PcmDataLib {
         /// </summary>
         public void CopyFrom(PcmData rhs) {
             CopyHeaderInfoFrom(rhs);
-            m_sampleArray = (byte[])rhs.m_sampleArray.Clone();
+
+            m_sampleArray = null;
+            if (rhs.m_sampleArray != null) {
+                m_sampleArray = (byte[])rhs.m_sampleArray.Clone();
+            }
         }
 
         // プロパティIO /////////////////////////////////////////////////////
