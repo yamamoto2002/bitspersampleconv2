@@ -3,6 +3,14 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.29 ==
+  * WASAPI排他モード マルチチャンネル再生。(Lynx Aurora/LT-USBで動作することを確認)
+  ** 1ch
+  ** 2chステレオ
+  ** 4ch FL FR BL BR
+  ** 5.1ch FL FR LFE BL BR 
+  ** 7.1ch FL FR LFE BL BR SL SR
+
 ===!PlayPcmWin 3.0.28 ==
   * Issue 29 シャッフル再生。
 
