@@ -8,8 +8,8 @@
     * 1chモノラル (!PlayPcmWin 2.0.89で対応)
     * 2chステレオ (!PlayPcmWin 1.0.0で対応)
     * 4ch FL FR BL BR (!PlayPcmWin 3.0.29で対応)
-    * 5.1ch FL FR LFE FC BL BR  (!PlayPcmWin 3.0.29で対応)
-    * 7.1ch FL FR LFE FC BL BR SL SR (!PlayPcmWin 3.0.29で対応)
+    * 5.1ch FL FR FC LFE BL BR  (!PlayPcmWin 3.0.29で対応)
+    * 7.1ch FL FR FC LFE BL BR SL SR (!PlayPcmWin 3.0.29で対応)
 
 ===!PlayPcmWin 3.0.28 ==
   * Issue 29 シャッフル再生。
