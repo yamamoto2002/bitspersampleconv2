@@ -83,6 +83,7 @@
                         <DataGridTextColumn x:Name="AlbumTitleColumn" Width="Auto" Binding="{Binding Path=AlbumTitle}" Header="アルバム名"/>
                         <DataGridTextColumn x:Name="SampleRateColumn" Width="Auto" Binding="{Binding Path=SampleRate}" Header="サンプルレート"/>
                         <DataGridTextColumn x:Name="QuantizationBitRateColumn" Width="Auto" Binding="{Binding Path=QuantizationBitRate}" Header="量子化ビット数"/>
+                        <DataGridTextColumn x:Name="NumChannelsColumn" Width="SizeToCells"  Binding="{Binding Path=NumChannels}" Header="チャンネル数"/>
                         <DataGridTextColumn x:Name="BitRateColumn" Width="Auto" Binding="{Binding Path=BitRate}" Header="ビットレート"/>
                         <DataGridTextColumn x:Name="IsIndex00Column" Width="SizeToCells" Binding="{Binding Path=IsIndex00}" Header="INDEX 00"/>
                         <DataGridCheckBoxColumn x:Name="ReadSeparaterAfterColumn" Width="SizeToCells" Binding="{Binding Path=ReadSeparaterAfter}" Header="ここまで一括読み込み"/>

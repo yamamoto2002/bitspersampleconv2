@@ -675,6 +675,39 @@ WasapiUser::GetUseDeviceName(LPWSTR name, size_t nameBytes)
     return true;
 }
 
+/// numChannels to channelMask
+static DWORD
+GetChannelMask(int numChannels)
+{
+    // maskbit32 is reserved therefore allowable numChannels is smaller than 32
+    assert(numChannels < 32);
+    DWORD result = 0;
+
+    switch (numChannels) {
+    case 1:
+        result = 0; // mono (unspecified)
+        break;
+    case 2:
+        result = 3; // 2ch stereo (FL FR)
+        break;
+    case 4:
+        result = 0x33; // 4ch matrix (FL FR BL BR)
+        break;
+    case 6:
+        result = 0x3f; // 5.1 surround (FL FR FC LFE BL BR)
+        break;
+    case 8:
+        result = 0x63f; // 7.1 surround (FL FR FC LFE BL BR SL SR)
+        break;
+    default:
+        // ? unknown format
+        result = (DWORD)((1LL << numChannels)-1);
+        break;
+    }
+
+    return result;
+}
+
 HRESULT
 WasapiUser::Setup(
         int sampleRate,
@@ -718,13 +751,6 @@ WasapiUser::Setup(
     WWWaveFormatDebug(waveFormat);
     WWWFEXDebug(wfex);
 
-    if (waveFormat->nChannels != m_numChannels) {
-        dprintf("E: waveFormat->nChannels(%d) != %d\n",
-            waveFormat->nChannels, m_numChannels);
-        hr = E_FAIL;
-        goto end;
-    }
-
     if (waveFormat->wFormatTag != WAVE_FORMAT_EXTENSIBLE) {
         dprintf("E: unsupported device ! mixformat == 0x%08x\n",
             waveFormat->wFormatTag);
@@ -732,7 +758,12 @@ WasapiUser::Setup(
         goto end;
     }
 
+    // exclusive/shared common task
+    wfex->Format.nChannels = (WORD)m_numChannels;
+
     if (WWSMExclusive == m_shareMode) {
+        // exclusive mode specific task
+
         if (WWPcmDataFormatTypeIsInt(m_format)) {
             wfex->SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
         }
@@ -741,12 +772,16 @@ WasapiUser::Setup(
         wfex->Format.nSamplesPerSec = sampleRate;
 
         wfex->Format.nBlockAlign
-            = (WORD)((WWPcmDataFormatTypeToBitsPerSample(m_format) / 8)
-                * waveFormat->nChannels);
+            = (WORD)((wfex->Format.wBitsPerSample / 8)
+                * wfex->Format.nChannels);
         wfex->Format.nAvgBytesPerSec
-            = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+            = wfex->Format.nSamplesPerSec * wfex->Format.nBlockAlign;
         wfex->Samples.wValidBitsPerSample
             = (WORD)WWPcmDataFormatTypeToValidBitsPerSample(m_format);
+
+        if (2 != m_numChannels) {
+            wfex->dwChannelMask = GetChannelMask(m_numChannels);
+        }
 
         dprintf("preferred Format:\n");
         WWWaveFormatDebug(waveFormat);
@@ -754,6 +789,19 @@ WasapiUser::Setup(
     
         HRG(m_audioClient->IsFormatSupported(
             m_shareMode,waveFormat,NULL));
+    } else {
+        // shared mode specific task
+        // wBitsPerSample, nSamplesPerSec, wValidBitsPerSample are fixed
+
+        // FIXME: This code snippet does not work properly!
+        if (2 != m_numChannels) {
+            wfex->Format.nBlockAlign
+                = (WORD)((wfex->Format.wBitsPerSample / 8)
+                    * wfex->Format.nChannels);
+            wfex->Format.nAvgBytesPerSec
+                = wfex->Format.nSamplesPerSec*wfex->Format.nBlockAlign;
+            wfex->dwChannelMask = GetChannelMask(m_numChannels);
+        }
     }
 
     m_frameBytes = waveFormat->nBlockAlign;

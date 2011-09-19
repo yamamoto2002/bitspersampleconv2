@@ -129,6 +129,14 @@ namespace PlayPcmWin
                 }
             }
 
+            public int NumChannels {
+                get {
+                    return m_pcmData.NumChannels;
+                }
+                set {
+                }
+            }
+
             /// <summary>
             /// GAPの場合true
             /// </summary>
@@ -250,6 +258,7 @@ namespace PlayPcmWin
 
             public int SampleRate { get { return samplingRate; } }
             public WasapiCS.SampleFormatType SampleFormat { get { return sampleFormat; } }
+            public int NumChannels { get; set; }
             public int LatencyMillisec { get { return latencyMillisec; } }
             public WasapiDataFeedMode DataFeedMode { get { return dfm; } }
             public WasapiSharedOrExclusive SharedOrExclusive { get { return shareMode; } }
@@ -258,6 +267,7 @@ namespace PlayPcmWin
             public bool Is(
                     int samplingRate,
                     WasapiCS.SampleFormatType fmt,
+                    int numChannels,
                     int latencyMillisec,
                     WasapiDataFeedMode dfm,
                     WasapiSharedOrExclusive shareMode,
@@ -265,6 +275,7 @@ namespace PlayPcmWin
                 return (this.setuped
                     && this.samplingRate == samplingRate
                     && this.sampleFormat == fmt
+                    && this.NumChannels == numChannels
                     && this.latencyMillisec == latencyMillisec
                     && this.dfm == dfm
                     && this.shareMode == shareMode
@@ -274,13 +285,15 @@ namespace PlayPcmWin
             public bool CompatibleTo(
                     int samplingRate,
                     WasapiCS.SampleFormatType fmt,
+                    int numChannels,
                     int latencyMillisec,
                     WasapiDataFeedMode dfm,
                     WasapiSharedOrExclusive shareMode,
                     RenderThreadTaskType threadTaskType) {
                 return (this.setuped
                     && this.samplingRate == samplingRate
-                    && SampleFormatIsCompatible(this.sampleFormat,fmt)
+                    && SampleFormatIsCompatible(this.sampleFormat, fmt)
+                    && this.NumChannels == numChannels
                     && this.latencyMillisec == latencyMillisec
                     && this.dfm == dfm
                     && this.shareMode == shareMode
@@ -302,6 +315,7 @@ namespace PlayPcmWin
 
             public void Set(int samplingRate,
                 WasapiCS.SampleFormatType fmt,
+                int numChannels,
                 int latencyMillisec,
                 WasapiDataFeedMode dfm,
                 WasapiSharedOrExclusive shareMode,
@@ -309,6 +323,7 @@ namespace PlayPcmWin
                     this.setuped = true;
                 this.samplingRate = samplingRate;
                 this.sampleFormat = fmt;
+                this.NumChannels = numChannels;
                 this.latencyMillisec = latencyMillisec;
                 this.dfm = dfm;
                 this.shareMode = shareMode;
@@ -1122,15 +1137,18 @@ namespace PlayPcmWin
             int hr = wasapi.Setup(
                 m_deviceSetupInfo.SampleRate,
                 m_deviceSetupInfo.SampleFormat,
-                2);
-            AddLogText(string.Format("wasapi.Setup({0}, {1}, {2}) {3:X8}\r\n",
-                m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
-                ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr));
+                m_deviceSetupInfo.NumChannels);
+            AddLogText(string.Format("wasapi.Setup({0} {1} {2}) {3:X8}\r\n",
+                m_deviceSetupInfo.SampleRate,
+                m_deviceSetupInfo.SampleFormat,
+                m_deviceSetupInfo.NumChannels, hr));
             if (hr < 0) {
                 UnsetupDevice();
 
-                string s = string.Format("wasapi.Setup() {0} {1} {2} {3} {4} failed {5:X8}\r\n",
-                    m_deviceSetupInfo.SampleRate, m_deviceSetupInfo.SampleFormat,
+                string s = string.Format("wasapi.Setup({0} {1} {2} {3} {4} {5}) failed {6:X8}\r\n",
+                    m_deviceSetupInfo.SampleRate,
+                    m_deviceSetupInfo.SampleFormat,
+                    m_deviceSetupInfo.NumChannels,
                     m_deviceSetupInfo.LatencyMillisec,
                     m_deviceSetupInfo.DataFeedMode,
                     ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
@@ -1138,6 +1156,15 @@ namespace PlayPcmWin
                 return hr;
             }
             return hr;
+        }
+
+        private int PcmChannelsToSetupChannels(int numChannels) {
+            switch (numChannels) {
+            case 1:
+                return 2; //< モノラル1chのPCMデータはMonoToStereo()によってステレオ2chに変換してから再生する。
+            default:
+                return numChannels;
+            }
         }
 
         /// <summary>
@@ -1177,6 +1204,7 @@ namespace PlayPcmWin
                 if (m_deviceSetupInfo.Is(
                     startPcmData.SampleRate,
                     sf.GetSampleFormatType(),
+                    PcmChannelsToSetupChannels(startPcmData.NumChannels),
                     latencyMillisec,
                     m_preference.wasapiDataFeedMode,
                     m_preference.wasapiSharedOrExclusive,
@@ -1196,6 +1224,7 @@ namespace PlayPcmWin
                 m_deviceSetupInfo.Set(
                     startPcmData.SampleRate,
                     sf.GetSampleFormatType(),
+                    PcmChannelsToSetupChannels(startPcmData.NumChannels),
                     latencyMillisec,
                     m_preference.wasapiDataFeedMode,
                     m_preference.wasapiSharedOrExclusive,
@@ -1209,7 +1238,7 @@ namespace PlayPcmWin
 
                 // 失敗
                 if (i == (candidateNum-1)) {
-                    string s = string.Format("エラー: wasapi.Setup({0}Hz {1} レイテンシー{2}ms {3} {4}) 失敗 {5:X8}\n" +
+                    string s = string.Format("エラー: wasapi.Setup({0}Hz {1} {2}ch レイテンシー{3}ms {4} {5}) 失敗 {6:X8}\n" +
                         "\n" +
                         "・再生リストの[一覧をクリア]し[対応フォーマット]ボタンを押すと再生可能なフォーマット一覧が出ます。\n" +
                         "・RME Fireface400やM-AUDIO ProFire2626等は、機器に設定されているマスターサンプリングレートをWASAPIから変更できないため手動で合わせる必要があります。\n" +
@@ -1220,7 +1249,9 @@ namespace PlayPcmWin
                         "・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。\n" +
                         "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。"
                         ,
-                        startPcmData.SampleRate, sf.GetSampleFormatType(), latencyMillisec,
+                        startPcmData.SampleRate, sf.GetSampleFormatType(),
+                        PcmChannelsToSetupChannels(startPcmData.NumChannels),
+                        latencyMillisec,
                         DfmToStr(m_preference.wasapiDataFeedMode),
                         ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
                     MessageBox.Show(s);
@@ -1330,14 +1361,14 @@ namespace PlayPcmWin
         /// FLACとWAVとAIFFで共通。
         /// </summary>
         private bool CheckAddPcmData(CueSheetReader csr, CueSheetTrackInfo csti, string path, PcmDataLib.PcmData pcmData) {
-            if (pcmData.NumChannels != 1 &&
-                pcmData.NumChannels != 2) {
-                string s = string.Format("1chモノラルと2chステレオ以外のPCMファイルの再生には対応していません: {0} {1}ch\r\n",
+            if (31 < pcmData.NumChannels) {
+                string s = string.Format("31chを超えるチャンネル数を持つPCMファイルの再生には対応していません: {0} {1}ch\r\n",
                     path, pcmData.NumChannels);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
                 return false;
             }
+
             if (pcmData.BitsPerSample != 16
              && pcmData.BitsPerSample != 24
              && pcmData.BitsPerSample != 32) {
@@ -1904,7 +1935,7 @@ namespace PlayPcmWin
                         }
 
                         if (pdAfter.NumChannels == 1) {
-                            // モノラル→ステレオ変換。
+                            // モノラル1ch→ステレオ2ch変換。
                             pdAfter = pdAfter.MonoToStereo();
                         }
 
