@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.29 ==
-  * WASAPI排他モード マルチチャンネルWAV/FLACの再生。(Lynx Aurora/LT-USBで動作することを確認)
+  * Issue 77 WASAPI排他モード マルチチャンネルWAV/FLACの再生。(Lynx Aurora/LT-USBで動作することを確認)
     * 1chモノラル (!PlayPcmWin 2.0.89で対応)
     * 2chステレオ (!PlayPcmWin 1.0.0で対応)
     * 4ch FL FR BL BR (!PlayPcmWin 3.0.29で対応)
