@@ -20,8 +20,8 @@
 /// コメント個数制限 1024個
 #define FLACDECODE_COMMENT_MAX (1024)
 
-/// 画像サイズ制限 10MB
-#define FLACDECODE_IMAGE_BYTES_MAX (10 * 1024 * 1024) 
+/// 画像サイズ制限 100MB
+#define FLACDECODE_IMAGE_BYTES_MAX (100 * 1024 * 1024) 
 
 #ifdef _DEBUG
 /*
