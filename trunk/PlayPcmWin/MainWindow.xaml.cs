@@ -2592,9 +2592,6 @@ namespace PlayPcmWin
         private void ChangePlayWavDataById(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
-            var pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
-            int groupId = pcmData.GroupId;
-
             int playingId = wasapi.GetNowPlayingPcmDataId();
             if (playingId < 0 && 0 <= m_loadingGroupId) {
                 // 再生中でなく、ロード中の場合。
@@ -2610,6 +2607,9 @@ namespace PlayPcmWin
                 wasapi.UpdatePlayPcmDataById(wavDataId);
                 return;
             }
+
+            var pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            int groupId = pcmData.GroupId;
 
             var playPcmData = FindPcmDataById(m_pcmDataListForPlay, playingId);
             if (playPcmData.GroupId == groupId) {
