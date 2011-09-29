@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.31 ==
-  * Issue 78 修正
+  * Issue 78(再生前に再生リスト項目をクリックするとPlayPcmWinが強制終了する) 修正
 
 ===!PlayPcmWin 3.0.29 ==
   * Issue 77 WASAPI排他モード マルチチャンネルWAV/FLACの再生。(Lynx Aurora/LT-USBで動作することを確認)
