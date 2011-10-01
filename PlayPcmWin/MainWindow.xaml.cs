@@ -1460,16 +1460,20 @@ namespace PlayPcmWin
                         PcmDataLib.PcmData pd = new PcmDataLib.PcmData();
                         pd.SetFormat(wavData.NumChannels, wavData.BitsPerFrame, wavData.BitsPerFrame,
                             wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
-                        if (wavData.Title != null) {
-                            pd.DisplayName = wavData.Title;
+                        if ("RIFFINFO_INAM".Equals(wavData.Title) &&
+                            "RIFFINFO_IART".Equals(wavData.ArtistName)) {
+                            // Issue 79 workaround
+                        } else {
+                            if (wavData.Title != null) {
+                                pd.DisplayName = wavData.Title;
+                            }
+                            if (wavData.AlbumName != null) {
+                                pd.AlbumTitle = wavData.AlbumName;
+                            }
+                            if (wavData.ArtistName != null) {
+                                pd.ArtistName = wavData.ArtistName;
+                            }
                         }
-                        if (wavData.AlbumName != null) {
-                            pd.AlbumTitle = wavData.AlbumName;
-                        }
-                        if (wavData.ArtistName != null) {
-                            pd.ArtistName = wavData.ArtistName;
-                        }
-
                         result = CheckAddPcmData(csr, csti, path, pd);
                     } else {
                         string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
@@ -2640,7 +2644,7 @@ namespace PlayPcmWin
             ++m_groupIdNextAdd;
         }
 
-        // しょーもない関数群 ////////////////////////////////////////////////////////////////////////
+        #region しょーもない関数群
 
         private WasapiCS.SchedulerTaskType
         PreferenceSchedulerTaskTypeToWasapiCSSchedulerTaskType(
@@ -2698,6 +2702,7 @@ namespace PlayPcmWin
                 return WasapiCS.BitFormatType.SInt;
             }
         }
+        #endregion
 
         // イベント処理 /////////////////////////////////////////////////////
 
