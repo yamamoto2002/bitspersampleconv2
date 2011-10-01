@@ -4,6 +4,9 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.31 ==
+  * Issue 79 修正
+
+===!PlayPcmWin 3.0.31 ==
   * Issue 78(再生前に再生リスト項目をクリックすると!PlayPcmWinが強制終了する) 修正
 
 ===!PlayPcmWin 3.0.29 ==
