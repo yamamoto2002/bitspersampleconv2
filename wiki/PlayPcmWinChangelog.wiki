@@ -3,10 +3,6 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 3.0.35 ==
-  * 日本語・英語自動切り替え
-  * スプラッシュスクリーン
-
 ===!PlayPcmWin 3.0.31 ==
   * Issue 79 修正
 
