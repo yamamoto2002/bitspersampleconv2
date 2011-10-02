@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,132 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotAddFile" xml:space="preserve">
+    <value>Sorry... Please stop playing to add files to the playlist.</value>
+  </data>
+  <data name="ChangingPlayGroup" xml:space="preserve">
+    <value>Reading files...</value>
+  </data>
+  <data name="CueFileFilter" xml:space="preserve">
+    <value>CUE files|*.cue</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Exclusive" xml:space="preserve">
+    <value>Exclusive</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="FloatingPointNumbers" xml:space="preserve">
+    <value>floating point numbers</value>
+  </data>
+  <data name="Latency" xml:space="preserve">
+    <value>Latency</value>
+  </data>
+  <data name="NothingToStore" xml:space="preserve">
+    <value>Nothing to store </value>
+  </data>
+  <data name="NotSupportedFileFormat" xml:space="preserve">
+    <value>Not supported file format</value>
+  </data>
+  <data name="NotSupportedQuantizationBitRate" xml:space="preserve">
+    <value>Not supported quantization bit rate. supported formats are 16, 24 and 32</value>
+  </data>
+  <data name="Pause" xml:space="preserve">
+    <value>Pa_use</value>
+  </data>
+  <data name="Paused" xml:space="preserve">
+    <value>Paused</value>
+  </data>
+  <data name="Playing" xml:space="preserve">
+    <value>Playing.</value>
+  </data>
+  <data name="PleaseCreatePlaylist" xml:space="preserve">
+    <value>Please create the playlist.</value>
+  </data>
+  <data name="PpwplFileFilter" xml:space="preserve">
+    <value>PPWPL files|*.ppwpl</value>
+  </data>
+  <data name="PressPlayButton" xml:space="preserve">
+    <value>Add more files to the playlist or Press Play button to play.</value>
+  </data>
+  <data name="ReadCompleted" xml:space="preserve">
+    <value>Read completed. ready to play.</value>
+  </data>
+  <data name="ReadFailedFiles" xml:space="preserve">
+    <value>Read failed files</value>
+  </data>
+  <data name="ReadFileFailed" xml:space="preserve">
+    <value>Read {0} file failed</value>
+  </data>
+  <data name="ReadingFiles" xml:space="preserve">
+    <value>Setup device completed. Now reading files to main memory...</value>
+  </data>
+  <data name="RestoreFailedFiles" xml:space="preserve">
+    <value>Missing files while restoring playlist</value>
+  </data>
+  <data name="Resume" xml:space="preserve">
+    <value>Resume(_U)</value>
+  </data>
+  <data name="SaveFileFailed" xml:space="preserve">
+    <value>Save file failed</value>
+  </data>
+  <data name="SetupFailAdvice" xml:space="preserve">
+    <value>*Please confirm sample rate or quantization bit rate are supported on your device using "list supported format" feature. Press [Clear the playlist][List supported format]\n*RME Fireface400 and M-AUDIO ProFire2626 are both cannot override master sampling rate settings via WASAPI. Please use Fireface settings or M-Audio Profire control panel to change master sampling rate of those devices.\n*44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.\n*Creative USB Sound Blaster HD prefer event driven mode. More problematic on timer driven mode.\n*Lynx AES16e WaveRT driver requires very low latency settings such as 29ms.\n*There are strange audio devices which suspends S/PDIF output when no signal. Such devices tend not to deliver first several thousand samples of file.\n*PlayPcmWin cannot setup E-MU 0404 USB 24bit mode. [Detailed settings][Fix Sint16] to play 24bit files on those devices but it truncates lower 8bit information.\n*Halide Bridge seems to require 24bit data always. [Detailed settinsg][Fix Sint24] to play sound on those devices.</value>
+  </data>
+  <data name="Shared" xml:space="preserve">
+    <value>Shared</value>
+  </data>
+  <data name="Stopping" xml:space="preserve">
+    <value>Stopping...</value>
+  </data>
+  <data name="TooManyChannels" xml:space="preserve">
+    <value>This file contains Too many channels(&gt;31)</value>
+  </data>
+  <data name="ValidBits" xml:space="preserve">
+    <value>Valid bits</value>
+  </data>
+  <data name="ErrorCode" xml:space="preserve">
+    <value>Error code</value>
+  </data>
+  <data name="EventDriven" xml:space="preserve">
+    <value>Event driven</value>
+  </data>
+  <data name="LicenseText" xml:space="preserve">
+    <value>PlayPcmWin uses libFLAC.\r\nlibFLAC license is a New BSD License. Please refer libFlacLicense.txt.\r\n\r\nPlayPcmWin uses Jcode.pm character encoding detect function.\r\nJcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
+  </data>
+  <data name="MemoryExhausted" xml:space="preserve">
+    <value>Memory exhausted. Please reduce files on playlist.</value>
+  </data>
+  <data name="PlayCompletedElapsedTimeIs" xml:space="preserve">
+    <value>Play completed. elapsed time is</value>
+  </data>
+  <data name="PlayStartFailed" xml:space="preserve">
+    <value>Play start failed</value>
+  </data>
+  <data name="ReadError" xml:space="preserve">
+    <value>Read error</value>
+  </data>
+  <data name="ReadPlayGroupNCompleted" xml:space="preserve">
+    <value>Read playgroup {0} completed.</value>
+  </data>
+  <data name="SupportedFileFilter" xml:space="preserve">
+    <value>Supported files|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|WAVE files|*.wav;*.wave|FLAC files|*.flac|AIFF files|*.aif;*.aiff|CUE files|*.cue|PPWPL files|*.ppwpl|All files|*.*</value>
+  </data>
+  <data name="TimerDriven" xml:space="preserve">
+    <value>Timer driven</value>
+  </data>
+  <data name="UnexpectedEndOfStream" xml:space="preserve">
+    <value>Unexpected end of stream.</value>
+  </data>
+  <data name="Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
 </root>

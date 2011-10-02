@@ -150,6 +150,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.ja-JP.resx" />
     <None Include="PlayPcmWin.exe.manifest">
       <SubType>Designer</SubType>
     </None>
@@ -215,6 +216,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="PlayPcmWinLicense.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <SplashScreen Include="SplashScreen1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

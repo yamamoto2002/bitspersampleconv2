@@ -160,7 +160,7 @@ namespace PlayPcmWin
             public string QuantizationBitRate {
                 get {
                     if (m_pcmData.SampleValueRepresentationType == PcmDataLib.PcmData.ValueRepresentationType.SFloat) {
-                        return m_pcmData.BitsPerSample.ToString() + " bit (浮動小数点数)";
+                        return m_pcmData.BitsPerSample.ToString() + " bit (" + Properties.Resources.FloatingPointNumbers + ")";
                     }
                     return m_pcmData.BitsPerSample.ToString() + " bit";
                 }
@@ -207,7 +207,7 @@ namespace PlayPcmWin
                 m_rowId = m_nextRowId++;
             }
 
-            #region INotifyPropertyChangedのメンバー
+            #region INotifyPropertyChanged members
 
             public event PropertyChangedEventHandler PropertyChanged;
 
@@ -571,7 +571,7 @@ namespace PlayPcmWin
                 ReadPlaylist(string.Empty);
 
                 if (0 < m_loadErrorMessages.Length) {
-                    MessageBox.Show(m_loadErrorMessages.ToString(), "前回終了時の再生リストを復元しようとして読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(m_loadErrorMessages.ToString(), Properties.Resources.RestoreFailedFiles, MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 m_loadErrorMessages = null;
@@ -676,7 +676,7 @@ namespace PlayPcmWin
         private string SampleFormatTypeToStr(WasapiCS.SampleFormatType t) {
             switch (t) {
             case WasapiCS.SampleFormatType.Sfloat:
-                return "32bit浮動小数点数";
+                return "32bit"+Properties.Resources.FloatingPointNumbers;
             case WasapiCS.SampleFormatType.Sint16:
                 return "16bit";
             case WasapiCS.SampleFormatType.Sint24:
@@ -684,7 +684,7 @@ namespace PlayPcmWin
             case WasapiCS.SampleFormatType.Sint32:
                 return "32bit";
             case WasapiCS.SampleFormatType.Sint32V24:
-                return "32bit(有効bit数24)";
+                return "32bit("+Properties.Resources.ValidBits + "=24)";
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "unknown";
@@ -775,7 +775,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = true;
                 menuToolSettings.IsEnabled = true;
-                statusBarText.Content = "再生リストを作って下さい。";
+                statusBarText.Content = Properties.Resources.PleaseCreatePlaylist;
                 break;
             case State.プレイリストあり:
                 if (0 < dataGridPlayList.Items.Count &&
@@ -803,7 +803,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = true;
                 menuToolSettings.IsEnabled = true;
-                statusBarText.Content = "再生リストを作り、再生ボタンを押して下さい。";
+                statusBarText.Content = Properties.Resources.PressPlayButton;
                 break;
             case State.デバイスSetup完了:
                 // 一覧のクリアーとデバイスの選択、再生リストの作成関連を押せなくする。
@@ -826,7 +826,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "デバイス選択完了。ファイル読み込み中……";
+                statusBarText.Content = Properties.Resources.ReadingFiles;
                 break;
             case State.ファイル読み込み完了:
                 menuItemFileNew.IsEnabled        = false;
@@ -848,7 +848,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "ファイル読み込み完了。再生できます。";
+                statusBarText.Content = Properties.Resources.ReadCompleted;
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 slider1.Value = 0;
@@ -862,7 +862,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = true;
                 buttonPause.IsEnabled            = true;
-                buttonPause.Content = "一時停止(_U)";
+                buttonPause.Content = Properties.Resources.Pause;
                 checkBoxShuffle.IsEnabled        = false;
 
                 buttonNext.IsEnabled             = true;
@@ -876,8 +876,10 @@ namespace PlayPcmWin
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
                 statusBarText.Content =
-                    string.Format("再生中。WASAPI{0} {1}kHz {2} {3}ch",
-                        radioButtonShared.IsChecked == true ? "共有" : "排他",
+                    string.Format("{0} WASAPI{1} {2}kHz {3} {4}ch",
+                        Properties.Resources.Playing,
+                        radioButtonShared.IsChecked == true ?
+                            Properties.Resources.Shared : Properties.Resources.Exclusive,
                         wasapi.GetBufferFormatSampleRate()*0.001,
                         SampleFormatTypeToStr(wasapi.GetBufferFormatType()),
                         wasapi.GetNumOfChannels());
@@ -892,7 +894,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled         = false;
                 buttonStop.IsEnabled         = true;
                 buttonPause.IsEnabled        = true;
-                buttonPause.Content = "再生再開(_U)";
+                buttonPause.Content = Properties.Resources.Resume;
                 checkBoxShuffle.IsEnabled    = false;
 
                 buttonNext.IsEnabled             = false;
@@ -905,7 +907,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled   = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "再生一時停止中";
+                statusBarText.Content = Properties.Resources.Paused;
 
                 progressBar1.Visibility = System.Windows.Visibility.Collapsed;
                 break;
@@ -929,7 +931,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "再生停止開始";
+                statusBarText.Content = Properties.Resources.Stopping;
                 break;
             case State.再生グループ切り替え中:
                 menuItemFileNew.IsEnabled        = false;
@@ -951,7 +953,7 @@ namespace PlayPcmWin
 
                 buttonSettings.IsEnabled = false;
                 menuToolSettings.IsEnabled = false;
-                statusBarText.Content = "読み込み中……";
+                statusBarText.Content = Properties.Resources.ChangingPlayGroup;
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -1241,22 +1243,19 @@ namespace PlayPcmWin
 
                 // 失敗
                 if (i == (candidateNum-1)) {
-                    string s = string.Format("エラー: wasapi.Setup({0}Hz {1} {2}ch レイテンシー{3}ms {4} {5}) 失敗 {6:X8}\n" +
-                        "\n" +
-                        "・再生リストの[一覧をクリア]し[対応フォーマット]ボタンを押すと再生可能なフォーマット一覧が出ます。\n" +
-                        "・RME Fireface400やM-AUDIO ProFire2626等は、機器に設定されているマスターサンプリングレートをWASAPIから変更できないため手動で合わせる必要があります。\n" +
-                        "・Creative X-Fi Titanium HDの44.1kHzと88.2kHzはタイマー駆動モードならば動作します。\n" +
-                        "・Creative USB Sound Blaster HDはイベント駆動モードのほうが安定動作します。\n" +
-                        "・Lynx AES16eのWaveRTドライバは、出力レイテンシーを20msなどの小さな値に設定すると再生できます。\n" +
-                        "・無音時に省電力のためS/PDIF出力を停止するデバイス等では、出力レイテンシーを50msなどの小さな値に設定すると曲の頭が途切れることがあるそうです。\n" +
-                        "・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。\n" +
-                        "・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。"
-                        ,
-                        startPcmData.SampleRate, sf.GetSampleFormatType(),
+                    string s = string.Format("{0}: wasapi.Setup({1}Hz {2} {3}ch {4} {5}ms {6} {7}) {8} {9:X8}\n\n{10}",
+                        Properties.Resources.Error,
+                        startPcmData.SampleRate,
+                        sf.GetSampleFormatType(),
                         PcmChannelsToSetupChannels(startPcmData.NumChannels),
+                        Properties.Resources.Latency,
+
                         latencyMillisec,
                         DfmToStr(m_preference.wasapiDataFeedMode),
-                        ShareModeToStr(m_preference.wasapiSharedOrExclusive), hr);
+                        ShareModeToStr(m_preference.wasapiSharedOrExclusive),
+                        Properties.Resources.Failed,
+                        hr,
+                        Properties.Resources.SetupFailAdvice);
                     MessageBox.Show(s);
                     return false;
                 }
@@ -1279,7 +1278,7 @@ namespace PlayPcmWin
         private StringBuilder m_loadErrorMessages;
 
         private void LoadErrorMessageAdd(string s) {
-            s = "■" + s.TrimEnd('\n').TrimEnd('\r') + "。 ";
+            s = "*" + s.TrimEnd('\n').TrimEnd('\r') + ". ";
             m_loadErrorMessages.Append(s);
         }
 
@@ -1365,7 +1364,8 @@ namespace PlayPcmWin
         /// </summary>
         private bool CheckAddPcmData(CueSheetReader csr, CueSheetTrackInfo csti, string path, PcmDataLib.PcmData pcmData) {
             if (31 < pcmData.NumChannels) {
-                string s = string.Format("31chを超えるチャンネル数を持つPCMファイルの再生には対応していません: {0} {1}ch\r\n",
+                string s = string.Format("{0}: {1} {2}ch\r\n",
+                    Properties.Resources.TooManyChannels,
                     path, pcmData.NumChannels);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
@@ -1375,7 +1375,8 @@ namespace PlayPcmWin
             if (pcmData.BitsPerSample != 16
              && pcmData.BitsPerSample != 24
              && pcmData.BitsPerSample != 32) {
-                string s = string.Format("量子化ビット数が16でも24でも32でもないPCMファイルの再生には対応していません: {0} {1}bit\r\n",
+                string s = string.Format("{0}: {1} {2}bit\r\n",
+                    Properties.Resources.NotSupportedQuantizationBitRate,
                     path, pcmData.BitsPerSample);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
@@ -1479,15 +1480,16 @@ namespace PlayPcmWin
                         }
                         result = CheckAddPcmData(csr, csti, path, pd);
                     } else {
-                        string s = string.Format("WAVファイル読み込み失敗: {0}\r\n", path);
+                        string s = string.Format(Properties.Resources.ReadFileFailed + ": {1}\r\n",
+                            "WAV", path);
                         AddLogText(s);
                         LoadErrorMessageAdd(s);
                     }
                 }
             } catch (Exception ex) {
-                string s = string.Format("WAVファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
+                string s = string.Format(Properties.Resources.ReadFileFailed + "\r\n{0}\r\n\r\n{1}", "WAV", path, ex);
                 AddLogText(s);
-                LoadErrorMessageAdd(string.Format("WAVファイル読み込み失敗: {0}", path));
+                LoadErrorMessageAdd(string.Format(Properties.Resources.ReadFileFailed + ": {1}", "WAV", path));
             }
 
             return result;
@@ -1510,15 +1512,15 @@ namespace PlayPcmWin
                             result = true;
                         }
                     } else {
-                        string s = string.Format("AIFFファイル読み込み失敗、{0}: {1}\r\n", aiffResult, path);
+                        string s = string.Format(Properties.Resources.ReadFileFailed + " {1}: {2}\r\n", "AIFF", aiffResult, path);
                         AddLogText(s);
                         LoadErrorMessageAdd(s);
                     }
                 }
             } catch (Exception ex) {
-                string s = string.Format("AIFFファイル読み込み失敗\r\n{0}\r\n\r\n{1}", path, ex);
+                string s = string.Format(Properties.Resources.ReadFileFailed + "\r\n{1}\r\n\r\n{2}", "AIFF", path, ex);
                 AddLogText(s);
-                LoadErrorMessageAdd(string.Format("AIFFファイル読み込み失敗: {0}", path));
+                LoadErrorMessageAdd(string.Format(Properties.Resources.ReadFileFailed + ": {1}", "AIFF", path));
             }
 
             return result;
@@ -1538,11 +1540,15 @@ namespace PlayPcmWin
                 CheckAddPcmData(csr, csti, path, pcmData);
                 readSuccess = true;
             } else {
-                string s = string.Format("FLACファイル読み込み失敗、{1}: {0}\r\n",
-                        path, FlacDecodeIF.ErrorCodeToStr(flacErcd));
+                string s = string.Format(Properties.Resources.ReadFileFailed + " {2}: {1}\r\n",
+                    "FLAC",
+                    path,
+                    FlacDecodeIF.ErrorCodeToStr(flacErcd));
                 AddLogText(s);
-                LoadErrorMessageAdd(string.Format("FLACファイル読み込み失敗、{1}: {0}",
-                    path, FlacDecodeIF.ErrorCodeToStr(flacErcd)));
+                LoadErrorMessageAdd(string.Format(Properties.Resources.ReadFileFailed + " {2}: {1}",
+                    "FLAC",
+                    path,
+                    FlacDecodeIF.ErrorCodeToStr(flacErcd)));
             }
 
             return readSuccess;
@@ -1556,8 +1562,8 @@ namespace PlayPcmWin
             CueSheetReader csr = new CueSheetReader();
             bool result = csr.ReadFromFile(path);
             if (!result) {
-                string s = string.Format("CUEファイル読み込み失敗: {0}\r\n",
-                        path);
+                string s = string.Format(Properties.Resources.ReadFileFailed + ": {1}\r\n",
+                        "CUE", path);
                 AddLogText(s);
                 LoadErrorMessageAdd(s);
                 return 0;
@@ -1633,8 +1639,9 @@ namespace PlayPcmWin
                 // 読まないで無視する。
                 break;
             default: {
-                    string s = string.Format("未対応ファイル: {0}\r\n",
-                            path);
+                    string s = string.Format("{0}: {1}\r\n",
+                        Properties.Resources.NotSupportedFileFormat,
+                        path);
                     AddLogText(s);
                     LoadErrorMessageAdd(s);
                 }
@@ -1681,7 +1688,7 @@ namespace PlayPcmWin
 
             if (State.デバイスSetup完了 <= m_state) {
                 // 追加不可。
-                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん再生を停止してから追加していただけますようお願い致します。");
+                MessageBox.Show(Properties.Resources.CannotAddFile);
                 return;
             }
 
@@ -1693,7 +1700,7 @@ namespace PlayPcmWin
             }
 
             if (0 < m_loadErrorMessages.Length) {
-                MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(m_loadErrorMessages.ToString(), Properties.Resources.ReadFailedFiles, MessageBoxButton.OK, MessageBoxImage.Information);
             }
             
             m_loadErrorMessages = null;
@@ -1703,7 +1710,7 @@ namespace PlayPcmWin
 
         private void MenuItemFileSaveCueAs_Click(object sender, RoutedEventArgs e) {
             if (m_pcmDataListForDisp.Count() == 0) {
-                MessageBox.Show("保存するデータはありません");
+                MessageBox.Show(Properties.Resources.NothingToStore);
                 return;
             }
 
@@ -1712,7 +1719,7 @@ namespace PlayPcmWin
 
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = System.IO.Path.GetDirectoryName(pcmData0.FullPath);
-            dlg.Filter = "CUEファイル|*.cue";
+            dlg.Filter = Properties.Resources.CueFileFilter;
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
@@ -1740,14 +1747,14 @@ namespace PlayPcmWin
 
                 if (!csw.WriteToFile(dlg.FileName)) {
                     MessageBox.Show(
-                        string.Format("ファイル保存失敗: {0}", dlg.FileName));
+                        string.Format("{0}: {1}", Properties.Resources.SaveFileFailed, dlg.FileName));
                 }
             }
         }
 
         private void MenuItemFileSaveAs_Click(object sender, RoutedEventArgs e) {
             if (m_pcmDataListForDisp.Count() == 0) {
-                MessageBox.Show("保存するデータはありません");
+                MessageBox.Show(Properties.Resources.NothingToStore);
                 return;
             }
 
@@ -1756,13 +1763,13 @@ namespace PlayPcmWin
 
             Microsoft.Win32.SaveFileDialog dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.InitialDirectory = System.IO.Path.GetDirectoryName(pcmData0.FullPath);
-            dlg.Filter = "PPWPLファイル|*.ppwpl";
+            dlg.Filter = Properties.Resources.PpwplFileFilter;
             Nullable<bool> result = dlg.ShowDialog();
 
             if (result == true) {
                 if (!SavePlaylist(dlg.FileName)) {
                     MessageBox.Show(
-                        string.Format("ファイル保存失敗: {0}", dlg.FileName));
+                        string.Format("{0}: {1}", Properties.Resources.SaveFileFailed, dlg.FileName));
                 }
             }
         }
@@ -1775,19 +1782,12 @@ namespace PlayPcmWin
         {
             if (State.デバイスSetup完了 <= m_state) {
                 // 追加不可。
-                MessageBox.Show("都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん再生を停止してから追加していただけますようお願い致します。");
+                MessageBox.Show(Properties.Resources.CannotAddFile);
                 return;
             }
 
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Filter =
-                "対応しているファイル|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|" +
-                "WAVEファイル|*.wav;*.wave|" +
-                "FLACファイル|*.flac|" +
-                "AIFFファイル|*.aif;*.aiff|" +
-                "CUEファイル|*.cue|" +
-                "PPWPLファイル|*.ppwpl|" +
-                "全てのファイル|*.*";
+            dlg.Filter = Properties.Resources.SupportedFileFilter;
             dlg.Multiselect = true;
 
             Nullable<bool> result = dlg.ShowDialog();
@@ -1802,7 +1802,9 @@ namespace PlayPcmWin
                 }
 
                 if (0 < m_loadErrorMessages.Length) {
-                    MessageBox.Show(m_loadErrorMessages.ToString(), "読み込めなかったファイル", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(m_loadErrorMessages.ToString(),
+                        Properties.Resources.ReadFailedFiles,
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
 
                 m_loadErrorMessages = null;
@@ -1813,13 +1815,10 @@ namespace PlayPcmWin
 
         private void MenuItemHelpAbout_Click(object sender, RoutedEventArgs e) {
             MessageBox.Show(
-                string.Format("PlayPcmWin バージョン {0}\r\n\r\n" +
-                    "PlayPcmWinは libFLACを使用しています。\r\n" +
-                    "libFLACのライセンスは、New BSD Licenseです。" +
-                    "libFlacLicense.txtをご覧ください。\r\n\r\n" +
-                    "PlayPcmWinは Jcode.pmの文字コード判別関数を使用しています。\r\n" +
-                    "Jcode.pmのCopyright: Copyright 1999-2005 Dan Kogai",
-                    AssemblyVersion));
+                string.Format("PlayPcmWin {0} {1}\r\n\r\n{2}",
+                    Properties.Resources.Version,
+                    AssemblyVersion,
+                    Properties.Resources.LicenseText));
         }
 
         private void MenuItemHelpWeb_Click(object sender, RoutedEventArgs e) {
@@ -1832,9 +1831,9 @@ namespace PlayPcmWin
         private static string DfmToStr(WasapiDataFeedMode dfm) {
             switch (dfm) {
             case WasapiDataFeedMode.EventDriven:
-                return "イベント駆動";
+                return Properties.Resources.EventDriven;
             case WasapiDataFeedMode.TimerDriven:
-                return "タイマー駆動";
+                return Properties.Resources.TimerDriven;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "unknown";
@@ -1844,9 +1843,9 @@ namespace PlayPcmWin
         private static string ShareModeToStr(WasapiSharedOrExclusive t) {
             switch (t) {
             case WasapiSharedOrExclusive.Exclusive:
-                return "WASAPI排他モード";
+                return "WASAPI " + Properties.Resources.Exclusive;
             case WasapiSharedOrExclusive.Shared:
-                return "WASAPI共有モード";
+                return "WASAPI " + Properties.Resources.Shared;
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "unknown";
@@ -1898,7 +1897,9 @@ namespace PlayPcmWin
                     PcmReader pr = new PcmReader();
                     int ercd = pr.StreamBegin(pd.FullPath, startFrame);
                     if (0 != ercd) {
-                        r.message = string.Format("読み込みエラー。{0}\r\nエラーコード {1}(0x{1:X8})。{2}",
+                        r.message = string.Format("{0}. {1}\r\n{2} {3}(0x{3:X8})。{4}",
+                            Properties.Resources.ReadError,
+                            Properties.Resources.ErrorCode,
                             pd.FullPath, ercd, FlacDecodeIF.ErrorCodeToStr(ercd));
                         args.Result = r;
                         Console.WriteLine("D: ReadFileSingleDoWork() !readSuccess");
@@ -1920,7 +1921,7 @@ namespace PlayPcmWin
                         }
                         byte[] part = pr.StreamReadOne(readFrames);
                         if (null == part) {
-                            r.message = string.Format("突然ストリームの終わりに達しました。");
+                            r.message = string.Format(Properties.Resources.UnexpectedEndOfStream);
                             args.Result = r;
                             Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
                             pr.StreamEnd();
@@ -1952,7 +1953,7 @@ namespace PlayPcmWin
                             
                             if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
                                 //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
-                                r.message = string.Format("メモリ不足です。再生リストのファイル数を減らすか、PCのメモリを増設して下さい。");
+                                r.message = string.Format(Properties.Resources.MemoryExhausted);
                                 args.Result = r;
                                 Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
                                 pr.StreamEnd();
@@ -1995,7 +1996,7 @@ namespace PlayPcmWin
                 wasapi.AddPlayPcmDataEnd();
 
                 // 成功。
-                r.message = string.Format("再生グループ{0}番読み込み完了。\r\n", readGroupId);
+                r.message = string.Format(Properties.Resources.ReadPlayGroupNCompleted + "\r\n", readGroupId);
                 r.hr = 0;
                 args.Result = r;
 
@@ -2372,7 +2373,7 @@ namespace PlayPcmWin
             AddLogText(string.Format("wasapi.Start({0}) {1:X8}\r\n",
                 wavDataId, hr));
             if (hr < 0) {
-                MessageBox.Show(string.Format("再生開始に失敗！{0:X8}", hr));
+                MessageBox.Show(string.Format(Properties.Resources.PlayStartFailed + "！{0:X8}", hr));
                 Exit();
                 return false;
             }
@@ -2507,7 +2508,8 @@ namespace PlayPcmWin
         /// </summary>
         private void PlayRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             m_sw.Stop();
-            AddLogText(string.Format("再生終了. 所要時間 {0}\r\n", m_sw.Elapsed));
+            AddLogText(string.Format(Properties.Resources.PlayCompletedElapsedTimeIs + " {0}\r\n",
+                m_sw.Elapsed));
 
             PerformPlayCompletedTask();
         }
