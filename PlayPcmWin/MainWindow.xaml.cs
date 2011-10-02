@@ -25,6 +25,7 @@ using WasapiPcmUtil;
 using System.Collections.ObjectModel;
 using System.IO.IsolatedStorage;
 using System.Security.Cryptography;
+using System.Globalization;
 
 namespace PlayPcmWin
 {
@@ -1032,8 +1033,10 @@ namespace PlayPcmWin
 
             UnsetupDevice();
 
-            wasapi.UnchooseDevice();
-            AddLogText("wasapi.UnchooseDevice()\r\n");
+            if (wasapi != null) {
+                wasapi.UnchooseDevice();
+                AddLogText("wasapi.UnchooseDevice()\r\n");
+            }
 
             m_loadedGroupId = -1;
             m_loadingGroupId = -1;
