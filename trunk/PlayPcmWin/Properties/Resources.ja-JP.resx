@@ -118,137 +118,137 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="CannotAddFile" xml:space="preserve">
-    <value>Sorry... Please stop playing to add files to the playlist.</value>
+    <value>都合により、出力デバイス選択後は再生リストに追加できない作りになっております。いったん再生を停止してから追加していただけますようお願い致します。</value>
   </data>
   <data name="ChangingPlayGroup" xml:space="preserve">
-    <value>Reading files...</value>
+    <value>読み込み中……</value>
   </data>
   <data name="CueFileFilter" xml:space="preserve">
-    <value>CUE files|*.cue</value>
+    <value>CUEファイル|*.cue</value>
   </data>
   <data name="Error" xml:space="preserve">
-    <value>Error</value>
+    <value>エラー</value>
   </data>
   <data name="Exclusive" xml:space="preserve">
-    <value>Exclusive</value>
+    <value>排他</value>
   </data>
   <data name="Failed" xml:space="preserve">
-    <value>Failed</value>
+    <value>失敗</value>
   </data>
   <data name="FloatingPointNumbers" xml:space="preserve">
-    <value>floating point numbers</value>
+    <value>浮動小数点数</value>
   </data>
   <data name="Latency" xml:space="preserve">
-    <value>Latency</value>
+    <value>レイテンシー</value>
   </data>
   <data name="NothingToStore" xml:space="preserve">
-    <value>Nothing to store </value>
+    <value>保存するデータはありません</value>
   </data>
   <data name="NotSupportedFileFormat" xml:space="preserve">
-    <value>Not supported file format</value>
+    <value>未対応ファイル形式</value>
   </data>
   <data name="NotSupportedQuantizationBitRate" xml:space="preserve">
-    <value>Not supported quantization bit rate. supported formats are 16, 24 and 32</value>
+    <value>量子化ビット数が16でも24でも32でもないPCMファイルの再生には対応していません</value>
   </data>
   <data name="Pause" xml:space="preserve">
-    <value>Pa_use</value>
+    <value>一時停止(_U)</value>
   </data>
   <data name="Paused" xml:space="preserve">
-    <value>Paused</value>
+    <value>再生一時停止中</value>
   </data>
   <data name="Playing" xml:space="preserve">
-    <value>Playing.</value>
+    <value>再生中。</value>
   </data>
   <data name="PleaseCreatePlaylist" xml:space="preserve">
-    <value>Please create the playlist.</value>
+    <value>再生リストを作って下さい。</value>
   </data>
   <data name="PpwplFileFilter" xml:space="preserve">
-    <value>PPWPL files|*.ppwpl</value>
+    <value>PPWPLファイル|*.ppwpl</value>
   </data>
   <data name="PressPlayButton" xml:space="preserve">
-    <value>Add more files to the playlist or Press Play button to play.</value>
+    <value>再生リストを作り、再生ボタンを押して下さい。</value>
   </data>
   <data name="ReadCompleted" xml:space="preserve">
-    <value>Read completed. ready to play.</value>
+    <value>ファイル読み込み完了。再生できます。</value>
   </data>
   <data name="ReadFailedFiles" xml:space="preserve">
-    <value>Read failed files</value>
+    <value>読み込めなかったファイル</value>
   </data>
   <data name="ReadFileFailed" xml:space="preserve">
-    <value>Read {0} file failed</value>
+    <value>{0}ファイル読み込み失敗</value>
   </data>
   <data name="ReadingFiles" xml:space="preserve">
-    <value>Setup device completed. Now reading files to main memory...</value>
+    <value>デバイス選択完了。ファイル読み込み中……</value>
   </data>
   <data name="RestoreFailedFiles" xml:space="preserve">
-    <value>Missing files while restoring playlist</value>
+    <value>前回終了時の再生リストを復元しようとして読み込めなかったファイル</value>
   </data>
   <data name="Resume" xml:space="preserve">
-    <value>Resume(_U)</value>
+    <value>再生再開(_U)</value>
   </data>
   <data name="SaveFileFailed" xml:space="preserve">
-    <value>Save file failed</value>
+    <value>ファイル保存失敗</value>
   </data>
   <data name="SetupFailAdvice" xml:space="preserve">
-    <value>*Please confirm sample rate or quantization bit rate are supported on your device using "list supported format" feature. Press [Clear the playlist][List supported format]
-*RME Fireface400 and M-AUDIO ProFire2626 are both cannot override master sampling rate settings via WASAPI. Please use Fireface settings or M-Audio Profire control panel to change master sampling rate of those devices.
-*44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.
-*Creative USB Sound Blaster HDs prefer event driven mode. Timer driven mode tends to more problematic on those devices.
-*Lynx AES16e WaveRT driver requires very low latency settings such as 29ms.
-*There are strange audio devices which stops TOSLINK output when no signal. Such devices apparently seem not to deliver first several thousand samples of PCM data.
-*PlayPcmWin cannot setup E-MU 0404 USB 24bit mode. [Detailed settings][Fix Sint16] to play 24bit files on those devices but it truncates lower 8bit information.
-*Halide Bridge seems to require 24bit data always. [Detailed settinsg][Fix Sint24] to play sound on those devices.</value>
+    <value>・再生リストの[一覧をクリア]し[対応フォーマット]ボタンを押すと再生可能なフォーマット一覧が出ます。
+・RME Fireface400やM-AUDIO ProFire2626等は、機器に設定されているマスターサンプリングレートをWASAPIから変更できないため手動で合わせる必要があります。
+・Creative X-Fi Titanium HDの44.1kHzと88.2kHzはタイマー駆動モードならば動作します。
+・Creative USB Sound Blaster HDはイベント駆動モードのほうが安定動作します。
+・Lynx AES16eのWaveRTドライバは、出力レイテンシーを29msなどの小さな値に設定すると再生できます。
+・無音時に省電力のためS/PDIF出力を停止するデバイス等では、出力レイテンシーを50msなどの小さな値に設定すると曲の頭が途切れることがあるそうです。
+・E-MU 0404 USBは、PlayPcmWinのバグが原因で量子化ビット数24bitのファイルを再生できません。[詳細設定][Sint16に固定する]を選択すると16bitにダウンサンプルされてしまいますが音は鳴ります。
+・Halide Bridgeは[詳細設定][Sint24に固定する]を選択すると再生できたそうです。</value>
   </data>
   <data name="Shared" xml:space="preserve">
-    <value>Shared</value>
+    <value>共有</value>
   </data>
   <data name="Stopping" xml:space="preserve">
-    <value>Stopping...</value>
+    <value>再生停止開始</value>
   </data>
   <data name="TooManyChannels" xml:space="preserve">
-    <value>This file contains Too many channels(&gt;31)</value>
+    <value>31chを超えるチャンネル数を持つPCMファイルの再生には対応していません</value>
   </data>
   <data name="ValidBits" xml:space="preserve">
-    <value>Valid bits</value>
+    <value>有効ビット数</value>
   </data>
   <data name="ErrorCode" xml:space="preserve">
-    <value>Error code</value>
+    <value>エラーコード</value>
   </data>
   <data name="EventDriven" xml:space="preserve">
-    <value>Event driven</value>
+    <value>イベント駆動</value>
   </data>
   <data name="LicenseText" xml:space="preserve">
-    <value>PlayPcmWin uses libFLAC.
-libFLAC license is a New BSD License. libFlacLicense.txt on the PlayPcmWin.exe folder contains full text of license.
+    <value>PlayPcmWinは libFLACを使用しています。
+libFLACのライセンスは、New BSD Licenseです。PlayPcmWin.exeと同じフォルダに入っているlibFlacLicense.txtをご覧ください。
 
-PlayPcmWin uses Jcode.pm character encoding detect function.
-Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
+PlayPcmWinは Jcode.pmの文字コード判別関数を使用しています。
+Jcode.pmのCopyright: Copyright 1999-2005 Dan Kogai</value>
   </data>
   <data name="MemoryExhausted" xml:space="preserve">
-    <value>Memory exhausted. Please reduce files on playlist.</value>
+    <value>メモリ不足です。再生リストのファイル数を減らしてください。</value>
   </data>
   <data name="PlayCompletedElapsedTimeIs" xml:space="preserve">
-    <value>Play completed. elapsed time is</value>
+    <value>再生終了。所要時間</value>
   </data>
   <data name="PlayStartFailed" xml:space="preserve">
-    <value>Play start failed</value>
+    <value>再生開始に失敗</value>
   </data>
   <data name="ReadError" xml:space="preserve">
-    <value>Read error</value>
+    <value>読み込みエラー</value>
   </data>
   <data name="ReadPlayGroupNCompleted" xml:space="preserve">
-    <value>Read playgroup {0} completed.</value>
+    <value>再生グループ{0}番読み込み完了。</value>
   </data>
   <data name="SupportedFileFilter" xml:space="preserve">
-    <value>Supported files|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|WAVE files|*.wav;*.wave|FLAC files|*.flac|AIFF files|*.aif;*.aiff|CUE files|*.cue|PPWPL files|*.ppwpl|All files|*.*</value>
+    <value>対応しているファイル|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|WAVEファイル|*.wav;*.wave|FLACファイル|*.flac|AIFFファイル|*.aif;*.aiff|CUEファイル|*.cue|PPWPLファイル|*.ppwpl|全てのファイル|*.*</value>
   </data>
   <data name="TimerDriven" xml:space="preserve">
-    <value>Timer driven</value>
+    <value>タイマー駆動</value>
   </data>
   <data name="UnexpectedEndOfStream" xml:space="preserve">
-    <value>Unexpected end of stream.</value>
+    <value>突然ストリームの終わりに達しました。</value>
   </data>
   <data name="Version" xml:space="preserve">
-    <value>Version</value>
+    <value>バージョン</value>
   </data>
 </root>
