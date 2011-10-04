@@ -151,7 +151,11 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
-        ///   PlayPcmWin uses libFLAC.\r\nlibFLAC license is a New BSD License. Please refer libFlacLicense.txt.\r\n\r\nPlayPcmWin uses Jcode.pm character encoding detect function.\r\nJcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai に類似しているローカライズされた文字列を検索します。
+        ///   PlayPcmWin uses libFLAC.
+        ///libFLAC license is a New BSD License. libFlacLicense.txt on the PlayPcmWin.exe folder contains full text of license.
+        ///
+        ///PlayPcmWin uses Jcode.pm character encoding detect function.
+        ///Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string LicenseText {
             get {
@@ -349,7 +353,10 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
-        ///   *Please confirm sample rate or quantization bit rate are supported on your device using &quot;list supported format&quot; feature. Press [Clear the playlist][List supported format]\n*RME Fireface400 and M-AUDIO ProFire2626 are both cannot override master sampling rate settings via WASAPI. Please use Fireface settings or M-Audio Profire control panel to change master sampling rate of those devices.\n*44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.\n*Creative USB Sound Blas [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
+        ///   *Please confirm sample rate or quantization bit rate are supported on your device using &quot;list supported format&quot; feature. Press [Clear the playlist][List supported format]
+        ///*RME Fireface400 and M-AUDIO ProFire2626 are both cannot override master sampling rate settings via WASAPI. Please use Fireface settings or M-Audio Profire control panel to change master sampling rate of those devices.
+        ///*44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.
+        ///*Creative USB Sound Blas [残りの文字列は切り詰められました]&quot;; に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string SetupFailAdvice {
             get {
