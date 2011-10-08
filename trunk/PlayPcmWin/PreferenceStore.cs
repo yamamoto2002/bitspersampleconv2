@@ -1,9 +1,4 @@
-﻿using System;
-using System.Text;
-using System.IO.IsolatedStorage;
-using System.Xml.Serialization;
-using PcmDataLib;
-using WasapiPcmUtil;
+﻿using WasapiPcmUtil;
 
 namespace PlayPcmWin {
     public class Preference : WWXmlRW.SaveLoadContents {
