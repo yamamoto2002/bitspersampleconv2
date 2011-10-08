@@ -227,11 +227,80 @@ copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)
 
 call "$(DevEnvDir)..\tools\vsvars32.bat"
 
-if $(PlatformName) == x64 goto :exit
+if $(PlatformName) == x64 goto :plat_x64
     echo "Setting LargeAddressAware to " $(TargetPath)
     editbin /NOLOGO /LARGEADDRESSAWARE "$(TargetPath)"
     echo "Setting LargeAddressAware to " "$(ProjectDir)obj\x86\$(ConfigurationName)\PlayPcmWin.exe"
     editbin /NOLOGO /LARGEADDRESSAWARE "$(ProjectDir)obj\x86\$(ConfigurationName)\PlayPcmWin.exe"
+    goto :exit
+:plat_x64
+    echo "creating localized resouces"
+
+echo "create en-US resources ############################################"
+cd $(ProjectDir)
+
+echo "resgen and copy en-US resources"
+resgen .\Properties\Resources.resx
+
+echo "copy generated resources to en-US dir"
+copy .\Properties\Resources.resources $(TargetDir)\en-US
+cd $(TargetDir)\en-US
+
+echo "copy PlayPcmWin to en-US"
+copy ..\PlayPcmWin.exe .
+
+echo "copy LocBaml to en-US"
+copy ..\..\..\..\LocBaml.exe .
+
+echo "run LocBaml generate"
+locbaml /generate ..\..\..\..\obj\x64\$(ConfigurationName)\PlayPcmWin.g.en-US.resources /tran:..\..\..\..\PlayPcmWin.en-US.csv /cul:en-US /out:.
+
+echo "rename en-US resources"
+del PlayPcmWin.Properties.Resources.en-US.resources
+ren Resources.resources PlayPcmWin.Properties.Resources.en-US.resources
+
+echo "link en-US resources"
+al /template:"..\PlayPcmWin.exe" /embed:PlayPcmWin.g.en-US.resources /embed:PlayPcmWin.Properties.Resources.en-US.resources /culture:en-US /out:PlayPcmWin.resources.dll 
+
+echo "cleanup"
+del LocBaml.exe
+del PlayPcmWin.exe
+del PlayPcmWin.g.en-US.resources
+del PlayPcmWin.Properties.Resources.en-US.resources
+
+echo "create ja-JP resources ############################################"
+cd $(ProjectDir)
+echo "resgen and copy ja-JP.resources"
+resgen .\Properties\Resources.ja-JP.resx
+copy .\Properties\Resources.ja-JP.resources $(TargetDir)\ja-JP
+cd $(TargetDir)\ja-JP
+
+echo "copy PlayPcmWin to ja-JP"
+copy ..\PlayPcmWin.exe .
+
+echo "copy LocBaml to ja-JP"
+copy ..\..\..\..\LocBaml.exe .
+
+echo "run LocBaml generate"
+locbaml /generate ..\..\..\..\obj\x64\$(ConfigurationName)\PlayPcmWin.g.en-US.resources /tran:..\..\..\..\PlayPcmWin.ja_JP.csv /cul:ja-JP /out:.
+
+echo "rename ja-JP.resources"
+del PlayPcmWin.Properties.Resources.ja-JP.resources
+ren Resources.ja-JP.resources PlayPcmWin.Properties.Resources.ja-JP.resources
+
+echo "link ja-JP resources"
+al /template:"..\PlayPcmWin.exe" /embed:PlayPcmWin.g.ja-JP.resources /embed:PlayPcmWin.Properties.Resources.ja-JP.resources /culture:ja-JP /out:PlayPcmWin.resources.dll
+
+echo "cleanup"
+del LocBaml.exe
+del PlayPcmWin.exe
+del PlayPcmWin.g.ja-JP.resources
+del PlayPcmWin.Properties.Resources.ja-JP.resources
+
+
+echo "create ja-JP resources end #########################################"
+cd $(ProjectDir)
+
 :exit
 </PostBuildEvent>
   </PropertyGroup>
