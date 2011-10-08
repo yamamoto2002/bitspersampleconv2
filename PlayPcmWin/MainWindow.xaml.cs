@@ -8,24 +8,17 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Wasapi;
 using WavRWLib2;
 using System.IO;
 using System.ComponentModel;
-using System.Threading.Tasks;
 using PcmDataLib;
 using WasapiPcmUtil;
 using System.Collections.ObjectModel;
-using System.IO.IsolatedStorage;
 using System.Security.Cryptography;
-using System.Globalization;
 
 namespace PlayPcmWin
 {
