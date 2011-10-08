@@ -255,7 +255,7 @@ echo "copy PlayPcmWin to en-US"
 copy ..\PlayPcmWin.exe .
 
 echo "copy LocBaml to en-US"
-copy ..\..\..\..\LocBaml.exe .
+copy ..\..\..\..\LocBaml_%25PLAT%25.exe locbaml.exe
 
 echo "run LocBaml generate"
 locbaml /generate ..\..\..\..\obj\%25PLAT%25\$(ConfigurationName)\PlayPcmWin.g.en-US.resources /tran:..\..\..\..\PlayPcmWin.en-US.csv /cul:en-US /out:.
@@ -287,7 +287,7 @@ echo "copy PlayPcmWin to ja-JP"
 copy ..\PlayPcmWin.exe .
 
 echo "copy LocBaml to ja-JP"
-copy ..\..\..\..\LocBaml.exe .
+copy ..\..\..\..\LocBaml_%25PLAT%25.exe locbaml.exe
 
 echo "run LocBaml generate"
 locbaml /generate ..\..\..\..\obj\%25PLAT%25\$(ConfigurationName)\PlayPcmWin.g.en-US.resources /tran:..\..\..\..\PlayPcmWin.ja_JP.csv /cul:ja-JP /out:.
