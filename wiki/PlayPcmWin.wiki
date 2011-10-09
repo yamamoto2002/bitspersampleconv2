@@ -1,6 +1,8 @@
 #summary WASAPI排他モードでWAV,AIFF,FLACファイルを再生するプログラムPlayPcmWinのページ
 #labels Featured
 
+[http://code.google.com/p/bitspersampleconv2/w/edit/PlayPcmWinEn English]
+
 = !PlayPcmWinのページ =
 
 !PlayPcmWinはWASAPI排他モードでWAV,AIFF,FLACファイルを再生するプログラムです。
