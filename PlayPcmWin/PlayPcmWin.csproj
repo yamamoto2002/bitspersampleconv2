@@ -218,9 +218,6 @@
   <ItemGroup>
     <Resource Include="PlayPcmWinLicense.txt" />
   </ItemGroup>
-  <ItemGroup>
-    <SplashScreen Include="SplashScreen1.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>copy /y $(ProjectDir)..\FlacDecodeDLL\bin\x86\$(ConfigurationName)\* $(TargetDir);
