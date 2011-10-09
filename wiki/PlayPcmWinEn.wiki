@@ -1,23 +1,24 @@
 #summary PlayPcmWin -- WASAPI player for audiophiles
 #labels Featured
 
-= PlayPcmWin =
+= !PlayPcmWin =
 
-PlayPcmWin is an opensource audio player for audiophiles.
+!PlayPcmWin is an opensource audio player for audiophiles.
 
 = Features =
 
   * Supports WASAPI exclusive mode playback. Bit-perfect capable.
   * Memory play. Load all PCM data onto the main memory before playback starts.
-  * Native 64-bit C++ code for the playback thread. C# WPF GUI for easy use.
+  * Native C++ code for the playback thread. C# WPF GUI for easy use.
   * Supports WAV(16, 24, 32bit), FLAC(16, 24bit), AIFF(16, 24bit) formats.
   * Supports CUE sheets.
   * Gapless playback.
+  * Supported Platforms: Windows Vista, Windows 7.
 
 = Downloads =
 
-PlayPcmWin Version 3.0.41:
-http://bitspersampleconv2.googlecode.com/files/PlayPcmWin341x64en.zip
+!PlayPcmWin Version 3.0.41 x64 build English installer
+  * http://bitspersampleconv2.googlecode.com/files/PlayPcmWin341x64en.zip
 
 = Screenshots =
 
