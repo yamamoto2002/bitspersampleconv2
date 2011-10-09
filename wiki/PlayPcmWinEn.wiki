@@ -3,7 +3,7 @@
 
 = PlayPcmWin =
 
-PlayPcmWin is another opensource audio player for windows.
+PlayPcmWin is an opensource audio player for audiophiles.
 
 = Features =
 
