@@ -10,7 +10,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 = Features =
 
   * Supports WASAPI exclusive mode playback. Bit-perfect capable.
-  * Memory play. Load all PCM data onto the main memory before playback starts.
+  * Memory play. Load all PCM data onto the main memory before the playback starts.
   * Native C++ code for the playback thread. C# WPF GUI for easy use.
   * Supports WAV(16, 24, 32bit), FLAC(16, 24bit), AIFF(16, 24bit) formats.
   * Supports CUE sheets.
