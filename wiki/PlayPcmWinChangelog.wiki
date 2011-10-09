@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.41 ==
+  * 英語版作成。
+
 ===!PlayPcmWin 3.0.31 ==
   * Issue 79 修正
 
