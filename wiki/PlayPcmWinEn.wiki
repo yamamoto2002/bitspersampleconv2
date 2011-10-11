@@ -32,7 +32,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 
 http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
-= What's the data feed mode? Which is better sound quality ? =
+= What's the data feed mode? Which is better for the sound quality ? =
 
   * Event driven data feed mode: Playback thread wakes up from sleep by WASAPI buffer request event. Wake up interval of playback thread is specified by output latency time. Buffer refill sample size is latency time x sample rate (samples).
   * Timer driven data feed mode: Playback thread wakes up by timer event. Timer alarm interval is specified by output latency time / 2.
@@ -60,5 +60,3 @@ If you choose *None* , the playback thread does not call AvSetMmThreadCharacteri
 Very detailed description is available on this website:
 http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
 http://msdn.microsoft.com/en-us/library/bb614507.aspx
-
-
