@@ -34,7 +34,7 @@ http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
 = What's the data feed mode? Which is better for the sound quality ? =
 
-  * Event driven data feed mode: Playback thread wakes up from sleep by WASAPI buffer request event. Wake up interval of playback thread is specified by output latency time. Buffer refill sample size is latency time x sample rate (samples).
+  * Event driven data feed mode: Playback thread wakes up from a sleep state by WASAPI buffer request event. Wake up interval of playback thread is specified by output latency time. Buffer refill sample size is latency time x sample rate (samples).
   * Timer driven data feed mode: Playback thread wakes up by timer event. Timer alarm interval is specified by output latency time / 2.
 
 Theoretically, Event driven mode is more sophisticated method than timer driven mode. It minimizes CPU load and elongate sleep interval of the playback thread.
