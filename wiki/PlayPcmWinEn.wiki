@@ -39,9 +39,7 @@ http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
 Theoretically, Event driven mode is more sophisticated method than timer driven mode. It minimizes CPU load and elongate sleep interval of the playback thread.
 
-In the real world, Several devices prefers event driven mode (On those devices, Timer driven mode lead to frequent click noise), Other a few devices prefers timer driven mode (Cannot use event mode at all). Most devices do work well on both mode.
-
-Generally Event driven mode is recommended for lower CPU load and less sound glitch.
+Generally speaking, Event driven mode is recommended for lower CPU load and less sound glitch. In the real world, Several devices prefers event driven mode (On those devices, Timer driven mode lead to frequent click noise), Other a few devices prefers timer driven mode (Cannot use event mode at all). Most devices do work well on both mode.
 
 = About the render thread task type =
 
