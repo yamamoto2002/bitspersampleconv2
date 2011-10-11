@@ -48,7 +48,7 @@ Generally Event driven mode is recommended for lower CPU load and less sound gli
 First, Render means playback, Capture means recording :)
 
 If you want to set 10 ms or fewer output latency,
-Pro Audio is preferred option. If you choose Pro Audio option,
+*Pro Audio* is preferred option. If you choose Pro Audio option,
 The render thread priority runs on highest priority. It reduces the probability of output buffer underflow but from the power consumption standpoint, causes negative impact.
 
 Render thread task type settings ultimately chooses
