@@ -57,8 +57,12 @@ AvSetMmThreadCharacteristics() function call of the playback thread.
 
 If you choose *None* , the playback thread does not call AvSetMmThreadCharacteristics() at all.
 
-*Playback* has lower priority than *Pro Audio* but higher priority than *Audio*. These difference is subtle, I think *Playback* is suitable for high CPU load environment such as background video transcoding or CGI rendering or other number crunching.
+*Playback* has lower priority than *Pro Audio* but higher priority than *Audio*. These difference is subtle, I think *Playback* is suitable for high CPU load environment such as background video transcoding or CGI rendering or other background number crunching tasks.
 
 Very detailed description is available on these website:
   * http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
   * http://msdn.microsoft.com/en-us/library/bb614507.aspx
+
+= Exclusive or Shared =
+
+I recommend exclusive mode for optimal sound quality. Exclusive mode bypasses windows mixer and numerous PCM data altering effects such as poor quality windows built-in software sample rate conversion.
