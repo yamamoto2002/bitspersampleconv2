@@ -65,4 +65,4 @@ Very detailed description is available on these website:
 
 = Exclusive or Shared =
 
-I recommend exclusive mode for optimal sound quality. Exclusive mode bypasses windows mixer and numerous PCM data altering effects such as poor quality windows built-in software sample rate conversion.
+I strongly recommend to choose exclusive mode for optimal sound quality. Exclusive mode bypasses windows mixer and numerous PCM data altering effects such as poor quality windows built-in software sample rate conversion.
