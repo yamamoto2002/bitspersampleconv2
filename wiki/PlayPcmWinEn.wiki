@@ -31,3 +31,34 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 = Screenshots =
 
 http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
+
+= What's the data feed mode? Which is better sound quality ? =
+
+  * Event driven data feed mode: Playback thread wakes up from sleep by WASAPI buffer request event. Wake up interval of playback thread is specified by output latency time. Buffer refill sample size is latency time x sample rate (samples).
+  * Timer driven data feed mode: Playback thread wakes up by timer event. Timer alarm interval is specified by output latency time / 2.
+
+Theoretically, Event driven mode is more sophisticated method than timer driven mode. It minimizes CPU load and elongate sleep interval.
+
+In the real world, Several devices prefers event driven mode (On those devices, Timer driven mode lead to frequent click noise), Other a few devices prefers timer driven mode (Cannot use event mode at all). Most devices do work well on both mode.
+
+Generally Event driven mode is recommended for lower CPU load and less sound glitch.
+
+= About the render thread task type =
+
+First, Render means playback, Capture means recording :)
+
+If you want to set 10 ms or fewer output latency,
+Pro Audio is preferred option. If you choose Pro Audio option,
+The render thread priority runs on highest priority. It reduces the probability of output buffer underflow but from the power consumption standpoint, causes negative impact.
+
+Render thread task type settings ultimately chooses
+the first parameter of
+AvSetMmThreadCharacteristics() function call of the playback thread.
+
+If you choose *None* , the playback thread does not call AvSetMmThreadCharacteristics() at all.
+
+Very detailed description is available on this website:
+http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
+http://msdn.microsoft.com/en-us/library/bb614507.aspx
+
+
