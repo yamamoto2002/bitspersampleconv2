@@ -57,6 +57,8 @@ AvSetMmThreadCharacteristics() function call of the playback thread.
 
 If you choose *None* , the playback thread does not call AvSetMmThreadCharacteristics() at all.
 
+*Playback* has lower priority than *Pro Audio* but higher priority than *Audio*. These difference is subtle, I think *Playback* is prefered on high CPU load environment.
+
 Very detailed description is available on these website:
   * http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
   * http://msdn.microsoft.com/en-us/library/bb614507.aspx
