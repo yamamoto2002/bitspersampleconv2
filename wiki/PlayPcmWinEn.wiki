@@ -57,6 +57,6 @@ AvSetMmThreadCharacteristics() function call of the playback thread.
 
 If you choose *None* , the playback thread does not call AvSetMmThreadCharacteristics() at all.
 
-Very detailed description is available on this website:
-http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
-http://msdn.microsoft.com/en-us/library/bb614507.aspx
+Very detailed description is available on these website:
+  * http://msdn.microsoft.com/en-us/library/ms684247%28v=VS.85%29.aspx
+  * http://msdn.microsoft.com/en-us/library/bb614507.aspx
