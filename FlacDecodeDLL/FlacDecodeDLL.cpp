@@ -78,6 +78,11 @@ struct FlacDecodeInfo {
     int          bitsPerSample;
     FLAC__uint64 totalSamples;
 
+    int minFrameSize;
+    int minBlockSize;
+    int maxFrameSize;
+    int maxBlockSize;
+
     FLAC__StreamDecoder *decoder;
 
     /// 1個のブロックに何サンプル(frame)データが入っているか。
@@ -111,6 +116,13 @@ struct FlacDecodeInfo {
         sampleRate    = 0;
         channels      = 0;
         bitsPerSample = 0;
+
+        totalSamples = 0;
+
+        minFrameSize = 0;
+        minBlockSize = 0;
+        maxFrameSize = 0;
+        maxBlockSize = 0;
 
         decoder = NULL;
 
@@ -294,10 +306,14 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
         fdi->sampleRate    = metadata->data.stream_info.sample_rate;
         fdi->channels      = metadata->data.stream_info.channels;
         fdi->bitsPerSample = metadata->data.stream_info.bits_per_sample;
+        fdi->minFrameSize  = metadata->data.stream_info.min_framesize;
+        fdi->minBlockSize  = metadata->data.stream_info.min_blocksize;
+        fdi->maxFrameSize  = metadata->data.stream_info.max_framesize;
+        fdi->maxBlockSize  = metadata->data.stream_info.max_blocksize;
     }
 
     if (metadata->type == FLAC__METADATA_TYPE_VORBIS_COMMENT) {
-        dprintf(fdi->logFP, "vendorstr=%s %d num=%u\n\n",
+        dprintf(fdi->logFP, "vendorstr=\"%s\" %d num=%u\n\n",
             (const char *)VC.vendor_string.entry,
             VC.vendor_string.length,
             VC.num_comments);
@@ -306,7 +322,7 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
         int num_comments = (FLACDECODE_COMMENT_MAX < VC.num_comments) ? FLACDECODE_COMMENT_MAX : VC.num_comments;
 
         for (int i=0; i<num_comments; ++i) {
-            dprintf(fdi->logFP, "entry=%s length=%d\n\n",
+            dprintf(fdi->logFP, "entry=\"%s\" length=%d\n\n",
                 (const char *)(VC.comments[i].entry),
                 VC.comments[i].length);
             if (0 == strncmp("TITLE=", (const char *)(&VC.comments[i].entry[0]), 6)) {
@@ -324,10 +340,13 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
     if (metadata->type == FLAC__METADATA_TYPE_PICTURE) {
         dprintf(fdi->logFP, "picture bytes=%d\n", PIC.data_length);
 
-        if (PIC.data && 0 < PIC.data_length && PIC.data_length <= FLACDECODE_IMAGE_BYTES_MAX) {
+        if (0 == fdi->pictureBytes &&
+            PIC.data && 0 < PIC.data_length && PIC.data_length <= FLACDECODE_IMAGE_BYTES_MAX) {
+            // store first picture data
+
             fdi->pictureBytes = PIC.data_length;
 
-            delete [] fdi->pictureData;
+            assert(NULL == fdi->pictureData);
             fdi->pictureData = new char[fdi->pictureBytes];
             assert(fdi->pictureData);
 

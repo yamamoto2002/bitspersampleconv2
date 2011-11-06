@@ -12,6 +12,7 @@ namespace PlayPcmWin {
         private long m_numFrames;
         private int m_pictureBytes;
         private byte[] m_pictureData;
+        private int m_numFramesPerBlock;
 
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
@@ -120,6 +121,7 @@ namespace PlayPcmWin {
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
             m_numFrames       = m_br.ReadInt64();
+            m_numFramesPerBlock = m_br.ReadInt32();
 
             string titleStr = m_br.ReadString();
             string albumStr = m_br.ReadString();
@@ -131,8 +133,8 @@ namespace PlayPcmWin {
                 m_pictureData = m_br.ReadBytes(m_pictureBytes);
             }
 
-            System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3}",
-                nChannels, bitsPerSample, sampleRate, m_numFrames);
+            System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
+                nChannels, bitsPerSample, sampleRate, m_numFrames, m_numFramesPerBlock);
 
             StopChildProcess();
 
@@ -171,6 +173,7 @@ namespace PlayPcmWin {
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
             m_numFrames       = m_br.ReadInt64();
+            m_numFramesPerBlock = m_br.ReadInt32();
 
             string titleStr = m_br.ReadString();
             string albumStr = m_br.ReadString();
