@@ -58,6 +58,10 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
+        int FlacDecodeDLL_GetNumFramesPerBlock(int id);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
         int FlacDecodeDLL_GetLastResult(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
@@ -171,13 +175,14 @@ namespace FlacDecodeCS {
              * 8          4              サンプルレート sampleRate
              * 12         4              量子化ビット数 bitsPerSample
              * 16         8              総サンプル数   numSamples
-             * 24         titleLen       タイトル文字列
-             * 24+titleLen albumLen      アルバム文字列
-             * 24+t+al     artistLen      アーティスト文字列
-             * 24+t+al+ar  4             画像データバイト数
-             * 28+t+al+ar  pictureBytes   画像データ
-             * 28+t+al+ar+pic   4              frameCount1 (ヘッダのみの場合なし)
-             * 32+t+al+ar+pic   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
+             * 24         4              NumFramesPerBlock
+             * 28         titleLen       タイトル文字列
+             * 28+titleLen albumLen      アルバム文字列
+             * 28+t+al     artistLen      アーティスト文字列
+             * 28+t+al+ar  4             画像データバイト数
+             * 32+t+al+ar  pictureBytes   画像データ
+             * 32+t+al+ar+pic   4              frameCount1 (ヘッダのみの場合なし)
+             * 36+t+al+ar+pic   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
              * ※2        4              frameCount2
              * ※2+4      ※3            PCMデータ2 frameCount2個
              * 
@@ -208,6 +213,9 @@ namespace FlacDecodeCS {
 
             long numSamples   = FlacDecodeDLL_GetNumSamples(id);
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumSamples() {0}", numSamples));
+
+            int numFramesPerBlock = FlacDecodeDLL_GetNumFramesPerBlock(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumFramesPerBlock() {0}", numFramesPerBlock));
 
             StringBuilder buf = new StringBuilder(256);
             FlacDecodeDLL_GetTitleStr(id, buf, buf.Capacity *2);
@@ -241,6 +249,7 @@ namespace FlacDecodeCS {
             bw.Write(bitsPerSample);
             bw.Write(sampleRate);
             bw.Write(numSamples);
+            bw.Write(numFramesPerBlock);
 
             bw.Write(titleStr);
             bw.Write(albumStr);

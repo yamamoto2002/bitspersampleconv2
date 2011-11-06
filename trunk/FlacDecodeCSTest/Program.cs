@@ -77,6 +77,7 @@ namespace FlacDecodeCSTest {
             int  bitsPerSample = br.ReadInt32();
             int  sampleRate    = br.ReadInt32();
             long numSamples    = br.ReadInt64();
+            int  numFramesPerBlock = br.ReadInt32();
 
             string titleStr = br.ReadString();
             string albumStr = br.ReadString();
@@ -88,8 +89,8 @@ namespace FlacDecodeCSTest {
                 br.ReadBytes(pictureBytes);
             }
 
-            System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
-                nChannels, bitsPerSample, sampleRate, numSamples);
+            System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3} numFramesPerBlock={4}",
+                nChannels, bitsPerSample, sampleRate, numSamples, numFramesPerBlock);
 
             System.Console.WriteLine("TITLE={0}", titleStr);
             System.Console.WriteLine("ALBUM={0}", albumStr);
@@ -116,6 +117,7 @@ namespace FlacDecodeCSTest {
             int  bitsPerSample = br.ReadInt32();
             int  sampleRate    = br.ReadInt32();
             long numSamples    = br.ReadInt64();
+            int  numFramesPerBlock = br.ReadInt32();
 
             string titleStr = br.ReadString();
             string albumStr = br.ReadString();
@@ -129,8 +131,8 @@ namespace FlacDecodeCSTest {
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 
-            System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3}",
-                nChannels, bitsPerSample, sampleRate, numSamples);
+            System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3} numFramesPerBlock={4}",
+                nChannels, bitsPerSample, sampleRate, numSamples, numFramesPerBlock);
 
             System.Console.WriteLine("TITLE={0}", titleStr);
             System.Console.WriteLine("ALBUM={0}", albumStr);
