@@ -33,11 +33,12 @@ enum FlacDecodeResultType {
 
 /// FLACヘッダーを読み込んで、フォーマット情報を取得する。
 /// 中のグローバル変数に貯める。APIの設計がスレッドセーフになってないので注意。
+/// @param skipSamples スキップするサンプル数。0以外の値を指定するとMD5のチェックを行わなくなるので注意。
 /// @param fromFlacPath パス名(UTF-16)
 /// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath);
+FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipSamples);
 
 /// FlacDecodeを終了する。(DecodeStartで立てたスレを止めたりする)
 /// DecodeStartが失敗を戻しても、成功を戻しても、呼ぶ必要がある。
