@@ -4,15 +4,28 @@
 #include <stdio.h>
 #include <assert.h>
 
-int wmain(int argc, wchar_t* argv[])
+static void
+PrintUsage(const wchar_t *argv0)
 {
-    if (argc != 3) {
-        printf("E: %s:%d inputFlacFilePath outputBinFilePath\n", __FILE__, __LINE__);
+    printf("Usage: %S inputFlacFilePath skipSamples outputBinFilePath\n", argv0);
+}
+
+int
+wmain(int argc, wchar_t* argv[])
+{
+    if (argc != 4) {
+        PrintUsage(argv[0]);
         return 1;
     }
 
-    printf("D: %s:%d FlacDecodeDLL_DecodeStart %S\n", __FILE__, __LINE__, argv[1]);
-    int id = FlacDecodeDLL_DecodeStart(argv[1]);
+    int skipSamples = _wtoi(argv[2]);
+    if (skipSamples < 0) {
+        PrintUsage(argv[0]);
+        return 1;
+    }
+
+    printf("D: %s:%d FlacDecodeDLL_DecodeStart from sample#%d %S\n", __FILE__, __LINE__, skipSamples, argv[1]);
+    int id = FlacDecodeDLL_DecodeStart(argv[1], skipSamples);
     if (id < 0) {
         printf("E: %s:%d FlacDecodeDLL_DecodeStart %d\n", __FILE__, __LINE__, id);
         return 1;
@@ -69,7 +82,7 @@ int wmain(int argc, wchar_t* argv[])
 
     {
         FILE *fp = NULL;
-        errno_t erno = _wfopen_s(&fp, argv[2], L"wb");
+        errno_t erno = _wfopen_s(&fp, argv[3], L"wb");
         assert(erno == 0);
         assert(fp);
 

@@ -155,12 +155,13 @@ namespace PlayPcmWin {
             return 0;
         }
 
-        public int ReadStreamBegin(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+        public int ReadStreamBegin(string flacFilePath, long skipSamples, out PcmDataLib.PcmData pcmData) {
             pcmData = new PcmDataLib.PcmData();
 
             StartChildProcess();
             SendString("A");
             SendBase64(flacFilePath);
+            SendString(skipSamples.ToString());
 
             int rv = m_br.ReadInt32();
             if (rv != 0) {
@@ -202,7 +203,7 @@ namespace PlayPcmWin {
         /// PCMサンプルを読み出す。
         /// </summary>
         /// <returns>読んだサンプルデータ</returns>
-        public byte [] ReadStreamReadOne()
+        public byte [] ReadStreamReadOne(long preferredFrames)
         {
             System.Diagnostics.Debug.Assert(0 < m_bytesPerFrame);
 
@@ -214,6 +215,12 @@ namespace PlayPcmWin {
             }
 
             byte [] sampleArray = m_br.ReadBytes(frameCount * m_bytesPerFrame);
+
+            if (preferredFrames < frameCount) {
+                Array.Resize(ref sampleArray, (int)preferredFrames * m_bytesPerFrame);
+                frameCount = (int)preferredFrames;
+            }
+
 
             System.Console.WriteLine("ReadStreamReadOne() frameCount={0} readCount={1}",
                 frameCount, sampleArray.Length / m_bytesPerFrame);

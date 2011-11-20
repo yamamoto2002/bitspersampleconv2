@@ -34,7 +34,7 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
-        int FlacDecodeDLL_DecodeStart(string path);
+        int FlacDecodeDLL_DecodeStart(string path, long skipSamples);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
@@ -166,7 +166,18 @@ namespace FlacDecodeCS {
 
             string path = Base64Decode(sbase64);
 
-            LogWriteLine(string.Format("FlacDecodeCS DecodeOne operationType={0} path={1}", operationType, path));
+            long skipSamples = 0;
+            if (operationType == OperationType.DecodeAll) {
+                // 内容抽出の場合、3行目にスキップサンプル数が渡ってくる。
+                string skipSamplesStr = System.Console.ReadLine();
+                if (null == skipSamplesStr || !Int64.TryParse(skipSamplesStr, out skipSamples) || skipSamples < 0) {
+                    LogWriteLine("内容抽出の場合、stdinの3行目にスキップサンプル数を入力してください。");
+                    return -3;
+                }
+            }
+
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne operationType={0} path={1} skipSamples={2}",
+                operationType, path, skipSamples));
 
             /* パイプ出力の内容
              * オフセット サイズ(バイト) 内容
@@ -174,7 +185,7 @@ namespace FlacDecodeCS {
              * 4          4              チャンネル数   nChannels
              * 8          4              サンプルレート sampleRate
              * 12         4              量子化ビット数 bitsPerSample
-             * 16         8              総サンプル数   numSamples
+             * 16         8              総サンプル数   numSamples (残りサンプル数ではない)
              * 24         4              NumFramesPerBlock
              * 28         titleLen       タイトル文字列
              * 28+titleLen albumLen      アルバム文字列
@@ -190,7 +201,7 @@ namespace FlacDecodeCS {
              * ※2…32+t+al+ar+pic+※1
              */
 
-            int rv = FlacDecodeDLL_DecodeStart(path);
+            int rv = FlacDecodeDLL_DecodeStart(path, skipSamples);
             bw.Write(rv);
             if (rv < 0) {
                 LogWriteLine(string.Format("FLACデコード開始エラー。{0}", rv));

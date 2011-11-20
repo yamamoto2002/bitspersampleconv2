@@ -78,6 +78,8 @@ struct FlacDecodeInfo {
     int          bitsPerSample;
     FLAC__uint64 totalSamples;
 
+    int64_t      skipSamples;
+
     int minFrameSize;
     int minBlockSize;
     int maxFrameSize;
@@ -118,6 +120,7 @@ struct FlacDecodeInfo {
         bitsPerSample = 0;
 
         totalSamples = 0;
+        skipSamples  = 0;
 
         minFrameSize = 0;
         minBlockSize = 0;
@@ -418,6 +421,7 @@ DecodeMain(FlacDecodeInfo *fdi)
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_PICTURE);
 
 #if 1
+    // Windowsでは、この方法でファイルを開かなければならぬ。
     ercd = _wfopen_s(&fp, fdi->fromFlacPathUtf16, L"rb");
     if (ercd != 0 || NULL == fp) {
         fdi->errorCode = FDRT_FileOpenError;
@@ -429,6 +433,7 @@ DecodeMain(FlacDecodeInfo *fdi)
     // FLAC__stream_decoder_finish()がfcloseしてくれるので、忘れる。
     fp = NULL;
 #else
+    // この方法でファイルを開くと、日本語Windowsで、アクサンテギューとかの付いているファイルが開けなくなる。
     {
         char path[MAX_PATH];
         memset(path, 0, sizeof path);
@@ -443,6 +448,34 @@ DecodeMain(FlacDecodeInfo *fdi)
         dprintf(fdi->logFP, "%s Flac decode error %d. set complete event.\n",
             __FUNCTION__, fdi->errorCode);
         goto end;
+    }
+
+    ok = FLAC__stream_decoder_process_until_end_of_metadata(fdi->decoder);
+    if (!ok) {
+        dprintf(fdi->logFP, "%s Flac metadata process error fdi->errorCode=%d\n",
+            __FUNCTION__, fdi->errorCode);
+
+        if (fdi->errorCode == FDRT_Success) {
+            fdi->errorCode = FDRT_DecorderProcessFailed;
+        }
+        dprintf(fdi->logFP, "%s Flac metadata process error %d. set complete event.\n",
+            __FUNCTION__, fdi->errorCode);
+        goto end;
+    }
+
+    if (0 < fdi->skipSamples) {
+        ok = FLAC__stream_decoder_seek_absolute(fdi->decoder, fdi->skipSamples);
+        if (!ok) {
+            dprintf(fdi->logFP, "%s Flac seek error skipSamples=%lld fdi->errorCode=%d\n",
+                __FUNCTION__, fdi->skipSamples, fdi->errorCode);
+            if (fdi->errorCode == FDRT_Success) {
+                fdi->errorCode = FDRT_DecorderProcessFailed;
+            }
+            dprintf(fdi->logFP, "%s Flac decode error %d. set complete event.\n",
+                __FUNCTION__, fdi->errorCode);
+            goto end;
+        }
+        // FLAC__stream_decoder_seek_absolute()を呼ぶとMD5チェックフラグが外れる
     }
 
     ok = FLAC__stream_decoder_process_until_end_of_stream(fdi->decoder);
@@ -724,7 +757,7 @@ LogClose(FlacDecodeInfo *fdi)
 /// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath)
+FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipSamples)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoNew();
     if (NULL == fdi) {
@@ -734,7 +767,10 @@ FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath)
 
     LogOpen(fdi);
     dprintf1(fdi->logFP, "%s started\n", __FUNCTION__);
-    dprintf1(fdi->logFP, "%s path=\"%S\"\n", __FUNCTION__, fromFlacPath);
+    dprintf1(fdi->logFP, "%s skipSamples=%lld path=\"%S\"\n",
+        __FUNCTION__, skipSamples, fromFlacPath);
+
+    fdi->skipSamples = skipSamples;
 
     assert(NULL == fdi->commandMutex);
     fdi->commandMutex = CreateMutex(NULL, FALSE, NULL);
@@ -767,6 +803,11 @@ FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath)
     
     dprintf1(fdi->logFP, "%s commandCompleteEvent. ercd=%d fdi->id=%d\n",
         __FUNCTION__, fdi->errorCode, fdi->id);
+    if (fdi->errorCode < 0) {
+        goto end;
+    }
+
+end:
     if (fdi->errorCode < 0) {
         int ercd = fdi->errorCode;
         FlacDecodeInfoDelete(fdi);

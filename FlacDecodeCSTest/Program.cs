@@ -100,10 +100,13 @@ namespace FlacDecodeCSTest {
             return 0;
         }
 
-        private int ReadAllTest(string flacFilePath) {
+        private int ReadAllTest(string flacFilePath, long skipSamples) {
             StartChildProcess();
             SendString("A");
             SendBase64(flacFilePath);
+
+            // スキップサンプル数。
+            SendString(skipSamples.ToString());
 
             System.Console.WriteLine("ReadAllTest({0}) started", flacFilePath);
 
@@ -166,26 +169,32 @@ namespace FlacDecodeCSTest {
             return exitCode;
         }
 
-        private int Run(string flacPath) {
+        private int Run(string flacPath, long skipSamples) {
             int exitCode;
             
             exitCode = ReadHeaderTest(flacPath);
             System.Console.WriteLine("Run() ReadHeaderTest result={0}", exitCode);
 
-            exitCode = ReadAllTest(flacPath);
+            exitCode = ReadAllTest(flacPath, skipSamples);
             System.Console.WriteLine("Run() ReadAllTest result={0}", exitCode);
 
             return exitCode;
         }
 
         static void Main(string[] args) {
-            if (args.Length != 1) {
+            if (args.Length != 2) {
                 System.Console.WriteLine("E: args[0] must be flacFilePath");
                 return;
             }
 
+            long skipSamples;
+            if (!Int64.TryParse(args[1], out skipSamples)) {
+                System.Console.WriteLine("E: args[1] must be skipSamples");
+                return;
+            }
+
             Program p = new Program();
-            p.Run(args[0]);
+            p.Run(args[0], skipSamples);
         }
     }
 }

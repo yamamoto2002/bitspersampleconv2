@@ -63,7 +63,7 @@ namespace PlayPcmWin {
                     result = m_buffer;
                     m_buffer = null;
                 } else {
-                    result = m_flacR.ReadStreamReadOne();
+                    result = m_flacR.ReadStreamReadOne(preferredFrames);
                 }
                 break;
             case Format.AIFF:
@@ -108,13 +108,14 @@ namespace PlayPcmWin {
         {
             // m_pcmData = new PcmDataLib.PcmData();
             m_flacR = new FlacDecodeIF();
-            int ercd = m_flacR.ReadStreamBegin(path, out m_pcmData);
+            int ercd = m_flacR.ReadStreamBegin(path, startFrame, out m_pcmData);
             if (ercd < 0) {
                 return ercd;
             }
 
             NumFrames = m_flacR.NumFrames;
 
+            /*
             // ストリームをskipFrameまで空読みする
             long pos = 0;
             while (pos < startFrame) {
@@ -131,6 +132,8 @@ namespace PlayPcmWin {
                 }
                 pos += dataFrames;
             }
+            */
+
             return ercd;
         }
 
