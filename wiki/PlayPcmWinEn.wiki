@@ -66,3 +66,10 @@ Very detailed description is available on these website:
 = Exclusive or Shared =
 
 I strongly recommend to choose exclusive mode for optimal sound quality. Exclusive mode bypasses windows mixer and numerous PCM data altering effects such as poor quality windows built-in software sample rate conversion.
+
+= If you experience sound stuttering on playback =
+
+Windows is complicated system and has wide variety of hardware. Very many factors are involved this type of problem.
+
+The following page provides very useful troubleshooting regarding to troubleshooting playback glitch on Windows. I recommend to check your system according to this guide. 
+http://www.native-instruments.com/knowledge/questions/847/Windows+7+Tuning+Tips+for+audio+processing
