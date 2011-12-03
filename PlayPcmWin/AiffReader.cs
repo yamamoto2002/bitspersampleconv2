@@ -28,8 +28,18 @@ namespace PlayPcmWin {
         public int BitsPerSample { get; set; }
         public long NumFrames { get; set; }
 
+        /// <summary>
+        /// returns BitsPerSample * NumChannels
+        /// </summary>
         public int BitsPerFrame {
             get { return BitsPerSample * NumChannels; }
+        }
+
+        /// <summary>
+        /// returns BitsPerSample * NumChannels / 8
+        /// </summary>
+        public int BytesPerFrame {
+            get { return BitsPerSample * NumChannels / 8; }
         }
 
         public byte[] GetSampleArray() { return m_sampleArray; }
@@ -143,6 +153,7 @@ namespace PlayPcmWin {
             NumChannels = ReadBigU16(br);
             NumFrames = ReadBigU32(br);
             BitsPerSample = ReadBigU16(br);
+
             byte[] sampleRate80 = br.ReadBytes(10);
 
             uint readSize = 2 + 4 + 2 + 10;
@@ -365,16 +376,11 @@ namespace PlayPcmWin {
             return ReadHeader1(br, out pcmData, ReadHeaderMode.AllHeadersWithID3);
         }
 
-        private int m_bytesPerFrame;
         private long m_posFrame;
 
         public ResultType ReadStreamBegin(BinaryReader br, out PcmDataLib.PcmData pcmData) {
             ResultType rt = ResultType.Success;
-
             rt = ReadHeader1(br, out pcmData, ReadHeaderMode.ReadStopBeforeSoundData);
-            if (rt == ResultType.Success) {
-                m_bytesPerFrame = pcmData.BitsPerFrame / 8;
-            }
             m_posFrame = 0;
 
             return rt;
@@ -386,7 +392,7 @@ namespace PlayPcmWin {
         /// <param name="skipFrames">スキップするフレーム数。負の値は指定できない。</param>
         /// <returns>実際にスキップできたフレーム数。</returns>
         public long ReadStreamSkip(BinaryReader br, long skipFrames) {
-            System.Diagnostics.Debug.Assert(0 < m_bytesPerFrame);
+            System.Diagnostics.Debug.Assert(0 < BytesPerFrame);
             if (skipFrames < 0) {
                 System.Diagnostics.Debug.Assert(false);
                 skipFrames = 0;
@@ -396,7 +402,7 @@ namespace PlayPcmWin {
                 skipFrames = NumFrames - m_posFrame;
             }
 
-            PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * m_bytesPerFrame / 8);
+            PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * BytesPerFrame / 8);
             m_posFrame += skipFrames;
             return skipFrames;
         }
@@ -493,7 +499,6 @@ namespace PlayPcmWin {
         }
 
         public void ReadStreamEnd() {
-            m_bytesPerFrame = 0;
             m_posFrame = 0;
         }
     }
