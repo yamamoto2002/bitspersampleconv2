@@ -1912,6 +1912,7 @@ namespace PlayPcmWin
                         if (endFrame < startFrame + posFrame + readFrames) {
                             readFrames = (int)(endFrame - (startFrame + posFrame));
                         }
+
                         byte[] part = pr.StreamReadOne(readFrames);
                         if (null == part) {
                             r.message = string.Format(Properties.Resources.UnexpectedEndOfStream);
@@ -1926,8 +1927,11 @@ namespace PlayPcmWin
                         // sampleArrayはそのうちの一部、startFrameからendFrameまでのデータが入っている。
                         pd.SetSampleArray(endFrame - startFrame, part);
 
-                        // 必要に応じて量子化ビット数の変更を行う。
+                        // 必要に応じてpartの量子化ビット数の変更処理を行い、pdAfterに新しく確保したPCMデータ配列をセット。
+                        // ここでpart配列は不要となる。
                         PcmData pdAfter = PcmUtil.BitsPerSampleConvAsNeeded(pd, m_deviceSetupInfo.SampleFormat);
+                        pd.ForgetDataPart();
+                        part = null;
 
                         if (pdAfter.GetSampleArray() == null ||
                             0 == pdAfter.GetSampleArray().Length) {
@@ -1945,7 +1949,7 @@ namespace PlayPcmWin
                             long allocBytes = pdAfter.NumFrames * pdAfter.BitsPerFrame / 8;
                             
                             if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
-                                //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しいが
+                                //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しい
                                 r.message = string.Format(Properties.Resources.MemoryExhausted);
                                 args.Result = r;
                                 Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
@@ -1960,9 +1964,6 @@ namespace PlayPcmWin
 
                         bool rv = wasapi.AddPlayPcmDataSetPcmFragment(pd.Id, posBytes, pdAfter.GetSampleArray());
                         System.Diagnostics.Debug.Assert(rv);
-
-                        pd.ForgetDataPart();
-                        part = null;
 
                         pdAfter.ForgetDataPart();
 
