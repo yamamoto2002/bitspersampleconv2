@@ -9,7 +9,6 @@ namespace PlayPcmWin {
         private FlacDecodeIF m_flacR;
         private AiffReader m_aiffR;
         private WavData m_waveR;
-        private byte[] m_buffer;
         private BinaryReader m_br;
 
         public long NumFrames { get; set; }
@@ -59,12 +58,7 @@ namespace PlayPcmWin {
             byte[] result;
             switch (m_format) {
             case Format.FLAC:
-                if (m_buffer != null) {
-                    result = m_buffer;
-                    m_buffer = null;
-                } else {
-                    result = m_flacR.ReadStreamReadOne(preferredFrames);
-                }
+                result = m_flacR.ReadStreamReadOne(preferredFrames);
                 break;
             case Format.AIFF:
                 result = m_aiffR.ReadStreamReadOne(m_br, preferredFrames);
@@ -101,7 +95,6 @@ namespace PlayPcmWin {
             m_flacR = null;
             m_aiffR = null;
             m_waveR = null;
-            m_buffer = null;
         }
 
         private int StreamBeginFlac(string path, long startFrame)
@@ -114,26 +107,6 @@ namespace PlayPcmWin {
             }
 
             NumFrames = m_flacR.NumFrames;
-
-            /*
-            // ストリームをskipFrameまで空読みする
-            long pos = 0;
-            while (pos < startFrame) {
-                byte[] data = m_flacR.ReadStreamReadOne();
-                int dataFrames = data.Length / m_flacR.BytesPerFrame;
-                if (startFrame < pos + dataFrames) {
-                    // startFrameよりも先に行ってしまった。startFrame以降をバッファに入れる。
-                    long storeFrames = pos + dataFrames - startFrame;
-                    m_buffer = new byte[storeFrames * m_flacR.BytesPerFrame];
-                    Array.Copy(
-                        data, (startFrame - pos) * m_flacR.BytesPerFrame,
-                        m_buffer, 0,
-                        m_buffer.Length);
-                }
-                pos += dataFrames;
-            }
-            */
-
             return ercd;
         }
 
