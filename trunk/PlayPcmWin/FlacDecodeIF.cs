@@ -102,25 +102,40 @@ namespace PlayPcmWin {
             return exitCode;
         }
 
-        // FIXME: ReadHeader()とReadStreamBegin()がコピペ!
+        enum ReadMode {
+            Header,
+            HeadereAndData,
+        };
 
-        public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+        private int ReadStartCommon(ReadMode mode, string flacFilePath, long skipSamples, out PcmDataLib.PcmData pcmData) {
             pcmData = new PcmDataLib.PcmData();
-
+            
             StartChildProcess();
-            SendString("H");
-            SendBase64(flacFilePath);
+
+            switch (mode) {
+            case ReadMode.Header:
+                SendString("H");
+                SendBase64(flacFilePath);
+                break;
+            case ReadMode.HeadereAndData:
+                SendString("A");
+                SendBase64(flacFilePath);
+                SendString(skipSamples.ToString());
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
 
             int rv = m_br.ReadInt32();
             if (rv != 0) {
-                StopChildProcess();
                 return rv;
             }
 
             int nChannels     = m_br.ReadInt32();
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
-            m_numFrames       = m_br.ReadInt64();
+            m_numFrames = m_br.ReadInt64();
             m_numFramesPerBlock = m_br.ReadInt32();
 
             string titleStr = m_br.ReadString();
@@ -128,15 +143,10 @@ namespace PlayPcmWin {
             string artistStr = m_br.ReadString();
 
             m_pictureBytes = m_br.ReadInt32();
-            m_pictureData  = new byte[0];
+            m_pictureData = new byte[0];
             if (0 < m_pictureBytes) {
                 m_pictureData = m_br.ReadBytes(m_pictureBytes);
             }
-
-            System.Console.WriteLine("ReadHeader() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
-                nChannels, bitsPerSample, sampleRate, m_numFrames, m_numFramesPerBlock);
-
-            StopChildProcess();
 
             pcmData.SetFormat(
                 nChannels,
@@ -151,51 +161,28 @@ namespace PlayPcmWin {
             pcmData.ArtistName = artistStr;
 
             pcmData.SetPicture(m_pictureBytes, m_pictureData);
+            return 0;
+        }
+
+        public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
+            int rv = ReadStartCommon(ReadMode.Header, flacFilePath, 0, out pcmData);
+            StopChildProcess();
+            if (rv != 0) {
+                return rv;
+            }
 
             return 0;
         }
 
         public int ReadStreamBegin(string flacFilePath, long skipSamples, out PcmDataLib.PcmData pcmData) {
-            pcmData = new PcmDataLib.PcmData();
-
-            StartChildProcess();
-            SendString("A");
-            SendBase64(flacFilePath);
-            SendString(skipSamples.ToString());
-
-            int rv = m_br.ReadInt32();
+            int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipSamples, out pcmData);
             if (rv != 0) {
                 StopChildProcess();
                 m_bytesPerFrame = 0;
                 return rv;
             }
 
-            int nChannels     = m_br.ReadInt32();
-            int bitsPerSample = m_br.ReadInt32();
-            int sampleRate    = m_br.ReadInt32();
-            m_numFrames       = m_br.ReadInt64();
-            m_numFramesPerBlock = m_br.ReadInt32();
-
-            string titleStr = m_br.ReadString();
-            string albumStr = m_br.ReadString();
-            string artistStr = m_br.ReadString();
-
-            m_pictureBytes = m_br.ReadInt32();
-            m_pictureData = new byte[0];
-            if (0 < m_pictureBytes) {
-                m_pictureData = m_br.ReadBytes(m_pictureBytes);
-            }
-
-            pcmData.SetFormat(
-                    nChannels,
-                    bitsPerSample,
-                    bitsPerSample,
-                    sampleRate,
-                    PcmDataLib.PcmData.ValueRepresentationType.SInt,
-                    m_numFrames);
-
             m_bytesPerFrame = pcmData.BitsPerFrame / 8;
-
             return 0;
         }
 
@@ -221,9 +208,6 @@ namespace PlayPcmWin {
                 frameCount = (int)preferredFrames;
             }
 
-
-            System.Console.WriteLine("ReadStreamReadOne() frameCount={0} readCount={1}",
-                frameCount, sampleArray.Length / m_bytesPerFrame);
             return sampleArray;
         }
 
@@ -246,9 +230,6 @@ namespace PlayPcmWin {
         public int ReadStreamEnd()
         {
             int exitCode = StopChildProcess();
-
-            System.Console.WriteLine("ReadEnd() exitCode={0}",
-                exitCode);
 
             m_bytesPerFrame = 0;
 
