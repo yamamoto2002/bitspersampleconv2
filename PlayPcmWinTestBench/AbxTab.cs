@@ -274,7 +274,7 @@ namespace PlayPcmWinTestBench {
                 }
                 pcmData.SetFormat(wavData.NumChannels, wavData.BitsPerFrame, wavData.BitsPerFrame,
                     wavData.SampleRate, wavData.SampleValueRepresentationType, wavData.NumFrames);
-                pcmData.SetSampleArray(wavData.NumFrames, wavData.GetSampleArray());
+                pcmData.SetSampleArray(wavData.GetSampleArray());
             }
 
             return pcmData;

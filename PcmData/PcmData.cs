@@ -269,11 +269,21 @@ namespace PcmDataLib {
         }
 
         /// <summary>
-        /// サンプル配列と総フレーム数NumFramesを入れる。
-        /// 注: 読み込み途中の一時データで、総フレーム数NumFramesよりもsampleArrayのフレーム数が少ないことがある。
+        /// 総フレーム数(サンプル値の数÷チャンネル数)をセット
         /// </summary>
-        /// <param name="numFrames"> 総フレーム数</param>
+        public void SetNumFrames(long numFrames) {
+            m_numFrames = numFrames;
+        }
+
+        /// <summary>
+        /// サンプル配列を入れる。総フレーム数は別途セットする必要あり。
+        /// </summary>
         /// <param name="sampleArray">サンプル配列</param>
+        public void SetSampleArray(byte[] sampleArray) {
+            m_sampleArray = null;
+            m_sampleArray = sampleArray;
+        }
+
         public void SetSampleArray(long numFrames, byte[] sampleArray) {
             m_numFrames = numFrames;
             m_sampleArray = null;
@@ -612,7 +622,7 @@ namespace PcmDataLib {
             PcmData newPcmData = new PcmData();
             newPcmData.CopyHeaderInfoFrom(this);
             newPcmData.SetFormat(2, BitsPerSample, ValidBitsPerSample, SampleRate, SampleValueRepresentationType, NumFrames);
-            newPcmData.SetSampleArray(NumFrames, newSampleArray);
+            newPcmData.SetSampleArray(newSampleArray);
 
             return newPcmData;
         }
@@ -773,7 +783,7 @@ namespace PcmDataLib {
             PcmData newPcmData = new PcmData();
             newPcmData.CopyHeaderInfoFrom(this);
             newPcmData.SetFormat(NumChannels, newBitsPerSample, newValidBitsPerSample, SampleRate, newValueRepType, NumFrames);
-            newPcmData.SetSampleArray(NumFrames, newSampleArray);
+            newPcmData.SetSampleArray(newSampleArray);
 
             return newPcmData;
         }

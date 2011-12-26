@@ -107,7 +107,7 @@ namespace PlayPcmWin {
             HeadereAndData,
         };
 
-        private int ReadStartCommon(ReadMode mode, string flacFilePath, long skipSamples, out PcmDataLib.PcmData pcmData) {
+        private int ReadStartCommon(ReadMode mode, string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData) {
             pcmData = new PcmDataLib.PcmData();
             
             StartChildProcess();
@@ -120,7 +120,8 @@ namespace PlayPcmWin {
             case ReadMode.HeadereAndData:
                 SendString("A");
                 SendBase64(flacFilePath);
-                SendString(skipSamples.ToString());
+                SendString(skipFrames.ToString());
+                SendString(wantFrames.ToString());
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -135,7 +136,8 @@ namespace PlayPcmWin {
             int nChannels     = m_br.ReadInt32();
             int bitsPerSample = m_br.ReadInt32();
             int sampleRate    = m_br.ReadInt32();
-            m_numFrames = m_br.ReadInt64();
+
+            m_numFrames         = m_br.ReadInt64();
             m_numFramesPerBlock = m_br.ReadInt32();
 
             string titleStr = m_br.ReadString();
@@ -165,7 +167,7 @@ namespace PlayPcmWin {
         }
 
         public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
-            int rv = ReadStartCommon(ReadMode.Header, flacFilePath, 0, out pcmData);
+            int rv = ReadStartCommon(ReadMode.Header, flacFilePath, 0, 0, out pcmData);
             StopChildProcess();
             if (rv != 0) {
                 return rv;
@@ -174,8 +176,8 @@ namespace PlayPcmWin {
             return 0;
         }
 
-        public int ReadStreamBegin(string flacFilePath, long skipSamples, out PcmDataLib.PcmData pcmData) {
-            int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipSamples, out pcmData);
+        public int ReadStreamBegin(string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData) {
+            int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipFrames, wantFrames, out pcmData);
             if (rv != 0) {
                 StopChildProcess();
                 m_bytesPerFrame = 0;
@@ -189,7 +191,7 @@ namespace PlayPcmWin {
         /// <summary>
         /// PCMサンプルを読み出す。
         /// </summary>
-        /// <returns>読んだサンプルデータ</returns>
+        /// <returns>読んだサンプルデータ。サイズはpreferredFramesよりも少ない場合がある。(preferredFramesよりも多くはない。)</returns>
         public byte [] ReadStreamReadOne(long preferredFrames)
         {
             System.Diagnostics.Debug.Assert(0 < m_bytesPerFrame);
@@ -204,6 +206,8 @@ namespace PlayPcmWin {
             byte [] sampleArray = m_br.ReadBytes(frameCount * m_bytesPerFrame);
 
             if (preferredFrames < frameCount) {
+                // 欲しいフレーム数よりも多くのサンプルデータが出てきた。CUEシートの場合などで起こる。
+                // データの後ろをtruncateする。
                 Array.Resize(ref sampleArray, (int)preferredFrames * m_bytesPerFrame);
                 frameCount = (int)preferredFrames;
             }

@@ -34,7 +34,7 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll", CharSet = CharSet.Unicode)]
         private extern static
-        int FlacDecodeDLL_DecodeStart(string path, long skipSamples);
+        int FlacDecodeDLL_DecodeStart(string path, long skipFrames);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
@@ -54,7 +54,7 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        long FlacDecodeDLL_GetNumSamples(int id);
+        long FlacDecodeDLL_GetNumFrames(int id);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
@@ -166,18 +166,27 @@ namespace FlacDecodeCS {
 
             string path = Base64Decode(sbase64);
 
-            long skipSamples = 0;
+            long skipFrames = 0;
+            long wantFrames = 0;
             if (operationType == OperationType.DecodeAll) {
-                // 内容抽出の場合、3行目にスキップサンプル数が渡ってくる。
-                string skipSamplesStr = System.Console.ReadLine();
-                if (null == skipSamplesStr || !Int64.TryParse(skipSamplesStr, out skipSamples) || skipSamples < 0) {
-                    LogWriteLine("内容抽出の場合、stdinの3行目にスキップサンプル数を入力してください。");
+                // 内容抽出の場合
+                // 3行目にスキップサンプル数。
+                // 4行目に取得サンプル数。
+                string skipFramesStr = System.Console.ReadLine();
+                if (null == skipFramesStr || !Int64.TryParse(skipFramesStr, out skipFrames) || skipFrames < 0) {
+                    LogWriteLine("内容抽出の場合、stdinの3行目にスキップフレーム数を入力してください。");
+                    return -3;
+                }
+
+                string wantFramesStr = System.Console.ReadLine();
+                if (null == wantFramesStr || !Int64.TryParse(wantFramesStr, out wantFrames)) {
+                    LogWriteLine("内容抽出の場合、stdinの4行目に読み込むフレーム数を入力してください。");
                     return -3;
                 }
             }
 
-            LogWriteLine(string.Format("FlacDecodeCS DecodeOne operationType={0} path={1} skipSamples={2}",
-                operationType, path, skipSamples));
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne operationType={0} path={1} skipF={2} wantF={3}",
+                operationType, path, skipFrames, wantFrames));
 
             /* パイプ出力の内容
              * オフセット サイズ(バイト) 内容
@@ -185,7 +194,7 @@ namespace FlacDecodeCS {
              * 4          4              チャンネル数   nChannels
              * 8          4              サンプルレート sampleRate
              * 12         4              量子化ビット数 bitsPerSample
-             * 16         8              総サンプル数   numSamples (残りサンプル数ではない)
+             * 16         8              総フレーム数   numFrames (残りフレーム数ではない)
              * 24         4              NumFramesPerBlock
              * 28         titleLen       タイトル文字列
              * 28+titleLen albumLen      アルバム文字列
@@ -201,7 +210,7 @@ namespace FlacDecodeCS {
              * ※2…32+t+al+ar+pic+※1
              */
 
-            int rv = FlacDecodeDLL_DecodeStart(path, skipSamples);
+            int rv = FlacDecodeDLL_DecodeStart(path, skipFrames);
             bw.Write(rv);
             if (rv < 0) {
                 LogWriteLine(string.Format("FLACデコード開始エラー。{0}", rv));
@@ -222,8 +231,8 @@ namespace FlacDecodeCS {
             int sampleRate    = FlacDecodeDLL_GetSampleRate(id);
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetSampleRate() {0}", sampleRate));
 
-            long numSamples   = FlacDecodeDLL_GetNumSamples(id);
-            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumSamples() {0}", numSamples));
+            long numFrames   = FlacDecodeDLL_GetNumFrames(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumFrames() {0}", numFrames));
 
             int numFramesPerBlock = FlacDecodeDLL_GetNumFramesPerBlock(id);
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumFramesPerBlock() {0}", numFramesPerBlock));
@@ -259,7 +268,7 @@ namespace FlacDecodeCS {
             bw.Write(nChannels);
             bw.Write(bitsPerSample);
             bw.Write(sampleRate);
-            bw.Write(numSamples);
+            bw.Write(numFrames);
             bw.Write(numFramesPerBlock);
 
             bw.Write(titleStr);
@@ -273,9 +282,16 @@ namespace FlacDecodeCS {
 
             int ercd = 0;
 
-            if (operationType == OperationType.DecodeAll) {
+            if (operationType == OperationType.DecodeAll && wantFrames != 0) {
                 // デコードしたデータを全部パイプに出力する。
+
+                if (wantFrames < 0) {
+                    // wantFramesが負の値の時、最後まで読み出す。
+                    wantFrames = numFrames - skipFrames;
+                }
+
                 int frameBytes = nChannels * bitsPerSample / 8;
+                long readFrames = 0;
 
                 const int numFramePerCall = 1024 * 1024;
                 byte[] buff = new byte[numFramePerCall * frameBytes];
@@ -289,9 +305,11 @@ namespace FlacDecodeCS {
                     if (0 < rv) {
                         bw.Write(rv);
                         bw.Write(buff, 0, rv * frameBytes);
+
+                        readFrames += rv;
                     }
 
-                    if (rv <= 0 || ercd == 1) {
+                    if (rv <= 0 || ercd == 1 || wantFrames <= readFrames) {
                         // これでおしまい。
                         int v0 = 0;
                         bw.Write(v0);

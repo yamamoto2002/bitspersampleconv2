@@ -76,9 +76,9 @@ struct FlacDecodeInfo {
     int          sampleRate;
     int          channels;
     int          bitsPerSample;
-    FLAC__uint64 totalSamples;
+    FLAC__uint64 totalFrames;
 
-    int64_t      skipSamples;
+    int64_t      skipFrames;
 
     int minFrameSize;
     int minBlockSize;
@@ -114,13 +114,12 @@ struct FlacDecodeInfo {
     char              *pictureData;
 
     void Clear(void) {
-        totalSamples  = 0;
         sampleRate    = 0;
         channels      = 0;
         bitsPerSample = 0;
 
-        totalSamples = 0;
-        skipSamples  = 0;
+        totalFrames = 0;
+        skipFrames  = 0;
 
         minFrameSize = 0;
         minBlockSize = 0;
@@ -184,10 +183,10 @@ WriteCallback1(const FLAC__StreamDecoder *decoder,
 
     (void)decoder;
 
-    dprintf(fdi->logFP, "%s fdi->totalSamples=%lld errorCode=%d\n", __FUNCTION__,
-        fdi->totalSamples, fdi->errorCode);
+    dprintf(fdi->logFP, "%s fdi->totalFrames=%lld errorCode=%d\n", __FUNCTION__,
+        fdi->totalFrames, fdi->errorCode);
 
-    if(fdi->totalSamples == 0) {
+    if(fdi->totalFrames == 0) {
         return FLAC__STREAM_DECODER_WRITE_STATUS_ABORT;
     }
 
@@ -305,7 +304,7 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
     dprintf(fdi->logFP, "%s type=%d\n", __FUNCTION__, metadata->type);
 
     if(metadata->type == FLAC__METADATA_TYPE_STREAMINFO) {
-        fdi->totalSamples  = metadata->data.stream_info.total_samples;
+        fdi->totalFrames  = metadata->data.stream_info.total_samples;
         fdi->sampleRate    = metadata->data.stream_info.sample_rate;
         fdi->channels      = metadata->data.stream_info.channels;
         fdi->bitsPerSample = metadata->data.stream_info.bits_per_sample;
@@ -463,11 +462,11 @@ DecodeMain(FlacDecodeInfo *fdi)
         goto end;
     }
 
-    if (0 < fdi->skipSamples) {
-        ok = FLAC__stream_decoder_seek_absolute(fdi->decoder, fdi->skipSamples);
+    if (0 < fdi->skipFrames) {
+        ok = FLAC__stream_decoder_seek_absolute(fdi->decoder, fdi->skipFrames);
         if (!ok) {
-            dprintf(fdi->logFP, "%s Flac seek error skipSamples=%lld fdi->errorCode=%d\n",
-                __FUNCTION__, fdi->skipSamples, fdi->errorCode);
+            dprintf(fdi->logFP, "%s Flac seek error skipFrames=%lld fdi->errorCode=%d\n",
+                __FUNCTION__, fdi->skipFrames, fdi->errorCode);
             if (fdi->errorCode == FDRT_Success) {
                 fdi->errorCode = FDRT_DecorderProcessFailed;
             }
@@ -628,11 +627,11 @@ FlacDecodeDLL_GetSampleRate(int id)
     return fdi->sampleRate;
 }
 
-// サンプル(==frame)総数。
+// フレーム総数。
 // DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int64_t __stdcall
-FlacDecodeDLL_GetNumSamples(int id)
+FlacDecodeDLL_GetNumFrames(int id)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
@@ -642,7 +641,7 @@ FlacDecodeDLL_GetNumSamples(int id)
         return 0;
     }
 
-    return fdi->totalSamples;
+    return fdi->totalFrames;
 }
 
 extern "C" __declspec(dllexport)
@@ -757,7 +756,7 @@ LogClose(FlacDecodeInfo *fdi)
 /// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipSamples)
+FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipFrames)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoNew();
     if (NULL == fdi) {
@@ -767,10 +766,10 @@ FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipSamples)
 
     LogOpen(fdi);
     dprintf1(fdi->logFP, "%s started\n", __FUNCTION__);
-    dprintf1(fdi->logFP, "%s skipSamples=%lld path=\"%S\"\n",
-        __FUNCTION__, skipSamples, fromFlacPath);
+    dprintf1(fdi->logFP, "%s skipFrames=%lld path=\"%S\"\n",
+        __FUNCTION__, skipFrames, fromFlacPath);
 
-    fdi->skipSamples = skipSamples;
+    fdi->skipFrames = skipFrames;
 
     assert(NULL == fdi->commandMutex);
     fdi->commandMutex = CreateMutex(NULL, FALSE, NULL);

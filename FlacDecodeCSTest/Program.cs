@@ -76,7 +76,7 @@ namespace FlacDecodeCSTest {
             int  nChannels     = br.ReadInt32();
             int  bitsPerSample = br.ReadInt32();
             int  sampleRate    = br.ReadInt32();
-            long numSamples    = br.ReadInt64();
+            long numFrames     = br.ReadInt64();
             int  numFramesPerBlock = br.ReadInt32();
 
             string titleStr = br.ReadString();
@@ -89,8 +89,8 @@ namespace FlacDecodeCSTest {
                 br.ReadBytes(pictureBytes);
             }
 
-            System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3} numFramesPerBlock={4}",
-                nChannels, bitsPerSample, sampleRate, numSamples, numFramesPerBlock);
+            System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
+                nChannels, bitsPerSample, sampleRate, numFrames, numFramesPerBlock);
 
             System.Console.WriteLine("TITLE={0}", titleStr);
             System.Console.WriteLine("ALBUM={0}", albumStr);
@@ -100,13 +100,13 @@ namespace FlacDecodeCSTest {
             return 0;
         }
 
-        private int ReadAllTest(string flacFilePath, long skipSamples) {
+        private int ReadAllTest(string flacFilePath, long skipFrames, long wantFrames) {
             StartChildProcess();
             SendString("A");
             SendBase64(flacFilePath);
 
-            // スキップサンプル数。
-            SendString(skipSamples.ToString());
+            SendString(skipFrames.ToString());
+            SendString(wantFrames.ToString());
 
             System.Console.WriteLine("ReadAllTest({0}) started", flacFilePath);
 
@@ -119,7 +119,7 @@ namespace FlacDecodeCSTest {
             int  nChannels     = br.ReadInt32();
             int  bitsPerSample = br.ReadInt32();
             int  sampleRate    = br.ReadInt32();
-            long numSamples    = br.ReadInt64();
+            long numFrames     = br.ReadInt64();
             int  numFramesPerBlock = br.ReadInt32();
 
             string titleStr = br.ReadString();
@@ -134,34 +134,40 @@ namespace FlacDecodeCSTest {
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 
-            System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numSamples={3} numFramesPerBlock={4}",
-                nChannels, bitsPerSample, sampleRate, numSamples, numFramesPerBlock);
+            System.Console.WriteLine("ReadAllTest() nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
+                nChannels, bitsPerSample, sampleRate, numFrames, numFramesPerBlock);
 
             System.Console.WriteLine("TITLE={0}", titleStr);
             System.Console.WriteLine("ALBUM={0}", albumStr);
             System.Console.WriteLine("ARTIST={0}", artistStr);
 
-            long pos = 0;
-            while (pos < numSamples) {
-                int frameCount = br.ReadInt32();
-                if (frameCount == 0) {
-                    break;
+            if (wantFrames != 0) {
+                if (wantFrames < 0) {
+                    wantFrames = numFrames - skipFrames;
                 }
 
-                System.Console.WriteLine("ReadAllTest() frameCount={0}", frameCount);
+                long readFrames = 0;
+                while (readFrames < wantFrames) {
+                    int n = br.ReadInt32();
+                    if (n == 0) {
+                        break;
+                    }
 
-                byte[] buff = br.ReadBytes(frameCount * bytesPerFrame);
+                    System.Console.WriteLine("ReadAllTest() n={0}", n);
 
-                System.Console.WriteLine("ReadAllTest() frameCount={0} readCount={1} pos={2}",
-                    frameCount, buff.Length / bytesPerFrame, pos);
-                if (buff.Length == 0) {
-                    break;
+                    byte[] buff = br.ReadBytes(n * bytesPerFrame);
+
+                    System.Console.WriteLine("ReadAllTest() n={0} readCount={1} pos={2}",
+                        n, buff.Length / bytesPerFrame, readFrames);
+                    if (buff.Length == 0) {
+                        break;
+                    }
+                    readFrames += buff.Length / bytesPerFrame;
                 }
-                pos += buff.Length / bytesPerFrame;
+
+                System.Console.WriteLine("ReadAllTest() numFrames={0} read={1} ({2}M Frames)",
+                    numFrames, readFrames, readFrames / 1048576);
             }
-
-            System.Console.WriteLine("ReadAllTest() numSamples={0} pos={1} ({2}M samples)",
-                numSamples, pos, pos / 1048576);
 
             int exitCode = StopChildProcess();
             System.Console.WriteLine("ReadAllTest() exitCode={0}",
@@ -169,32 +175,32 @@ namespace FlacDecodeCSTest {
             return exitCode;
         }
 
-        private int Run(string flacPath, long skipSamples) {
+        private int Run(string flacPath) {
             int exitCode;
             
             exitCode = ReadHeaderTest(flacPath);
             System.Console.WriteLine("Run() ReadHeaderTest result={0}", exitCode);
 
-            exitCode = ReadAllTest(flacPath, skipSamples);
-            System.Console.WriteLine("Run() ReadAllTest result={0}", exitCode);
+            exitCode = ReadAllTest(flacPath, 0, -1);
+            System.Console.WriteLine("Run() ReadAllTest till eof result={0}", exitCode);
+
+            exitCode = ReadAllTest(flacPath, 65536, 65536);
+            System.Console.WriteLine("Run() ReadAllTest partial result={0}", exitCode);
+
+            exitCode = ReadAllTest(flacPath, 0, 0);
+            System.Console.WriteLine("Run() ReadAllTest onlyheader result={0}", exitCode);
 
             return exitCode;
         }
 
         static void Main(string[] args) {
-            if (args.Length != 2) {
-                System.Console.WriteLine("E: args[0] must be flacFilePath");
-                return;
-            }
-
-            long skipSamples;
-            if (!Int64.TryParse(args[1], out skipSamples)) {
-                System.Console.WriteLine("E: args[1] must be skipSamples");
+            if (args.Length != 1) {
+                System.Console.WriteLine("Usage: flacFilePath");
                 return;
             }
 
             Program p = new Program();
-            p.Run(args[0], skipSamples);
+            p.Run(args[0]);
         }
     }
 }

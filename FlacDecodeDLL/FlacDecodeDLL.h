@@ -64,11 +64,11 @@ extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetSampleRate(int id);
 
-/// サンプル(==frame)総数。
+/// フレーム総数。(ここでフレームとは、全チャンネル分のサンプルデータ1個のこと)
 /// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int64_t __stdcall
-FlacDecodeDLL_GetNumSamples(int id);
+FlacDecodeDLL_GetNumFrames(int id);
 
 /// タイトル文字列(WSTR)。
 /// DecodeStart成功後に呼ぶことができる。
