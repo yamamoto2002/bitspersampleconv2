@@ -279,7 +279,7 @@ namespace Wasapi {
         /// </summary>
         /// <param name="t">サンプルフォーマットタイプ</param>
         /// <returns>メモリ上に占めるバイト数(1サンプルあたり)</returns>
-        public int SampleFormatTypeToUseBytesPerSample(SampleFormatType t) {
+        public static int SampleFormatTypeToUseBytesPerSample(SampleFormatType t) {
             switch (t) {
             case SampleFormatType.Sint16: return 2;
             case SampleFormatType.Sint24: return 3;

@@ -25,14 +25,15 @@ namespace PlayPcmWin {
         /// </summary>
         /// <param name="path">ファイルパス。</param>
         /// <param name="startFrame">読み出し開始フレーム</param>
+        /// <param name="wantFrames">取得したいフレーム数。-1: 最後まで。0: 取得しない。</param>
         /// <returns>0以上: 成功。負: 失敗。</returns>
-        public int StreamBegin(string path, long startFrame) {
+        public int StreamBegin(string path, long startFrame, long wantFrames) {
             string ext = System.IO.Path.GetExtension(path);
             switch (ext.ToLower()) {
             case ".flac":
                 // FLACファイル読み込み。
                 m_format = Format.FLAC;
-                return StreamBeginFlac(path, startFrame);
+                return StreamBeginFlac(path, startFrame, wantFrames);
             case ".aiff":
             case ".aif":
                 // AIFFファイル読み込み。
@@ -97,11 +98,11 @@ namespace PlayPcmWin {
             m_waveR = null;
         }
 
-        private int StreamBeginFlac(string path, long startFrame)
+        private int StreamBeginFlac(string path, long startFrame, long wantFrames)
         {
             // m_pcmData = new PcmDataLib.PcmData();
             m_flacR = new FlacDecodeIF();
-            int ercd = m_flacR.ReadStreamBegin(path, startFrame, out m_pcmData);
+            int ercd = m_flacR.ReadStreamBegin(path, startFrame, wantFrames, out m_pcmData);
             if (ercd < 0) {
                 return ercd;
             }
