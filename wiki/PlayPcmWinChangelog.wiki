@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.42 ==
+  * FLAC読み込み処理の高速化。本当にバグっぽい。
+
 ===!PlayPcmWin 3.0.41 ==
   * 英語版作成。
 
