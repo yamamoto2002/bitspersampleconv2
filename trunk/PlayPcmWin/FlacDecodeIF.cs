@@ -176,6 +176,14 @@ namespace PlayPcmWin {
             return 0;
         }
 
+        /// <summary>
+        /// FLACファイルからPCMデータを取り出し開始。
+        /// </summary>
+        /// <param name="flacFilePath">読み込むファイルパス。</param>
+        /// <param name="skipFrames">ファイルの先頭からのスキップするフレーム数。0以外の値を指定するとMD5のチェックが行われなくなる。</param>
+        /// <param name="wantFrames">取得するフレーム数。</param>
+        /// <param name="pcmData">出てきたデコード後のPCMデータ。</param>
+        /// <returns></returns>
         public int ReadStreamBegin(string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData) {
             int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipFrames, wantFrames, out pcmData);
             if (rv != 0) {
@@ -238,6 +246,18 @@ namespace PlayPcmWin {
             m_bytesPerFrame = 0;
 
             return exitCode;
+        }
+
+        public void ReadStreamAbort() {
+            System.Diagnostics.Debug.Assert(null != m_childProcess);
+            m_pss.Close();
+            m_pss = null;
+
+            m_childProcess.Close();
+            m_childProcess = null;
+
+            m_br.Close();
+            m_br = null;
         }
 
     }

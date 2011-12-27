@@ -75,6 +75,9 @@ namespace PlayPcmWin {
             checkBoxRefrainRedraw.IsChecked =
                 preference.RefrainRedraw;
 
+            checkBoxParallelRead.IsChecked =
+                preference.ParallelRead;
+
             textBoxPlayingTimeSize.Text =
                 preference.PlayingTimeSize.ToString();
 
@@ -153,7 +156,8 @@ namespace PlayPcmWin {
             m_preference.RefrainRedraw
                 = checkBoxRefrainRedraw.IsChecked == true;
 
-            m_preference.ParallelRead = false;
+            m_preference.ParallelRead
+                = checkBoxParallelRead.IsChecked == true;
 
             m_preference.WindowScale = sliderWindowScaling.Value;
 

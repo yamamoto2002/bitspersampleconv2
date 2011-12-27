@@ -120,8 +120,7 @@ namespace PlayPcmWin {
 
             Preference p = xmlRW.Load();
 
-            // 読み込んだ値が都合によりサポートされていない場合、ロード後に強制的に上書きする
-            p.ParallelRead = false;
+            // (読み込んだ値が都合によりサポートされていない場合、このタイミングでロード後に強制的に上書き出来る)
 
             return p;
         }

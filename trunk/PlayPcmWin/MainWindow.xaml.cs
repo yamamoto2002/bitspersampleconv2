@@ -1860,15 +1860,6 @@ namespace PlayPcmWin
             public int hr;
         }
 
-        private void ReadFileDoWork(object o, DoWorkEventArgs args) {
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
-
-            ReadFileDoWork1(o, args);
-
-            sw.Stop();
-            Console.WriteLine("ReadFile elapsed time {0}", sw.Elapsed);
-        }
         struct ReadProgressInfo {
             public int pcmDataId;
             public long startFrame;
@@ -1908,8 +1899,9 @@ namespace PlayPcmWin
         /// <summary>
         ///  バックグラウンド読み込み。
         ///  m_readFileWorker.RunWorkerAsync(読み込むgroupId)で開始する。
+        ///  完了するとReadFileRunWorkerCompletedが呼ばれる。
         /// </summary>
-        private void ReadFileDoWork1(object o, DoWorkEventArgs args) {
+        private void ReadFileDoWork(object o, DoWorkEventArgs args) {
             BackgroundWorker bw = (BackgroundWorker)o;
             int readGroupId = (int)args.Argument;
             Console.WriteLine("D: ReadFileSingleDoWork({0}) started", readGroupId);
@@ -1917,6 +1909,9 @@ namespace PlayPcmWin
             ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
             try {
                 r.hr = -1;
+
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                sw.Start();
 
                 m_readProgressInfo = new ReadProgressInfo(
                     0, 0, 0, 0, CountWaveDataOnPlayGroup(m_pcmDataListForPlay, readGroupId));
@@ -1937,11 +1932,13 @@ namespace PlayPcmWin
                     long endFrame   = (long)(pd.EndTick) * pd.SampleRate / 75;
 
                     bool rv = ReadOnePcmFile(bw, pd, startFrame, endFrame, r);
+                    if (bw.CancellationPending) {
+                        args.Cancel = true;
+                        return;
+                    }
+
                     if (!rv) {
                         args.Result = r;
-                        if (bw.CancellationPending) {
-                            args.Cancel = true;
-                        }
                         return;
                     }
 
@@ -1953,7 +1950,8 @@ namespace PlayPcmWin
                 wasapi.AddPlayPcmDataEnd();
 
                 // 成功。
-                r.message = string.Format(Properties.Resources.ReadPlayGroupNCompleted + "\r\n", readGroupId);
+                sw.Stop();
+                r.message = string.Format(Properties.Resources.ReadPlayGroupNCompleted + "\r\n", readGroupId, sw.ElapsedMilliseconds);
                 r.hr = 0;
                 args.Result = r;
 
@@ -1985,6 +1983,7 @@ namespace PlayPcmWin
                 this.readFrames     = readFrames;
                 this.writeOffsFrame = writeOffsFrame;
                 doneEvent = new ManualResetEvent(false);
+                result = true;
             }
 
             public void ThreadPoolCallback(Object threadContext) {
@@ -1992,6 +1991,20 @@ namespace PlayPcmWin
 
                 result = mw.ReadOnePcmFileFragment(bw, pd, readStartFrame, readFrames, writeOffsFrame);
                 doneEvent.Set();
+            }
+
+            /// <summary>
+            /// このインスタンスの使用を終了する。再利用はできない。
+            /// </summary>
+            public void End() {
+                mw = null;
+                bw = null;
+                pd = null;
+                readStartFrame = 0;
+                readFrames = 0;
+                writeOffsFrame = 0;
+                doneEvent = null;
+                result = true;
             }
         };
 
@@ -2061,10 +2074,7 @@ namespace PlayPcmWin
 
             {
                 // このトラックのWasapi PCMデータ領域を確保する。
-                // Wasapi再生バッファのフォーマットはm_deviceSetupInfo.SampleFormat
-                // 総フレーム数はendFrame - startFrame
                 long allocBytes = wantFramesTotal * m_deviceSetupInfo.UseBytesPerFrame;
-
                 if (!wasapi.AddPlayPcmDataAllocateMemory(pd.Id, allocBytes)) {
                     //ClearPlayList(PlayListClearMode.ClearWithoutUpdateUI); //< メモリを空ける：効果があるか怪しい
                     r.message = string.Format(Properties.Resources.MemoryExhausted);
@@ -2073,27 +2083,36 @@ namespace PlayPcmWin
                 }
             }
 
-            // ファイルのstartFrameからendFrameまでを読みだす。(並列化)
-            int fragmentCount = Environment.ProcessorCount;
-            var rri = SetupReadPcmTasks(bw, pd, startFrame, endFrame, fragmentCount);
-            var doneEventArray = new ManualResetEvent[rri.Count];
-            for (int i=0; i < rri.Count; ++i) {
-                doneEventArray[i] = rri[i].doneEvent;
-            }
-
-            for (int i=0; i < rri.Count; ++i) {
-                ThreadPool.QueueUserWorkItem(rri[i].ThreadPoolCallback, i);
-            }
-            WaitHandle.WaitAll(doneEventArray);
-
-            for (int i=0; i < rri.Count; ++i) {
-                if (!rri[i].result) {
-                    r.message = string.Format(Properties.Resources.UnexpectedEndOfStream);
-                    return false;
+            bool result = true;
+            if (m_preference.ParallelRead) {
+                // ファイルのstartFrameからendFrameまでを読みだす。(並列化)
+                int fragmentCount = Environment.ProcessorCount;
+                var rri = SetupReadPcmTasks(bw, pd, startFrame, endFrame, fragmentCount);
+                var doneEventArray = new ManualResetEvent[rri.Count];
+                for (int i=0; i < rri.Count; ++i) {
+                    doneEventArray[i] = rri[i].doneEvent;
                 }
+
+                for (int i=0; i < rri.Count; ++i) {
+                    ThreadPool.QueueUserWorkItem(rri[i].ThreadPoolCallback, i);
+                }
+                WaitHandle.WaitAll(doneEventArray);
+
+                for (int i=0; i < rri.Count; ++i) {
+                    if (!rri[i].result) {
+                        r.message = string.Format(Properties.Resources.UnexpectedEndOfStream);
+                        result = false;
+                    }
+                    rri[i].End();
+                }
+                rri.Clear();
+                doneEventArray = null;
+            } else {
+                // ファイルのstartFrameからendFrameまでを読み出す。(1スレッド)
+                result = ReadOnePcmFileFragment(bw, pd, startFrame, wantFramesTotal, 0);
             }
 
-            return true;
+            return result;
         }
 
         private bool ReadOnePcmFileFragment(BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long wantFramesTotal, long writeOffsFrame) {
@@ -2139,21 +2158,23 @@ namespace PlayPcmWin
 
                 long posBytes = (writeOffsFrame + frameCount) * pdAfter.BitsPerFrame / 8;
 
-                bool rv = wasapi.AddPlayPcmDataSetPcmFragment(pd.Id, posBytes, pdAfter.GetSampleArray());
-                System.Diagnostics.Debug.Assert(rv);
+                bool result = false;
+                lock (pd) {
+                    result = wasapi.AddPlayPcmDataSetPcmFragment(pd.Id, posBytes, pdAfter.GetSampleArray());
+                }
+                System.Diagnostics.Debug.Assert(result);
 
                 pdAfter.ForgetDataPart();
-
-                if (bw.CancellationPending) {
-                    Console.WriteLine("D: ReadFileSingleDoWork() Cancelled");
-                    pr.StreamEnd();
-                    return false;
-                }
 
                 // frameCountを進める
                 frameCount += readFrames;
 
                 ReadFileReportProgress(readFrames);
+
+                if (bw.CancellationPending) {
+                    pr.StreamAbort();
+                    return false;
+                }
             } while (frameCount < wantFramesTotal);
 
             pr.StreamEnd();
@@ -2190,7 +2211,9 @@ namespace PlayPcmWin
             AddLogText(r.message);
 
             if (r.hr < 0) {
-                MessageBox.Show(r.message);
+                if (0 < r.message.Length) {
+                    MessageBox.Show(r.message);
+                }
                 Exit();
                 return;
             }
