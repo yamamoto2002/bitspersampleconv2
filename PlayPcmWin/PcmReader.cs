@@ -75,6 +75,29 @@ namespace PlayPcmWin {
             return result;
         }
 
+        public void StreamAbort() {
+            switch (m_format) {
+            case Format.FLAC:
+                m_flacR.ReadStreamAbort();
+                break;
+            case Format.AIFF:
+                m_aiffR.ReadStreamEnd();
+                break;
+            case Format.WAVE:
+                m_waveR.ReadStreamEnd();
+                break;
+            }
+
+            if (null != m_br) {
+                m_br.Close();
+                m_br = null;
+            }
+            m_pcmData = null;
+            m_flacR = null;
+            m_aiffR = null;
+            m_waveR = null;
+        }
+
         public void StreamEnd() {
             switch (m_format) {
             case Format.FLAC:

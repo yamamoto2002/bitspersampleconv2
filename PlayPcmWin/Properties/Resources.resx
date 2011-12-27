@@ -237,7 +237,7 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
     <value>Read error</value>
   </data>
   <data name="ReadPlayGroupNCompleted" xml:space="preserve">
-    <value>Read playgroup {0} completed.</value>
+    <value>Read playgroup {0} completed. Elapsed time: {1}ms</value>
   </data>
   <data name="SupportedFileFilter" xml:space="preserve">
     <value>Supported files|*.wav;*.wave;*.flac;*.aif;*.aiff;*.cue;*.ppwpl|WAVE files|*.wav;*.wave|FLAC files|*.flac|AIFF files|*.aif;*.aiff|CUE files|*.cue|PPWPL files|*.ppwpl|All files|*.*</value>
