@@ -2215,20 +2215,18 @@ namespace PlayPcmWin
         /// バックグラウンドファイル読み込みが完了した。
         /// </summary>
         private void ReadFileRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
-            ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
-
-            // Cancel時は、r.messageは無い。
-            if (0 < r.message.Length) {
-                AddLogText(r.message);
+            if (args.Cancelled) {
+                // キャンセル時は何もしないで直ちに終わる。
+                return;
             }
 
+            ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
+
+            AddLogText(r.message);
+
             if (r.hr < 0) {
-                if (0 < r.message.Length) {
-                    MessageBox.Show(r.message);
-                    Exit();
-                } else {
-                    // キャンセル時。
-                }
+                MessageBox.Show(r.message);
+                Exit();
                 return;
             }
 
