@@ -425,6 +425,9 @@ namespace PlayPcmWin {
 
             byte[] sampleArray = br.ReadBytes((int)(readFrames * BitsPerFrame / 8));
 
+            // 読めたフレーム数 (ReadBytes()が1バイトも読めなかった場合byte[0]が戻るのでreadFramesは0となる)
+            readFrames = sampleArray.Length / (BitsPerFrame / 8);
+
             switch (Compression) {
             case CompressionType.None:
                 // エンディアン変換
