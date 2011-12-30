@@ -1909,6 +1909,7 @@ namespace PlayPcmWin
             ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
             try {
                 r.hr = -1;
+                r.message = "Unknown error";
 
                 System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                 sw.Start();
@@ -1933,6 +1934,9 @@ namespace PlayPcmWin
 
                     bool rv = ReadOnePcmFile(bw, pd, startFrame, endFrame, r);
                     if (bw.CancellationPending) {
+                        r.hr = -1;
+                        r.message = string.Empty;
+                        args.Result = r;
                         args.Cancel = true;
                         return;
                     }
@@ -2212,13 +2216,19 @@ namespace PlayPcmWin
         /// </summary>
         private void ReadFileRunWorkerCompleted(object o, RunWorkerCompletedEventArgs args) {
             ReadFileRunWorkerCompletedArgs r = (ReadFileRunWorkerCompletedArgs)args.Result;
-            AddLogText(r.message);
+
+            // Cancel時は、r.messageは無い。
+            if (0 < r.message.Length) {
+                AddLogText(r.message);
+            }
 
             if (r.hr < 0) {
                 if (0 < r.message.Length) {
                     MessageBox.Show(r.message);
+                    Exit();
+                } else {
+                    // キャンセル時。
                 }
-                Exit();
                 return;
             }
 
