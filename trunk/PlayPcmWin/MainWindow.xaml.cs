@@ -1986,7 +1986,11 @@ namespace PlayPcmWin
             public ReadPcmTaskInfo(MainWindow mw, BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long readFrames, long writeOffsFrame) {
                 this.mw = mw;
                 this.bw = bw;
-                this.pd = pd;
+
+                // PcmDataのSampleArrayメンバを各スレッドが物置のように使うので実体をコピーする。
+                this.pd = new PcmData();
+                this.pd.CopyFrom(pd);
+
                 this.readStartFrame = readStartFrame;
                 this.readFrames     = readFrames;
                 this.writeOffsFrame = writeOffsFrame;
@@ -2130,7 +2134,7 @@ namespace PlayPcmWin
         private bool ReadOnePcmFileFragment(BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long wantFramesTotal, long writeOffsFrame) {
             PcmReader pr = new PcmReader();
             int ercd = pr.StreamBegin(pd.FullPath, readStartFrame, wantFramesTotal);
-
+            
             long frameCount = 0;
             do {
                 // 読み出したいフレーム数wantFrames。
