@@ -15,6 +15,7 @@
 http://bitspersampleconv2.googlecode.com/files/ppw3049settings.png
 
 http://bitspersampleconv2.googlecode.com/files/ppw3049cpu.png
+
 ↑FLACの並列読込で全CPUコアを使い切っている様子
 
 ===!PlayPcmWin 3.0.42 ==
