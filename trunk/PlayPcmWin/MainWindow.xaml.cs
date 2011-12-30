@@ -1988,8 +1988,12 @@ namespace PlayPcmWin
 
             public void ThreadPoolCallback(Object threadContext) {
                 int threadIndex = (int)threadContext;
-
-                result = mw.ReadOnePcmFileFragment(bw, pd, readStartFrame, readFrames, writeOffsFrame);
+                try {
+                    result = mw.ReadOnePcmFileFragment(bw, pd, readStartFrame, readFrames, writeOffsFrame);
+                } catch (Exception ex) {
+                    System.Console.WriteLine(ex);
+                    result = false;
+                }
                 doneEvent.Set();
             }
 
