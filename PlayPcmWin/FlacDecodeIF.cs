@@ -17,36 +17,36 @@ namespace PlayPcmWin {
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.Success:
-                return "成功";
+                return "Success";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.Completed:
-                return "成功のうちに終了";
+                return "Completed";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.DataNotReady:
-                return "データの準備がまだ出来ていません(内部エラー)";
+                return "Data not ready (internal error)";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.WriteOpenFailed:
-                return "ファイルが開けませんでした";
+                return "Could not open specified file";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecoderNewFailed:
-                return "FlacStreamDecoderの作成に失敗";
+                return "FlacStreamDecoder create failed";
 
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecoderInitFailed:
-                return "FlacStreamDecoderの初期化失敗";
+                return "FlacStreamDecoder init failed";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FlacStreamDecorderProcessFailed:
-                return "FlacStreamDecoderが失敗を戻しました";
+                return "FlacStreamDecoder returns fail";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.LostSync:
-                return "デコード中に同期を見失いました(データが壊れている)";
+                return "Lost sync while decoding (file corrupted)";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.BadHeader:
-                return "ヘッダー部分が壊れています";
+                return "Bad header";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.FrameCrcMismatch:
-                return "CRCエラー。ファイルの内容が壊れています";
+                return "CRC mismatch. (File corrupted)";
 
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.Unparseable:
-                return "解析失敗";
+                return "Unparsable data";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.NumFrameIsNotAligned:
-                return "フレーム数のアラインエラー(内部エラー)";
+                return "NumFrame is not aligned (internal error)";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.RecvBufferSizeInsufficient:
-                return "受信バッファサイズが小さすぎて１ブロックも入りませんでした";
+                return "Recv bufer size is insufficient (internal error)";
             case (int)FlacDecodeCS.FlacDecode.DecodeResultType.OtherError:
             default:
-                return "分類外のエラー";
+                return "Other error";
             }
         }
 

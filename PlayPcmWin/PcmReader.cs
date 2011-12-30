@@ -98,10 +98,15 @@ namespace PlayPcmWin {
             m_waveR = null;
         }
 
-        public void StreamEnd() {
+        /// <summary>
+        /// 読み込み処理を通常終了する。
+        /// </summary>
+        /// <returns>Error code</returns>
+        public int StreamEnd() {
+            int rv = 0;
             switch (m_format) {
             case Format.FLAC:
-                m_flacR.ReadStreamEnd();
+                rv = m_flacR.ReadStreamEnd();
                 break;
             case Format.AIFF:
                 m_aiffR.ReadStreamEnd();
@@ -119,6 +124,15 @@ namespace PlayPcmWin {
             m_flacR = null;
             m_aiffR = null;
             m_waveR = null;
+
+            return rv;
+        }
+
+        /// <summary>
+        /// StreamEndの戻り値を文字列に変換。
+        /// </summary>
+        public string ErrorCodeToStr(int ercd) {
+            return FlacDecodeIF.ErrorCodeToStr(ercd);
         }
 
         private int StreamBeginFlac(string path, long startFrame, long wantFrames)

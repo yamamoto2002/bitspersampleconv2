@@ -34,7 +34,7 @@ wmain(int argc, wchar_t* argv[])
     int bitsPerSample  = FlacDecodeDLL_GetBitsPerSample(id);
     int channels       = FlacDecodeDLL_GetNumOfChannels(id);
     int sampleRate     = FlacDecodeDLL_GetSampleRate(id);
-    int64_t numSamples = FlacDecodeDLL_GetNumSamples(id);
+    int64_t numFrames = FlacDecodeDLL_GetNumFrames(id);
     int numFramesPerBlock = FlacDecodeDLL_GetNumFramesPerBlock(id);
 
     wchar_t titleStr[16];
@@ -68,11 +68,11 @@ wmain(int argc, wchar_t* argv[])
         }
     }
 
-    printf("D: decodeId=%d bitsPerSample=%d sampleRate=%d numSamples=%lld channels=%d numFramesPerBlock=%d\n",
+    printf("D: decodeId=%d bitsPerSample=%d sampleRate=%d numFrames=%lld channels=%d numFramesPerBlock=%d\n",
         id,
         bitsPerSample,
         sampleRate,
-        numSamples,
+        numFrames,
         channels,
         numFramesPerBlock);
 

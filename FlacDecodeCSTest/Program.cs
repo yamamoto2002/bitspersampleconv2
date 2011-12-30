@@ -181,14 +181,16 @@ namespace FlacDecodeCSTest {
             exitCode = ReadHeaderTest(flacPath);
             System.Console.WriteLine("Run() ReadHeaderTest result={0}", exitCode);
 
-            exitCode = ReadAllTest(flacPath, 0, -1);
-            System.Console.WriteLine("Run() ReadAllTest till eof result={0}", exitCode);
 
+            
             exitCode = ReadAllTest(flacPath, 65536, 65536);
             System.Console.WriteLine("Run() ReadAllTest partial result={0}", exitCode);
 
             exitCode = ReadAllTest(flacPath, 0, 0);
             System.Console.WriteLine("Run() ReadAllTest onlyheader result={0}", exitCode);
+
+            exitCode = ReadAllTest(flacPath, 0, -1);
+            System.Console.WriteLine("Run() ReadAllTest till eof result={0}", exitCode);
 
             return exitCode;
         }

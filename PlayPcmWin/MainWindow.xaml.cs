@@ -1935,7 +1935,7 @@ namespace PlayPcmWin
                     long startFrame = (long)(pd.StartTick) * pd.SampleRate / 75;
                     long endFrame   = (long)(pd.EndTick) * pd.SampleRate / 75;
 
-                    bool rv = ReadOnePcmFile(bw, pd, startFrame, endFrame, r);
+                    bool rv = ReadOnePcmFile(bw, pd, startFrame, endFrame, ref r);
                     if (bw.CancellationPending) {
                         r.hr = -1;
                         r.message = string.Empty;
@@ -1982,6 +1982,7 @@ namespace PlayPcmWin
             public long writeOffsFrame;
             public ManualResetEvent doneEvent;
             public bool result;
+            public string message;
 
             public ReadPcmTaskInfo(MainWindow mw, BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long readFrames, long writeOffsFrame) {
                 this.mw = mw;
@@ -1994,6 +1995,9 @@ namespace PlayPcmWin
                 this.readStartFrame = readStartFrame;
                 this.readFrames     = readFrames;
                 this.writeOffsFrame = writeOffsFrame;
+
+                this.message = string.Empty;
+
                 doneEvent = new ManualResetEvent(false);
                 result = true;
             }
@@ -2001,7 +2005,7 @@ namespace PlayPcmWin
             public void ThreadPoolCallback(Object threadContext) {
                 int threadIndex = (int)threadContext;
                 try {
-                    result = mw.ReadOnePcmFileFragment(bw, pd, readStartFrame, readFrames, writeOffsFrame);
+                    result = mw.ReadOnePcmFileFragment(bw, pd, readStartFrame, readFrames, writeOffsFrame, ref message);
                 } catch (Exception ex) {
                     System.Console.WriteLine(ex);
                     result = false;
@@ -2061,7 +2065,7 @@ namespace PlayPcmWin
             }
         }
 
-        private bool ReadOnePcmFile(BackgroundWorker bw, PcmDataLib.PcmData pd, long startFrame, long endFrame, ReadFileRunWorkerCompletedArgs r) {
+        private bool ReadOnePcmFile(BackgroundWorker bw, PcmDataLib.PcmData pd, long startFrame, long endFrame, ref ReadFileRunWorkerCompletedArgs r) {
             {
                 // endFrameの位置を確定する。
                 // すると、rpi.ReadFramesも確定する。
@@ -2116,7 +2120,7 @@ namespace PlayPcmWin
 
                 for (int i=0; i < rri.Count; ++i) {
                     if (!rri[i].result) {
-                        r.message = string.Format(Properties.Resources.UnexpectedEndOfStream);
+                        r.message += rri[i].message + "\r\n";
                         result = false;
                     }
                     rri[i].End();
@@ -2125,16 +2129,25 @@ namespace PlayPcmWin
                 doneEventArray = null;
             } else {
                 // ファイルのstartFrameからendFrameまでを読み出す。(1スレッド)
-                result = ReadOnePcmFileFragment(bw, pd, startFrame, wantFramesTotal, 0);
+                string message = string.Empty;
+                result = ReadOnePcmFileFragment(bw, pd, startFrame, wantFramesTotal, 0, ref message);
+                if (!result) {
+                    r.message = message;
+                }
             }
 
             return result;
         }
 
-        private bool ReadOnePcmFileFragment(BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long wantFramesTotal, long writeOffsFrame) {
+        private bool ReadOnePcmFileFragment(BackgroundWorker bw, PcmDataLib.PcmData pd, long readStartFrame, long wantFramesTotal, long writeOffsFrame, ref string message) {
             PcmReader pr = new PcmReader();
             int ercd = pr.StreamBegin(pd.FullPath, readStartFrame, wantFramesTotal);
-            
+            if (ercd < 0) {
+                Console.WriteLine("D: ReadOnePcmFileFragment() StreamBegin failed");
+                message = FlacDecodeIF.ErrorCodeToStr(ercd);
+                return false;
+            }
+
             long frameCount = 0;
             do {
                 // 読み出したいフレーム数wantFrames。
@@ -2145,8 +2158,9 @@ namespace PlayPcmWin
 
                 byte[] part = pr.StreamReadOne(wantFrames);
                 if (null == part) {
-                    Console.WriteLine("D: ReadFileSingleDoWork() lowmemory");
                     pr.StreamEnd();
+                    Console.WriteLine("D: ReadOnePcmFileFragment() lowmemory");
+                    message = "Low memory";
                     return false;
                 }
 
@@ -2189,12 +2203,16 @@ namespace PlayPcmWin
 
                 if (bw.CancellationPending) {
                     pr.StreamAbort();
+                    message = string.Empty;
                     return false;
                 }
             } while (frameCount < wantFramesTotal);
 
-            pr.StreamEnd();
-            return true;
+            ercd = pr.StreamEnd();
+            if (ercd < 0) {
+                message = string.Format("{0}: {1}", FlacDecodeIF.ErrorCodeToStr(ercd), pd.FullPath);
+            }
+            return 0 <= ercd;
         }
 
         private void ReadFileWorkerProgressChanged(object sender, ProgressChangedEventArgs e) {
