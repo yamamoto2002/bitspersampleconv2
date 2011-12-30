@@ -1308,6 +1308,9 @@ namespace PlayPcmWin
             }
         }
 
+        /// <summary>
+        /// ファイルを最初から最後まで全部読む。
+        /// </summary>
         private byte[] ReadWholeFile(string path) {
             byte[] result = new byte[0];
 
@@ -1964,6 +1967,7 @@ namespace PlayPcmWin
                 Console.WriteLine("D: ReadFileSingleDoWork({0}) done", readGroupId);
             } catch (Exception ex) {
                 r.message = ex.ToString();
+                r.hr = -1;
                 args.Result = r;
                 Console.WriteLine("D: ReadFileSingleDoWork() {0}", ex.ToString());
             }
