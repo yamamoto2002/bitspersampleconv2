@@ -1912,7 +1912,7 @@ namespace PlayPcmWin
             ReadFileRunWorkerCompletedArgs r = new ReadFileRunWorkerCompletedArgs();
             try {
                 r.hr = -1;
-                r.message = "Unknown error";
+                r.message = string.Empty;
 
                 System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                 sw.Start();
