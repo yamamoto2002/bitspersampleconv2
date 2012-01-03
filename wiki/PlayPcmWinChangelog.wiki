@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.52 ==
+  * FLAC読み込み時のCRCエラーメッセージの文章を修正
+
 ===!PlayPcmWin 3.0.51 ==
   * FLAC読み込み時のCRCエラー検出後、エラーメッセージ表示が出ない問題を修正(Issue 87)
 
