@@ -236,6 +236,60 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
+        ///   All tracks に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeAllTracks {
+            get {
+                return ResourceManager.GetString("PlayModeAllTracks", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   All tracks repeat に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeAllTracksRepeat {
+            get {
+                return ResourceManager.GetString("PlayModeAllTracksRepeat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   One track に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeOneTrack {
+            get {
+                return ResourceManager.GetString("PlayModeOneTrack", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   One track repeat に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeOneTrackRepeat {
+            get {
+                return ResourceManager.GetString("PlayModeOneTrackRepeat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Shuffle に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeShuffle {
+            get {
+                return ResourceManager.GetString("PlayModeShuffle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Shuffle repeat に類似しているローカライズされた文字列を検索します。
+        /// </summary>
+        internal static string PlayModeShuffleRepeat {
+            get {
+                return ResourceManager.GetString("PlayModeShuffleRepeat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Play start failed に類似しているローカライズされた文字列を検索します。
         /// </summary>
         internal static string PlayStartFailed {

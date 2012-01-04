@@ -32,6 +32,8 @@ namespace PlayPcmWin {
 
         public bool PlayRepeat { get; set; }
 
+        public bool PlayAllTracks { get; set; }
+
         public int PlayingTimeSize { get; set; }
 
         public bool PlayingTimeFontBold { get; set; }
@@ -80,6 +82,8 @@ namespace PlayPcmWin {
             ManuallySetMainWindowDimension = true;
             ParallelRead = false;
             PlayRepeat = true;
+            PlayAllTracks = true;
+            Shuffle = false;
             PlayingTimeSize = 16;
             PlayingTimeFontBold = true;
             PlayingTimeFontName = "Courier New";
@@ -88,7 +92,6 @@ namespace PlayPcmWin {
             StorePlaylistContent = true;
             DispCoverart = true;
             RefrainRedraw = false;
-            Shuffle = false;
 
             MainWindowLeft = -1;
             MainWindowTop = -1;

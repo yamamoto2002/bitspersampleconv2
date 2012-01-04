@@ -538,6 +538,8 @@ namespace PlayPcmWin
         {
             InitializeComponent();
 
+            InitializePlaymodeComboBox();
+
             // InitializeComponent()によって、チェックボックスのチェックイベントが発生し
             // m_preferenceの内容が変わるので、InitializeComponent()の後にロードする。
 
@@ -640,12 +642,87 @@ namespace PlayPcmWin
                 break;
             }
 
-            checkBoxContinuous.IsChecked = m_preference.PlayRepeat;
-            checkBoxShuffle.IsChecked = m_preference.Shuffle;
+            UpdatePlaymodeComboBoxFromPreference();
 
             SetupBackgroundWorkers();
 
             CreateDeviceList();
+        }
+
+        /// <summary>
+        /// 再生モードコンボボックスの項目
+        /// </summary>
+        enum ComboBoxPlayModeType {
+            AllTracks,
+            AllTracksRepeat,
+            OneTrack,
+            OneTrackRepeat,
+            Shuffle,
+            ShuffleRepeat,
+            NUM
+        };
+
+        private void InitializePlaymodeComboBox() {
+            comboBoxPlayMode.Items.Clear();
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeAllTracks);
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeAllTracksRepeat);
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeOneTrack);
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeOneTrackRepeat);
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeShuffle);
+            comboBoxPlayMode.Items.Add(Properties.Resources.PlayModeShuffleRepeat);
+        }
+
+        private bool IsPlayModeAllTracks() {
+            ComboBoxPlayModeType t = (ComboBoxPlayModeType)comboBoxPlayMode.SelectedIndex;
+            return t == ComboBoxPlayModeType.AllTracks
+                || t == ComboBoxPlayModeType.AllTracksRepeat;
+        }
+
+        private bool IsPlayModeOneTrack() {
+            ComboBoxPlayModeType t = (ComboBoxPlayModeType)comboBoxPlayMode.SelectedIndex;
+            return t == ComboBoxPlayModeType.OneTrack
+                || t == ComboBoxPlayModeType.OneTrackRepeat;
+        }
+
+        private bool IsPlayModeShuffle() {
+            ComboBoxPlayModeType t = (ComboBoxPlayModeType)comboBoxPlayMode.SelectedIndex;
+            return t == ComboBoxPlayModeType.Shuffle
+                || t == ComboBoxPlayModeType.ShuffleRepeat;
+        }
+
+        private bool IsPlayModeRepeat() {
+            ComboBoxPlayModeType t = (ComboBoxPlayModeType)comboBoxPlayMode.SelectedIndex;
+            return t == ComboBoxPlayModeType.AllTracksRepeat
+                || t == ComboBoxPlayModeType.OneTrackRepeat
+                || t == ComboBoxPlayModeType.ShuffleRepeat;
+        }
+
+        private void UpdatePlaymodeComboBoxFromPreference() {
+            if (m_preference.Shuffle) {
+                 if (m_preference.PlayRepeat) {
+                     comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.ShuffleRepeat;
+                 } else {
+                     comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.Shuffle;
+                 }
+            } else if (m_preference.PlayAllTracks) {
+                if (m_preference.PlayRepeat) {
+                    comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.AllTracksRepeat;
+                } else {
+                    comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.AllTracks;
+                }
+            } else {
+                if (m_preference.PlayRepeat) {
+                    comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.OneTrackRepeat;
+                } else {
+                    comboBoxPlayMode.SelectedIndex = (int)ComboBoxPlayModeType.OneTrack;
+                }
+            }
+        }
+
+        private void SetPreferencePlaymodeFromComboBox() {
+            m_preference.PlayAllTracks = IsPlayModeAllTracks();
+            m_preference.PlayRepeat    = IsPlayModeRepeat();
+            m_preference.Shuffle       = IsPlayModeShuffle();
         }
 
         private void SetupBackgroundWorkers() {
@@ -766,7 +843,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
-                checkBoxShuffle.IsEnabled        = true;
+                comboBoxPlayMode.IsEnabled       = true;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -794,7 +871,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
-                checkBoxShuffle.IsEnabled = true;
+                comboBoxPlayMode.IsEnabled       = true;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -817,7 +894,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = false;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
-                checkBoxShuffle.IsEnabled        = false;
+                comboBoxPlayMode.IsEnabled       = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -839,7 +916,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled             = true;
                 buttonStop.IsEnabled             = false;
                 buttonPause.IsEnabled            = false;
-                checkBoxShuffle.IsEnabled        = false;
+                comboBoxPlayMode.IsEnabled       = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -866,7 +943,7 @@ namespace PlayPcmWin
                 buttonStop.IsEnabled             = true;
                 buttonPause.IsEnabled            = true;
                 buttonPause.Content = Properties.Resources.Pause;
-                checkBoxShuffle.IsEnabled        = false;
+                comboBoxPlayMode.IsEnabled       = false;
 
                 buttonNext.IsEnabled             = true;
                 buttonPrev.IsEnabled             = true;
@@ -898,7 +975,7 @@ namespace PlayPcmWin
                 buttonStop.IsEnabled         = true;
                 buttonPause.IsEnabled        = true;
                 buttonPause.Content = Properties.Resources.Resume;
-                checkBoxShuffle.IsEnabled    = false;
+                comboBoxPlayMode.IsEnabled   = false;
 
                 buttonNext.IsEnabled             = false;
                 buttonPrev.IsEnabled             = false;
@@ -922,7 +999,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
-                checkBoxShuffle.IsEnabled = false;
+                comboBoxPlayMode.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -944,7 +1021,7 @@ namespace PlayPcmWin
                 buttonPlay.IsEnabled = false;
                 buttonStop.IsEnabled = false;
                 buttonPause.IsEnabled = false;
-                checkBoxShuffle.IsEnabled = false;
+                comboBoxPlayMode.IsEnabled = false;
 
                 buttonNext.IsEnabled = false;
                 buttonPrev.IsEnabled = false;
@@ -1083,8 +1160,7 @@ namespace PlayPcmWin
                     Height);
 
                 // 再生リピート設定を保存
-                m_preference.PlayRepeat = checkBoxContinuous.IsChecked == true;
-                m_preference.Shuffle = checkBoxShuffle.IsChecked == true;
+                SetPreferencePlaymodeFromComboBox();
 
                 // 設定画面の表示状態を保存
                 m_preference.SettingsIsExpanded = expanderSettings.IsExpanded;
@@ -2228,10 +2304,11 @@ namespace PlayPcmWin
         /// </summary>
         private void UpdatePlayRepeat() {
             bool repeat = false;
-            // シャッフルではなく、GroupIdが0しかない場合、リピート設定が可能。
-            if (checkBoxContinuous.IsChecked == true &&
-                    checkBoxShuffle.IsChecked == false &&
-                    0 == CountWaveDataOnPlayGroup(m_pcmDataListForPlay, 1)) {
+            // 1曲リピートか(全曲リピート再生で、GroupIdが0しかない場合)、WASAPI再生スレッドのリピート設定が可能。
+            ComboBoxPlayModeType playMode = (ComboBoxPlayModeType)comboBoxPlayMode.SelectedIndex;
+            if (playMode == ComboBoxPlayModeType.OneTrackRepeat
+                || (playMode == ComboBoxPlayModeType.AllTracksRepeat
+                    && 0 == CountWaveDataOnPlayGroup(m_pcmDataListForPlay, 1))) {
                 repeat = true;
             }
             wasapi.SetPlayRepeat(repeat);
@@ -2393,14 +2470,25 @@ namespace PlayPcmWin
         }
 
         /// <summary>
-        /// 表示順に並んでいるプレイリストm_pcmDataListForPlayを作成。
+        /// 全曲が表示順に並んでいるプレイリストm_pcmDataListForPlayを作成。
         /// </summary>
-        private void CreateNormalPlayList() {
+        private void CreateAllTracksPlayList() {
             m_pcmDataListForPlay = new List<PcmData>();
             for (int i=0; i < m_pcmDataListForDisp.Count; ++i) {
-                var idx = i;
-                m_pcmDataListForPlay.Add(m_pcmDataListForDisp[idx]);
+                m_pcmDataListForPlay.Add(m_pcmDataListForDisp[i]);
             }
+        }
+
+        /// <summary>
+        /// 1曲再生のプレイリストをm_pcmDataListForPlayに作成。
+        /// </summary>
+        private void CreateOneTrackPlayList(int wavDataId) {
+            var pcmData = new PcmData();
+            pcmData.CopyFrom(FindPcmDataById(m_pcmDataListForDisp, wavDataId));
+            pcmData.GroupId = 0;
+
+            m_pcmDataListForPlay = new List<PcmData>();
+            m_pcmDataListForPlay.Add(pcmData);
         }
 
         private void buttonPlay_Click(object sender, RoutedEventArgs e) {
@@ -2408,32 +2496,41 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (true == checkBoxShuffle.IsChecked) {
+            if (IsPlayModeShuffle()) {
                 // シャッフル再生する
                 CreateShuffledPlayList();
                 ReadStartPlayByWavDataId(m_pcmDataListForPlay[0].Id);
-            } else {
-                // 選択されている曲から順番に再生する。
-                // 再生する曲のwavDataIdをdataGridの選択セルから取得する
-                int wavDataId = 0;
-                var selectedCells = dataGridPlayList.SelectedCells;
-                if (0 < selectedCells.Count) {
-                    var cell = selectedCells[0];
-                    System.Diagnostics.Debug.Assert(cell != null);
-                    PlayListItemInfo pli = cell.Item as PlayListItemInfo;
-                    System.Diagnostics.Debug.Assert(pli != null);
-                    var pcmData = pli.PcmData();
-
-                    if (null != pcmData) {
-                        wavDataId = pcmData.Id;
-                    } else {
-                        // ココまで読んだ的な行は、pcmDataを持っていない
-                    }
-                }
-
-                CreateNormalPlayList();
-                ReadStartPlayByWavDataId(wavDataId);
+                return;
             }
+
+            // 選択されている曲から順番に再生する。
+            // 再生する曲のwavDataIdをdataGridの選択セルから取得する
+            int wavDataId = 0;
+            var selectedCells = dataGridPlayList.SelectedCells;
+            if (0 < selectedCells.Count) {
+                var cell = selectedCells[0];
+                System.Diagnostics.Debug.Assert(cell != null);
+                PlayListItemInfo pli = cell.Item as PlayListItemInfo;
+                System.Diagnostics.Debug.Assert(pli != null);
+                var pcmData = pli.PcmData();
+
+                if (null != pcmData) {
+                    wavDataId = pcmData.Id;
+                } else {
+                    // ココまで読んだ的な行は、pcmDataを持っていない
+                }
+            }
+
+            if (IsPlayModeOneTrack()) {
+                // 1曲再生。1曲だけ読み込んで再生する。
+                CreateOneTrackPlayList(wavDataId);
+                ReadStartPlayByWavDataId(wavDataId);
+                return;
+            }
+
+            // 全曲再生
+            CreateAllTracksPlayList();
+            ReadStartPlayByWavDataId(wavDataId);
         }
 
         private void buttonPause_Click(object sender, RoutedEventArgs e) {
@@ -2483,7 +2580,14 @@ namespace PlayPcmWin
         private bool ReadStartPlayByWavDataId(int wavDataId) {
             System.Diagnostics.Debug.Assert(0 <= wavDataId);
 
+
             PcmDataLib.PcmData pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            if (null == pcmData) {
+                // 1曲再生モードの時。再生リストを作りなおす。
+                CreateOneTrackPlayList(wavDataId);
+                m_loadedGroupId = -1;
+                pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            }
 
             if (pcmData.GroupId != m_loadedGroupId) {
                 // m_LoadedGroupIdと、wavData.GroupIdが異なる場合。
@@ -2551,7 +2655,7 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (checkBoxContinuous.IsChecked == true) {
+            if (IsPlayModeRepeat()) {
                 m_task.Set(TaskType.PlaySpecifiedGroup, 0, 0);
                 return;
             }
@@ -2691,6 +2795,11 @@ namespace PlayPcmWin
             if (m_task.Type == TaskType.PlaySpecifiedGroup) {
                 UnsetupDevice();
 
+                if (IsPlayModeOneTrack()) {
+                    // 1曲再生モードの時、再生リストを作りなおす。
+                    CreateOneTrackPlayList(m_task.WavDataId);
+                }
+
                 if (SetupDevice(m_task.GroupId)) {
                     StartReadPlayGroupOnTask();
                     return;
@@ -2828,7 +2937,14 @@ namespace PlayPcmWin
                 return;
             }
 
+            // 再生中である。
             var pcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
+            if (null == pcmData) {
+                // 1曲再生の時起きる。
+                Stop(new Task(TaskType.PlaySpecifiedGroup, 0, wavDataId));
+                return;
+            }
+
             int groupId = pcmData.GroupId;
 
             var playPcmData = FindPcmDataById(m_pcmDataListForPlay, playingId);
@@ -2988,7 +3104,9 @@ namespace PlayPcmWin
             }
         }
 
-        private void buttonPrev_Click(object sender, RoutedEventArgs e) {
+        private delegate int UpdateOrdinal(int v);
+
+        private void buttonNextOrPrevClicked(UpdateOrdinal updateOrdinal) {
             int wavDataId = wasapi.GetNowPlayingPcmDataId();
             var playingPcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
             if (null == playingPcmData) {
@@ -2996,31 +3114,32 @@ namespace PlayPcmWin
             }
 
             var ordinal = playingPcmData.Ordinal;
-            --ordinal;
+            ordinal = updateOrdinal(ordinal);
             if (ordinal < 0) {
                 ordinal = 0;
             }
 
-            ChangePlayWavDataById(m_pcmDataListForPlay[ordinal].Id);
+            if (IsPlayModeOneTrack()) {
+                // 1曲再生モードの時
+                if (m_pcmDataListForDisp.Count <= ordinal) {
+                    ordinal = 0;
+                }
+                ChangePlayWavDataById(m_pcmDataListForDisp[ordinal].Id);
+            } else {
+                // 全曲再生またはシャッフル再生モードの時。
+                if (m_pcmDataListForPlay.Count <= ordinal) {
+                    ordinal = 0;
+                }
+                ChangePlayWavDataById(m_pcmDataListForPlay[ordinal].Id);
+            }
         }
 
         private void buttonNext_Click(object sender, RoutedEventArgs e) {
-            int wavDataId = wasapi.GetNowPlayingPcmDataId();
-            var playingPcmData = FindPcmDataById(m_pcmDataListForPlay, wavDataId);
-            if (null == playingPcmData) {
-                return;
-            }
+            buttonNextOrPrevClicked((x) => { return ++x; });
+        }
 
-            var ordinal = playingPcmData.Ordinal;
-            ++ordinal;
-            if (ordinal < 0) {
-                ordinal = 0;
-            }
-            if (m_pcmDataListForPlay.Count <= ordinal) {
-                ordinal = 0;
-            }
-
-            ChangePlayWavDataById(m_pcmDataListForPlay[ordinal].Id);
+        private void buttonPrev_Click(object sender, RoutedEventArgs e) {
+            buttonNextOrPrevClicked((x) => { return --x; });
         }
 
         private void checkBoxContinuous_CheckedChanged(object sender, RoutedEventArgs e) {

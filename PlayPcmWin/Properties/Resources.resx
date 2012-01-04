@@ -251,4 +251,22 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
   <data name="Version" xml:space="preserve">
     <value>Version</value>
   </data>
+  <data name="PlayModeAllTracks" xml:space="preserve">
+    <value>All tracks</value>
+  </data>
+  <data name="PlayModeAllTracksRepeat" xml:space="preserve">
+    <value>All tracks repeat</value>
+  </data>
+  <data name="PlayModeOneTrack" xml:space="preserve">
+    <value>One track</value>
+  </data>
+  <data name="PlayModeOneTrackRepeat" xml:space="preserve">
+    <value>One track repeat</value>
+  </data>
+  <data name="PlayModeShuffle" xml:space="preserve">
+    <value>Shuffle</value>
+  </data>
+  <data name="PlayModeShuffleRepeat" xml:space="preserve">
+    <value>Shuffle repeat</value>
+  </data>
 </root>
