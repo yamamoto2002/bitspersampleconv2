@@ -251,4 +251,22 @@ Jcode.pmのCopyright: Copyright 1999-2005 Dan Kogai</value>
   <data name="Version" xml:space="preserve">
     <value>バージョン</value>
   </data>
+  <data name="PlayModeAllTracks" xml:space="preserve">
+    <value>全曲</value>
+  </data>
+  <data name="PlayModeAllTracksRepeat" xml:space="preserve">
+    <value>全曲繰り返し</value>
+  </data>
+  <data name="PlayModeOneTrack" xml:space="preserve">
+    <value>1曲</value>
+  </data>
+  <data name="PlayModeOneTrackRepeat" xml:space="preserve">
+    <value>1曲繰り返し</value>
+  </data>
+  <data name="PlayModeShuffle" xml:space="preserve">
+    <value>シャッフル</value>
+  </data>
+  <data name="PlayModeShuffleRepeat" xml:space="preserve">
+    <value>シャッフル繰り返し</value>
+  </data>
 </root>

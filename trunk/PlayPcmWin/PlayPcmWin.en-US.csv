@@ -94,17 +94,24 @@ PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.Height,None,False,True,,16
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.Margin,None,False,True,,"420,6,0,0"
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Top
-PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.Width,None,False,True,,200
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.Controls.Primitives.ToggleButton.IsChecked,None,False,True,,True
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.Width,None,False,True,,200
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxCoverart:System.Windows.FrameworkElement.HorizontalAlignment,None,False,True,,Left
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.Controls.CheckBox.$Content,CheckBox,True,True,,
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.Controls.ContentControl.Content,CheckBox,True,True,,Minimize GUI redraw when playing
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.Height,None,False,True,,16
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.Margin,None,False,True,,"420,28,0,0"
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Top
-PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.Width,None,False,True,,273
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.Controls.Primitives.ToggleButton.IsChecked,None,False,True,,True
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.Width,None,False,True,,273
 PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxRefrainRedraw:System.Windows.FrameworkElement.HorizontalAlignment,None,False,True,,Left
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.Controls.CheckBox.$Content,CheckBox,True,True,,
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.Controls.ContentControl.Content,CheckBox,True,True,,Parallelize file read
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.FrameworkElement.Height,None,False,True,,16
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.FrameworkElement.Margin,None,False,True,,"520,6,0,0"
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Top
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.Controls.Primitives.ToggleButton.IsChecked,None,False,True,,False
+PlayPcmWin.g.en-US.resources:settingswindow.baml,checkBoxParallelRead:System.Windows.FrameworkElement.HorizontalAlignment,None,False,True,,Left
 PlayPcmWin.g.en-US.resources:settingswindow.baml,textBoxPlayingTimeSize:System.Windows.Controls.TextBox.$Content,Text,True,True,,
 PlayPcmWin.g.en-US.resources:settingswindow.baml,textBoxPlayingTimeSize:System.Windows.FrameworkElement.Height,None,False,True,,28
 PlayPcmWin.g.en-US.resources:settingswindow.baml,textBoxPlayingTimeSize:System.Windows.FrameworkElement.Margin,None,False,True,,"328,50,0,0"
@@ -386,20 +393,6 @@ PlayPcmWin.g.en-US.resources:mainwindow.baml,labelPlayingTime:System.Windows.Con
 PlayPcmWin.g.en-US.resources:mainwindow.baml,slider1:System.Windows.FrameworkElement.Margin,None,False,True,,"6,0,7,0"
 PlayPcmWin.g.en-US.resources:mainwindow.baml,slider1:System.Windows.FrameworkElement.Height,None,False,True,,23
 PlayPcmWin.g.en-US.resources:mainwindow.baml,slider1:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Bottom
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.Controls.CheckBox.$Content,CheckBox,True,True,,
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.Controls.ContentControl.Content,CheckBox,True,True,,Repeat
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.FrameworkElement.Height,None,False,True,,16
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.FrameworkElement.HorizontalAlignment,None,False,True,,Left
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.FrameworkElement.Margin,None,False,True,,"6,35,0,0"
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Top
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxContinuous:System.Windows.Controls.Primitives.ToggleButton.IsChecked,None,False,True,,True
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.Controls.CheckBox.$Content,CheckBox,True,True,,
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.Controls.ContentControl.Content,CheckBox,True,True,,Shuffle
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.FrameworkElement.Height,None,False,True,,16
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.FrameworkElement.HorizontalAlignment,None,False,True,,Left
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.Controls.Primitives.ToggleButton.IsChecked,None,False,True,,false
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.FrameworkElement.Margin,None,False,True,,"85,35,0,0"
-PlayPcmWin.g.en-US.resources:mainwindow.baml,checkBoxShuffle:System.Windows.FrameworkElement.VerticalAlignment,None,False,True,,Top
 PlayPcmWin.g.en-US.resources:mainwindow.baml,expanderSettings:System.Windows.Controls.Expander.$Content,None,False,True,,#Grid_4;
 PlayPcmWin.g.en-US.resources:mainwindow.baml,expanderSettings:System.Windows.Controls.HeaderedContentControl.Header,Label,True,True,,Settings
 PlayPcmWin.g.en-US.resources:mainwindow.baml,expanderSettings:System.Windows.FrameworkElement.Margin,None,False,True,,"0,29,6,26"
