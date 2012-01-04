@@ -2180,7 +2180,7 @@ namespace PlayPcmWin
             }
 
             bool result = true;
-            if (m_preference.ParallelRead) {
+            if (m_preference.ParallelRead && PcmReader.IsTheFormatCompressed(PcmReader.GuessFileFormatFromFilePath(pd.FullPath))) {
                 // ファイルのstartFrameからendFrameまでを読みだす。(並列化)
                 int fragmentCount = Environment.ProcessorCount;
                 var rri = SetupReadPcmTasks(bw, pd, startFrame, endFrame, fragmentCount);

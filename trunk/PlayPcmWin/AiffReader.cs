@@ -401,6 +401,9 @@ namespace PlayPcmWin {
                 // 最後に移動。
                 skipFrames = NumFrames - m_posFrame;
             }
+            if (skipFrames == 0) {
+                return 0;
+            }
 
             PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * BytesPerFrame / 8);
             m_posFrame += skipFrames;
