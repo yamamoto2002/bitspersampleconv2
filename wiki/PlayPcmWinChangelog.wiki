@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.53 ==
+  * 1曲再生モード作成
+
 ===!PlayPcmWin 3.0.52 ==
   * FLAC読み込み時のCRCエラーメッセージの文章を修正
 
