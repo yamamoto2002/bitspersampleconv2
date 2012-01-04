@@ -13,12 +13,42 @@ namespace PlayPcmWin {
 
         public long NumFrames { get; set; }
 
-        enum Format {
+        public enum Format {
             FLAC,
             AIFF,
-            WAVE
+            WAVE,
+            Unknown
         };
         Format m_format;
+
+        public static bool IsTheFormatCompressed(Format fmt) {
+            switch (fmt) {
+            case Format.FLAC:
+                return true;
+            case Format.AIFF:
+            case Format.WAVE:
+                return false;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return false;
+            }
+        }
+
+        public static Format GuessFileFormatFromFilePath(string path) {
+            string ext = System.IO.Path.GetExtension(path);
+            switch (ext.ToLower()) {
+            case ".flac":
+                return Format.FLAC;
+            case ".aiff":
+            case ".aif":
+                return Format.AIFF;
+            case ".wav":
+            case ".wave":
+                return Format.WAVE;
+            default:
+                return Format.Unknown;
+            }
+        }
 
         /// <summary>
         /// StreamBegin()を呼んだら、成功しても失敗してもStreamEnd()を呼んでください。
@@ -28,19 +58,17 @@ namespace PlayPcmWin {
         /// <param name="wantFrames">取得したいフレーム数。-1: 最後まで。0: 取得しない。</param>
         /// <returns>0以上: 成功。負: 失敗。</returns>
         public int StreamBegin(string path, long startFrame, long wantFrames) {
-            string ext = System.IO.Path.GetExtension(path);
-            switch (ext.ToLower()) {
-            case ".flac":
+            var fmt = GuessFileFormatFromFilePath(path);
+            switch (fmt) {
+            case Format.FLAC:
                 // FLACファイル読み込み。
                 m_format = Format.FLAC;
                 return StreamBeginFlac(path, startFrame, wantFrames);
-            case ".aiff":
-            case ".aif":
+            case Format.AIFF:
                 // AIFFファイル読み込み。
                 m_format = Format.AIFF;
                 return StreamBeginAiff(path, startFrame);
-            case ".wav":
-            case ".wave":
+            case Format.WAVE:
                 // WAVEファイル読み込み。
                 m_format = Format.WAVE;
                 return StreamBeginWave(path, startFrame);
