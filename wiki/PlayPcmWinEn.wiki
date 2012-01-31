@@ -73,3 +73,7 @@ Windows is complicated system and has wide variety of hardware and software. Ver
 
 The following page provides very useful troubleshooting regarding to playback glitch on Windows. I recommend to check your system according to this guide. 
 http://www.native-instruments.com/knowledge/questions/847/Windows+7+Tuning+Tips+for+audio+processing
+
+= How to build =
+
+PlayPcmWinHowToBuild
