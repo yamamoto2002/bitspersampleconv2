@@ -13,7 +13,8 @@
 == Download PlayPcmWin sourcecode =
 
 Open windows explorer, create C:\work\BpsConvWin2 and right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
-*http://bitspersampleconv2.googlecode.com/svn/trunk*
+
+http://bitspersampleconv2.googlecode.com/svn/trunk
 
 == Create LocBaml_x64.exe and LocBaml_x86.exe =
 
@@ -28,12 +29,12 @@ Open `[`Project`]``[`Configuration manager`]`, select x86 platform and rebuild t
 
 == Prepare libFLAC_static.lib and libogg_static.lib ==
 
-Download libogg-x.y.z.tar.gz source code from the following site
+Download libogg-x.y.z.tar.gz source code from the following site:
 http://xiph.org/downloads/
 
 Extract onto C:\work folder. Open C:\work\libogg-x.y.z\win32\VS2010\libogg_static.sln and release-build libogg_static.lib
 
-Download flac-x.y.z.tar.gz source code from the following site
+Download flac-x.y.z.tar.gz source code from the following site:
 http://flac.sourceforge.net/download.html
 
 Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release build. right-click libFLAC_static on the solution explorer and `[`Property`]` to open libFLAC_static property page. on the page, Select `[`VC++ directories`]``[`include directories`]` and append *C:\work\libogg-x.y.z\include* 
