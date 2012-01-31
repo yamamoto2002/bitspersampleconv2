@@ -1,0 +1,50 @@
+#summary How to build PlayPcmWin
+#labels Featured
+
+= How to build PlayPcmWin =
+
+== Prerequisites ==
+
+ * Windows 7 x64 or Windows Vista x64
+ * Visual Studio 2010
+ * TortoiseSVN
+ * Lhaplus or equivalent archive file extractor
+
+== Download PlayPcmWin sourcecode =
+
+Open windows explorer, create C:\work\BpsConvWin2 and right-click the BpsConvWin2 folder and [svn checkout...] to open Checkout dialog. Enter the following URL on [URL of repository]
+*http://bitspersampleconv2.googlecode.com/svn/trunk*
+
+== Create LocBaml_x64.exe and LocBaml_x86.exe =
+
+Download LocBaml SDK from the following page:
+http://msdn.microsoft.com/en-us/library/ms746621.aspx
+
+Run Visual Studio 2010 and Load locbaml_sdk.sln
+
+Open [Project][configuration manager], select x64 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x64.exe
+
+Open [Project][configuration manager], select x86 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x86.exe
+
+== Prepare libFLAC_static.lib and libogg_static.lib ==
+
+Download libogg-x.y.z.tar.gz source code from the following site
+http://xiph.org/downloads/
+
+Extract onto C:\work folder. Open C:\work\libogg-x.y.z\win32\VS2010\libogg_static.sln and release-build libogg_static.lib
+
+Download flac-x.y.z.tar.gz source code from the following site
+http://flac.sourceforge.net/download.html
+
+Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release build. right-click libFLAC_static on the solution explorer and [property] to open libFLAC_static property page. on the page, Select [VC++ directories][include directories] and append *C:\work\libogg-x.y.z\include* 
+
+I suppose additionally the NetWide assembler is needed for FLAC build. it can be downloaded from the following site:
+http://sourceforge.net/projects/nasm/
+
+== Build PlayPcmWin ==
+
+Open C:\work\BpsConvWin2\PlayPcmWin\PlayPcmWin.sln
+
+Select build target (Release x64 or Release x86). Right-click PlayPcmWin and flag as startup project and build.
+
+I suppose libFLAC_static.lib and libogg_static.lib must be specify somewhere to build successfully. please play it by ear if any problem arises.
