@@ -37,7 +37,7 @@ http://flac.sourceforge.net/download.html
 
 Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release build. right-click libFLAC_static on the solution explorer and `[`Property`]` to open libFLAC_static property page. on the page, Select `[`VC++ directories`]``[`include directories`]` and append *C:\work\libogg-x.y.z\include;* 
 
-I suppose additionally the Netwide assembler is needed for FLAC build. it can be downloaded from the following site:
+In order to build FLAC, I suppose, the Netwide assembler is needed additionally. it can be downloaded from the following site:
 http://sourceforge.net/projects/nasm/
 
 Only Win32 build of libFLAC and libogg are needed because !PlayPcmWin creates dedicated FLAC decode process that runs on 32bit mode.
