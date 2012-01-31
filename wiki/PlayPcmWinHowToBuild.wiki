@@ -5,7 +5,7 @@
 
 == Prerequisites ==
 
- * Windows 7 x64 or Windows Vista x64
+ * Windows 7 x64
  * Visual Studio 2010 Professional
  * TortoiseSVN
  * Lhaplus or equivalent archive file extractor
