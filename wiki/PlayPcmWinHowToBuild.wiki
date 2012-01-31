@@ -21,9 +21,9 @@ http://msdn.microsoft.com/en-us/library/ms746621.aspx
 
 Run Visual Studio 2010 and Load locbaml_sdk.sln
 
-Open `[`Project`]``[`Configuration manager`]`, select x64 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x64.exe
+Open `[`Project`]``[`Configuration manager`]`, select x64 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\!PlayPcmWin\LocBaml_x64.exe
 
-Open `[`Project`]``[`Configuration manager`]`, select x86 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x86.exe. although this LocBaml_x86.exe may not work correctly. I forgot the detail, but if the LocBaml_x86.exe doesn't work, 32bit version of LocBaml must be built using Windows 32-bit version. I don't know why but it worked for me.
+Open `[`Project`]``[`Configuration manager`]`, select x86 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\!PlayPcmWin\LocBaml_x86.exe. although this LocBaml_x86.exe may not work correctly. I forgot the detail, but if the LocBaml_x86.exe doesn't work, 32bit version of LocBaml must be built using Windows 32-bit version. I don't know why but it worked for me.
 
 == 3. Prepare libFLAC_static.lib and libogg_static.lib ==
 
@@ -37,14 +37,14 @@ http://flac.sourceforge.net/download.html
 
 Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release build. right-click libFLAC_static on the solution explorer and `[`Property`]` to open libFLAC_static property page. on the page, Select `[`VC++ directories`]``[`include directories`]` and append *C:\work\libogg-x.y.z\include;* 
 
-I suppose additionally the NetWide assembler is needed for FLAC build. it can be downloaded from the following site:
+I suppose additionally the Netwide assembler is needed for FLAC build. it can be downloaded from the following site:
 http://sourceforge.net/projects/nasm/
 
-Only Win32 build of libFLAC and libogg are needed because PlayPcmWin creates dedicated FLAC decode process that runs on 32bit mode.
+Only Win32 build of libFLAC and libogg are needed because !PlayPcmWin creates dedicated FLAC decode process that runs on 32bit mode.
 
 == 4. Build !PlayPcmWin ==
 
-Open C:\work\BpsConvWin2\PlayPcmWin\PlayPcmWin.sln
+Open C:\work\BpsConvWin2\!PlayPcmWin\!PlayPcmWin.sln
 
 Select build target (Release x64 or Release x86. Other platform such as AnyCPU doesn't work). Right-click !PlayPcmWin project on the solution explorer window and flag it as startup project and build.
 
