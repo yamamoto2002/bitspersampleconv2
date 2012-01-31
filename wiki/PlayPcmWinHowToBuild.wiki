@@ -42,7 +42,7 @@ Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release
 I suppose additionally the NetWide assembler is needed for FLAC build. it can be downloaded from the following site:
 http://sourceforge.net/projects/nasm/
 
-Only Win32 build of libFLAC and libogg are needed because PlayPcmWin creates dedicated FLAC decode process that is 32bit mode.
+Only Win32 build of libFLAC and libogg are needed because PlayPcmWin creates dedicated FLAC decode process that runs on 32bit mode.
 
 == 4. Build PlayPcmWin ==
 
