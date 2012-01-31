@@ -7,12 +7,10 @@
 
  * Windows 7 x64
  * Visual Studio 2010 Professional
- * TortoiseSVN
- * Lhaplus or equivalent archive file extractor
 
 == 1. Download PlayPcmWin sourcecode =
 
-Open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
+Checkout PlayPcmWin sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
 
 http://bitspersampleconv2.googlecode.com/svn/trunk
 
