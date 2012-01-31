@@ -25,7 +25,7 @@ Run Visual Studio 2010 and Load locbaml_sdk.sln
 
 Open `[`Project`]``[`Configuration manager`]`, select x64 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x64.exe
 
-Open `[`Project`]``[`Configuration manager`]`, select x86 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x86.exe
+Open `[`Project`]``[`Configuration manager`]`, select x86 platform and rebuild the solution. copy resulted locbaml.exe to C:\work\BpsConvWin2\PlayPcmWin\LocBaml_x86.exe. although this LocBaml_x86.exe may not work correctly. I forgot the detail, but if LocBaml_x86.exe doesn't work, 32bit version of LocBaml must be built using Windows 32-bit version.
 
 == 3. Prepare libFLAC_static.lib and libogg_static.lib ==
 
