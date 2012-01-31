@@ -48,4 +48,4 @@ Open C:\work\BpsConvWin2\PlayPcmWin\PlayPcmWin.sln
 
 Select build target (Release x64 or Release x86). Right-click PlayPcmWin and flag as startup project and build.
 
-I suppose libFLAC_static.lib and libogg_static.lib must be specify somewhere to build successfully. please play it by ear if any problem arises.
+I suppose the folder path to libFLAC_static.lib and libogg_static.lib must be specified somewhere to build PlayPcmWin successfully. Please play it by ear if any problem arises.
