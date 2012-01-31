@@ -8,9 +8,9 @@
  * Windows 7 x64
  * Visual Studio 2010 Professional
 
-== 1. Download PlayPcmWin sourcecode =
+== 1. Download !PlayPcmWin sourcecode =
 
-Checkout PlayPcmWin sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
+Checkout !PlayPcmWin sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
 
 http://bitspersampleconv2.googlecode.com/svn/trunk
 
@@ -42,10 +42,10 @@ http://sourceforge.net/projects/nasm/
 
 Only Win32 build of libFLAC and libogg are needed because PlayPcmWin creates dedicated FLAC decode process that runs on 32bit mode.
 
-== 4. Build PlayPcmWin ==
+== 4. Build !PlayPcmWin ==
 
 Open C:\work\BpsConvWin2\PlayPcmWin\PlayPcmWin.sln
 
-Select build target (Release x64 or Release x86. Other platform such as AnyCPU doesn't work). Right-click PlayPcmWin and flag as startup project and build.
+Select build target (Release x64 or Release x86. Other platform such as AnyCPU doesn't work). Right-click !PlayPcmWin project on the solution explorer window and flag it as startup project and build.
 
-I suppose the folder path to libFLAC_static.lib and libogg_static.lib must be specified somewhere to build PlayPcmWin successfully. Please play it by ear if any problem arises.
+I suppose the folder path to libFLAC_static.lib and libogg_static.lib must be specified somewhere to build !PlayPcmWin successfully. Please play it by ear if any problem arises.
