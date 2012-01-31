@@ -1,7 +1,7 @@
 #summary How to build PlayPcmWin
 #labels Featured
 
-= How to build PlayPcmWin =
+= How to build !PlayPcmWin =
 
 == Prerequisites ==
 
