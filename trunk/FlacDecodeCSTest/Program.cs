@@ -89,6 +89,14 @@ namespace FlacDecodeCSTest {
                 br.ReadBytes(pictureBytes);
             }
 
+            /*
+            int numCuesheetTracks = br.ReadInt32();
+            var cueSheetOffsets = new long[numCuesheetTracks];
+            for (int i=0; i < numCuesheetTracks; ++i) {
+                cueSheetOffsets[i] = br.ReadInt64();
+            }
+            */
+
             System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
                 nChannels, bitsPerSample, sampleRate, numFrames, numFramesPerBlock);
 
@@ -131,6 +139,14 @@ namespace FlacDecodeCSTest {
             if (0 < pictureBytes) {
                 br.ReadBytes(pictureBytes);
             }
+
+            /*
+            int numCuesheetTracks = br.ReadInt32();
+            var cueSheetOffsets = new long[numCuesheetTracks];
+            for (int i=0; i < numCuesheetTracks; ++i) {
+                cueSheetOffsets[i] = br.ReadInt64();
+            }
+            */
 
             int bytesPerFrame = nChannels * bitsPerSample / 8;
 

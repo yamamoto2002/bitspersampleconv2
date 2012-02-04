@@ -7,6 +7,7 @@
 #include "FlacDecodeDLL.h"
 #include <assert.h>
 #include <map>
+#include <vector>
 
 // x86 CPUにしか対応してない。
 // x64やビッグエンディアンには対応してない。
@@ -22,6 +23,12 @@
 
 /// 画像サイズ制限 100MB
 #define FLACDECODE_IMAGE_BYTES_MAX (100 * 1024 * 1024) 
+
+/// 最大トラック数
+#define FLACDECODE_TRACK_MAX (256)
+
+/// 最大トラックインデックス数
+#define FLACDECODE_TRACK_IDX_MAX (99)
 
 #ifdef _DEBUG
 /*
@@ -70,6 +77,26 @@ enum FlacDecodeCommand {
     FDC_GetFrames,
 };
 
+typedef struct {
+    int64_t offsetSamples;
+    int number;
+} FlacCuesheetIndexInfo;
+
+struct FlacCuesheetTrackInfo {
+    int64_t offsetSamples;
+    int trackNumber;
+
+    char isrc[13];
+
+    /** The track type: 0 for audio, 1 for non-audio. */
+    bool isAudio;
+
+    /** まじかよって感じ。 */
+    bool preEmphasis;
+
+    std::vector<FlacCuesheetIndexInfo> indices;
+};
+
 /// FlacDecodeの物置。
 struct FlacDecodeInfo {
     int          id;
@@ -112,6 +139,8 @@ struct FlacDecodeInfo {
 
     int               pictureBytes;
     char              *pictureData;
+
+    std::vector<FlacCuesheetTrackInfo> cueSheetTracks;
 
     void Clear(void) {
         sampleRate    = 0;
@@ -292,6 +321,7 @@ WriteCallback(const FLAC__StreamDecoder *decoder,
 
 #define VC  metadata->data.vorbis_comment
 #define PIC metadata->data.picture
+#define CUE metadata->data.cue_sheet
 
 static void
 MetadataCallback(const FLAC__StreamDecoder *decoder,
@@ -353,6 +383,57 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
             assert(fdi->pictureData);
 
             memcpy(fdi->pictureData, PIC.data, fdi->pictureBytes);
+        }
+    }
+
+    if (metadata->type == FLAC__METADATA_TYPE_CUESHEET && CUE.tracks != NULL) {
+        dprintf(fdi->logFP, "cuesheet num tracks=%d\n", CUE.num_tracks);
+
+        fdi->cueSheetTracks.clear();
+
+        uint32_t nMax = CUE.num_tracks;
+        if (FLACDECODE_TRACK_MAX < nMax) {
+            nMax = FLACDECODE_TRACK_MAX;
+        }
+
+        for (int i=0; i<(int)nMax; ++i) {
+            FlacCuesheetTrackInfo track;
+            FLAC__StreamMetadata_CueSheet_Track *from = &CUE.tracks[i];
+
+            track.offsetSamples = from->offset;
+            track.isAudio = !from->type;
+            track.preEmphasis = !!from->pre_emphasis;
+            track.trackNumber = from->number;
+
+            memset(track.isrc, 0, sizeof track.isrc);
+            memcpy(track.isrc, from->isrc, sizeof track.isrc-1);
+
+            dprintf(fdi->logFP, "  trackNr=%d offsSamples=%lld isAudio=%d preEmph=%d numIdx=%d isrc=%02x%02x%02x%02x %02x%02x%02x%02x %02x%02x%02x%02x\n",
+                track.trackNumber, track.offsetSamples,  (int)track.isAudio, (int)track.preEmphasis, (int)from->num_indices,
+                (unsigned int)track.isrc[0], (unsigned int)track.isrc[1], (unsigned int)track.isrc[2], (unsigned int)track.isrc[3],
+                (unsigned int)track.isrc[4], (unsigned int)track.isrc[5], (unsigned int)track.isrc[6], (unsigned int)track.isrc[7],
+                (unsigned int)track.isrc[8], (unsigned int)track.isrc[9], (unsigned int)track.isrc[10], (unsigned int)track.isrc[11]);
+
+            if (from->indices == NULL) {
+                continue;
+            }
+
+            uint32_t iMax = from->num_indices;
+            if (FLACDECODE_TRACK_IDX_MAX < iMax) {
+                iMax = FLACDECODE_TRACK_IDX_MAX;
+            }
+
+            for (int j=0; j<(int)iMax; ++j) {
+                FlacCuesheetIndexInfo idxInfo;
+                FLAC__StreamMetadata_CueSheet_Index *idxFrom = &from->indices[j];
+                idxInfo.number = idxFrom->number;
+                idxInfo.offsetSamples = idxFrom->offset;
+                track.indices.push_back(idxInfo);
+
+                dprintf(fdi->logFP, "    idxNr=%d offsSamples=%lld\n",
+                    idxInfo.number, idxInfo.offsetSamples);
+            }
+            fdi->cueSheetTracks.push_back(track);
         }
     }
 }
@@ -418,6 +499,7 @@ DecodeMain(FlacDecodeInfo *fdi)
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_STREAMINFO);
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_VORBIS_COMMENT);
     FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_PICTURE);
+    FLAC__stream_decoder_set_metadata_respond(fdi->decoder, FLAC__METADATA_TYPE_CUESHEET);
 
 #if 1
     // Windowsでは、この方法でファイルを開かなければならぬ。
@@ -576,8 +658,6 @@ FlacDecodeInfoFindById(int id)
 
 ///////////////////////////////////////////////////////////////
 
-/// チャンネル数。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetNumOfChannels(int id)
@@ -593,8 +673,6 @@ FlacDecodeDLL_GetNumOfChannels(int id)
     return fdi->channels;
 }
 
-/// 量子化ビット数。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetBitsPerSample(int id)
@@ -610,8 +688,6 @@ FlacDecodeDLL_GetBitsPerSample(int id)
     return fdi->bitsPerSample;
 }
 
-/// サンプルレート。
-/// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetSampleRate(int id)
@@ -627,8 +703,6 @@ FlacDecodeDLL_GetSampleRate(int id)
     return fdi->sampleRate;
 }
 
-// フレーム総数。
-// DecodeStart成功後に呼ぶことができる。
 extern "C" __declspec(dllexport)
 int64_t __stdcall
 FlacDecodeDLL_GetNumFrames(int id)
@@ -750,10 +824,6 @@ LogClose(FlacDecodeInfo *fdi)
 #define LogClose(fdi)
 #endif
 
-/// FLACヘッダーを読み込んで、フォーマット情報を取得する。
-/// 中のグローバル変数に貯める。APIの設計がスレッドセーフになってないので注意。
-/// @param fromFlacPath パス名(UTF-16)
-/// @return 0以上: デコーダーId。負: エラー。FlacDecodeResultType参照。
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_DecodeStart(const wchar_t *fromFlacPath, int64_t skipFrames)
@@ -824,7 +894,6 @@ if (NULL != p) {          \
     p = NULL;             \
 }
 
-/// FlacDecodeを終了する。(DecodeStartで立てたスレを止めたりする)
 extern "C" __declspec(dllexport)
 void __stdcall
 FlacDecodeDLL_DecodeEnd(int id)
@@ -877,7 +946,6 @@ FlacDecodeDLL_DecodeEnd(int id)
     fdi = NULL;
 }
 
-/// 次のPCMデータをnumFrameサンプルだけbuff_returnに詰める
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetNextPcmData(int id, int numFrame, char *buff_return)
@@ -925,7 +993,6 @@ FlacDecodeDLL_GetNextPcmData(int id, int numFrame, char *buff_return)
     return fdi->retrievedFrames;
 }
 
-/// 画像データのサイズ
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetPictureBytes(int id)
@@ -936,7 +1003,6 @@ FlacDecodeDLL_GetPictureBytes(int id)
     return fdi->pictureBytes;
 }
 
-/// 画像データ
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_return)
@@ -957,3 +1023,38 @@ FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_r
     memcpy(picture_return, &fdi->pictureData[offs], copyBytes);
     return copyBytes;
 }
+
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(int id)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+
+    return fdi->cueSheetTracks.size();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+    if (n < 0 || fdi->cueSheetTracks.size() <= (unsigned int)n) {
+        return -1;
+    }
+    return fdi->cueSheetTracks[n].trackNumber;
+}
+
+extern "C" __declspec(dllexport)
+int64_t __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+    if (n < 0 || fdi->cueSheetTracks.size() <= (unsigned int)n) {
+        return -1;
+    }
+    return fdi->cueSheetTracks[n].offsetSamples;
+}
+
