@@ -88,6 +88,18 @@ namespace FlacDecodeCS {
         private extern static
         int FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, byte[] buff);
 
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(int id);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        long FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n);
+
         enum OperationType {
             DecodeAll,
             DecodeHeaderOnly
@@ -201,13 +213,15 @@ namespace FlacDecodeCS {
              * 28+t+al     artistLen      アーティスト文字列
              * 28+t+al+ar  4             画像データバイト数
              * 32+t+al+ar  pictureBytes   画像データ
-             * 32+t+al+ar+pic   4              frameCount1 (ヘッダのみの場合なし)
-             * 36+t+al+ar+pic   ※1            PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
-             * ※2        4              frameCount2
-             * ※2+4      ※3            PCMデータ2 frameCount2個
+             * 32+t+al+ar+pic   4         CUEシートトラック数 numCuesheetTracks
+             * 36+t+al+ar+pic+tOffs      CUEシートトラックオフセット(8*numCuesheetTracks)
+             * 36+t+al+ar+pic+tOffs   4   frameCount1 (ヘッダのみの場合なし)
+             * 40+t+al+ar+pic+tOffs   ※1 PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
+             * ※2        4               frameCount2
+             * ※2+4      ※3             PCMデータ2 frameCount2個
              * 
              * ※1…frameCount1 * nChannels * (bitsPerSample/8)
-             * ※2…32+t+al+ar+pic+※1
+             * ※2…32+t+al+ar+pic+tOffs+※1
              */
 
             int rv = FlacDecodeDLL_DecodeStart(path, skipFrames);
@@ -263,6 +277,14 @@ namespace FlacDecodeCS {
                 FlacDecodeDLL_GetPictureData(id, 0, pictureBytes, pictureData);
             }
 
+            int numCuesheetTracks = FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(id);
+            LogWriteLine(string.Format("FlacDecodeCS DecodeOne numOfCuesheetTracks {0}", numCuesheetTracks));
+
+            long[] cueSheetOffsetArray = new long[numCuesheetTracks];
+            for (int i=0; i < numCuesheetTracks; ++i) {
+                cueSheetOffsetArray[i] = FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(id, i);
+            }
+
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne output start"));
 
             bw.Write(nChannels);
@@ -279,6 +301,13 @@ namespace FlacDecodeCS {
             if (0 < pictureBytes) {
                 bw.Write(pictureData);
             }
+
+            /*
+            bw.Write(numCuesheetTracks);
+            for (int i=0; i<numCuesheetTracks; ++i) {
+                bw.Write(cueSheetOffsetArray[i]);
+            }
+            */
 
             int ercd = 0;
 

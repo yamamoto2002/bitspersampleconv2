@@ -81,6 +81,16 @@ wmain(int argc, wchar_t* argv[])
     printf("D: artist=%S\n", artistStr);
 
     {
+        int nCuesheets = FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(id);
+        printf("D: cuesheet=%d\n", nCuesheets);
+        for (int i=0; i<nCuesheets; ++i) {
+            int trackNr = FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(id, i);
+            int64_t offs = FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(id, i);
+            printf("  %d trackNr=%d offs=%lld\n", i, trackNr, offs);
+        }
+    }
+
+    {
         FILE *fp = NULL;
         errno_t erno = _wfopen_s(&fp, argv[3], L"wb");
         assert(erno == 0);

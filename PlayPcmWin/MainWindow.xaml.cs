@@ -1539,7 +1539,7 @@ namespace PlayPcmWin
 
             WavData wavData = new WavData();
             try {
-                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     if (wavData.ReadHeader(br)) {
                         // WAVヘッダ読み込み成功。PcmDataを作って再生リストに足す。
 
@@ -1586,7 +1586,7 @@ namespace PlayPcmWin
 
             AiffReader ar = new AiffReader();
             try {
-                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open))) {
+                using (BinaryReader br = new BinaryReader(File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))) {
                     PcmDataLib.PcmData pd;
                     AiffReader.ResultType aiffResult = ar.ReadHeader(br, out pd);
                     if (aiffResult == AiffReader.ResultType.Success) {
@@ -3447,6 +3447,5 @@ namespace PlayPcmWin
         private void buttonClearPlayList_Click(object sender, RoutedEventArgs e) {
             ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
         }
-
     }
 }

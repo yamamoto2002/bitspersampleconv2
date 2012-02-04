@@ -121,3 +121,17 @@ extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_return);
 
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(int id);
+
+/// 埋め込みCUEシートトラックnのトラックナンバー
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n);
+
+/// 埋め込みCUEシートトラックnのオフセットサンプル位置
+extern "C" __declspec(dllexport)
+int64_t __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n);
+
