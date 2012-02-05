@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.59 ==
+  * Issue 90 再生リストの曲順を並び替えると再生順が変になる問題を修正。
+
 ===!PlayPcmWin 3.0.58 ==
   * Issue 88 FLAC埋め込みCUEシートの読み込み対応
 
