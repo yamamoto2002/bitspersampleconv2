@@ -2517,7 +2517,9 @@ namespace PlayPcmWin
         private void CreateAllTracksPlayList() {
             m_pcmDataListForPlay = new List<PcmData>();
             for (int i=0; i < m_pcmDataListForDisp.Count; ++i) {
-                m_pcmDataListForPlay.Add(m_pcmDataListForDisp[i]);
+                var pcmData = new PcmData();
+                pcmData.CopyFrom(m_pcmDataListForDisp[i]);
+                m_pcmDataListForPlay.Add(pcmData);
             }
         }
 
@@ -3452,6 +3454,7 @@ namespace PlayPcmWin
                 }
 
                 pcmData.Id = i;
+                pcmData.Ordinal = i;
                 pcmData.GroupId = m_groupIdNextAdd;
             }
         }

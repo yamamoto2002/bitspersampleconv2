@@ -251,7 +251,7 @@ namespace PcmDataLib {
             EndTick = -1;
             AlbumTitle = "";
             ArtistName = "";
-            CueSheetIndex = -1;
+            CueSheetIndex = 1;
             PictureBytes = 0;
             PictureData = null;
         }
