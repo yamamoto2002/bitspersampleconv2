@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.58 ==
+  * Issue 88 FLAC埋め込みCUEシートの読み込み対応
+
 ===!PlayPcmWin 3.0.57 ==
   * Issue 89 読み取り専用WAVおよびAIFFファイルが読み込めない問題を修正。
 
