@@ -94,11 +94,23 @@ namespace FlacDecodeCS {
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        int FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n);
+        int FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int trackId);
 
         [DllImport("FlacDecodeDLL.dll")]
         private extern static
-        long FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n);
+        long FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int trackId);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetEmbeddedCuesheetTrackNumOfIndices(int id, int trackId);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        int FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexNumber(int id, int trackId, int indexId);
+
+        [DllImport("FlacDecodeDLL.dll")]
+        private extern static
+        long FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexOffsetSamples(int id, int trackId, int indexId);
 
         enum OperationType {
             DecodeAll,
@@ -213,12 +225,16 @@ namespace FlacDecodeCS {
              * 28+t+al     artistLen      アーティスト文字列
              * 28+t+al+ar  4             画像データバイト数
              * 32+t+al+ar  pictureBytes   画像データ
-             * 32+t+al+ar+pic   4         CUEシートトラック数 numCuesheetTracks
-             * 36+t+al+ar+pic+tOffs      CUEシートトラックオフセット(8*numCuesheetTracks)
-             * 36+t+al+ar+pic+tOffs   4   frameCount1 (ヘッダのみの場合なし)
-             * 40+t+al+ar+pic+tOffs   ※1 PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし) frameCount1個
-             * ※2        4               frameCount2
-             * ※2+4      ※3             PCMデータ2 frameCount2個
+             * 32+t+al+ar+pic   4         CUEシートトラック数 nct
+             * 36+t+al+ar+pic+tOffs  4    CUEシートトラック0のトラック番号
+             * 40+t+al+ar+pic+tOffs  8    CUEシートトラック0のオフセット
+             * 48+t+al+ar+pic+tOffs  4    CUEシートトラック0のインデックス数nIdx0
+             * 52+t+al+ar+pic+tOffs  8    CUEシートトラック0インデックス0のインデックス番号
+             * …
+             * frameOffs    4             frameCount1 (ヘッダのみの場合なし)
+             * frameOffs+4  ※1           PCMデータ1(リトルエンディアン、LRLRLR…) (ヘッダのみの場合なし)
+             * ※2          4             frameCount2
+             * ※2+4        ※3           PCMデータ2
              * 
              * ※1…frameCount1 * nChannels * (bitsPerSample/8)
              * ※2…32+t+al+ar+pic+tOffs+※1
@@ -252,17 +268,17 @@ namespace FlacDecodeCS {
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne GetNumFramesPerBlock() {0}", numFramesPerBlock));
 
             StringBuilder buf = new StringBuilder(256);
-            FlacDecodeDLL_GetTitleStr(id, buf, buf.Capacity *2);
+            FlacDecodeDLL_GetTitleStr(id, buf, buf.Capacity * 2);
             string titleStr = buf.ToString();
 
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne titleStr {0}", titleStr));
-            
-            FlacDecodeDLL_GetAlbumStr(id, buf, buf.Capacity*2);
+
+            FlacDecodeDLL_GetAlbumStr(id, buf, buf.Capacity * 2);
             string albumStr = buf.ToString();
 
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne albumStr {0}", albumStr));
-            
-            FlacDecodeDLL_GetArtistStr(id, buf, buf.Capacity*2);
+
+            FlacDecodeDLL_GetArtistStr(id, buf, buf.Capacity * 2);
             string artistStr = buf.ToString();
 
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne artistStr {0}", artistStr));
@@ -270,19 +286,11 @@ namespace FlacDecodeCS {
             int pictureBytes = FlacDecodeDLL_GetPictureBytes(id);
 
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne pictureBytes {0}", pictureBytes));
-            
+
             byte[] pictureData = null;
             if (0 < pictureBytes) {
                 pictureData = new byte[pictureBytes];
                 FlacDecodeDLL_GetPictureData(id, 0, pictureBytes, pictureData);
-            }
-
-            int numCuesheetTracks = FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(id);
-            LogWriteLine(string.Format("FlacDecodeCS DecodeOne numOfCuesheetTracks {0}", numCuesheetTracks));
-
-            long[] cueSheetOffsetArray = new long[numCuesheetTracks];
-            for (int i=0; i < numCuesheetTracks; ++i) {
-                cueSheetOffsetArray[i] = FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(id, i);
             }
 
             LogWriteLine(string.Format("FlacDecodeCS DecodeOne output start"));
@@ -302,12 +310,26 @@ namespace FlacDecodeCS {
                 bw.Write(pictureData);
             }
 
-            /*
-            bw.Write(numCuesheetTracks);
-            for (int i=0; i<numCuesheetTracks; ++i) {
-                bw.Write(cueSheetOffsetArray[i]);
+            {
+                // Cuesheets
+                int numCuesheetTracks = FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(id);
+                LogWriteLine(string.Format("FlacDecodeCS DecodeOne numOfCuesheetTracks {0}", numCuesheetTracks));
+                bw.Write(numCuesheetTracks);
+
+                for (int trackId=0; trackId < numCuesheetTracks; ++trackId) {
+                    bw.Write(FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(id, trackId));
+                    bw.Write(FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(id, trackId));
+
+                    int numCuesheetTrackIndices = FlacDecodeDLL_GetEmbeddedCuesheetTrackNumOfIndices(id, trackId);
+                    LogWriteLine(string.Format("FlacDecodeCS DecodeOne CuesheetTrackNumOfIndices track={0} nIdx={1}", trackId, numCuesheetTrackIndices));
+                    bw.Write(numCuesheetTrackIndices);
+
+                    for (int indexId=0; indexId < numCuesheetTrackIndices; ++indexId) {
+                        bw.Write(FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexNumber(id, trackId, indexId));
+                        bw.Write(FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexOffsetSamples(id, trackId, indexId));
+                    }
+                }
             }
-            */
 
             int ercd = 0;
 

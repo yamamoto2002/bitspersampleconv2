@@ -132,12 +132,9 @@ namespace PlayPcmWin
                 }
             }
 
-            /// <summary>
-            /// GAPの場合true
-            /// </summary>
-            public string IsIndex00 {
+            public int IndexNr {
                 get {
-                    return (m_pcmData.CueSheetIndex == 0) ? "Yes" : "No";
+                    return m_pcmData.CueSheetIndex;
                 }
                 set {
                 }
@@ -1484,9 +1481,10 @@ namespace PlayPcmWin
                 if (pcmData.DisplayName == null || pcmData.DisplayName.Length == 0) {
                     pcmData.DisplayName = pcmData.FileName;
                 }
-                pcmData.StartTick = 0;
-                pcmData.EndTick = -1;
-                pcmData.CueSheetIndex = 1;
+                // startTickとendTickは、既にセットされていることもあるので、ここではセットしない。
+                // pcmData.StartTick = 0;
+                // pcmData.EndTick = -1;
+                // pcmData.CueSheetIndex = 1;
             } else {
                 if (0 < csti.title.Length) {
                     pcmData.DisplayName = csti.title;
@@ -1612,16 +1610,60 @@ namespace PlayPcmWin
         /// FLACファイルのヘッダ部分を読み込む。
         /// </summary>
         /// <returns>読めたらtrue</returns>
-        private bool ReadFlacFileHeader(string path, CueSheetReader csr, CueSheetTrackInfo csti) {
-            bool readSuccess = false;
+        private bool ReadFlacFileHeader(string path, ReadHeaderMode mode, CueSheetReader csr, CueSheetTrackInfo csti) {
+            bool readResult = false;
             PcmDataLib.PcmData pcmData;
+            List<FlacDecodeIF.FlacCuesheetTrackInfo> ctiList;
+
             FlacDecodeIF fdif = new FlacDecodeIF();
             int flacErcd = 0;
-            flacErcd = fdif.ReadHeader(path, out pcmData);
+            flacErcd = fdif.ReadHeader(path, out pcmData, out ctiList);
             if (flacErcd == 0) {
-                CheckAddPcmData(csr, csti, path, pcmData);
-                readSuccess = true;
+                // FLACヘッダ部分読み込み成功。
+
+                if (ctiList.Count == 0 || mode == ReadHeaderMode.OnlyConcreteFile) {
+                    // FLAC埋め込みCUEシート情報を読まない。
+
+                    CheckAddPcmData(csr, csti, path, pcmData);
+                } else {
+                    // FLAC埋め込みCUEシート情報を読む。
+
+                    PcmData pcmTrack = null;
+                    for (int trackId=0; trackId < ctiList.Count; ++trackId) {
+                        var cti = ctiList[trackId];
+
+                        if (cti.indices.Count == 0) {
+                            // インデックスが1つもないトラック。lead-outトラックの場合等。
+                            if (pcmTrack != null) {
+                                pcmTrack.EndTick = (int)((cti.offsetSamples * 75) / pcmTrack.SampleRate);
+                                CheckAddPcmData(null, null, path, pcmTrack);
+                                pcmTrack = null;
+                            }
+                        } else {
+                            for (int indexId=0; indexId < cti.indices.Count; ++indexId) {
+                                var indexInfo = cti.indices[indexId];
+
+                                if (pcmTrack != null) {
+                                    pcmTrack.EndTick = (int)(((cti.offsetSamples + indexInfo.offsetSamples) * 75) / pcmTrack.SampleRate);
+                                    CheckAddPcmData(null, null, path, pcmTrack);
+                                    pcmTrack = null;
+                                }
+
+                                pcmTrack = new PcmData();
+                                pcmTrack.CopyFrom(pcmData);
+                                if (pcmTrack.DisplayName.Length == 0) {
+                                    pcmTrack.DisplayName = System.IO.Path.GetFileName(path);
+                                }
+                                pcmTrack.DisplayName = string.Format("{0} (Track {1}, Index {2})", pcmTrack.DisplayName, cti.trackNr, indexInfo.indexNr);
+                                pcmTrack.CueSheetIndex = indexInfo.indexNr;
+                                pcmTrack.StartTick = (int)(((cti.offsetSamples + indexInfo.offsetSamples) * 75) / pcmTrack.SampleRate);
+                            }
+                        }
+                    }
+                }
+                readResult = true;
             } else {
+                // FLACヘッダ部分読み込み失敗。
                 string s = string.Format(Properties.Resources.ReadFileFailed + " {2}: {1}\r\n",
                     "FLAC",
                     path,
@@ -1633,7 +1675,7 @@ namespace PlayPcmWin
                     FlacDecodeIF.ErrorCodeToStr(flacErcd)));
             }
 
-            return readSuccess;
+            return readResult;
         }
 
         /// <summary>
@@ -1697,7 +1739,7 @@ namespace PlayPcmWin
                 break;
             case ".flac":
                 if (mode != ReadHeaderMode.OnlyMetaFile) {
-                    result += ReadFlacFileHeader(path, csr, csti) ? 1 : 0;
+                    result += ReadFlacFileHeader(path, mode, csr, csti) ? 1 : 0;
                 }
                 break;
             case ".aif":

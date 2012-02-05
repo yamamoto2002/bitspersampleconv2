@@ -233,6 +233,30 @@ namespace PcmDataLib {
             PictureData = rhs.PictureData;
         }
 
+        public PcmData() {
+            NumChannels = 0;
+            SampleRate = 0;
+            BitsPerSample = 0;
+            ValidBitsPerSample = 0;
+            SampleValueRepresentationType = ValueRepresentationType.SInt;
+            m_numFrames = 0;
+            m_sampleArray = null;
+            Id = -1;
+            Ordinal = -1;
+            GroupId = -1;
+            FileName = null;
+            FullPath = null;
+            DisplayName = null;
+            StartTick = 0;
+            EndTick = -1;
+            AlbumTitle = "";
+            ArtistName = "";
+            CueSheetIndex = -1;
+            PictureBytes = 0;
+            PictureData = null;
+        }
+
+
         /// <summary>
         /// ヘッダー情報、サンプルデータ領域をクローンする。
         /// </summary>
