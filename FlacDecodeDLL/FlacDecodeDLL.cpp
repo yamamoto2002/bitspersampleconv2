@@ -391,14 +391,14 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
 
         fdi->cueSheetTracks.clear();
 
-        uint32_t nMax = CUE.num_tracks;
-        if (FLACDECODE_TRACK_MAX < nMax) {
-            nMax = FLACDECODE_TRACK_MAX;
+        uint32_t numOfTracks = CUE.num_tracks;
+        if (FLACDECODE_TRACK_MAX < numOfTracks) {
+            numOfTracks = FLACDECODE_TRACK_MAX;
         }
 
-        for (int i=0; i<(int)nMax; ++i) {
+        for (int trackId=0; trackId<(int)numOfTracks; ++trackId) {
             FlacCuesheetTrackInfo track;
-            FLAC__StreamMetadata_CueSheet_Track *from = &CUE.tracks[i];
+            FLAC__StreamMetadata_CueSheet_Track *from = &CUE.tracks[trackId];
 
             track.offsetSamples = from->offset;
             track.isAudio = !from->type;
@@ -414,24 +414,22 @@ MetadataCallback(const FLAC__StreamDecoder *decoder,
                 (unsigned int)track.isrc[4], (unsigned int)track.isrc[5], (unsigned int)track.isrc[6], (unsigned int)track.isrc[7],
                 (unsigned int)track.isrc[8], (unsigned int)track.isrc[9], (unsigned int)track.isrc[10], (unsigned int)track.isrc[11]);
 
-            if (from->indices == NULL) {
-                continue;
-            }
+            if (from->indices != NULL) {
+                uint32_t numOfIndices = from->num_indices;
+                if (FLACDECODE_TRACK_IDX_MAX < numOfIndices) {
+                    numOfIndices = FLACDECODE_TRACK_IDX_MAX;
+                }
 
-            uint32_t iMax = from->num_indices;
-            if (FLACDECODE_TRACK_IDX_MAX < iMax) {
-                iMax = FLACDECODE_TRACK_IDX_MAX;
-            }
+                for (int indexId=0; indexId<(int)numOfIndices; ++indexId) {
+                    FlacCuesheetIndexInfo idxInfo;
+                    FLAC__StreamMetadata_CueSheet_Index *idxFrom = &from->indices[indexId];
+                    idxInfo.number = idxFrom->number;
+                    idxInfo.offsetSamples = idxFrom->offset;
+                    track.indices.push_back(idxInfo);
 
-            for (int j=0; j<(int)iMax; ++j) {
-                FlacCuesheetIndexInfo idxInfo;
-                FLAC__StreamMetadata_CueSheet_Index *idxFrom = &from->indices[j];
-                idxInfo.number = idxFrom->number;
-                idxInfo.offsetSamples = idxFrom->offset;
-                track.indices.push_back(idxInfo);
-
-                dprintf(fdi->logFP, "    idxNr=%d offsSamples=%lld\n",
-                    idxInfo.number, idxInfo.offsetSamples);
+                    dprintf(fdi->logFP, "    idxNr=%d offsSamples=%lld\n",
+                        idxInfo.number, idxInfo.offsetSamples);
+                }
             }
             fdi->cueSheetTracks.push_back(track);
         }
@@ -1036,25 +1034,72 @@ FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(int id)
 
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n)
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int trackId)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
-    if (n < 0 || fdi->cueSheetTracks.size() <= (unsigned int)n) {
+    if (trackId < 0 || fdi->cueSheetTracks.size() <= (unsigned int)trackId) {
         return -1;
     }
-    return fdi->cueSheetTracks[n].trackNumber;
+    return fdi->cueSheetTracks[trackId].trackNumber;
 }
 
 extern "C" __declspec(dllexport)
 int64_t __stdcall
-FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n)
+FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int trackId)
 {
     FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
     assert(fdi);
-    if (n < 0 || fdi->cueSheetTracks.size() <= (unsigned int)n) {
+    if (trackId < 0 || fdi->cueSheetTracks.size() <= (unsigned int)trackId) {
         return -1;
     }
-    return fdi->cueSheetTracks[n].offsetSamples;
+    return fdi->cueSheetTracks[trackId].offsetSamples;
 }
 
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumOfIndices(int id, int trackId)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+    if (trackId < 0 || fdi->cueSheetTracks.size() <= (unsigned int)trackId) {
+        return -1;
+    }
+    return fdi->cueSheetTracks[trackId].indices.size();
+}
+
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexNumber(int id, int trackId, int indexId)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+    if (trackId < 0 || fdi->cueSheetTracks.size() <= (unsigned int)trackId) {
+        return -1;
+    }
+
+    FlacCuesheetTrackInfo *fct = &fdi->cueSheetTracks[trackId];
+    if (indexId < 0 || fct->indices.size() <= (unsigned int)indexId) {
+        return -1;
+    }
+
+    return fct->indices[indexId].number;
+}
+
+extern "C" __declspec(dllexport)
+int64_t __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexOffsetSamples(int id, int trackId, int indexId)
+{
+    FlacDecodeInfo *fdi = FlacDecodeInfoFindById(id);
+    assert(fdi);
+    if (trackId < 0 || fdi->cueSheetTracks.size() <= (unsigned int)trackId) {
+        return -1;
+    }
+
+    FlacCuesheetTrackInfo *fct = &fdi->cueSheetTracks[trackId];
+    if (indexId < 0 || fct->indices.size() <= (unsigned int)indexId) {
+        return -1;
+    }
+
+    return fct->indices[indexId].offsetSamples;
+}

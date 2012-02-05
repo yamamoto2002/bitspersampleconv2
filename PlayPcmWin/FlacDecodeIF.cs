@@ -2,9 +2,21 @@
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
+using System.Collections.Generic;
 
 namespace PlayPcmWin {
     class FlacDecodeIF {
+        public struct FlacCuesheetTrackIndexInfo {
+            public int indexNr;
+            public long offsetSamples;
+        }
+
+        public class FlacCuesheetTrackInfo {
+            public int trackNr;
+            public long offsetSamples;
+            public List<FlacCuesheetTrackIndexInfo> indices = new List<FlacCuesheetTrackIndexInfo>();
+        };
+
         private Process m_childProcess;
         private BinaryReader m_br;
         private AnonymousPipeServerStream m_pss;
@@ -107,8 +119,9 @@ namespace PlayPcmWin {
             HeadereAndData,
         };
 
-        private int ReadStartCommon(ReadMode mode, string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData) {
-            pcmData = new PcmDataLib.PcmData();
+        private int ReadStartCommon(ReadMode mode, string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData_return, out List<FlacCuesheetTrackInfo> cueSheet_return) {
+            pcmData_return = new PcmDataLib.PcmData();
+            cueSheet_return = new List<FlacCuesheetTrackInfo>();
             
             StartChildProcess();
 
@@ -150,7 +163,25 @@ namespace PlayPcmWin {
                 m_pictureData = m_br.ReadBytes(m_pictureBytes);
             }
 
-            pcmData.SetFormat(
+            {
+                int numCuesheetTracks = m_br.ReadInt32();
+                for (int trackId=0; trackId < numCuesheetTracks; ++trackId) {
+                    var cti = new FlacCuesheetTrackInfo();
+                    cti.trackNr = m_br.ReadInt32();
+                    cti.offsetSamples = m_br.ReadInt64();
+
+                    int numCuesheetTrackIndices = m_br.ReadInt32();
+                    for (int indexId=0; indexId < numCuesheetTrackIndices; ++indexId) {
+                        var indexInfo = new FlacCuesheetTrackIndexInfo();
+                        indexInfo.indexNr = m_br.ReadInt32();
+                        indexInfo.offsetSamples = m_br.ReadInt64();
+                        cti.indices.Add(indexInfo);
+                    }
+                    cueSheet_return.Add(cti);
+                }
+            }
+
+            pcmData_return.SetFormat(
                 nChannels,
                 bitsPerSample,
                 bitsPerSample,
@@ -158,16 +189,16 @@ namespace PlayPcmWin {
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
                 m_numFrames);
 
-            pcmData.DisplayName = titleStr;
-            pcmData.AlbumTitle = albumStr;
-            pcmData.ArtistName = artistStr;
+            pcmData_return.DisplayName = titleStr;
+            pcmData_return.AlbumTitle = albumStr;
+            pcmData_return.ArtistName = artistStr;
 
-            pcmData.SetPicture(m_pictureBytes, m_pictureData);
+            pcmData_return.SetPicture(m_pictureBytes, m_pictureData);
             return 0;
         }
 
-        public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData) {
-            int rv = ReadStartCommon(ReadMode.Header, flacFilePath, 0, 0, out pcmData);
+        public int ReadHeader(string flacFilePath, out PcmDataLib.PcmData pcmData_return, out List<FlacCuesheetTrackInfo> cueSheet_return) {
+            int rv = ReadStartCommon(ReadMode.Header, flacFilePath, 0, 0, out pcmData_return, out cueSheet_return);
             StopChildProcess();
             if (rv != 0) {
                 return rv;
@@ -184,15 +215,16 @@ namespace PlayPcmWin {
         /// <param name="wantFrames">取得するフレーム数。</param>
         /// <param name="pcmData">出てきたデコード後のPCMデータ。</param>
         /// <returns></returns>
-        public int ReadStreamBegin(string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData) {
-            int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipFrames, wantFrames, out pcmData);
+        public int ReadStreamBegin(string flacFilePath, long skipFrames, long wantFrames, out PcmDataLib.PcmData pcmData_return) {
+            List<FlacCuesheetTrackInfo> cti;
+            int rv = ReadStartCommon(ReadMode.HeadereAndData, flacFilePath, skipFrames, wantFrames, out pcmData_return, out cti);
             if (rv != 0) {
                 StopChildProcess();
                 m_bytesPerFrame = 0;
                 return rv;
             }
 
-            m_bytesPerFrame = pcmData.BitsPerFrame / 8;
+            m_bytesPerFrame = pcmData_return.BitsPerFrame / 8;
             return 0;
         }
 

@@ -60,6 +60,17 @@ namespace FlacDecodeCSTest {
             return exitCode;
         }
 
+        struct CuesheetTrackIndexInfo {
+            public int indexNr;
+            public long offsetSamples;
+        }
+
+        class CuesheetTrackInfo {
+            public int trackNr;
+            public long offsetSamples;
+            public List<CuesheetTrackIndexInfo> indices = new List<CuesheetTrackIndexInfo>();
+        };
+
         private int ReadHeaderTest(string flacFilePath) {
             StartChildProcess();
             SendString("H");
@@ -89,13 +100,24 @@ namespace FlacDecodeCSTest {
                 br.ReadBytes(pictureBytes);
             }
 
-            /*
-            int numCuesheetTracks = br.ReadInt32();
-            var cueSheetOffsets = new long[numCuesheetTracks];
-            for (int i=0; i < numCuesheetTracks; ++i) {
-                cueSheetOffsets[i] = br.ReadInt64();
+            var cuesheetTracks = new List<CuesheetTrackInfo>();
+            {
+                int numCuesheetTracks = br.ReadInt32();
+                for (int trackId=0; trackId < numCuesheetTracks; ++trackId) {
+                    var cti = new CuesheetTrackInfo();
+                    cti.trackNr = br.ReadInt32();
+                    cti.offsetSamples = br.ReadInt64();
+
+                    int numCuesheetTrackIndices = br.ReadInt32();
+                    for (int indexId=0; indexId < numCuesheetTrackIndices; ++indexId) {
+                        var indexInfo = new CuesheetTrackIndexInfo();
+                        indexInfo.indexNr = br.ReadInt32();
+                        indexInfo.offsetSamples = br.ReadInt64();
+                        cti.indices.Add(indexInfo);
+                    }
+                    cuesheetTracks.Add(cti);
+                }
             }
-            */
 
             System.Console.WriteLine("ReadHeaderTest() completed. nChannels={0} bitsPerSample={1} sampleRate={2} numFrames={3} numFramesPerBlock={4}",
                 nChannels, bitsPerSample, sampleRate, numFrames, numFramesPerBlock);

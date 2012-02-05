@@ -121,17 +121,40 @@ extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetPictureData(int id, int offs, int pictureBytes, char *picture_return);
 
+/// 埋め込みCUEシートトラックの総数
 extern "C" __declspec(dllexport)
 int __stdcall
 FlacDecodeDLL_GetEmbeddedCuesheetNumOfTracks(int id);
 
-/// 埋め込みCUEシートトラックnのトラックナンバー
+/// 埋め込みCUEシートトラックtrackIdのトラックナンバーtrackNr
+/// @param trackId トラックID (0から連番で付与されている)
+/// @return trackNr (1～99 および170) 負の値のとき、trackIdが範囲外
 extern "C" __declspec(dllexport)
 int __stdcall
-FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int n);
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumber(int id, int trackId);
 
-/// 埋め込みCUEシートトラックnのオフセットサンプル位置
+/// 埋め込みCUEシートトラックtrackIdのオフセットサンプル位置
 extern "C" __declspec(dllexport)
 int64_t __stdcall
-FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int n);
+FlacDecodeDLL_GetEmbeddedCuesheetTrackOffsetSamples(int id, int trackId);
+
+/// 埋め込みCUEシートトラックtrackIdのインデックス総数
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackNumOfIndices(int id, int trackId);
+
+/// 埋め込みCUEシートトラックtrackId、インデックスindexIdのインデックス番号indexNr
+/// @param trackId トラックID (0から連番で付与されている)
+/// @param indexId インデックスID(0から連番で付与される)
+/// @return indexNr (0～99) 負の値のとき、trackIdかindexIdが範囲外
+extern "C" __declspec(dllexport)
+int __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexNumber(int id, int trackId, int indexId);
+
+/// 埋め込みCUEシートトラックtrackIdのインデックスindexIdのオフセット
+/// @param indexId インデックスID(0から連番で付与される)
+/// @return インデックスindexIdのトラック先頭からのオフセット位置
+extern "C" __declspec(dllexport)
+int64_t __stdcall
+FlacDecodeDLL_GetEmbeddedCuesheetTrackIndexOffsetSamples(int id, int trackId, int indexId);
 

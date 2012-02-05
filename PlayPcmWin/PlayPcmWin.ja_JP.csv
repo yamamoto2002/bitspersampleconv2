@@ -46,7 +46,7 @@ PlayPcmWin.g.en-US.resources:mainwindow.baml,SampleRateColumn:System.Windows.Con
 PlayPcmWin.g.en-US.resources:mainwindow.baml,QuantizationBitRateColumn:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,量子化ビット数
 PlayPcmWin.g.en-US.resources:mainwindow.baml,NumChannelsColumn:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,チャンネル数
 PlayPcmWin.g.en-US.resources:mainwindow.baml,BitRateColumn:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,ビットレート
-PlayPcmWin.g.en-US.resources:mainwindow.baml,IsIndex00Column:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,INDEX 00
+PlayPcmWin.g.en-US.resources:mainwindow.baml,IsIndex00Column:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,Index
 PlayPcmWin.g.en-US.resources:mainwindow.baml,ReadSeparaterAfterColumn:System.Windows.Controls.DataGridColumn.Header,Label,True,True,,ここまで一括読み込み
 PlayPcmWin.g.en-US.resources:mainwindow.baml,groupBox7:System.Windows.Controls.HeaderedContentControl.Header,Label,True,True,,再生制御
 PlayPcmWin.g.en-US.resources:mainwindow.baml,buttonPlay:System.Windows.Controls.ContentControl.Content,Button,True,True,,再生(_P)
