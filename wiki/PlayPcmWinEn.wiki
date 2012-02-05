@@ -23,8 +23,8 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 Stable version !PlayPcmWin 3.0.57 x64 build installer
   * http://bitspersampleconv2.googlecode.com/files/PlayPcmWin357x64en.zip
 
-Development version !PlayPcmWin 3.0.58 x64 build installer
-  * http://bitspersampleconv2.googlecode.com/files/PlayPcmWin358x64en.zip
+Development version !PlayPcmWin 3.0.59 x64 build installer
+  * http://bitspersampleconv2.googlecode.com/files/PlayPcmWin359x64en.zip
 
 = License =
 
