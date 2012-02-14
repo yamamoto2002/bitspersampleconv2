@@ -37,7 +37,7 @@ http://flac.sourceforge.net/download.html
 
 Extract it onto C:\work folder. Open C:\work\flac-s.t.u\FLAC.sln. select release build. right-click libFLAC_static on the solution explorer and `[`Property`]` to open libFLAC_static property page. on the page, Select `[`VC++ directories`]``[`include directories`]` and append *C:\work\libogg-x.y.z\include;*
 
-Right-click  `[`libFLAC_static`] and select `[Build`] to build libFLAC_static.lib
+Right-click  `[`libFLAC_static`]` and select `[`Build`]` to build libFLAC_static.lib
 
 In order to build FLAC, I suppose, the Netwide assembler is needed additionally. It can be downloaded from the following site:
 http://sourceforge.net/projects/nasm/
