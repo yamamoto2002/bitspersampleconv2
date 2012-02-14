@@ -16,7 +16,7 @@ http://bitspersampleconv2.googlecode.com/svn/trunk
 
 == 2. Create LocBaml_x64.exe and LocBaml_x86.exe =
 
-Download LocBaml SDK from the following page:
+Download "LocBaml Tool Sample" from the following page:
 http://msdn.microsoft.com/en-us/library/ms746621.aspx
 
 Run Visual Studio 2010 and Load locbaml_sdk.sln
