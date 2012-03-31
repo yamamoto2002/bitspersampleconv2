@@ -3,6 +3,12 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.60 ==
+  * Issue 93 HDMIディスプレイの電源が切れると再生が止まるバグ修正
+  * Issue 94 選択曲除外機能バグ修正
+  * Issue 92 DACが安定するまでの間無音を送出する機能作成
+http://bitspersampleconv2.googlecode.com/files/ppw3060settings.png
+
 ===!PlayPcmWin 3.0.59 ==
   * Issue 90 再生リストの曲順を入れ替えると再生順が変になる問題を修正。
 
