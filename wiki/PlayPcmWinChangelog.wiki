@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.61 ==
+  * Issue 95 timeBeginPeriod(1)を呼ぶかどうかを設定する機能作成
+
 ===!PlayPcmWin 3.0.60 ==
   * Issue 93 HDMIディスプレイの電源が切れると再生が止まるバグ修正
   * Issue 94 選択曲除外機能バグ修正
