@@ -208,6 +208,8 @@ Pro Audioにすると、出力レイテンシーを10ミリ秒よりも短く設
 WASAPIからデバイスのマスターサンプリングレートの変更ができません。
 タスクトレイの「Fireface Settings」や「M-Audio ProFire」でマスターサンプリングレートを、再生するWAVファイルのサンプリングレートに予め設定してください。
 
+Echo AudioFireシリーズも同様のようです。
+
 =Creative X-FiTiHDで44.1kHzと88.2kHzのイベント駆動再生ができない問題=
 
 Creative X-FiTiHDは、44.1kHzサンプリングと88.2kHzサンプリングでWASAPI排他イベント駆動モードが使えません。
