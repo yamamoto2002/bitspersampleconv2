@@ -32,6 +32,11 @@ Stable version !PlayPcmWin 3.0.61 x64 build installer
 
 http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
+
+=Additional setting is needed with RME FireFace 400/800/UC/UFX, M-AUDIO ProFire series, Echo AudioFire series etc=
+
+These professional audio equipments do not support sample rate change via WASAPI. Please set sample rate manually prior to play using "FireFace Settings", "M-Audio Profire" or "AudioFire Console" application on your system tray.
+
 = What's the data feed mode? Which is better for the sound quality ? =
 
   * Event driven data feed mode: Playback thread wakes up from sleep state by WASAPI buffer request event. Wake up interval of playback thread is specified by output latency time. Buffer refill sample size is latency time x sample rate (samples).
