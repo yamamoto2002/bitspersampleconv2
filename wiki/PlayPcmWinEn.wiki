@@ -33,7 +33,7 @@ Stable version !PlayPcmWin 3.0.63 x64 build installer
 http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
 
-=Additional setting is needed with RME FireFace 400/800/UC/UFX, M-AUDIO ProFire series, Echo AudioFire series etc=
+=Additional setting is necessary with RME FireFace 400/800/UC/UFX, M-AUDIO ProFire series, Echo AudioFire series etc=
 
 These professional audio equipments do not support sample rate change via WASAPI. Please set sample rate manually prior to playing using "FireFace Settings", "M-Audio Profire" or "AudioFire Console" application on your system tray.
 
