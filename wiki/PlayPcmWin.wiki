@@ -327,7 +327,7 @@ WasapiUser.cppに書かれています。
 
 全部で200行ほどの短いプログラムです。
 
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1365
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1325
 
 ==再生スレッド 関数呼び出しグラフ==
 
