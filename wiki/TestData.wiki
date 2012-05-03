@@ -1,7 +1,7 @@
 #summary music player test data
 #labels Phase-QA
 
-http://bitspersampleconv2.googlecode.com/files/FloatClipTestWav.zip
+http://bitspersampleconv2.googlecode.com/files/FloatClipTest2Wav.zip
 32bit float PCM clipping test
 
 http://bitspersampleconv2.googlecode.com/files/triangle20.zip
