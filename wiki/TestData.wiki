@@ -3,3 +3,6 @@
 
 http://bitspersampleconv2.googlecode.com/files/FloatClipTestWav.zip
 32bit float PCM clipping test
+
+http://bitspersampleconv2.googlecode.com/files/triangle20.zip
+24bit PCM full-scale sample value increment/decrement
