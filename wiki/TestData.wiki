@@ -1,6 +1,9 @@
 #summary music player test data
 #labels Phase-QA
 
+http://bitspersampleconv2.googlecode.com/files/FloatSubnormalWav.zip
+32bit float PCM subnormal number test
+
 http://bitspersampleconv2.googlecode.com/files/FloatClipTest2Wav.zip
 32bit float PCM clipping test
 
