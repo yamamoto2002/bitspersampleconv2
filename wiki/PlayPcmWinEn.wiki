@@ -33,6 +33,11 @@ Stable version (!PlayPcmWin 3.0.70)
 
 http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
 
+=64-bit version and 32-bit version. Which is better?=
+
+64-bit version is better for lower CPU usage than 32-bit version and its capability to use larger virtual memory space.
+
+But 64-bit version doesn't work if your computer has 32-bit operating system.
 
 =Additional setting is necessary with RME FireFace 400/800/UC/UFX, M-AUDIO ProFire series, Echo AudioFire series etc=
 
