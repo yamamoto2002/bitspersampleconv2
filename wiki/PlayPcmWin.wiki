@@ -73,7 +73,7 @@ http://code.google.com/p/bitspersampleconv2/wiki/WasapiExclusiveMode
 =既知のバグ一覧=
 
 最新版に存在する不具合一覧:
-http://code.google.com/p/bitspersampleconv2/issues/list?can=2&q=&sort=-id&colspec=ID%20Type%20Status%20Priority%20Milestone%20Owner%20Summary
+http://code.google.com/p/bitspersampleconv2/issues/list?can=2&q=&colspec=ID+Type+Status+Priority+Milestone+Owner+Summary&groupby=&sort=-id&x=&y=&cells=tiles&mode=grid
 
 最新版では修正された不具合も含めて全て表示:
 http://code.google.com/p/bitspersampleconv2/issues/list?can=1&q=&sort=-id&colspec=ID%20Type%20Status%20Summary
