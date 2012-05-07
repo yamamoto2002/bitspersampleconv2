@@ -29,9 +29,7 @@ Stable version (!PlayPcmWin 3.0.70)
   * !PlayPcmWin: MIT License http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/PlayPcmWinLicense.txt
   * libFLAC: New BSD License http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/libFlacLicense.txt
 
-= Screenshots =
-
-http://bitspersampleconv2.googlecode.com/files/PPW3038EN.png
+http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_en.png
 
 =64-bit version and 32-bit version. Which is better?=
 
