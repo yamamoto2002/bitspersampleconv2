@@ -33,7 +33,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_en.png
 
 =64-bit version and 32-bit version. Which is better?=
 
-64-bit version is better than 32-bit version for lower CPU usage and its capability to use larger virtual memory space. (faster processing, more space for music data)
+These two versions are created from the same source code. 64-bit version is better than 32-bit version for lower CPU usage and its capability to use larger virtual memory space. (faster processing, more space for music data)
 
 But 64-bit version doesn't work if your computer has 32-bit operating system.
 
