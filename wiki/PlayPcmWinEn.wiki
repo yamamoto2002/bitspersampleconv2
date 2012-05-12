@@ -31,7 +31,7 @@ Stable version (!PlayPcmWin 3.0.73)
 
 http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_en.png
 
-=64-bit version and 32-bit version. Which is better?=
+=64-bit version or 32-bit version, Which is better?=
 
 These two versions are created from the same source code. 64-bit version is better than 32-bit version for lower CPU usage and its capability to use larger virtual memory space. (faster processing, more space for music data)
 
