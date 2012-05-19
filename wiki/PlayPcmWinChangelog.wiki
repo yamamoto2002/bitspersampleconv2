@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.76 ==
+  * (日本語版)詳細設定画面に英語が残っている問題修正
+
 ===!PlayPcmWin 3.0.75 ==
   * Issue 59 再生リストの列の並び順を保存する
   * 再生リストのAlternating row background colorを設定できるようにする。
