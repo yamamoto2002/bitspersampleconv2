@@ -58,7 +58,7 @@ First, Render means playback, Capture means recording :)
 
 If you want to set 10 ms or fewer output latency,
 *Pro Audio* is preferred option. If you choose Pro Audio option,
-The render thread priority runs on the highest priority. It reduces the probability of output buffer underflow accidents but from the power consumption standpoint, It causes negative impact.
+The render thread runs on the highest priority. It reduces the probability of output buffer underflow accidents but from the power consumption standpoint, It causes negative impact.
 
 Render thread task type settings ultimately chooses
 the first parameter of
