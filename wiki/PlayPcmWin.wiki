@@ -378,3 +378,7 @@ WASAPI排他イベント駆動モードで、出力レイテンシー設定200�
 =参考文献=
 
 http://msdn.microsoft.com/en-us/library/dd370844%28v=VS.85%29.aspx
+
+=作者のメールアドレス=
+
+yamamoto2002@gmail.com
