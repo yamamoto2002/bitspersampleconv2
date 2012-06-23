@@ -4,6 +4,9 @@
 =PlayPcmWin 更新履歴=
 
 
+===!PlayPcmWin 3.0.87 ==
+  * Issue 108 再生リストが一部だけ表示されている状態で再生曲が進んでいくと再生曲が画面外に行く問題修正
+
 ===!PlayPcmWin 3.0.85 ==
   * スプラッシュスクリーン作成。http://bitspersampleconv2.googlecode.com/svn/trunk/PlayPcmWin/ppwsplash.png
   * PlayPcmWinテストベンチをプログラムメニューに追加しないように修正。
