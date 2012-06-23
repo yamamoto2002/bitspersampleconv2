@@ -20,9 +20,9 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 
 = Downloads =
 
-Stable version (!PlayPcmWin 3.0.87)
-  * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin387x64en.zip
-  * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin387en.zip
+Stable version (!PlayPcmWin 3.0.88)
+  * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin388x64en.zip
+  * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin388en.zip
 
 = License =
 
