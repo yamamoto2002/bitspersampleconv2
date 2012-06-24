@@ -5,7 +5,7 @@
 
 
 ===!PlayPcmWin 3.0.91 ==
-  * 英語リソースの修正
+  * 英語リソースの修正 Fixed english resource layout mess introduced on PlayPcmWin 3.0.89
 
 ===!PlayPcmWin 3.0.89 ==
   * 再生スレッドタスクタイプ設定を詳細設定画面に移動し出力デバイス一覧の表示領域を広くする
