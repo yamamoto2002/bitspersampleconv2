@@ -28,14 +28,12 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
 
 =ダウンロード=
 
-安定版　(バージョン 3.0.88)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin388.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin388x64.zip
-
-非常にバグっぽい開発版　(バージョン 3.0.89)
+安定版　(バージョン 3.0.89)
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin389.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin389x64.zip
 
+非常にバグっぽい開発版
+  * なし
 
 *(バージョン3.0.52以降に備わっている並列読み込み機能は実験的機能でまだ不安定なことがあるようです。とりあえず無効にしておいたほうが無難です。)*
 
