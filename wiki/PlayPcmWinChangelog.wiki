@@ -3,6 +3,8 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.92 ==
+  * Issue 109 修正
 
 ===!PlayPcmWin 3.0.91 ==
   * 英語リソースの修正 Fixed English UI layout mess introduced on !PlayPcmWin 3.0.89
