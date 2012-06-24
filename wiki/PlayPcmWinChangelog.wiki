@@ -13,6 +13,7 @@
 ===!PlayPcmWin 3.0.85 ==
   * スプラッシュスクリーン作成。http://bitspersampleconv2.googlecode.com/svn/trunk/PlayPcmWin/ppwsplash.png
   * PlayPcmWinテストベンチをプログラムメニューに追加しないように修正。
+  * Issue 109 発生
 
 ===!PlayPcmWin 3.0.83 ==
   * Issue 107 黒地に白のテーマで再生リストの空欄が白で塗られる問題修正。
