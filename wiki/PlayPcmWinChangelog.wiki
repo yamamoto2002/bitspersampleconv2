@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 3.0.92 ==
-  * Issue 109 スプラッシュスクリーンが消えるタイミングでファイル読み込みエラー表示も消える問題修正
+  * Issue 109 スプラッシュスクリーンが消えるタイミングで再生リスト内の曲ファイル読み込みエラー表示も消える問題修正
 
 ===!PlayPcmWin 3.0.91 ==
   * 英語リソースの修正 Fixed English UI layout mess introduced on !PlayPcmWin 3.0.89
