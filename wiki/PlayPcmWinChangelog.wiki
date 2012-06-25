@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.93 ==
+  * English UI Output Latency groupbox layout tweak
+
 ===!PlayPcmWin 3.0.92 ==
   * Issue 109 スプラッシュスクリーンが消えるタイミングで再生リスト内の曲ファイル読み込みエラー表示も消える問題修正
 
