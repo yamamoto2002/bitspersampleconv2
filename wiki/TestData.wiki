@@ -1,11 +1,11 @@
 #summary music player test data
 #labels Phase-QA
 
+32bit float PCM subnormal number test data. Processing subnormal number takes more CPU time than processing normalized number
 http://bitspersampleconv2.googlecode.com/files/FloatSubnormalWav2.zip
-32bit float PCM subnormal number test
 
+32bit float PCM clipping test data contains float value more than 1.0
 http://bitspersampleconv2.googlecode.com/files/FloatClipTest2Wav.zip
-32bit float PCM clipping test
 
+24bit PCM full-scale sample value increment/decrement for bit-perfectness test
 http://bitspersampleconv2.googlecode.com/files/triangle20.zip
-24bit PCM full-scale sample value increment/decrement
