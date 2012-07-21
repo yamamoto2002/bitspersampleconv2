@@ -7,5 +7,5 @@
 ==32bit float PCM clipping test data which contains float value more than 1.0==
   * http://bitspersampleconv2.googlecode.com/files/FloatClipTest2Wav.zip
 
-==24bit PCM full-scale sample value increment/decrement for bit-perfectness test==
+==24bit PCM full-scale sample value increment/decrement (step by 8) for bit-perfectness test==
   * http://bitspersampleconv2.googlecode.com/files/triangle20.zip
