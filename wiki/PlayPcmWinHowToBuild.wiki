@@ -58,3 +58,7 @@ Open C:\work\BpsConvWin2\!PlayPcmWin\!PlayPcmWin.sln
 Select build target (Release x64 or Release x86. Other platform such as AnyCPU doesn't work). Right-click !PlayPcmWin project on the solution explorer window and flag it as startup project and build the solution.
 
 I suppose the folder path to libFLAC_static.lib and libogg_static.lib must be specified somewhere to build !PlayPcmWin successfully. Please play it by ear if any problem arises.
+
+=How to update English UI layout=
+
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/00HowToUpdateEn-US%20Resource.txt
