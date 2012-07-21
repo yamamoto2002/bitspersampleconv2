@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 3.0.94 ==
+  * 再生位置スライダーの長さが伸び縮みするようにした。
+
 ===!PlayPcmWin 3.0.93 ==
   * English UI Output Latency groupbox layout tweak
 
