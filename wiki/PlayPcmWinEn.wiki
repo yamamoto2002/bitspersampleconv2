@@ -81,7 +81,7 @@ I strongly recommend to choose exclusive mode for optimal sound quality. Exclusi
 PlayPcmWin uses Resampler MFT(Audio Resampler DSP) to resample PCM data on wasapi shared mode.
 http://msdn.microsoft.com/en-us/library/windows/desktop/ff819070%28v=vs.85%29.aspx
 
-wasapi shared resampler quality value is used as
+Wasapi shared resampler quality value is used as
 IWMResamplerProps::SetHalfFilterLength() argument.
 http://msdn.microsoft.com/en-us/library/windows/desktop/ff819250%28v=vs.85%29.aspx
 
