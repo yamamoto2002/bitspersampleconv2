@@ -78,12 +78,14 @@ I strongly recommend to choose exclusive mode for optimal sound quality. Exclusi
 
 = About wasapi shared resampler quality value on settings window =
 
-PlayPcmWin uses Resampler MFT(Audio Resampler DSP) to resample on wasapi shared mode.
+PlayPcmWin uses Resampler MFT(Audio Resampler DSP) to resample PCM data on wasapi shared mode.
 http://msdn.microsoft.com/en-us/library/windows/desktop/ff819070%28v=vs.85%29.aspx
 
 wasapi shared resampler quality value is used as
 IWMResamplerProps::SetHalfFilterLength() argument.
 http://msdn.microsoft.com/en-us/library/windows/desktop/ff819250%28v=vs.85%29.aspx
+
+On wasapi exclusive mode, PlayPcmWin does not perform resampling (sample rate conversion) so this parameter is not used.
 
 = If you experience sound stuttering on playback =
 
