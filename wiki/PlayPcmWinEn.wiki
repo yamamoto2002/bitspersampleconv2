@@ -85,6 +85,8 @@ Wasapi shared resampler quality value is used as
 IWMResamplerProps::SetHalfFilterLength() argument.
 http://msdn.microsoft.com/en-us/library/windows/desktop/ff819250%28v=vs.85%29.aspx
 
+Resampler MFT is introduced on Windows 7. PlayPcmWin wasapi shared mode playback does not run on Vista.
+
 On wasapi exclusive mode, PlayPcmWin does not perform resampling (sample rate conversion) so this parameter is not used.
 
 = If you experience sound stuttering on playback =
