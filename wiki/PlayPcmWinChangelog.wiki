@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.1 ==
+  * Issue 114 (!PlayPcmWin 3.0.98で発生したWASAPI共有モード再生でGPFが発生するバグ) 修正
+
 ===!PlayPcmWin 4.0.0 ==
   * Issue 113 (!PlayPcmWin 3.0.99で発生した一時停止すると再生位置つまみが動かなくなるバグ) 修正
 
