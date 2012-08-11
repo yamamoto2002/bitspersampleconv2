@@ -12,7 +12,7 @@ Its input/output data is uncompressed little-endian byte order PCM stream.
 
 Media Foundation uses COM therefore you need to call CoCreateInstance first.
 
-Next call the MFStartup to initialize Media Foundation platform.
+Next call MFStartup to initialize Media Foundation platform.
 
 {{{
 HRESULT hr = S_OK;
