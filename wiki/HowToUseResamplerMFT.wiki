@@ -1,4 +1,6 @@
+#summary How to use Resampler MFT
 #labels Featured
+
 =How to use Resampler MFT=
 
 Resampler MFT (Audio Resampler DSP) is sample rate converter introduced on Windows 7.
