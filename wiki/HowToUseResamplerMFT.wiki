@@ -3,7 +3,7 @@
 
 =How to use Resampler MFT=
 
-MFT stands for Media Foundation transform. MFT is a component of Microsoft Media Foundation, MFT provides media data processing.
+MFT stands for Media Foundation transform. MFT is a component of Microsoft Media Foundation. MFT provides media data processing.
 
 Resampler MFT (MFT interface of Audio Resampler DSP) is sample rate converter introduced on Windows 7.
 
