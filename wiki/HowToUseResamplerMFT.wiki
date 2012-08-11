@@ -78,11 +78,10 @@ hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, NULL);
 
 ==5. Create IMFSample from uncompressed PCM input data==
 {{{
-// input data 
-BYTE  *data = ...;
-DWORD  bytes = ...; //< bytes is smaller than approx. 1Mbytes
-IMFMediaBuffer *pBuffer = NULL;
+BYTE  *data = ...; //< input PCM data 
+DWORD bytes = ...; //< bytes is smaller than approx. 1Mbytes
 
+IMFMediaBuffer *pBuffer = NULL;
 hr = MFCreateMemoryBuffer(bytes , &pBuffer);
 
 BYTE  *pByteBufferTo = NULL;
