@@ -158,7 +158,6 @@ CoUninitialize();
 
 ==Sample code==
 Working sample program is avaiable here
-
 http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWMFResamplerTest
 
 Compiled executable
