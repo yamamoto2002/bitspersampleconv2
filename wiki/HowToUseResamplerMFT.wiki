@@ -25,117 +25,116 @@ hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 ==2. Create Resampler MFT Object==
 
 {{{
- CComPtr<IUnknown> spTransformUnk;
- IMFTransform *pTransform; //< this is Resampler MFT
+CComPtr<IUnknown> spTransformUnk;
+IMFTransform *pTransform; //< this is Resampler MFT
 
- hr = CoCreateInstance(CLSID_CResamplerMediaObject, NULL, CLSCTX_INPROC_SERVER,
-            IID_IUnknown, (void**)&spTransformUnk);
- // check if SUCCEEDED(hr)
+hr = CoCreateInstance(CLSID_CResamplerMediaObject, NULL, CLSCTX_INPROC_SERVER,
+        IID_IUnknown, (void**)&spTransformUnk);
+// check if SUCCEEDED(hr)
 
- hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&pTransform));
- // check if SUCCEEDED(hr)
+hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&pTransform));
+// check if SUCCEEDED(hr)
 
- CComPtr<IWMResamplerProps> spResamplerProps;
- hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&spResamplerProps);
- hr = spResamplerProps->SetHalfFilterLength(60); //< best conversion quality
+CComPtr<IWMResamplerProps> spResamplerProps;
+hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&spResamplerProps);
+hr = spResamplerProps->SetHalfFilterLength(60); //< best conversion quality
 }}}
 
 ==3. Specify input/output PCM format to Resampler MFT==
 
 {{{
- IMFMediaType *pMediaType = NULL;
- MyPcmFormat fmt;
- // set input PCM format parameters to fmt
+IMFMediaType *pMediaType = NULL;
+MyPcmFormat fmt;
+// set input PCM format parameters to fmt
 
- MFCreateMediaType(&pMediaType);
- hr = pMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio));
- hr = pMediaType->SetGUID(MF_MT_SUBTYPE,
-            (fmt.sampleFormat == WWMFBitFormatInt) ? MFAudioFormat_PCM : MFAudioFormat_Float);
- hr = pMediaType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,         fmt.nChannels);
- hr = pMediaType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,   fmt.sampleRate);
- hr = pMediaType->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,      fmt.FrameBytes());
- hr = pMediaType->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, fmt.BytesPerSec());
- hr = pMediaType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,      fmt.bits);
- hr = pMediaType->SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,    TRUE);
- if (0 != fmt.dwChannelMask) {
-     hr = pMediaType->SetUINT32(MF_MT_AUDIO_CHANNEL_MASK, fmt.dwChannelMask);
- }
- if (fmt.bits != fmt.validBitsPerSample) {
-     hr = pMediaType->SetUINT32(MF_MT_AUDIO_VALID_BITS_PER_SAMPLE, fmt.validBitsPerSample);
- }
- pTransform->SetInputType(0, spOutputType, 0);
+MFCreateMediaType(&pMediaType);
+hr = pMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio));
+hr = pMediaType->SetGUID(MF_MT_SUBTYPE,
+        (fmt.sampleFormat == WWMFBitFormatInt) ? MFAudioFormat_PCM : MFAudioFormat_Float);
+hr = pMediaType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,         fmt.nChannels);
+hr = pMediaType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,   fmt.sampleRate);
+hr = pMediaType->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,      fmt.FrameBytes());
+hr = pMediaType->SetUINT32(MF_MT_AUDIO_AVG_BYTES_PER_SECOND, fmt.BytesPerSec());
+hr = pMediaType->SetUINT32(MF_MT_AUDIO_BITS_PER_SAMPLE,      fmt.bits);
+hr = pMediaType->SetUINT32(MF_MT_ALL_SAMPLES_INDEPENDENT,    TRUE);
+if (0 != fmt.dwChannelMask) {
+    hr = pMediaType->SetUINT32(MF_MT_AUDIO_CHANNEL_MASK, fmt.dwChannelMask);
+}
+if (fmt.bits != fmt.validBitsPerSample) {
+    hr = pMediaType->SetUINT32(MF_MT_AUDIO_VALID_BITS_PER_SAMPLE, fmt.validBitsPerSample);
+}
+pTransform->SetInputType(0, spOutputType, 0);
 
- // also need to call pTransform->SetOutputType() in the same way as SetInputType
+// also need to call pTransform->SetOutputType() in the same way as SetInputType
 }}}
 
 ==4. Send stream start message to Resampler MFT ==
 
 {{{
- hr = pTransform->ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, NULL);
- hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, NULL);
- hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, NULL);
+hr = pTransform->ProcessMessage(MFT_MESSAGE_COMMAND_FLUSH, NULL);
+hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, NULL);
+hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, NULL);
 }}}
 
 ==5. create IMFSample from uncompressed PCM input data==
 {{{
- // input data 
- BYTE  *data = ...;
- DWORD  bytes = ...; //< bytes is smaller than approx. 1Mbytes
- IMFMediaBuffer *pBuffer = NULL;
+// input data 
+BYTE  *data = ...;
+DWORD  bytes = ...; //< bytes is smaller than approx. 1Mbytes
+IMFMediaBuffer *pBuffer = NULL;
 
- hr = MFCreateMemoryBuffer(bytes , &pBuffer);
+hr = MFCreateMemoryBuffer(bytes , &pBuffer);
 
- BYTE  *pByteBufferTo = NULL;
- hr = pBuffer->Lock(&pByteBufferTo, NULL, NULL);
+BYTE  *pByteBufferTo = NULL;
+hr = pBuffer->Lock(&pByteBufferTo, NULL, NULL);
+memcpy(pByteBufferTo, data, bytes);
+pBuffer->Unlock();
+pByteBufferTo = NULL;
 
- memcpy(pByteBufferTo, data, bytes);
- pBuffer->Unlock();
- pByteBufferTo = NULL;
+hr = pBuffer->SetCurrentLength(bytes);
 
- hr = pBuffer->SetCurrentLength(bytes);
+IMFSample *pSample = NULL;
+hr = MFCreateSample(&pSample);
+hr = pSample->AddBuffer(pBuffer);
 
- IMFSample *pSample = NULL;
- hr = MFCreateSample(&pSample);
- hr = pSample->AddBuffer(pBuffer);
-
- SafeRelease(&pBuffer);
+SafeRelease(&pBuffer);
 }}}
 
 ==6. Set input data to Resampler MFT==
 
 {{{ 
- hr = pTransform->ProcessInput(0, pSample, 0);
+hr = pTransform->ProcessInput(0, pSample, 0);
 }}}
 
 ==7. Perform sample rate conversion and get output sample data==
 
 {{{
- do {
-     MFT_OUTPUT_DATA_BUFFER outputDataBuffer;
-     DWORD dwStatus;
-     hr = pTransform->ProcessOutput(0, 1, &outputDataBuffer, &dwStatus);
-     if (hr == MF_E_TRANSFORM_NEED_MORE_INPUT) {
+do {
+    MFT_OUTPUT_DATA_BUFFER outputDataBuffer;
+    DWORD dwStatus;
+    hr = pTransform->ProcessOutput(0, 1, &outputDataBuffer, &dwStatus);
+    if (hr == MF_E_TRANSFORM_NEED_MORE_INPUT) {
+        // conversion end
         break;
-     }
+    }
 
-     // output PCM data is set in outputDataBuffer.pSample;
-     IMFSample *pSample = outputDataBuffer.pSample;
+    // output PCM data is set in outputDataBuffer.pSample;
+    IMFSample *pSample = outputDataBuffer.pSample;
  
-     CComPtr<IMFMediaBuffer> spBuffer;
-     hr = pSample->ConvertToContiguousBuffer(&spBuffer);
+    CComPtr<IMFMediaBuffer> spBuffer;
+    hr = pSample->ConvertToContiguousBuffer(&spBuffer);
+    DWORD cbBytes = 0;
+    hr = spBuffer->GetCurrentLength(&cbBytes);
 
-     DWORD cbBytes = 0;
-     hr = spBuffer->GetCurrentLength(&cbBytes);
+    BYTE  *pByteBuffer = NULL;
+    hr = spBuffer->Lock(&pByteBuffer, NULL, NULL);
 
-     BYTE  *pByteBuffer = NULL;
-     hr = spBuffer->Lock(&pByteBuffer, NULL, NULL);
+    BYTE *to = new BYTE[cbBytes]; //< output PCM data
+    toBytes = cbBytes;            //< output PCM data size
+    memcpy(to, pByteBuffer, cbBytes);
 
-     BYTE *to = new BYTE[cbBytes];
-     toBytes = cbBytes;
-     memcpy(to, pByteBuffer, cbBytes);
-
-     spBuffer->Unlock();
- } while (true);
+    spBuffer->Unlock();
+} while (true);
 }}}
 
 ==8. repeat 6 and 7 until all input data is processed==
@@ -143,19 +142,19 @@ hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 ==9. Drain remaining samples on Resampler MFT buffer==
 
 {{{
- hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_END_OF_STREAM, NULL);
- hr = pTransform->ProcessMessage(MFT_MESSAGE_COMMAND_DRAIN, NULL);
+hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_END_OF_STREAM, NULL);
+hr = pTransform->ProcessMessage(MFT_MESSAGE_COMMAND_DRAIN, NULL);
 
- // perform step 7
+// perform step 7
 }}}
 
 ==10 Notify end streaming message to Resampler MFT and shutdown==
 
 {{{
- pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_END_STREAMING, NULL);
- SafeRelease(&pTransform);
- MFShutdown();
- CoUninitialize();
+pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_END_STREAMING, NULL);
+SafeRelease(&pTransform);
+MFShutdown();
+CoUninitialize();
 }}}
 
 ==Sample code==
