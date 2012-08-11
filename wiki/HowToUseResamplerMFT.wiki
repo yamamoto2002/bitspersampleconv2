@@ -50,7 +50,7 @@ MyPcmFormat fmt;
 MFCreateMediaType(&pMediaType);
 hr = pMediaType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio));
 hr = pMediaType->SetGUID(MF_MT_SUBTYPE,
-        (fmt.sampleFormat == WWMFBitFormatInt) ? MFAudioFormat_PCM : MFAudioFormat_Float);
+        (fmt.sampleFormat == MyBitFormatInt) ? MFAudioFormat_PCM : MFAudioFormat_Float);
 hr = pMediaType->SetUINT32(MF_MT_AUDIO_NUM_CHANNELS,         fmt.nChannels);
 hr = pMediaType->SetUINT32(MF_MT_AUDIO_SAMPLES_PER_SECOND,   fmt.sampleRate);
 hr = pMediaType->SetUINT32(MF_MT_AUDIO_BLOCK_ALIGNMENT,      fmt.FrameBytes());
