@@ -8,7 +8,7 @@ MFT stands for Media Foundation transform. MFT is a component of Microsoft Media
 Resampler MFT (MFT interface of Audio Resampler DSP) is sample rate converter introduced on Windows 7.
 
 Resampler MFT is implemented as Media Foundation Transform.
-Its input/output data is uncompressed little-endian byte order PCM stream.
+Its input/output data is uncompressed little-endian byte order PCM audio stream.
 
 ==1. Initialization==
 
