@@ -8,7 +8,7 @@ Resampler MFT (Audio Resampler DSP) is sample rate converter introduced on Windo
 Resampler MFT is implemented as Media Foundation Transform.
 Its input/output data is uncompressed little-endian byte order PCM stream.
 
-==1. Initialize==
+==1. Initialization==
 
 Media Foundation uses COM therefore you need to call CoCreateInstance first.
 
@@ -76,7 +76,7 @@ hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_BEGIN_STREAMING, NULL);
 hr = pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_START_OF_STREAM, NULL);
 }}}
 
-==5. create IMFSample from uncompressed PCM input data==
+==5. Create IMFSample from uncompressed PCM input data==
 {{{
 // input data 
 BYTE  *data = ...;
@@ -137,7 +137,7 @@ do {
 } while (true);
 }}}
 
-==8. repeat 6 and 7 until all input data is processed==
+==8. Repeat 6 and 7 until all input data is processed==
 
 ==9. Drain remaining samples on Resampler MFT buffer==
 
@@ -148,7 +148,7 @@ hr = pTransform->ProcessMessage(MFT_MESSAGE_COMMAND_DRAIN, NULL);
 // perform step 7
 }}}
 
-==10 Notify end streaming message to Resampler MFT and shutdown==
+==10 Send end streaming message to Resampler MFT and shutdown Media Framework==
 
 {{{
 pTransform->ProcessMessage(MFT_MESSAGE_NOTIFY_END_STREAMING, NULL);
