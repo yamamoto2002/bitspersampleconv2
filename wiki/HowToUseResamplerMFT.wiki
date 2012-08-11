@@ -18,8 +18,10 @@ Next call MFStartup to initialize Media Foundation platform.
 HRESULT hr = S_OK;
 
 hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+// check if SUCCEEDED(hr)
 
 hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
+// check if SUCCEEDED(hr)
 }}}
 
 ==2. Create Resampler MFT Object==
@@ -30,10 +32,8 @@ IMFTransform *pTransform; //< this is Resampler MFT
 
 hr = CoCreateInstance(CLSID_CResamplerMediaObject, NULL, CLSCTX_INPROC_SERVER,
         IID_IUnknown, (void**)&spTransformUnk);
-// check if SUCCEEDED(hr)
 
 hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&pTransform));
-// check if SUCCEEDED(hr)
 
 CComPtr<IWMResamplerProps> spResamplerProps;
 hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&spResamplerProps);
