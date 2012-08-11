@@ -34,6 +34,10 @@ hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 
  hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&pTransform));
  // check if SUCCEEDED(hr)
+
+ CComPtr<IWMResamplerProps> spResamplerProps;
+ hr = spTransformUnk->QueryInterface(IID_PPV_ARGS(&spResamplerProps);
+ hr = spResamplerProps->SetHalfFilterLength(60); //< best conversion quality
 }}}
 
 ==3. Specify input/output PCM format to Resampler MFT==
@@ -158,6 +162,4 @@ hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 Working sample program is avaiable here
 
 http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWMFResamplerTest
-
-
 
