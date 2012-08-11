@@ -138,7 +138,7 @@ do {
 } while (true);
 }}}
 
-==8. Repeat 6 and 7 until all input data is processed==
+==8. Repeat 5, 6 and 7 until all input data is processed==
 
 ==9. Drain remaining samples on Resampler MFT buffer==
 
