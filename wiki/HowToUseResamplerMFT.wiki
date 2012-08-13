@@ -3,16 +3,16 @@
 
 =How to use Resampler MFT=
 
-MFT stands for Media Foundation transform. MFT is a component of Microsoft Media Foundation. MFT provides media data processing.
+MFT stands for Media Foundation transform. MFT provides media data processing. MFT is a component of Microsoft Media Foundation.
 
-Resampler MFT (MFT interface of Audio Resampler DSP) is a sample rate converter introduced on Windows 7.
+Resampler MFT (MFT interface of Audio Resampler DSP) is a sample rate converter MFT introduced on Windows 7.
 
 Resampler MFT is implemented as a Media Foundation Transform.
 Its input/output data is uncompressed little-endian byte order PCM audio stream.
 
 ==1. Initialization==
 
-Media Foundation uses COM therefore you need to call CoCreateInstance first.
+Media Foundation uses COM. Call CoInitializeEx to initialize COM.
 
 Next call MFStartup to initialize Media Foundation platform.
 
