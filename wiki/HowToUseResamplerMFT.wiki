@@ -5,7 +5,7 @@
 
 MFT(Media Foundation transform) is a component of Microsoft Media Foundation. MFT provides media data processing.
 
-Resampler MFT (MFT interface of Audio Resampler DSP) is a sample rate converter MFT introduced on Windows 7.
+Resampler MFT (MFT interface of Audio Resampler DSP) is a sample rate converter introduced on Windows 7.
 
 Resampler MFT is implemented as a Media Foundation Transform.
 Its input/output data is uncompressed little-endian byte order PCM audio stream.
