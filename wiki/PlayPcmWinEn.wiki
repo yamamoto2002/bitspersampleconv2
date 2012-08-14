@@ -17,7 +17,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
   * Gapless playback.
   * Source code available.
   * Supported Platforms: Windows Vista (SP1 or later), Windows 7. *Windows XP is not supported* because XP does not have WASAPI. Windows 2003 Server, Windows 2000, Windows NT 1.0 to 4.0, Windows Me, Windows 9x, Windows 1.0 to 3.11, Windows RT are not supported as well. There is a report !PlayPcmWin runs on Windows 2008 Server (I don't tested on Windows 2008 Server).
-  * WASAPI shared mode playback works on Windows 7. *WASAPI shared mode playback doesn't work on Windows Vista* because !PlayPcmWin uses Audio Resampler DSP that is introduced on Windows 7.
+  * WASAPI exclusive mode playback of !PlayPcmWin works on Windows Vista and Windows 7. *WASAPI shared mode playback of !PlayPcmWin doesn't work on Windows Vista* because !PlayPcmWin uses Audio Resampler DSP that is introduced on Windows 7. 
 
 = Downloads =
 
