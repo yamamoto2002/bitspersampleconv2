@@ -30,7 +30,7 @@ hr = MFStartup(MF_VERSION, MFSTARTUP_NOSOCKET);
 
 {{{
 CComPtr<IUnknown> spTransformUnk;
-IMFTransform *pTransform; //< this is Resampler MFT
+IMFTransform *pTransform = NULL; //< this is Resampler MFT
 
 hr = CoCreateInstance(CLSID_CResamplerMediaObject, NULL, CLSCTX_INPROC_SERVER,
         IID_IUnknown, (void**)&spTransformUnk);
