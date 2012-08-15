@@ -67,7 +67,7 @@ if (fmt.bits != fmt.validBitsPerSample) {
 }
 pTransform->SetInputType(0, spOutputType, 0);
 
-// also need to call pTransform->SetOutputType() in the same way as SetInputType
+// also need to call pTransform->SetOutputType() in the same manner as SetInputType
 }}}
 
 ==4. Send stream start message to Resampler MFT ==
