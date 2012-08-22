@@ -9,3 +9,6 @@
 
 ==24bit PCM full-scale sample value increment/decrement (step by 256) for bit-perfectness test==
   * http://bitspersampleconv2.googlecode.com/files/triangle20.zip
+
+==24bit PCM full-scale sample value increment/decrement (step by 1) 
+  * http://bitspersampleconv2.googlecode.com/files/triangleRadder24bit.zip
