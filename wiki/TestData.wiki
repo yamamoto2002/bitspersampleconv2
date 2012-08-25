@@ -1,7 +1,7 @@
 #summary music player test data
 #labels Phase-QA
 
-*Important* These file is not intended to listen to by human!
+*Important* These file is not intended to listen to by human ears!
 Please turn off amplifier before playback starts.
 
 ==32bit float PCM subnormal number test data. Processing subnormal number takes more CPU time than processing normalized number==
