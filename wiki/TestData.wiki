@@ -11,8 +11,8 @@ Please turn off amplifier before playback starts.
 ==32bit float PCM clipping test data which contains float value more than 1.0==
   * http://bitspersampleconv2.googlecode.com/files/FloatClipTest2Wav.zip
 
-==24bit PCM full-scale sample value increment/decrement (step by 256) for bit-perfectness test==
-  * http://bitspersampleconv2.googlecode.com/files/triangle20.zip
+==16bit PCM full-scale sample value increment/decrement for bit-perfectness test==
+  * http://bitspersampleconv2.googlecode.com/files/TriangleRadder16Pack.zip
 
 ==24bit PCM full-scale sample value increment/decrement (step by 1) for bit-perfectness test==
   * http://bitspersampleconv2.googlecode.com/files/TriangleRadder24Pack.zip
