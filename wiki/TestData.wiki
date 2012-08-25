@@ -16,3 +16,7 @@ Please turn off amplifier before playback starts.
 
 ==24bit PCM full-scale sample value increment/decrement (step by 1) for bit-perfectness test==
   * http://bitspersampleconv2.googlecode.com/files/TriangleRadder24Pack.zip
+
+==FLAC file contains difficult-to-compress data. Decompressing produces 1% smaller PCM data==
+
+http://bitspersampleconv2.googlecode.com/files/urandomflac.zip
