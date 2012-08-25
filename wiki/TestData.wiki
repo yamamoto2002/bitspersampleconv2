@@ -2,6 +2,7 @@
 #labels Phase-QA
 
 *Important* These file is not intended to listen to by human ears!
+Some of them contains DC offset which may potentially damage your amplifier or speakers. 
 Please turn off amplifier before playback starts.
 
 ==32bit float PCM subnormal number test data. Processing subnormal number takes more CPU time than processing normalized number==
