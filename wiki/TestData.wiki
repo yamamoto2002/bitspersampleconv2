@@ -1,6 +1,9 @@
 #summary music player test data
 #labels Phase-QA
 
+*Important* These file is not intended to listen to by human!
+contains 
+
 ==32bit float PCM subnormal number test data. Processing subnormal number takes more CPU time than processing normalized number==
   * http://bitspersampleconv2.googlecode.com/files/FloatSubnormalWav2.zip
 
