@@ -1,7 +1,7 @@
 #summary music player test data
 #labels Phase-QA
 
-*Important* These file is not intended to listen to by human ears!
+*Important* These file is not intended to be listened to by human ears!
 Some of them contain DC offset which may potentially damage your amplifier or speakers. 
 Please turn off amplifier before playback starts.
 
