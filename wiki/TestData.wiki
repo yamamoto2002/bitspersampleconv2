@@ -19,8 +19,8 @@ Please turn off amplifier before playback starts.
 
 ==FLAC file contains difficult-to-compress data. Decompressing produces 1% smaller PCM data==
 
-http://bitspersampleconv2.googlecode.com/files/urandomflac.zip
+  * http://bitspersampleconv2.googlecode.com/files/urandomflac.zip
 
 ==FLAC file embedded corrupted cover art image==
 
-http://bitspersampleconv2.googlecode.com/files/CorruptedCoverartFlac.zip
+  * http://bitspersampleconv2.googlecode.com/files/CorruptedCoverartFlac.zip
