@@ -6,6 +6,7 @@
 ===!PlayPcmWin 4.0.3 ==
   * FxCopで出た警告を大方修正
   * Traditional Chinese translation
+  * PlayPcmWin 4.0.1以前のバージョンで設定した「出力レイテンシー値」「再生開始前無音送出秒数」等々の設定値がPlayPcmWin4.0.3以降のバージョンへの移行で自動的には引き継がれません！大変お手数ですが、インストール後これらの設定値を設定し直していただくようお願いします。
 
 ===!PlayPcmWin 4.0.1 ==
   * Issue 114 (!PlayPcmWin 3.0.98で発生したWASAPI共有モード再生でGPFが発生するひどいバグ) 修正
