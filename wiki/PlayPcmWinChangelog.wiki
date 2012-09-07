@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.3 ==
+  * FxCopで出た警告を大方修正
+  * Traditional Chinese translation
+
 ===!PlayPcmWin 4.0.1 ==
   * Issue 114 (!PlayPcmWin 3.0.98で発生したWASAPI共有モード再生でGPFが発生するひどいバグ) 修正
 
