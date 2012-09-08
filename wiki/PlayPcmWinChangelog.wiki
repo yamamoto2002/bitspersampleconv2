@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.4 ==
+  * 詳細設定画面のローカライズ漏れの修正
+
 ===!PlayPcmWin 4.0.3 ==
   * FxCopで出た警告を大方修正
   * Traditional Chinese translation
