@@ -30,7 +30,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(9) || MainDataGridColumnBitRate	 || Bitrate || uncompressed CD == 1411 kbps ||
 ||(10) || MainDataGridColumnIndexNr	 || Index || CD Index number in CUE sheet. not need to translate ||
 ||(11) || MainDataGridColumnReadSeparaterAfter	 || Batch read endpoint || read PCM data onto main memory until the checked track. ||
-||(12) || MainButtonClearPlayList	 || {{{_Clear the playlist}}} || {{{underbar(_)}}} means keyboard accelerator alphabet. see next comment. ||
+||(12) || MainButtonClearPlayList	 || {{{_Clear the playlist}}} || {{{underbar _ }}} means keyboard accelerator alphabet. see next comment. ||
 ||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}}} || {{{(_R)}}} means keyboard shortcut key is R ||
 ||(14) || MainGroupBoxPlaybackControl	 || Playback control || ||
 ||(15) || MainButtonPlay	 || {{{_Play}}} || ||
