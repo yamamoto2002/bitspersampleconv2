@@ -67,7 +67,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(45) || MenuItemFileSaveCueAs	 || Save the playlist as a _CUE sheet... || ||
 ||(46) || MenuItemFileSaveAs	 || Save _As... || ||
 ||(47) || MenuItemFileExit	 || E_xit || ||
-||(48) || MenuTool	 || _Tools || ||
+||(48) || MenuTool	 || __Tools || ||
 ||(49) || MenuItemToolSettings	 || _Settings || ||
 ||(50) || MenuPlayList	 || P_laylist || ||
 ||(51) || MenuItemPlayListClear	 || _Clear the playlist || ||
