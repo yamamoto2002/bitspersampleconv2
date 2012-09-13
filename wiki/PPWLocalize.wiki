@@ -30,13 +30,13 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(9) || MainDataGridColumnBitRate	 || Bitrate || uncompressed CD == 1411 kbps ||
 ||(10) || MainDataGridColumnIndexNr	 || Index || CD Index number in CUE sheet. not need to translate ||
 ||(11) || MainDataGridColumnReadSeparaterAfter	 || Batch read endpoint || read PCM data onto main memory until the checked track. ||
-||(12) || MainButtonClearPlayList	 || _Clear the playlist || underbar(_) means keyboard accelerator alphabet. see next comment. ||
-||(13) || MainButtonDelistSelected	 || Delist the selected file(_R) || (_R) means keyboard shortcut key is R ||
+||(12) || MainButtonClearPlayList	 || {{{_Clear the playlist}}} || {{{underbar(_)}}} means keyboard accelerator alphabet. see next comment. ||
+||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}} || {{{(_R)}}} means keyboard shortcut key is R ||
 ||(14) || MainGroupBoxPlaybackControl	 || Playback control || ||
-||(15) || MainButtonPlay	 || _Play || ||
-||(16) || MainButtonStop	 || _Stop || ||
-||(17)-1 || MainButtonPause	 || Pa_use || shortcut key is U ||
-||(17)-2 || MainButtonResume	 || Resume(_U) || shortcut key is U ||
+||(15) || MainButtonPlay	 || {{{_Play}}} || ||
+||(16) || MainButtonStop	 || {{{_Stop}}} || ||
+||(17)-1 || MainButtonPause	 || {{{Pa_use}}} || shortcut key is U ||
+||(17)-2 || MainButtonResume	 || {{{Resume(_U)}}} || shortcut key is U ||
 ||(18) || MainButtonPrev	 || Prev || ||
 ||(19) || MainButtonNext	 || Next || ||
 ||(20) || -  || - || play mode. see (36) to (41) ||
@@ -51,8 +51,8 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(29) || MainGroupBoxWasapiOutputLatency	 || Output latency || ||
 ||(30) || - || - || not need to localize ||
 ||(31) || MainGroupBoxOutputDevices	 || Output device || ||
-||(32) || MainButtonSettings	 || _Detailed settings... || ||
-||(33) || MainButtonInspectDevice	 || L_ist supported formats || ||
+||(32) || MainButtonSettings	 || {{{_Detailed settings...}}} || ||
+||(33) || MainButtonInspectDevice	 || {{{L_ist supported formats}}} || ||
 ||(34) || MainGroupBoxLog	 || Log || ||
 ||(35) || - || - || Status bar text. see below ||
 ||(36) || MainPlayModeAllTracks	 || All tracks || ||
@@ -62,19 +62,19 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(40) || MainPlayModeShuffle	 || Shuffle || ||
 ||(41) || MainPlayModeShuffleRepeat	 || Shuffle repeat || ||
 ||(42) || MenuFile	 || _File || ||
-||(43) || MenuItemFileNew	 || Clear the playlist(_N) || ||
-||(44) || MenuItemFileOpen	 || _Open... || ||
+||(43) || MenuItemFileNew	 || {{{Clear the playlist(_N)}}} || ||
+||(44) || MenuItemFileOpen	 || {{{_Open...}}} || ||
 ||(45) || MenuItemFileSaveCueAs	 || Save the playlist as a _CUE sheet... || ||
-||(46) || MenuItemFileSaveAs	 || Save _As... || ||
-||(47) || MenuItemFileExit	 || E_xit || ||
-||(48) || MenuTool	 || __Tools || ||
-||(49) || MenuItemToolSettings	 || _Settings || ||
-||(50) || MenuPlayList	 || P_laylist || ||
-||(51) || MenuItemPlayListClear	 || _Clear the playlist || ||
-||(52) || MenuItemPlayListItemEditMode	 || Playlist item edit mode(_E) || ||
-||(53) || MenuHelp	 || _Help || ||
-||(54) || MenuItemHelpAbout	 || About(_V) || ||
-||(55) || MenuItemHelpWeb	 || Visit PlayPcmWin _Website || ||
+||(46) || MenuItemFileSaveAs	 || {{{Save _As...}}} || ||
+||(47) || MenuItemFileExit	 || {{{E_xit}}} || ||
+||(48) || MenuTool	 || {{{_Tools}}} || ||
+||(49) || MenuItemToolSettings	 || {{{_Settings}}} || ||
+||(50) || MenuPlayList	 || P_laylist}}} || ||
+||(51) || MenuItemPlayListClear	 || {{{_Clear the playlist}}} || ||
+||(52) || MenuItemPlayListItemEditMode	 || {{{Playlist item edit mode(_E)}}} || ||
+||(53) || MenuHelp	 || {{{_Help}}} || ||
+||(54) || MenuItemHelpAbout	 || {{{About(_V)}}} || ||
+||(55) || MenuItemHelpWeb	 || {{{Visit PlayPcmWin _Website}}} || ||
 
 == Status bar texts ==
 ||No.|| Resource identifier          || English text || comment ||
@@ -97,7 +97,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||E-6 || PlayStartFailed	 || Play start failed || ||
 ||E-7 || ReadError	 || Read error || means file read error ||
 ||E-8 || ReadFailedFiles	 || Read failed files || used when failed to read several files ||
-||E-9 || ReadFileFailed	 || Read file failed {0} || {0} is replaced with file name ||
+||E-9 || ReadFileFailed	 || Read file failed `{0}` || `{0}` is replaced with file name ||
 ||E-10|| RestoreFailedFiles	 || Missing files while restoring playlist || ||
 ||E-11|| SaveFileFailed	 || Save file failed || ||
 ||E-12|| TooManyChannels	 || This file contains Too many channels(>31) || ||
@@ -105,11 +105,11 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 
 == Log messages ==
 ||No.|| Resource identifier          || English text || comment ||
-|| Log-1 || ClippedSampleDetected	 || Clipped sample value detected on floating point PCM data! Clipped sample value count={1}, FileName={0} || {0} is replaced with filename. {1} is replaced with clipped sample count. ||
-|| Log-2 || DeviceStateChanged	 || DeviceStateChanged. DeviceId={0} || {0} is replaced with device name ||
-|| Log-3 || PlayCompletedElapsedTimeIs	 || Play completed. elapsed time is || ||
-|| Log-4 || ReadPlayGroupNCompleted	 || Read playgroup {0} completed. Elapsed time: {1}ms || ||
-|| Log-5 || UsingDeviceStateChanged	 || Using device state change detected! DeviceName={0} DeviceId={1} || ||
+|| Log-1 || ClippedSampleDetected	 || Clipped sample value detected on floating point PCM data! Clipped sample value count=`{1}`, FileName=`{0}` || `{0}` is replaced with filename. `{1}` is replaced with clipped sample count. ||
+|| Log-2 || DeviceStateChanged	 || DeviceStateChanged. DeviceId=`{0}` || `{0}` is replaced with device name ||
+|| Log-3 || PlayCompletedElapsedTimeIs	 || Play completed. elapsed time is `{0}`ms|| ||
+|| Log-4 || ReadPlayGroupNCompleted	 || Read playgroup `{0}` completed. Elapsed time: `{1}`ms || ||
+|| Log-5 || UsingDeviceStateChanged	 || Using device state change detected! DeviceName=`{0}` DeviceId=`{1}` || ||
 
 == Miscellaneous words ==
 ||No.|| Resource identifier          || English text || comment ||
