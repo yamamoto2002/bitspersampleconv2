@@ -31,7 +31,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(10) || MainDataGridColumnIndexNr	 || Index || CD Index number in CUE sheet. not need to translate ||
 ||(11) || MainDataGridColumnReadSeparaterAfter	 || Batch read endpoint || read PCM data onto main memory until the checked track. ||
 ||(12) || MainButtonClearPlayList	 || {{{_Clear the playlist}}} || {{{underbar(_)}}} means keyboard accelerator alphabet. see next comment. ||
-||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}} || {{{(_R)}}} means keyboard shortcut key is R ||
+||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}}} || {{{(_R)}}} means keyboard shortcut key is R ||
 ||(14) || MainGroupBoxPlaybackControl	 || Playback control || ||
 ||(15) || MainButtonPlay	 || {{{_Play}}} || ||
 ||(16) || MainButtonStop	 || {{{_Stop}}} || ||
@@ -64,7 +64,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(42) || MenuFile	 || _File || ||
 ||(43) || MenuItemFileNew	 || {{{Clear the playlist(_N)}}} || ||
 ||(44) || MenuItemFileOpen	 || {{{_Open...}}} || ||
-||(45) || MenuItemFileSaveCueAs	 || Save the playlist as a _CUE sheet... || ||
+||(45) || MenuItemFileSaveCueAs	 || {{{Save the playlist as a _CUE sheet...}}} || ||
 ||(46) || MenuItemFileSaveAs	 || {{{Save _As...}}} || ||
 ||(47) || MenuItemFileExit	 || {{{E_xit}}} || ||
 ||(48) || MenuTool	 || {{{_Tools}}} || ||
