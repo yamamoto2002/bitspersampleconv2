@@ -127,9 +127,9 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 
 == Open File filters ==
 ||No.|| Resource identifier          || English text || comment ||
-|| FilterCueFiles	 || CUE files || ||
-|| FilterPpwplFiles	 || PPWPL files || ||
-|| FilterSupportedFiles	 || Supported files || ||
+|| Filter-1 || FilterCueFiles	 || CUE files || ||
+|| Filter-2 || FilterPpwplFiles	 || PPWPL files || ||
+|| Filter-3 || FilterSupportedFiles	 || Supported files || ||
 
 == Setup failed dialog message ==
 
