@@ -61,7 +61,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(39) || MainPlayModeOneTrackRepeat	 || One track repeat || ||
 ||(40) || MainPlayModeShuffle	 || Shuffle || ||
 ||(41) || MainPlayModeShuffleRepeat	 || Shuffle repeat || ||
-||(42) || MenuFile	 || _File || ||
+||(42) || MenuFile	 || {{{_File}}} || ||
 ||(43) || MenuItemFileNew	 || {{{Clear the playlist(_N)}}} || ||
 ||(44) || MenuItemFileOpen	 || {{{_Open...}}} || ||
 ||(45) || MenuItemFileSaveCueAs	 || {{{Save the playlist as a _CUE sheet...}}} || ||
@@ -69,7 +69,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 ||(47) || MenuItemFileExit	 || {{{E_xit}}} || ||
 ||(48) || MenuTool	 || {{{_Tools}}} || ||
 ||(49) || MenuItemToolSettings	 || {{{_Settings}}} || ||
-||(50) || MenuPlayList	 || P_laylist}}} || ||
+||(50) || MenuPlayList	 || {{{P_laylist}}} || ||
 ||(51) || MenuItemPlayListClear	 || {{{_Clear the playlist}}} || ||
 ||(52) || MenuItemPlayListItemEditMode	 || {{{Playlist item edit mode(_E)}}} || ||
 ||(53) || MenuHelp	 || {{{_Help}}} || ||
@@ -132,7 +132,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 || Filter-3 || FilterSupportedFiles	 || Supported files || ||
 
 == Setup failed dialog message ==
-
+{{{
 Please confirm sample rate or quantization bit rate are supported on your device using "list supported format" feature. Press [Clear the playlist][List supported format].
   * Some professional audio devices (RME Fireface, M-Audio ProFire, Echo AudioFire etc.) are not able to be changed master sampling rate via WASAPI. Please use FireFace settings, M-Audio ProFire control panel or equivalent tools on your system tray to change master sampling rate of those devices before playback.
   * 44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.
@@ -141,6 +141,7 @@ Please confirm sample rate or quantization bit rate are supported on your device
   * There are strange audio devices which stops TOSLINK output when no signal. Such devices apparently seem not to deliver first several thousand samples of PCM data. If first part of music is truncated, please increase [Zero flush period on playback starts] value.
   * PlayPcmWin cannot setup E-MU 0404 USB 24bit mode. [Detailed settings][Fix Int16] to play 24bit files on those devices but it truncates lower 8bit information.
   * Halide Bridge seems to require 24bit data always. [Detailed settings][Fix Int24] to play sound on those devices.
+}}}
 
 == Settings window ==
 
