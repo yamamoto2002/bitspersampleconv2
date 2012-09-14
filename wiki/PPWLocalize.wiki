@@ -7,15 +7,7 @@
 
 http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMain.png
 
-http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png
-
-http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuFile.png
-
-http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuTools.png
-
-http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuPlaylist.png
-
-http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
+http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuFile.png http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuTools.png http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuPlaylist.png http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMenuHelp.png
 
 
 ||No.|| Resource identifier          || English text || comment ||
