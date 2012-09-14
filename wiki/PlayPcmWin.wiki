@@ -23,7 +23,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
   * Windows 7に対応しております。Windows XPでは動きません。Vistaは、WASAPI排他モードは動きます。
   * ノンリアルタイム(低速)アップサンプリング機能。
 
-!PlayPcmWinはWASAPIの実験プログラムです。音楽を聴くのにもそこそこ使えるようになってきましたが、対応ファイル形式が少ないです。WASAPI排他モードで、いろいろなファイルフォーマットで保存されている音楽を聴きたい場合は、Foobar2000のfoo_out_wasapiプラグインを使うのが便利です。Foobar2000のfoo_out_wasapiプラグインは、WASAPI排他タイマー駆動モードで動作しているようです。
+!PlayPcmWinはWASAPIの実験プログラムです。音楽を聴くのにもそこそこ使えるようになってきましたが、対応ファイル形式が少ないです。WASAPI排他モードで、いろいろなファイルフォーマットで保存されている音楽を聴きたい場合は、Foobar2000のfoo_out_wasapiプラグインを使うのが便利です。Foobar2000のfoo_out_wasapiプラグインは、WASAPI排他タイマー駆動モードで動作しているようです。(2012年9月14日追記: Foobar2000 WASAPI出力プラグインバージョン3.0でイベント駆動もできるようになっています)
 
 
 =ダウンロード=
