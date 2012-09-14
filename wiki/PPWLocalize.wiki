@@ -105,15 +105,15 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 
 == Miscellaneous words ==
 ||No.|| Resource identifier          || English text || comment ||
-|| Word-1 || EventDriven	 || Event driven || ||
-|| Word-2 || Exclusive	 || Exclusive || ||
-|| Word-3 || Failed	 || Failed || ||
-|| Word-4 || FloatingPointNumbers	 || Float || not need to translate ||
-|| Word-5 || Latency	 || Latency || ||
-|| Word-6 || Error	 || Error || ||
-|| Word-7 || ErrorCode	 || Error code || ||
-|| Word-8 || Shared	 || Shared || ||
-|| Word-9 || TimerDriven	 || Timer driven || ||
+|| Word-1 || EventDriven	 || Event driven || WASAPI *event driven* data feed mode ||
+|| Word-2 || TimerDriven	 || Timer driven || WASAPI *timer driven* data feed mode ||
+|| Word-3 || Exclusive	 || Exclusive || WASAPI *exclusive* operation mode ||
+|| Word-4 || Shared	 || Shared || WASAPI *shared* operation mode ||
+|| Word-5 || Failed	 || Failed || ||
+|| Word-6 || FloatingPointNumbers	 || Float || not need to translate ||
+|| Word-7 || Latency	 || Latency || means output latency (delay) time ||
+|| Word-8 || Error	 || Error || ||
+|| Word-9 || ErrorCode	 || Error code || ||
 || Word-10|| ValidBits	 || Valid bits || There is 32bit per sample PCM data with 24bit valid bits and 8bit padding zeroes ||
 || Word-11|| Version	 || Version || ||
 
