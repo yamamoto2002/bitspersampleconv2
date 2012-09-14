@@ -28,7 +28,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(15) || MainButtonPlay	 || {{{_Play}}} || ||
 ||(16) || MainButtonStop	 || {{{_Stop}}} || ||
 ||(17)-1 || MainButtonPause	 || {{{Pa_use}}} || shortcut key is U ||
-||(17)-2 || MainButtonResume	 || {{{Resume(_U)}}} || shortcut key is U ||
+||(17)-2 || MainButtonResume	 || {{{Resume(_U)}}} || shortcut key is U. This text is displayed while pausing ||
 ||(18) || MainButtonPrev	 || Prev || ||
 ||(19) || MainButtonNext	 || Next || ||
 ||(20) || -  || - || play mode. see (36) to (41) ||
