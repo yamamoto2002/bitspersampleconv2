@@ -23,7 +23,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(10) || MainDataGridColumnIndexNr	 || Index || CD Index number in CUE sheet. not need to translate ||
 ||(11) || MainDataGridColumnReadSeparaterAfter	 || Batch read endpoint || read PCM data onto main memory until the checked track. ||
 ||(12) || MainButtonClearPlayList	 || {{{_Clear the playlist}}} || {{{underbar _ }}} means keyboard accelerator alphabet. Keyboard accelerator alphabet is C. see next comment. ||
-||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}}} || {{{(_R)}}} means keyboard accelerator alphabet is R ||
+||(13) || MainButtonDelistSelected	 || {{{Delist the selected file(_R)}}} || {{{(_R)}}} means keyboard accelerator alphabet is R. Press ALT key to display underbar ||
 ||(14) || MainGroupBoxPlaybackControl	 || Playback control || ||
 ||(15) || MainButtonPlay	 || {{{_Play}}} || ||
 ||(16) || MainButtonStop	 || {{{_Stop}}} || ||
