@@ -146,7 +146,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 ||No.|| Resource identifier          || English text || comment ||
 || (S-1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
 || (S-2) || SettingsGroupBoxQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
-|| (S-3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI、PCIe、1394 audio devices)||(max approx. 120 characters) ||
+|| (S-3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI, PCIe, 1394 audio devices)||(max approx. 120 characters) Int, Float, PCI, PCIe USB and 1394 are technical terms ||
 || (S-4) || SettingsRadioButtonBpsVariableSint16Sint32V24||Auto select Int16,Int32V24(Suitable for PCI、PCIe、1394 audio devices which do not support 32bps)||(max approx. 120 characters) ||
 || (S-5) || SettingsRadioButtonBpsVariableSint16Sint24||Auto select Int16,Int24(Suitable for USB audio devices)||(max approx. 120 characters) ||
 || (S-6) || SettingsRadioButtonBpsSint16||Always use Int16 format(Truncates lower bits when 24bps or 32bps data arrives)||(max approx. 120 characters) ||
