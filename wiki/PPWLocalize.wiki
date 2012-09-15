@@ -27,8 +27,8 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(14) || MainGroupBoxPlaybackControl	 || Playback control || ||
 ||(15) || MainButtonPlay	 || {{{_Play}}} || ||
 ||(16) || MainButtonStop	 || {{{_Stop}}} || ||
-||(17)-1 || MainButtonPause	 || {{{Pa_use}}} || shortcut key is U ||
-||(17)-2 || MainButtonResume	 || {{{Resume(_U)}}} || shortcut key is U. This text is displayed while pausing ||
+||(17-1) || MainButtonPause	 || {{{Pa_use}}} || shortcut key is U ||
+||(17-2) || MainButtonResume	 || {{{Resume(_U)}}} || shortcut key is U. This text is displayed while pausing ||
 ||(18) || MainButtonPrev	 || Prev || ||
 ||(19) || MainButtonNext	 || Next || ||
 ||(20) || -  || - || play mode. see (36) to (41) ||
@@ -70,58 +70,58 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 
 == Status bar texts ==
 ||No.|| Resource identifier          || English text || comment ||
-||(35)-1 || MainStatusChangingPlayGroup	 || Reading files... || ||
-||(35)-2 || MainStatusPaused	 || Paused. || ||
-||(35)-3 || MainStatusPlaying	 || Playing. || ||
-||(35)-4 || MainStatusPleaseCreatePlaylist	 || Please create the playlist. || ||
-||(35)-5 || MainStatusPressPlayButton	 || Add more files to the playlist or Press play button || ||
-||(35)-6 || MainStatusReadCompleted	 || Read completed. ready to play. || ||
-||(35)-7 || MainStatusReadingFiles	 || Setup device completed. Now reading files to Main memory... || ||
-||(35)-8 || MainStatusStopping	 || Stopping... || ||
+||(35-1) || MainStatusChangingPlayGroup	 || Reading files... || ||
+||(35-2) || MainStatusPaused	 || Paused. || ||
+||(35-3) || MainStatusPlaying	 || Playing. || ||
+||(35-4) || MainStatusPleaseCreatePlaylist	 || Please create the playlist. || ||
+||(35-5) || MainStatusPressPlayButton	 || Add more files to the playlist or Press play button || ||
+||(35-6) || MainStatusReadCompleted	 || Read completed. ready to play. || ||
+||(35-7) || MainStatusReadingFiles	 || Setup device completed. Now reading files to Main memory... || ||
+||(35-8) || MainStatusStopping	 || Stopping... || ||
 
 == Error messages ==
 ||No.|| Resource identifier          || English text || comment ||
-||E-1 || MemoryExhausted	 || Memory exhausted. Please reduce files on playlist. || ||
-||E-2 || CannotAddFile	 || Sorry... Please stop playback to add files to the playlist. || ||
-||E-3 || NothingToStore	 || Nothing to store  || attempt to save playlist but there is nothing ||
-||E-4 || NotSupportedFileFormat	 || Not supported file format || ||
-||E-5 || NotSupportedQuantizationBitRate	 || Not supported quantization bit rate. supported formats are 16, 24 and 32 || ||
-||E-6 || PlayStartFailed	 || Play start failed || ||
-||E-7 || ReadError	 || Read error || means file read error ||
-||E-8 || ReadFailedFiles	 || Read failed files || used when failed to read several files ||
-||E-9 || ReadFileFailed	 || Read file failed `{0}` || `{0}` is replaced with file name ||
-||E-10|| RestoreFailedFiles	 || Missing files while restoring playlist || ||
-||E-11|| SaveFileFailed	 || Save file failed || ||
-||E-12|| TooManyChannels	 || This file contains Too many channels(>31) || ||
-||E-13|| UnexpectedEndOfStream	 || Unexpected end of stream. || stream means file :) ||
+||(E-1) || MemoryExhausted	 || Memory exhausted. Please reduce files on playlist. || ||
+||(E-2) || CannotAddFile	 || Sorry... Please stop playback to add files to the playlist. || ||
+||(E-3) || NothingToStore	 || Nothing to store  || attempt to save playlist but there is nothing ||
+||(E-4) || NotSupportedFileFormat	 || Not supported file format || ||
+||(E-5) || NotSupportedQuantizationBitRate	 || Not supported quantization bit rate. supported formats are 16, 24 and 32 || ||
+||(E-6) || PlayStartFailed	 || Play start failed || ||
+||(E-7) || ReadError	 || Read error || means file read error ||
+||(E-8) || ReadFailedFiles	 || Read failed files || used when failed to read several files ||
+||(E-9) || ReadFileFailed	 || Read file failed `{0}` || `{0}` is replaced with file name ||
+||(E-10)|| RestoreFailedFiles	 || Missing files while restoring playlist || ||
+||(E-11)|| SaveFileFailed	 || Save file failed || ||
+||(E-12)|| TooManyChannels	 || This file contains Too many channels(>31) || ||
+||(E-13)|| UnexpectedEndOfStream	 || Unexpected end of stream. || stream means file :) ||
 
 == Log messages ==
 ||No.|| Resource identifier          || English text || comment ||
-|| Log-1 || ClippedSampleDetected	 || Clipped sample value detected on floating point PCM data! Clipped sample value count=`{1}`, FileName=`{0}` || `{0}` is replaced with filename. `{1}` is replaced with clipped sample count. ||
-|| Log-2 || DeviceStateChanged	 || DeviceStateChanged. DeviceId=`{0}` || `{0}` is replaced with device name ||
-|| Log-3 || PlayCompletedElapsedTimeIs	 || Play completed. elapsed time is `{0}`ms|| ||
-|| Log-4 || ReadPlayGroupNCompleted	 || Read playgroup `{0}` completed. Elapsed time: `{1}`ms || ||
-|| Log-5 || UsingDeviceStateChanged	 || Using device state change detected! DeviceName=`{0}` DeviceId=`{1}` || ||
+|| (Log-1) || ClippedSampleDetected	 || Clipped sample value detected on floating point PCM data! Clipped sample value count=`{1}`, FileName=`{0}` || `{0}` is replaced with filename. `{1}` is replaced with clipped sample count. ||
+|| (Log-2) || DeviceStateChanged	 || DeviceStateChanged. DeviceId=`{0}` || `{0}` is replaced with device name ||
+|| (Log-3) || PlayCompletedElapsedTimeIs	 || Play completed. elapsed time is `{0}`ms|| ||
+|| (Log-4) || ReadPlayGroupNCompleted	 || Read playgroup `{0}` completed. Elapsed time: `{1}`ms || ||
+|| (Log-5) || UsingDeviceStateChanged	 || Using device state change detected! DeviceName=`{0}` DeviceId=`{1}` || ||
 
 == Miscellaneous words ==
 ||No.|| Resource identifier          || English text || comment ||
-|| Word-1 || EventDriven	 || Event driven || WASAPI *event driven* data feed mode ||
-|| Word-2 || TimerDriven	 || Timer driven || WASAPI *timer driven* data feed mode ||
-|| Word-3 || Exclusive	 || Exclusive || WASAPI *exclusive* operation mode ||
-|| Word-4 || Shared	 || Shared || WASAPI *shared* operation mode ||
-|| Word-5 || Failed	 || Failed || ||
-|| ~~Word-6~~ || FloatingPointNumbers	 || Float || not need to translate ||
-|| Word-7 || Latency	 || Latency || means output latency (delay) time ||
-|| Word-8 || Error	 || Error || ||
-|| Word-9 || ErrorCode	 || Error code || ||
-|| Word-10|| ValidBits	 || Valid bits || There is 32bit per sample PCM data with 24bit valid bits and 8bit padding zeroes ||
-|| Word-11|| Version	 || Version || ||
+|| (Word-1) || EventDriven	 || Event driven || WASAPI *event driven* data feed mode ||
+|| (Word-2) || TimerDriven	 || Timer driven || WASAPI *timer driven* data feed mode ||
+|| (Word-3) || Exclusive	 || Exclusive || WASAPI *exclusive* operation mode ||
+|| (Word-4) || Shared	 || Shared || WASAPI *shared* operation mode ||
+|| (Word-5) || Failed	 || Failed || ||
+|| ~~(Word-6)~~ || FloatingPointNumbers	 || Float || not need to translate ||
+|| (Word-7) || Latency	 || Latency || means output latency (delay) time ||
+|| (Word-8) || Error	 || Error || ||
+|| (Word-9) || ErrorCode	 || Error code || ||
+|| (Word-10)|| ValidBits	 || Valid bits || There is 32bit per sample PCM data with 24bit valid bits and 8bit padding zeroes ||
+|| (Word-11)|| Version	 || Version || ||
 
 == Open File filters ==
 ||No.|| Resource identifier          || English text || comment ||
-|| Filter-1 || FilterCueFiles	 || CUE files || ||
-|| Filter-2 || FilterPpwplFiles	 || PPWPL files || ||
-|| Filter-3 || FilterSupportedFiles	 || Supported files || ||
+|| (Filter-1) || FilterCueFiles	 || CUE files || ||
+|| (Filter-2) || FilterPpwplFiles	 || PPWPL files || ||
+|| (Filter-3) || FilterSupportedFiles	 || Supported files || ||
 
 == Setup failed dialog message ==
 {{{
@@ -140,42 +140,42 @@ Please confirm sample rate or quantization bit rate are supported on your device
 http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 
 ||No.|| Resource identifier          || English text || comment ||
-|| (1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
-|| (2) || SettingsGroupBoxQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
-|| (3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI、PCIe、1394 audio devices)||(max approx. 120 characters) ||
-|| (4) || SettingsRadioButtonBpsVariableSint16Sint32V24||Auto select Int16,Int32V24(Suitable for PCI、PCIe、1394 audio devices which do not support 32bps)||(max approx. 120 characters) ||
-|| (5) || SettingsRadioButtonBpsVariableSint16Sint24||Auto select Int16,Int24(Suitable for USB audio devices)||(max approx. 120 characters) ||
-|| (6) || SettingsRadioButtonBpsSint16||Always use Int16 format(Truncates lower bits when 24bps or 32bps data arrives)||(max approx. 120 characters) ||
-|| (7) || SettingsRadioButtonBpsSint24||Always use Int24 format(Fills 0 to lower bits when 16bps data arrives, Truncates lower bits when 32bps data arrives)|| (max approx. 120 characters) ||
-|| (8) || SettingsRadioButtonBpsSint32V24||Always use Int32V24(Int32, Valid bits=24bps)||(max approx. 120 characters) ||
-|| (9) || SettingsRadioButtonBpsSint32||Always use Int32(Fill 0s to lower bits, Valid bits=32bps)|| (max approx. 120 characters)||
-|| (10) || SettingsRadioButtonBpsSfloat32||Always use Float32(IEEE754 single precision floating point format: Supported hardware is very rare)|| (max approx. 120 characters)||
-|| (11) || SettingsRadioButtonBpsAutoSelect||Auto select(Try Int32V24 and Int24 when 24bps data arrives)||(max approx. 120 characters) ||
-|| (12) || SettingsGroupBoxCuesheetSettings||CUE sheet settings|| ||
-|| (13) || SettingsCheckBoxPlaceKokomadeAterIndex00||Set [Batch read endpoint] flag after INDEX00|| ||
-|| (14) || SettingsGroupBoxDeviceBufferFlush||Device buffer flush settings|| ||
-|| (15) || SettingsLabelZeroFlushSeconds||Zero flush period on playback starts:|| ||
-|| (16) || SettingsLabelZeroFlushUnit||second(s)|| ||
-|| (17) || SettingsGroupBoxRenderThreadTaskType||Render thread task type|| ||
-||~~(18)~~|| SettingsRadioButtonTaskAudio||Audio|| (no need to translate) ||
-|| ~~(19)~~ || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
-|| ~~(20)~~ || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
-|| ~~(21)~~ || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
-|| (22) || SettingsGroupBoxListDisplay||List display settings|| ||
-|| (23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
-|| (24) || SettingsButtonChangeColor||Change color...|| ||
-|| (25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
-|| (26) || SettingsLabelConversionQuality||Quality (1 to 60):|| ||
-|| (27) || SettingsGroupBoxOtherSettings||Other settings|| ||
-|| (28) || SettingsCheckBoxManuallySetMainWindowDimension||Remember Window position and size|| (max approx. 30 characters) ||
-|| (29) || SettingsCheckBoxStorePlaylistContent||Restore the playlist on program startup||(max approx. 30 characters) ||
-|| (30) || SettingsCheckBoxCoverart||Display cover art images||(max approx. 30 characters) ||
-|| (31) || SettingsCheckBoxRefrainRedraw||Minimize GUI redraw when playing|| (max approx. 30 characters)||
-|| (32) || SettingsCheckBoxParallelRead||Parallelize file read||(max approx. 30 characters) ||
-|| (33) || SettingsCheckBoxTimePeriod1||Invoke timeBeginPeriod(1)|| *timeBeginPeriod(1)* is invoked function name.(max approx. 30 characters) ||
-|| (34) || SettingsLabelPlayingTimeFont||Playing time font:|| ||
-|| (35) || SettingsCheckBoxPlayingTimeBold||Bold|| means font style is bold ||
-|| (36) || SettingsButtonReset||`_Restore defaults`|| ||
-|| (37) || SettingsButtonOK||OK|| ||
-|| (38) || SettingsButtonCancel||Cancel|| ||
+|| (S-1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
+|| (S-2) || SettingsGroupBoxQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
+|| (S-3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI、PCIe、1394 audio devices)||(max approx. 120 characters) ||
+|| (S-4) || SettingsRadioButtonBpsVariableSint16Sint32V24||Auto select Int16,Int32V24(Suitable for PCI、PCIe、1394 audio devices which do not support 32bps)||(max approx. 120 characters) ||
+|| (S-5) || SettingsRadioButtonBpsVariableSint16Sint24||Auto select Int16,Int24(Suitable for USB audio devices)||(max approx. 120 characters) ||
+|| (S-6) || SettingsRadioButtonBpsSint16||Always use Int16 format(Truncates lower bits when 24bps or 32bps data arrives)||(max approx. 120 characters) ||
+|| (S-7) || SettingsRadioButtonBpsSint24||Always use Int24 format(Fills 0 to lower bits when 16bps data arrives, Truncates lower bits when 32bps data arrives)|| (max approx. 120 characters) ||
+|| (S-8) || SettingsRadioButtonBpsSint32V24||Always use Int32V24(Int32, Valid bits=24bps)||(max approx. 120 characters) ||
+|| (S-9) || SettingsRadioButtonBpsSint32||Always use Int32(Fill 0s to lower bits, Valid bits=32bps)|| (max approx. 120 characters)||
+|| (S-10) || SettingsRadioButtonBpsSfloat32||Always use Float32(IEEE754 single precision floating point format: Supported hardware is very rare)|| (max approx. 120 characters)||
+|| (S-11) || SettingsRadioButtonBpsAutoSelect||Auto select(Try Int32V24 and Int24 when 24bps data arrives)||(max approx. 120 characters) ||
+|| (S-12) || SettingsGroupBoxCuesheetSettings||CUE sheet settings|| ||
+|| (S-13) || SettingsCheckBoxPlaceKokomadeAterIndex00||Set [Batch read endpoint] flag after INDEX00|| ||
+|| (S-14) || SettingsGroupBoxDeviceBufferFlush||Device buffer flush settings|| ||
+|| (S-15) || SettingsLabelZeroFlushSeconds||Zero flush period on playback starts:|| ||
+|| (S-16) || SettingsLabelZeroFlushUnit||second(s)|| ||
+|| (S-17) || SettingsGroupBoxRenderThreadTaskType||Render thread task type|| ||
+||~~(S-18)~~|| SettingsRadioButtonTaskAudio||Audio|| (no need to translate) ||
+|| ~~(S-19)~~ || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
+|| ~~(S-20)~~ || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
+|| ~~(S-21)~~ || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
+|| (S-22) || SettingsGroupBoxListDisplay||List display settings|| ||
+|| (S-23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
+|| (S-24) || SettingsButtonChangeColor||Change color...|| ||
+|| (S-25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
+|| (S-26) || SettingsLabelConversionQuality||Quality (1 to 60):|| ||
+|| (S-27) || SettingsGroupBoxOtherSettings||Other settings|| ||
+|| (S-28) || SettingsCheckBoxManuallySetMainWindowDimension||Remember Window position and size|| (max approx. 30 characters) ||
+|| (S-29) || SettingsCheckBoxStorePlaylistContent||Restore the playlist on program startup||(max approx. 30 characters) ||
+|| (S-30) || SettingsCheckBoxCoverart||Display cover art images||(max approx. 30 characters) ||
+|| (S-31) || SettingsCheckBoxRefrainRedraw||Minimize GUI redraw when playing|| (max approx. 30 characters)||
+|| (S-32) || SettingsCheckBoxParallelRead||Parallelize file read||(max approx. 30 characters) ||
+|| (S-33) || SettingsCheckBoxTimePeriod1||Invoke timeBeginPeriod(1)|| *timeBeginPeriod(1)* is invoked function name.(max approx. 30 characters) ||
+|| (S-34) || SettingsLabelPlayingTimeFont||Playing time font:|| ||
+|| (S-35) || SettingsCheckBoxPlayingTimeBold||Bold|| means font style is bold ||
+|| (S-36) || SettingsButtonReset||`_Restore defaults`|| ||
+|| (S-37) || SettingsButtonOK||OK|| ||
+|| (S-38) || SettingsButtonCancel||Cancel|| ||
 || - || SettingsLabelFontPoints||pt|| means font size unit is pt (points). no need to translate ||
