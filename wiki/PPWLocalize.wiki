@@ -43,7 +43,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(29) || MainGroupBoxWasapiOutputLatency	 || Output latency || ||
 ||(30) || - || - || not need to localize ||
 ||(31) || MainGroupBoxOutputDevices	 || Output device || ||
-||(32) || MainButtonSettings	 || {{{_Detailed settings...}}} || ||
+||(32) || MainButtonSettings	 || {{{_Detailed settings...}}} || ... means it need additional user interaction to complete command ||
 ||(33) || MainButtonInspectDevice	 || {{{L_ist supported formats}}} || ||
 ||(34) || MainGroupBoxLog	 || Log || ||
 ||(35) || - || - || Status bar text. see below ||
