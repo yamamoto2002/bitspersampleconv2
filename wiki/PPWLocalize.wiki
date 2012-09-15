@@ -137,5 +137,45 @@ Please confirm sample rate or quantization bit rate are supported on your device
 
 == Settings window ==
 
-
 http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
+
+||No.|| Resource identifier          || English text || comment ||
+|| (1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
+|| (2) || SettingsGroupBoxQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)|| ||
+|| (3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI、PCIe、1394 audio devices)|| ||
+|| (4) || SettingsRadioButtonBpsVariableSint16Sint32V24||Auto select Int16,Int32V24(Suitable for PCI、PCIe、1394 audio devices which do not support 32bps)|| ||
+|| (5) || SettingsRadioButtonBpsVariableSint16Sint24||Auto select Int16,Int24(Suitable for USB audio devices)|| ||
+|| (6) || SettingsRadioButtonBpsSint16||Always use Int16 format(Truncates lower bits when 24bps or 32bps data arrives)|| ||
+|| (7) || SettingsRadioButtonBpsSint24||Always use Int24 format(Fills 0 to lower bits when 16bps data arrives, Truncates lower bits when 32bps data arrives)|| (max approx. 120 characters) ||
+|| (8) || SettingsRadioButtonBpsSint32V24||Always use Int32V24(Int32, Valid bits=24bps)|| ||
+|| (9) || SettingsRadioButtonBpsSint32||Always use Int32(Fill 0s to lower bits, Valid bits=32bps)|| ||
+|| (10) || SettingsRadioButtonBpsSfloat32||Always use Float32(IEEE754 single precision floating point format: Supported hardware is very rare)|| ||
+|| (11) || SettingsRadioButtonBpsAutoSelect||Auto select(Try Int32V24 and Int24 when 24bps data arrives)|| ||
+|| (12) || SettingsGroupBoxCuesheetSettings||CUE sheet settings|| ||
+|| (13) || SettingsCheckBoxPlaceKokomadeAterIndex00||Set [Batch read endpoint] flag after INDEX00|| ||
+|| (14) || SettingsGroupBoxDeviceBufferFlush||Device buffer flush settings|| ||
+|| (15) || SettingsLabelZeroFlushSeconds||Zero flush period on playback starts:|| ||
+|| (16) || SettingsLabelZeroFlushUnit||second(s)|| ||
+|| (17) || SettingsGroupBoxRenderThreadTaskType||Render thread task type|| ||
+|| (18) || SettingsRadioButtonTaskAudio||Audio|| (no need to translate) ||
+|| (19) || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
+|| (20) || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
+|| (21) || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
+|| (22) || SettingsGroupBoxListDisplay||List display settings|| ||
+|| (23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
+|| (24) || SettingsButtonChangeColor||Change color...|| ||
+|| (25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
+|| (26) || SettingsLabelConversionQuality||Quality (1 to 60):|| ||
+|| (27) || SettingsGroupBoxOtherSettings||Other settings|| ||
+|| (28) || SettingsCheckBoxManuallySetMainWindowDimension||Remember Window position and size|| ||
+|| (29) || SettingsCheckBoxStorePlaylistContent||Restore the playlist on program startup|| ||
+|| (30) || SettingsCheckBoxCoverart||Display cover art images|| ||
+|| (31) || SettingsCheckBoxRefrainRedraw||Minimize GUI redraw when playing|| ||
+|| (32) || SettingsCheckBoxParallelRead||Parallelize file read|| ||
+|| (33) || SettingsCheckBoxTimePeriod1||Invoke timeBeginPeriod(1)|| *timeBeginPeriod(1)* is function name invoked so no need to translate ||
+|| (34) || SettingsLabelPlayingTimeFont||Playing time font:|| ||
+|| (35) || SettingsCheckBoxPlayingTimeBold||Bold|| means font style is bold ||
+|| (36) || SettingsButtonReset||_Restore defaults|| ||
+|| (37) || SettingsButtonOK||OK|| ||
+|| (38) || SettingsButtonCancel||Cancel|| ||
+|| - || SettingsLabelFontPoints||pt|| means font size unit is pt (points). no need to translate ||
