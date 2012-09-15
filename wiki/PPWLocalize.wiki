@@ -110,7 +110,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 || Word-3 || Exclusive	 || Exclusive || WASAPI *exclusive* operation mode ||
 || Word-4 || Shared	 || Shared || WASAPI *shared* operation mode ||
 || Word-5 || Failed	 || Failed || ||
-|| Word-6 || FloatingPointNumbers	 || Float || not need to translate ||
+|| ~~Word-6~~ || FloatingPointNumbers	 || Float || not need to translate ||
 || Word-7 || Latency	 || Latency || means output latency (delay) time ||
 || Word-8 || Error	 || Error || ||
 || Word-9 || ErrorCode	 || Error code || ||
@@ -157,10 +157,10 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (15) || SettingsLabelZeroFlushSeconds||Zero flush period on playback starts:|| ||
 || (16) || SettingsLabelZeroFlushUnit||second(s)|| ||
 || (17) || SettingsGroupBoxRenderThreadTaskType||Render thread task type|| ||
-|| (18) || SettingsRadioButtonTaskAudio||Audio|| (no need to translate) ||
-|| (19) || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
-|| (20) || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
-|| (21) || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
+||~~(18)~~|| SettingsRadioButtonTaskAudio||Audio|| (no need to translate) ||
+|| ~~(19)~~ || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
+|| ~~(20)~~ || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
+|| ~~(21)~~ || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
 || (22) || SettingsGroupBoxListDisplay||List display settings|| ||
 || (23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
 || (24) || SettingsButtonChangeColor||Change color...|| ||
