@@ -3,6 +3,8 @@
 
 = PlayPcmWin Localization =
 
+== Localization file ==
+
 http://bitspersampleconv2.googlecode.com/files/PlayPcmWinLocalize.txt
 
 == Main window ==
