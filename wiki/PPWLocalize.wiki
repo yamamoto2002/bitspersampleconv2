@@ -3,6 +3,8 @@
 
 = PlayPcmWin Localization =
 
+http://bitspersampleconv2.googlecode.com/files/PlayPcmWinLocalize.txt
+
 == Main window ==
 
 http://bitspersampleconv2.googlecode.com/files/ppwLocalizeMain.png
