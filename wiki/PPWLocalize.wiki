@@ -175,7 +175,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (33) || SettingsCheckBoxTimePeriod1||Invoke timeBeginPeriod(1)|| *timeBeginPeriod(1)* is invoked function name.(max approx. 30 characters) ||
 || (34) || SettingsLabelPlayingTimeFont||Playing time font:|| ||
 || (35) || SettingsCheckBoxPlayingTimeBold||Bold|| means font style is bold ||
-|| (36) || SettingsButtonReset||_Restore defaults|| ||
+|| (36) || SettingsButtonReset||`_Restore defaults`|| ||
 || (37) || SettingsButtonOK||OK|| ||
 || (38) || SettingsButtonCancel||Cancel|| ||
 || - || SettingsLabelFontPoints||pt|| means font size unit is pt (points). no need to translate ||
