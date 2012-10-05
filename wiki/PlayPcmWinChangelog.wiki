@@ -3,8 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.9 ==
+  * M3U8再生リストの読み込み対応。M3U再生リストも読み込めることがありますがM3U8の使用を推奨
+
 ===!PlayPcmWin 4.0.8 ==
-  * Simplified Chinese translation (動作するかどうか不明)
+  * Simplified Chinese translation
 
 ===!PlayPcmWin 4.0.7 ==
   * 英語64ビット版インストーラーのアンインストール画面用アイコンつけ忘れ修正
@@ -17,7 +20,7 @@
 
 ===!PlayPcmWin 4.0.3 ==
   * FxCopで出た警告を大方修正
-  * Traditional Chinese translation (動作するかどうか不明)
+  * Traditional Chinese translation
   * PlayPcmWin 4.0.1以前のバージョンで設定した「出力レイテンシー値」「再生開始前無音送出秒数」等々の設定値がPlayPcmWin4.0.3以降のバージョンへの移行で自動的には引き継がれません！大変お手数ですが、インストール後これらの設定値を設定し直していただくようお願いします。
 
 ===!PlayPcmWin 4.0.1 ==
