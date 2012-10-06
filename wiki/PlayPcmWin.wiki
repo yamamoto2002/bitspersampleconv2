@@ -28,9 +28,9 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
 
 =ダウンロード=
 
-安定版　(バージョン 4.0.10)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin410.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin410x64.zip
+安定版　(バージョン 4.0.11)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin411.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin411x64.zip
 
 非常にバグっぽい開発版
   * なし
