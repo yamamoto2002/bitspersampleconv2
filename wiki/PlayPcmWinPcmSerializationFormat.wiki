@@ -5,14 +5,14 @@
 
 http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat01.png
 
-http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat02.png
+http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat02b.png
 
-http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat03.png
+http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat03b.png
 
 http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat04b.png
 
-http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat05.png
+http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat05b.png
 
 http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat06.png
 
-http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat07.png
+http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat07b.png
