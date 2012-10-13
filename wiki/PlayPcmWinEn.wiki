@@ -103,3 +103,13 @@ http://www.native-instruments.com/knowledge/questions/847/Windows+7+Tuning+Tips+
 = How to build =
 
 PlayPcmWinHowToBuild
+
+= What is Int16 Int24 Int32 Int32v24 ? =
+
+ * Int16: 16-bit PCM
+ * Int24: 16-bit PCM
+ * Int32: 16-bit PCM
+ * Int32v24: 32-bit PCM data. valid bits=24bits
+
+For more details, please refer following document :
+PlayPcmWinPcmSerializationFormat 
