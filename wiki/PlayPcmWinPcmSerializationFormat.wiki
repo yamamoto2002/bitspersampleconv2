@@ -9,7 +9,7 @@ http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat02.png
 
 http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat03.png
 
-http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat04.png
+http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat04b.png
 
 http://bitspersampleconv2.googlecode.com/files/PCMSerializationFormat05.png
 
