@@ -3,6 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.14 ==
+  * Issue 115 CUEシートにperformer情報等が無いときヌルポする問題の修正
+  * CUEシート読み込み時の文字エンコーディングの設定
+http://bitspersampleconv2.googlecode.com/files/ppwsettings414.png
+
 ===!PlayPcmWin 4.0.12 ==
   * Issue 115 再生リストファイルと音楽ファイル両方に曲タイトル情報が存在するとき再生リストの曲タイトルを表示するように修正
 
