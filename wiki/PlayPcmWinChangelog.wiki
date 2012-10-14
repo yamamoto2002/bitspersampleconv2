@@ -5,7 +5,7 @@
 
 ===!PlayPcmWin 4.0.14 ==
   * Issue 115 CUEシートにperformer情報等が無いときヌルポする問題の修正
-  * CUEシート読み込み時の文字エンコーディングの設定
+  * CUEシート読み込み時の文字コードの設定
 http://bitspersampleconv2.googlecode.com/files/ppwsettings414.png
 
 ===!PlayPcmWin 4.0.12 ==
