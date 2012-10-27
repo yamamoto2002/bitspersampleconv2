@@ -13,20 +13,7 @@ Windows 7に対応しております。
 
 =ダウンロード=
 
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin101.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin101x64.zip
-
-|| Windows  || !RecPcmWin || 結果 ||
-|| 32ビット版 || 32ビット版   || ○ ||
-|| 64ビット版 || 64ビット版   || ○ ||
-|| 32ビット版 || 64ビット版   || × ||
-|| 64ビット版 || 32ビット版   || △ ||
-
-32ビット版のWindowsの場合は32ビット版の!RecPcmWinを、
-64ビット版のWindowsの場合は64ビット版の!RecPcmWinを使用してください。
-
-32ビット版のWindowsで64ビット版の!RecPcmWinを動かすことはできません。
-64ビット版のWindowsで32ビット版の!RecPcmWinを実行することは可能ですが、64ビット版の方がメモリ不足の発生の可能性が減ります。
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin103x64.zip
 
 =使用方法=
 
