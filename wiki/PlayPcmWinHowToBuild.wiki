@@ -32,6 +32,7 @@ C:\work\BpsConvWin2> sn -k WavRWLib2\WavRWLib2.snk
 C:\work\BpsConvWin2> sn -k WavRWTest\WavRWTest.snk
 C:\work\BpsConvWin2> sn -k WWDirectComputeCS\WWDirectComputeCS.snk
 C:\work\BpsConvWin2> sn -k WWXmlRW\WWXmlRW.snk
+C:\work\BpsConvWin2> sn -k RecPcmWin\RecPcmWin.snk
 }}}
 
 == 3. Prepare libFLAC_static.lib and libogg_static.lib ==
