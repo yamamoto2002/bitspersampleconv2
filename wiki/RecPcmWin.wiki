@@ -13,7 +13,7 @@ Windows 7に対応しております。
 
 =ダウンロード=
 
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin103x64.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/RecPcmWin104x64.zip
 
 =使用方法=
 
@@ -45,6 +45,9 @@ http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/Wasa
 http://msdn.microsoft.com/en-us/library/dd370800%28v=VS.85%29.aspx
 
 =更新履歴=
+===!RecPcmWin 1.0.4 ==
+  * 量子化ビット数24ビットの録音に対応。
+
 ===!RecPcmWin 1.0.1 ==
   * 64ビット版のインストーラーに、WasapiIODLL.DLLが入っていなかったのを修正。
 
