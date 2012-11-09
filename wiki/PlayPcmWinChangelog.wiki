@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.16 ==
+  * Issue 116 Mp3tagでFLACファイルに付けたアルバム名情報等が取れない問題を修正
+  * PlayPcmWinTestBench 非常に音が悪いアップサンプル機能作成
+
 ===!PlayPcmWin 4.0.14 ==
   * Issue 115 CUEシートにperformer情報等が無いときヌルポする問題の修正
   * CUEシート読み込み時の文字コードの設定
