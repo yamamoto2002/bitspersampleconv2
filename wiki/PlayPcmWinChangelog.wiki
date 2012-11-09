@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 4.0.16 ==
-  * Issue 116 Mp3tagでFLACファイルに付けたアルバム名情報等が取れない問題を修正
+  * Issue 116 Mp3tagでFLACファイルに付けたアルバム名情報等が表示されない問題を修正
   * PlayPcmWinTestBench 非常に音が悪いアップサンプル機能作成
 
 ===!PlayPcmWin 4.0.14 ==
