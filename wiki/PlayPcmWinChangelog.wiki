@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.17 ==
+  * AssemblyVersionの上げ忘れでPlayPcmWinTestBenchが起動しない問題を修正
+
 ===!PlayPcmWin 4.0.16 ==
   * Issue 116 Mp3tagでFLACファイルに付けたアルバム名情報等が表示されない問題を修正
   * PlayPcmWinTestBench 非常に音が悪いアップサンプル機能作成
