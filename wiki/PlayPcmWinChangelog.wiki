@@ -3,6 +3,11 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.19 ==
+  * PlayPcmWin WASAPI Setup失敗時に表示される文字列を更新。(Issue 41)
+
+  * PlayPcmWinTestBench 離散ヒルベルト変換(ハイパス型)がバグっていることが判明したのでバグ有りと表示。
+
 ===!PlayPcmWin 4.0.18 ==
   * PlayPcmWinTestBench 音の位相を回転する機能作成。
   * PlayPcmWinTestBench 非常に音が悪いアップサンプル機能 キュービック補間。
