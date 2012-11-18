@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.20 ==
+  * PlayPcmWinTestBench 音の位相を回転する機能 浮動小数点数形式出力の時音量制限処理を行わないようにした。
+
 ===!PlayPcmWin 4.0.19 ==
   * PlayPcmWin WASAPI Setup失敗時に表示される文字列を更新。(Issue 41)
 
