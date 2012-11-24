@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.22 ==
+  * Setup timer resolution to 0.5ms
+
 ===!PlayPcmWin 4.0.20 ==
   * PlayPcmWinTestBench 音の位相を回転する機能 浮動小数点数形式出力の時音量制限処理を行わないようにした。
 
