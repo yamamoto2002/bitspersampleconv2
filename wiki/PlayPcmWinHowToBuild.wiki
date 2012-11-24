@@ -8,6 +8,10 @@
  * Windows 7 x64
  * Visual Studio 2010 Professional
 
+== 0. Download and install Windows Driver Kit 7.1.0 =
+
+Install Windows Driver Kit 7.1.0 and update Visual Studio user library path
+
 == 1. Download !PlayPcmWin sourcecode =
 
 Checkout !PlayPcmWin sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
