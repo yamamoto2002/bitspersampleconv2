@@ -10,6 +10,14 @@ Resampler MFT (MFT interface of Audio Resampler DSP) is a sample rate converter 
 Resampler MFT is implemented as a Media Foundation Transform.
 Its input/output data is uncompressed little-endian byte order PCM audio stream.
 
+=Sample code=
+
+Working sample program is avaiable here
+http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWMFResamplerTest
+
+Compiled executable
+http://code.google.com/p/bitspersampleconv2/downloads/detail?name=WWMFResamplerTest106.zip
+
 ==1. Initialization==
 
 Media Foundation uses COM. Call CoInitializeEx to initialize COM.
@@ -157,14 +165,6 @@ SafeRelease(&pTransform);
 MFShutdown();
 CoUninitialize();
 }}}
-
-=Sample code=
-
-Working sample program is avaiable here
-http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWMFResamplerTest
-
-Compiled executable
-http://code.google.com/p/bitspersampleconv2/downloads/detail?name=WWMFResamplerTest106.zip
 
 =References=
 
