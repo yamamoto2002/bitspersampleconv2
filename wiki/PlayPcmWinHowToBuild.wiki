@@ -11,6 +11,11 @@
 == 0. Download and install Windows Driver Kit 7.1.0 =
 
 Install Windows Driver Kit 7.1.0 and update Visual Studio user library path
+{{{
+i386:  $(LibraryPath);C:\WinDDK\7600.16385.1\lib\win7\i386
+amd64: $(LibraryPath);C:\WinDDK\7600.16385.1\lib\win7\amd64
+}}}
+respectively.
 
 == 1. Download !PlayPcmWin sourcecode =
 
