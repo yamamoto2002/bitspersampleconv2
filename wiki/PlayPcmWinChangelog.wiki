@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.23 ==
+  * WASAPI共有モード再生で最大振幅が0.98になるように音量を下げリミッターAPOの副作用を軽減する機能。
+
 ===!PlayPcmWin 4.0.22 ==
   * Setup timer resolution to 0.5ms
 
