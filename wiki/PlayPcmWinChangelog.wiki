@@ -7,7 +7,7 @@
  * 最後に再生していた曲の番号を覚える Revision 2830
 
 ===!PlayPcmWin 4.0.24 ===
-  * PlayPcmWin 4.0.22で新設したタイマー解像度0.5ms設定は、再生開始後しばらくすると効力が切れてしまうことがわかったので注意書きを付けた(Issue 118)。(タイマー解像度の値を観察するプログラム http://bitspersampleconv2.googlecode.com/files/TimerResolutionMonitor101.zip )
+  * PlayPcmWin 4.0.22で新設したタイマー解像度0.5ms設定は、再生開始後しばらくすると効力が切れてしまうことがわかったので注意書きを付けた(Issue 118)。(タイマー解像度の値を観察するプログラム: http://bitspersampleconv2.googlecode.com/files/TimerResolutionMonitor101.zip )
 
 ===!PlayPcmWin 4.0.23 ===
   * WASAPI共有モード再生で、最大振幅が0.98になるように音量を下げることでリミッターAPOによって発生する歪を軽減する機能。(この機能はビットパーフェクト再生できるようになる機能ではありません。)
