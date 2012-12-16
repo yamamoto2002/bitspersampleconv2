@@ -6,27 +6,22 @@ BPSConvWinは16bit PCM WAVファイルを読み込み、
 
 http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
 
+=ダウンロード=
+
+http://bitspersampleconv2.googlecode.com/files/BpsConvWin115.zip
+
 =使い方=
 
 16bit PCM WAVファイルをCDからripするなどして用意します。
 
-以下のZIPファイルをダウンロードして中に入っているSetup.exeを実行するとインストールします。
-
-http://bitspersampleconv2.googlecode.com/files/BpsConvWin40114.zip
-
-正常にセットアップが終わるとデスクトップにBPSConvWinというショートカットが出来ますので、
-これをダブルクリックして実行してください。
-画面の指示に従うと、読み出すWAVファイルと同じフォルダに
+BpsConvWin.exeをダブルクリックして実行してください。
+読み出したWAVファイルと同じフォルダに
 量子化ビット数が1～15ビットに減らされた15個のWAVファイルが作られます。
 
 読み込むWAVファイル自体は読み出しに使用するだけで、書き換えません。
 
 出力ファイルを書き込むときに同名のファイルがすでに存在した場合、エラー終了します。
 これは、すでに存在するファイルを上書きしないようにするためです。
-
-=アンインストール方法=
-
-コントロールパネルの[プログラムの追加と削除]からBPSConvWinを選んで削除すると消えます。
 
 =出てくるWAVファイルの音について=
 
@@ -42,38 +37,3 @@ http://bitspersampleconv2.googlecode.com/files/BpsConvWin40114.zip
 ||8ビット(固定電話)||53dB||
 
 *量子化ビット数1ビットのWAVファイルはとんでもない大音量の雑音が入ります。音量に注意してください。*
-
-=ソースコードから実行形式ファイルを作る方法=
-
-開発環境はマイクロソフトが無料で配っている
-http://www.microsoft.com/eXPress/download/
-のVisual C# 2010 Express Edition Japaneseをダウンロードしてきてインストールします。
-
-BitsPerSampleConvのソースコードはTortoiseSVNなどを利用してこのページの上のほうの
-Sourceタブのあたりからチェックアウトしてください。
-
-チェックアウトしてきたソースツリーのBPSConvWin.slnをダブルクリックすると
-Visual C# Express Editionの開発環境が起動するのでF5キーを押してコンパイルし実行してください。
-
-=ソースコードの解説=
-
-  * BpsConv.cs…WAVEファイルを読み込んで量子化ビット数を減らし、結果を別のファイルに書き込みます。
- http://code.google.com/p/bitspersampleconv2/source/browse/trunk/BpsConvWin/BpsConvWin/BpsConv.cs
-
-  * Form1.cs…ユーザーインターフェースのコードです。画面にGUIを描画し、マウスやキーボードの入力を受け付け、BpsConv.csの機能を呼び出します。
- http://code.google.com/p/bitspersampleconv2/source/browse/trunk/BpsConvWin/BpsConvWin/Form1.cs
-
- * Program.cs…プログラムはここから起動します。Visual C#が生成したファイルで、このファイルを編集する必要はあまりありません。
-
-以下テキストエディタで直接編集しないファイル
-
-  * AssemblyInfo.cs…バージョン情報などが入っているファイル。
-  * Resource.resx…ローカライズする必要のある文字列情報。英語。VisualC#のリソースエディタで編集します。
-  * Resources.ja.resx…ローカライズする必要のある文字列情報。日本語。VisualC#のリソースエディタで編集します。
-  * Form1.Designer.cs…VisualC#のユーザーインターフェースエディタが生成したファイル。
-  * Form1.resx…ユーザーインターフェースの文字列情報。英語。VisualC#のユーザーインターフェースエディタで編集します。
-  * Form1.ja.resx…ユーザーインターフェースの文字列情報。日本語。VisualC#のユーザーインターフェースエディタで編集します。
-  * Settings.settings…用途がよくわからないファイル。全く無視しているが今のところ問題は起きていない。
-  * Settings.Designer.cs…用途がよくわからないファイル。全く無視しているが今のところ問題は起きていない。
-  * BpsConvWin.csproj…プロジェクトファイル。ダブルクリックするとVisual C#でこのプロジェクトが開く。
-  * BpsConvWin.sln…ソリューションファイル。複数のプロジェクトをまとめるファイル。ダブルクリックするとVisual C#で結局このプロジェクトが開く。
