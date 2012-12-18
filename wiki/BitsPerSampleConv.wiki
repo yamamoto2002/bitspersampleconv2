@@ -8,7 +8,7 @@ http://bitspersampleconv2.googlecode.com/files/bpsconvwin113.jpg
 
 =ダウンロード=
 
-http://bitspersampleconv2.googlecode.com/files/BpsConvWin115.zip
+http://bitspersampleconv2.googlecode.com/files/BpsConvWin117.zip
 
 =使い方=
 
@@ -37,3 +37,11 @@ BpsConvWin.exeをダブルクリックして実行してください。
 ||8ビット(固定電話)||53dB||
 
 *量子化ビット数1ビットのWAVファイルはとんでもない大音量の雑音が入ります。音量に注意してください。*
+
+=ノイズシェイピング機能=
+
+このノイズシェイピング機能は最も簡単な1次バターワース型フィルターらしいです
+
+=ディザを加える機能=
+
+このディザはRPDFディザです。
