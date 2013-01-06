@@ -3,6 +3,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.28 ===
+ * Issue 121 WASAPI初期化時エラーメッセージにDSPeaker Anti-Mode 2.0 Dual Core用設定説明文を追加。
+ * Issue 123 フォルダドロップ時にファイルの並び順をソートする機能作成。
+
 ===!PlayPcmWin 4.0.27 ===
  * Revision 2858 ノイズシェイピングが可能な状況で常にログ出力に「Noise shaping...」と表示されるバグを修正。ノイズシェイピングを行った時だけログ出力に「Noise shaping...」と表示するように修正。
 
