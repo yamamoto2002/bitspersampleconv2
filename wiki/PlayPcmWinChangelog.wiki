@@ -3,6 +3,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.31 ===
+ * DSFファイルを読み込んでDoPで再生する機能。
+
 ===!PlayPcmWin 4.0.29 ===
  * 量子化ビット数自動選択アルゴリズムの改善 Revision 2869
 
