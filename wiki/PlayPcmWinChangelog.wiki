@@ -4,7 +4,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 4.0.32 ===
- * DSDIFF(*.dff)ファイルを読み込んでDoPで再生する機能。
+ * DSDIFFファイルを読み込んでDoPで再生する機能。
 
 ===!PlayPcmWin 4.0.31 ===
  * DSFファイルを読み込んでDoPで再生する機能。
