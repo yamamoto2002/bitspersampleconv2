@@ -13,6 +13,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
   * 量子化ビット数16、24、32ビットの2チャンネルステレオ非圧縮WAVファイル再生に対応。
   * 量子化ビット数16ビットと24ビットの2チャンネルステレオFLACファイル再生に対応。
   * 量子化ビット数16ビットと24ビットの2チャンネルステレオAIFFファイル再生に対応。
+  * DSDIFFファイルとDSFファイルをDoPで再生する機能。
   * 再生リスト。ギャップレス再生。
   * CUEシートとM3U8再生リストの読み込みに対応。
   * WASAPI排他モード使用。Bit perfect再生可能。
@@ -28,9 +29,9 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
 
 =ダウンロード=
 
-安定版　(バージョン 4.0.32)
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin432.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin432x64.zip
+安定版　(バージョン 4.0.34)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin434.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin434x64.zip
 
 非常にバグっぽい開発版
   * なし
@@ -80,7 +81,7 @@ http://code.google.com/p/bitspersampleconv2/issues/list?can=1&q=&sort=-id&colspe
 
 =MP3は再生できません=
 
-PlayPcmWinはMP3ファイルは再生できません。AAC、WMA、ALAC、DSDIFF等々の再生にも対応しておりません。
+PlayPcmWinはMP3ファイルは再生できません。AAC、WMA、ALAC等々の再生にも対応しておりません。
 これらの形式のファイルはfoobar2000等の他の音楽再生ソフトを使用すると再生できます。
 
 =複数ファイルをエクスプローラーから!PlayPcmWinにドラッグアンドドロップする際、エクスプローラーに並んでいる順番に再生リストに並べる方法=
