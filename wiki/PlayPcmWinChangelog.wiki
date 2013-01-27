@@ -11,7 +11,7 @@
  * バチッという音が出るバグ有り。 
 
 ===!PlayPcmWin 4.0.32 ===
- * DSDIFFファイル(2.8MHz 2ch ステレオ "not compressed" DSD)を読み込んでDoPで再生する機能。バチッという音が出るバグ有り。 
+ * DSDIFFファイル(2.8MHz 2ch ステレオ“not compressed”DSD)を読み込んでDoPで再生する機能。バチッという音が出るバグ有り。 
 
 ===!PlayPcmWin 4.0.31 ===
  * DSFファイル(2.8MHz 2ch ステレオ DSD)を読み込んでDoPで再生する機能。だがバチッという音が出るバグ有り。 
