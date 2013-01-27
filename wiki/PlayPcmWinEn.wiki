@@ -13,7 +13,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
   * Memory play. Load all PCM data onto the main memory before the playback starts.
   * *Native C++ optimized code for the playback thread.* C# .NET 4.0 WPF GUI for easy use.
   * Supports WAV(16, 24, 32bit), FLAC(16, 24bit), AIFF(16, 24bit)  and AIFC-sowt formats.
-  * Support DoP playback of DFF and DSF files.
+  * DoP playback of DFF and DSF files.
   * Supports CUE sheets and M3U8 playlists.
   * Gapless playback.
   * Source code available.
