@@ -7,6 +7,7 @@
 
  * Windows 7 x64
  * Visual Studio 2010 Professional
+ * Expression Blend 4 (I have) or Microsoft Expression Blend SDK for Silverlight 4
 
 == 0. Download and install Windows Driver Kit 7.1.0 =
 
