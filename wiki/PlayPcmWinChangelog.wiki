@@ -11,6 +11,9 @@
 
 http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
 
+http://bitspersampleconv2.googlecode.com/files/flacmd5mismatch.png
+
+
 ===!PlayPcmWin 4.0.42 ===
  * 詳細設定画面の整理。
  * DoP再生の再生シーク時処理の高速化を試みたが改善せず(Revision 2950)。
