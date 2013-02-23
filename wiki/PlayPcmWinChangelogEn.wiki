@@ -11,7 +11,7 @@
 
 ===!PlayPcmWin 4.0.42 ===
  * Settings window rearrangement.
- * DoP playback seek algorithm optimized slightly (Revision 2950)。
+ * DoP playback seek algorithm slightly optimized (Revision 2950)。
 
 ===!PlayPcmWin 4.0.37 ===
  * Fixed DoP playback glich on file seek and track change
