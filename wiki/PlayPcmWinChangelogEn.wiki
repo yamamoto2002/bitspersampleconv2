@@ -35,7 +35,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
  * Issue 123 (New feature) Sort folder by name when dropped
 
 ===!PlayPcmWin 4.0.27 ===
- * Revision 2858 Fixed bug: [Noise shaping...] message is always displayed even when noise shaping is not performed
+ * Revision 2858 Fixed bug: “Noise shaping...” message is always displayed even when noise shaping is not performed
 
 ===!PlayPcmWin 4.0.26 ===
  * (New feature) perform noise shaping when quantization bit rate is reduced on WASAPI exclusive mode playback
