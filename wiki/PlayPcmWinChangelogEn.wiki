@@ -56,7 +56,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
   * PlayPcmWinTestBench updates
 
 ===!PlayPcmWin 4.0.19 ===
-  * Updated message text displayed on WASAPI Setup failure (Issue 41)
+  * message text displayed on WASAPI Setup failure is updated (Issue 41)
   * PlayPcmWinTestBench updates.
 
 ===!PlayPcmWin 4.0.18 ===
