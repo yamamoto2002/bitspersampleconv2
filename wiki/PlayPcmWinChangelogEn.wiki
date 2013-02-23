@@ -4,7 +4,7 @@
 =!PlayPcmWin Changelog=
 
 ===!PlayPcmWin 4.0.43 ===
- * Updated settings window layout. (Revision 2957)
+ * Settings window layout updated. (Revision 2957)
  * (New feature) Sort dropped files ordered by file name (Issue 123)
  * (New feature) Set [Batch read endpoint] on file drop. (Issue 127)
  * (New feature) Calculate FLAC MD5sum on file read and compare with metadata MD5sum. (Issue 126)
@@ -12,7 +12,7 @@
 http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
 
 ===!PlayPcmWin 4.0.42 ===
- * Updated Settings window layout.
+ * Settings window layout updated.
  * DoP playback seek algorithm slightly optimized (Revision 2950)。
 
 ===!PlayPcmWin 4.0.37 ===
