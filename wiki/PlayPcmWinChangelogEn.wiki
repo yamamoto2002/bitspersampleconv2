@@ -8,6 +8,8 @@
  * (New feature) Added Set [Batch read endpoint] on file drop. (Issue 127)
  * (New feature) Calculate FLAC MD5sum on file read and compare with metadata MD5sum. (Issue 126)
 
+(Revision 2957)
+
 ===!PlayPcmWin 4.0.42 ===
  * Settings window rearrangement.
  * DoP playback seek algorithm optimized slightly (Revision 2950)。
