@@ -1,7 +1,7 @@
 #summary PlayPcmWin Changelog
 #labels Featured
 
-=PlayPcmWin Changelog=
+=!PlayPcmWin Changelog=
 
 ===!PlayPcmWin 4.0.43 ===
  * Updated settings window layout. (Revision 2957)
