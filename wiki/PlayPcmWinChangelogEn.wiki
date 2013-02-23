@@ -32,7 +32,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
 
 ===!PlayPcmWin 4.0.28 ===
  * Issue 121 WASAPI initialize error message updated. (about DSPeaker Anti-Mode 2.0 Dual Core)
- * Issue 123 (New feature) Sort folder by name when dropped
+ * Issue 123 (New feature) Sort folder by filename when dropped
 
 ===!PlayPcmWin 4.0.27 ===
  * Revision 2858 Fixed bug: “Noise shaping...” message is always displayed even when noise shaping is not performed
