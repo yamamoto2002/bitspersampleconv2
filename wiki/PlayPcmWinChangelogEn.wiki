@@ -13,10 +13,10 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
 
 ===!PlayPcmWin 4.0.42 ===
  * Settings window layout updated.
- * DoP playback seek algorithm slightly optimized (Revision 2950)。
+ * DSD DoP playback seek algorithm slightly optimized (Revision 2950)。
 
 ===!PlayPcmWin 4.0.37 ===
- * Fixed DoP playback glich on file seek and track change
+ * Fixed DSD DoP playback glich on file seek and track change
  * Support DoP playback of DSD5.6MHz 2ch stereo DSD data(0x05/0xfa method) I hope it works :)
 
 ===!PlayPcmWin 4.0.32 ===
