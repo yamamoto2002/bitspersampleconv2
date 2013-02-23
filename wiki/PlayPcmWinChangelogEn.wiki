@@ -47,7 +47,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
   * (Bugfix) There seems timer resolution=0.5ms settings is not stable so dialog text updated to add (unstable) (Issue 118)。(Timer resolution monitor program: http://bitspersampleconv2.googlecode.com/files/TimerResolutionMonitor101.zip )
 
 ===!PlayPcmWin 4.0.23 ===
-  * (New feature) On WASAPI shared mode, maximum quantized value magnitude limits 0.98 to prevent limiter APO artifact
+  * (New feature) On WASAPI shared mode, Limits maximum quantized value magnitude to 0.98 to prevent limiter APO artifact
 
 ===!PlayPcmWin 4.0.22 ===
   * (New feature) Setup timer resolution to 0.5ms
