@@ -1,0 +1,112 @@
+#summary PlayPcmWin Changelog
+#labels Featured
+
+=PlayPcmWin Changelog=
+
+===!PlayPcmWin 4.0.43 ===
+ * (New feature) Sort dropped files ordered by file name (Issue 123)
+ * (New feature) Added Set [Batch read endpoint] on file drop. (Issue 127)
+ * (New feature) Calculate FLAC MD5sum on file read and compare with metadata MD5sum. (Issue 126)
+
+===!PlayPcmWin 4.0.42 ===
+ * Settings window rearrangement.
+ * DoP playback seek algorithm optimized slightly (Revision 2950)。
+
+===!PlayPcmWin 4.0.37 ===
+ * Fixed DoP playback glich on file seek and track change
+ * Support DoP playback of DSD5.6MHz 2ch stereo DSD data(0x05/0xfa method) I hope it works :)
+
+===!PlayPcmWin 4.0.36 ===
+ * DoP playback glitch still not fixed 
+
+===!PlayPcmWin 4.0.32 ===
+ * DoP playback of DSDIFF files(2.8MHz 2ch stereo“not compressed”DSD).
+ * DoP playback glitch still not fixed 
+
+===!PlayPcmWin 4.0.31 ===
+ * DoP playback of DSF files(2.8MHz 2ch stereo DSD)
+ * DoP playback glitch exists 
+
+===!PlayPcmWin 4.0.29 ===
+ * PCM quantization bit rate selection algorithm improved on WASAPI exclusive playback (Revision 2869) (Issue 121)
+
+===!PlayPcmWin 4.0.28 ===
+ * Issue 121 WASAPI initialize error message updated. (about DSPeaker Anti-Mode 2.0 Dual Core)
+ * Issue 123 (New feature) Sort folder by name when dropped
+
+===!PlayPcmWin 4.0.27 ===
+ * Revision 2858 Fixed bug: [Noise shaping...] message is always displayed even when noise shaping is not performed
+
+===!PlayPcmWin 4.0.26 ===
+ * (New feature) perform noise shaping when quantization bit rate is reduced on WASAPI exclusive mode playback
+
+===!PlayPcmWin 4.0.25 ===
+ * remember last played track number (Revision 2830)
+
+===!PlayPcmWin 4.0.24 ===
+  * (Bugfix) There seems timer resolution=0.5ms settings is not stable so dialog text updated to add (unstable) (Issue 118)。(Timer resolution monitor program: http://bitspersampleconv2.googlecode.com/files/TimerResolutionMonitor101.zip )
+
+===!PlayPcmWin 4.0.23 ===
+  * (New feature) On WASAPI shared mode, maximum quantized value magnitude limits 0.98 to prevent limiter APO artifact
+
+===!PlayPcmWin 4.0.22 ===
+  * (New feature) Setup timer resolution to 0.5ms
+
+===!PlayPcmWin 4.0.20 ===
+  * PlayPcmWinTestBench updates
+
+===!PlayPcmWin 4.0.19 ===
+  * Updated message text displayed on WASAPI Setup failure (Issue 41)
+  * PlayPcmWinTestBench updates.
+
+===!PlayPcmWin 4.0.18 ===
+  * PlayPcmWinTestBench updates.
+
+===!PlayPcmWin 4.0.17 ===
+  * PlayPcmWinTestBench updates.
+
+===!PlayPcmWin 4.0.16 ===
+  * Issue 116 (BugFix) album name is not displayed when album name is updated using Mp3tag
+  * PlayPcmWinTestBench updates.
+
+===!PlayPcmWin 4.0.14 ===
+  * Issue 115 (BugFix) Application crashes when performer is missing on CUE sheets
+  * (New feature) CUE sheets Character encoding selection combo box
+http://bitspersampleconv2.googlecode.com/files/ppwsettings414.png
+
+===!PlayPcmWin 4.0.12 ==
+  * Issue 115 display title name from playlist file when playlist file and music metadata both contains title name
+
+===!PlayPcmWin 4.0.11 ===
+  * Issue 115 (BugFix) Display title name from music metadata when playlist file does not contain music title name
+
+===!PlayPcmWin 4.0.10 ===
+  * Issue 115 (BugFix) Display album name from playlist file when music file does not contain album info
+
+===!PlayPcmWin 4.0.9 ===
+  * Issue 115 (New feature) Supports M3U8 playlist file.
+  * Application icon updated.
+http://bitspersampleconv2.googlecode.com/files/ppwlogodiff.png
+
+===!PlayPcmWin 4.0.8 ===
+  * Simplified Chinese translation
+
+===!PlayPcmWin 4.0.7 ===
+  * (BugFix) Missing application icon for uninstaller on English 64bit version
+
+===!PlayPcmWin 4.0.6 ===
+  * Application icon updated.
+
+===!PlayPcmWin 4.0.4 ===
+  * Settings window Japanese translation updated
+
+===!PlayPcmWin 4.0.3 ===
+  * Fixed most of FxCop warnings
+  * Traditional Chinese translation
+  * Settings storage format changed
+
+===!PlayPcmWin 4.0.1 ===
+  * Issue 114 (BugFix) Fixed GPF bug on WASAPI shared mode introduced on !PlayPcmWin 3.0.98
+
+===!PlayPcmWin 4.0.0 ===
+  * Issue 113 (BugFix) Seek thumb does not move introduced on !PlayPcmWin 3.0.99
