@@ -29,6 +29,10 @@ Stable version (!PlayPcmWin 4.0.43)
   * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin443x64en.zip
   * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin443en.zip
 
+= Changelog =
+
+PlayPcmWinChangelogEn
+
 = License =
 
   * !PlayPcmWin: MIT License http://code.google.com/p/bitspersampleconv2/source/browse/trunk/PlayPcmWin/PlayPcmWinLicense.txt
