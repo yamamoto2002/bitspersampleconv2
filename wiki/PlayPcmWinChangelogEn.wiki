@@ -28,7 +28,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
  * DoP playback glitch exists 
 
 ===!PlayPcmWin 4.0.29 ===
- * PCM quantization bit rate selection algorithm improved on WASAPI exclusive playback (Revision 2869) (Issue 121)
+ * WASAPI exclusive PCM quantization bit rate selection algorithm improved (Revision 2869) (Issue 121)
 
 ===!PlayPcmWin 4.0.28 ===
  * Issue 121 WASAPI initialize error message updated. (about DSPeaker Anti-Mode 2.0 Dual Core)
@@ -38,10 +38,10 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
  * Revision 2858 Fixed bug: “Noise shaping...” message is always displayed even when noise shaping is not performed
 
 ===!PlayPcmWin 4.0.26 ===
- * (New feature) perform noise shaping when quantization bit rate is reduced on WASAPI exclusive mode playback
+ * (New feature) Perform noise shaping when quantization bit rate is reduced on WASAPI exclusive mode playback
 
 ===!PlayPcmWin 4.0.25 ===
- * remember last played track number (Revision 2830)
+ * Remember last played track number using IsolatedStorage (Revision 2830)
 
 ===!PlayPcmWin 4.0.24 ===
   * (Bugfix) There seems timer resolution=0.5ms settings is not stable so dialog text updated to add (unstable) (Issue 118)。(Timer resolution monitor program: http://bitspersampleconv2.googlecode.com/files/TimerResolutionMonitor101.zip )
@@ -56,7 +56,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
   * PlayPcmWinTestBench updates
 
 ===!PlayPcmWin 4.0.19 ===
-  * message text displayed on WASAPI Setup failure is updated (Issue 41)
+  * Message text displayed on WASAPI Setup failure is updated (Issue 41)
   * PlayPcmWinTestBench updates.
 
 ===!PlayPcmWin 4.0.18 ===
