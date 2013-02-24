@@ -5,6 +5,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.45 ===
+ * Issue 120 修正。
+
 ===!PlayPcmWin 4.0.43 ===
  * 詳細設定画面の整理。(Revision 2960)
  * Issue 123 複数ファイルをドロップした時、ファイルの順番をABC順に並び替える機能。
