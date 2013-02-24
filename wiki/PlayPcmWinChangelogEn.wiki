@@ -93,7 +93,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwsettings414.png
   * Issue 115 (BugFix) Display title name from music metadata when playlist file does not contain music title name
 
 ===!PlayPcmWin 4.0.10 ===
-  * Issue 115 (BugFix) Display album name from playlist file when music file does not contain album info
+  * Issue 115 (BugFix) Display album name from playlist file when music file does not contain album name 
 
 ===!PlayPcmWin 4.0.9 ===
   * Issue 115 (New feature) Supports M3U8 playlist file.
