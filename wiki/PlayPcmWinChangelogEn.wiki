@@ -9,7 +9,7 @@
  * (New feature) Set Batch read endpoint on file drop. This feature enables to read one track onto main memory and play when multiple tracks exists on playlist and play mode is all-tracks. (Issue 127)
  * (New feature) Calculate FLAC MD5sum on file read and compare with metadata MD5sum. (Issue 126)
 
-http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
+http://bitspersampleconv2.googlecode.com/files/ppw4043ss2.png
 
 ===!PlayPcmWin 4.0.42 ===
  * Settings window layout updated.
