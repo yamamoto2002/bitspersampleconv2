@@ -5,6 +5,9 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
+===!PlayPcmWin 4.0.45 ===
+ * Fix Issue 120 Crash when latency value text is selected and dropped to PPW window.
+
 ===!PlayPcmWin 4.0.43 ===
  * Settings window layout updated to accommodate new checkboxes. (Revision 2960)
  * (New feature) Sort dropped files ordered by file name (Issue 123)
