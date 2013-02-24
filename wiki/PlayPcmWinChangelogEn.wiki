@@ -115,7 +115,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwlogodiff.png
 ===!PlayPcmWin 4.0.3 ===
   * Fixed most of FxCop warnings
   * Traditional Chinese translation
-  * Settings storage format changed
+  * Settings IsolatedStorage format changed due to typo correction of XML tag names found by FxCop
 
 ===!PlayPcmWin 4.0.1 ===
   * Issue 114 (BugFix) Fixed GPF bug on WASAPI shared mode. This bug is introduced on !PlayPcmWin 3.0.98
