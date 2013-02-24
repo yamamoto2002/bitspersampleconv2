@@ -118,7 +118,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwlogodiff.png
   * Settings storage format changed
 
 ===!PlayPcmWin 4.0.1 ===
-  * Issue 114 (BugFix) Fixed GPF bug on WASAPI shared mode introduced on !PlayPcmWin 3.0.98
+  * Issue 114 (BugFix) Fixed GPF bug on WASAPI shared mode. This bug is introduced on !PlayPcmWin 3.0.98
 
 ===!PlayPcmWin 4.0.0 ===
-  * Issue 113 (BugFix) Seek thumb does not move introduced on !PlayPcmWin 3.0.99
+  * Issue 113 (BugFix) Seek thumb does not move. This bug is introduced on !PlayPcmWin 3.0.99
