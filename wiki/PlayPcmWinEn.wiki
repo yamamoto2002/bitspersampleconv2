@@ -31,7 +31,7 @@ Stable version (!PlayPcmWin 4.0.43)
 
 = Changelog =
 
-PlayPcmWinChangelogEn
+  * PlayPcmWinChangelogEn
 
 = License =
 
