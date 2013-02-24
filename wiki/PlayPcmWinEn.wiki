@@ -48,7 +48,7 @@ But 64-bit version doesn't work if your computer has 32-bit operating system.
 
 =Additional setting is necessary with RME FireFace 400/800/UC/UFX, M-AUDIO ProFire series, Echo AudioFire series etc=
 
-These professional audio equipments do not support sample rate change via WASAPI. Please set sample rate manually prior to playing using "FireFace Settings", "M-Audio Profire" or "AudioFire Console" application on your system tray.
+These professional audio equipments do not support sample rate change via WASAPI. Please set sample rate manually prior to play using "FireFace Settings", "M-Audio Profire Control Panel" or "AudioFire Console" application on your system tray.
 
 = What's the data feed mode? Which is better for the sound quality ? =
 
