@@ -23,6 +23,9 @@ http://bitspersampleconv2.googlecode.com/files/ppw4043ss.png
  * DoP playback of DSDIFF files(2.8MHz 2ch stereo“not compressed”DSD).
  * DoP playback glitch still not fixed 
 
+ * DoP playback test program http://bitspersampleconv2.googlecode.com/files/PlayPcm106.zip
+ * DoP playback test program source code: http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FPlayPcm
+
 ===!PlayPcmWin 4.0.31 ===
  * DoP playback of DSF files(2.8MHz 2ch stereo DSD)
  * DoP playback glitch exists 
