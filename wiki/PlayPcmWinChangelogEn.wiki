@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =!PlayPcmWin Changelog=
 
 ===!PlayPcmWin 4.0.43 ===
- * Settings window layout updated to accomodate new checkboxes. (Revision 2957)
+ * Settings window layout updated to accommodate new checkboxes. (Revision 2957)
  * (New feature) Sort dropped files ordered by file name (Issue 123)
  * (New feature) Set Batch read endpoint on file drop. This feature enables to read one track onto main memory and play when multiple tracks exists on playlist and play mode is all-tracks. (Issue 127)
  * (New feature) Calculate FLAC MD5sum on file read and compare with metadata MD5sum. (Issue 126)
