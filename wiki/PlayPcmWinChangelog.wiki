@@ -6,7 +6,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 4.0.43 ===
- * 詳細設定画面の整理。(Revision 2957)
+ * 詳細設定画面の整理。(Revision 2960)
  * Issue 123 複数ファイルをドロップした時、ファイルの順番をABC順に並び替える機能。
  * Issue 127 ドロップ時に個々のトラックに[ここまで一括読み込み]を付ける機能。1曲ずつファイルを読み込んで再生するようになる。
  * Issue 126 FLACファイルの圧縮を解いて出てきたPCMデータについてMD5値を算出しメタデータに埋め込まれたMD5値と照合する機能。
@@ -17,7 +17,7 @@ http://bitspersampleconv2.googlecode.com/files/flacmd5mismatch2.png
 
 
 ===!PlayPcmWin 4.0.42 ===
- * 詳細設定画面の整理。
+ * 詳細設定画面の整理。(Revision 2957)
  * DoP再生の再生シーク時処理の高速化を試みたが改善せず(Revision 2950)。
 
 ===!PlayPcmWin 4.0.37 ===
