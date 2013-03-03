@@ -25,9 +25,9 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin 日本語
 
 = Downloads 下载 =
 
-Stable version (!PlayPcmWin 4.0.45)
-  * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin445x64en.zip
-  * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin445en.zip
+Stable version (!PlayPcmWin 4.0.46)
+  * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446x64en.zip
+  * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446en.zip
 
 = Changelog =
 
