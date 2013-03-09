@@ -5,6 +5,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.47 ===
+ * DSD 11.2MHz、DSD 22.5MHz、DSD 3.0MHz、DSD 6.1MHz、DSD 12.2MHz、DSD 24.5MHz等のDoP再生
+ * 起動時にウィンドウを出してから再生リストを読むようにしたが、再生リストが読み終わるまでの間真っ白いウィンドウが出るのであまり良くない感じ。
+
 ===!PlayPcmWin 4.0.46 ===
  * GPU描画とソフトウェア描画の切り替え機能。(Revision 3023)
 
