@@ -1,5 +1,5 @@
 #summary WAVファイルをGnuplotでプロットできる形式に変換するプログラム
-#labels Featured
+#labels Deprecated
 
 = 説明 =
 
