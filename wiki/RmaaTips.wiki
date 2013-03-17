@@ -1,5 +1,5 @@
 #summary RMAA tips
-#labels Featured
+#labels Deprecated
 
 = ASIOで録再する方法 =
 
