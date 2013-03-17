@@ -1,5 +1,5 @@
 #summary パルスを出力して録音し、WAVファイルを作成するPulse5
-#labels Featured
+#labels Deprecated
 
 Pulse5はASIOデバイスから5波長分の長さの正弦波のパルスを22.5Hz～18286Hzまでの1/3oct刻みで順に出力し、
 同時にASIOデバイスから録音するプログラムです。
