@@ -1,5 +1,5 @@
 #summary Sound Blaster X-Fi Titanium HD OPAMP交換
-#labels Featured
+#labels Deprecated
 
 = Sound Blaster X-Fi Titanium HD OPAMP交換 =
 
