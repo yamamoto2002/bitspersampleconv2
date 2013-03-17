@@ -1,5 +1,5 @@
 #summary 1個目のWAVファイルの左チャンネルを左チャンネル、2個目のWAVファイルの左チャンネルを右チャンネルとしたWAVファイルを作成するプログラム
-#labels Featured
+#labels Deprecated
 
 = 説明 =
 
