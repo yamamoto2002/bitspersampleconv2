@@ -1,5 +1,5 @@
 #summary サンプリングレート変換 性能比較
-#labels Featured
+#labels Deprecated
 
 = サンプリングレート変換プログラムの性能比較 =
 
