@@ -1,5 +1,5 @@
 #summary 矩形波の生成方法と性能比較
-#labels Featured
+#labels Deprecated
 
 = !SqWave2と!WaveGeneの10kHz 矩形波出力波形とスペクトル比較 =
 
