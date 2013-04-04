@@ -29,12 +29,13 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
 
 =ダウンロード=
 
-安定版　(バージョン 4.0.49)
+安定版　(バージョン 4.0.46)
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446x64.zip
+
+非常にバグっぽい開発版　(バージョン 4.0.49)
   * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin449.zip
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin449x64.zip
-
-非常にバグっぽい開発版
-  * なし
 
 *(バージョン3.0.52以降に備わっている並列読み込み機能は実験的機能でまだ不安定なことがあるようです。とりあえず無効にしておいたほうが無難です。)*
 
