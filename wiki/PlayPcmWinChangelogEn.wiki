@@ -5,6 +5,9 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
+===!PlayPcmWin 4.0.50 ===
+ * Fix program crash when the reading file is disappeared while loading
+
 ===!PlayPcmWin 4.0.49 ===
  * On program startup, perform playlist file loading after window creation.
  * (New feature) Invoke DwmEnableMMCSS(FALSE)
