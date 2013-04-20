@@ -5,6 +5,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.52 ===
+ * 再生開始時にEndpoint bufferのフレーム数をログ窓に表示。(IAudioClient::GetBufferSize()の戻す値。http://msdn.microsoft.com/en-us/library/windows/desktop/dd370866%28v=vs.85%29.aspx 参照)
+
 ===!PlayPcmWin 4.0.50 ===
  * 再生ボタンを押した後のPCMファイル読み込み中にファイルが消えると例外がスローされるが!PlayPcmWinがキャッチしないために強制終了する問題を修正。
 
