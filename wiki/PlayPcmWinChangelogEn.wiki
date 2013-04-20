@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.52 ===
- * (New feature) Display endpoint buffer frame number in log window before playback starts for debugging purpose. This value is output parameter of IAudioClient::GetBufferSize()  http://msdn.microsoft.com/en-us/library/windows/desktop/dd370866%28v=vs.85%29.aspx 
+ * Display endpoint buffer frame number in log window before playback starts for debugging purpose. This value is output parameter of IAudioClient::GetBufferSize()  http://msdn.microsoft.com/en-us/library/windows/desktop/dd370866%28v=vs.85%29.aspx 
 
 ===!PlayPcmWin 4.0.50 ===
  * Fix program crash when the reading file is disappeared while loading
