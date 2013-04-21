@@ -5,6 +5,9 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
+===!PlayPcmWin 4.0.53 ===
+ * libFLAC.lib optimization option tweak
+
 ===!PlayPcmWin 4.0.52 ===
  * Display endpoint buffer frame number in log window before playback starts (for debugging purpose). This value is output parameter of IAudioClient::GetBufferSize()  http://msdn.microsoft.com/en-us/library/windows/desktop/dd370866%28v=vs.85%29.aspx 
 
