@@ -5,6 +5,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.53 ===
+ * libFLAC.libを作るときの最適化オプションを変更
+
 ===!PlayPcmWin 4.0.52 ===
  * 再生開始時(初期化後、再生開始前)にEndpoint bufferのフレーム数をログ窓に表示。(IAudioClient::GetBufferSize()の戻す値。http://msdn.microsoft.com/en-us/library/windows/desktop/dd370866%28v=vs.85%29.aspx 参照)
 
