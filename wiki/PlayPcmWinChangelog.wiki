@@ -5,6 +5,9 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.57 ===
+ * DwmEnableMMCSSの呼び出しを行わないという選択肢を作成し、これをデフォルト設定にする。
+
 ===!PlayPcmWin 4.0.56 ===
  * Issue 130 調査用バージョン
 
