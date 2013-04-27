@@ -34,8 +34,8 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446x64.zip
 
 非常にバグっぽい開発版
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin456.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin456x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin457.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin457x64.zip
 
 *(バージョン3.0.52以降に備わっている並列読み込み機能は実験的機能でまだ不安定なことがあるようです。とりあえず無効にしておいたほうが無難です。)*
 
