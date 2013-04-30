@@ -34,8 +34,8 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
   * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin446x64.zip
 
 非常にバグっぽい開発版
-  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin457.zip
-  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin457x64.zip
+  * 32ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin458.zip
+  * 64ビット版 http://bitspersampleconv2.googlecode.com/files/PlayPcmWin458x64.zip
 
 その他の版のダウンロード
  * http://code.google.com/p/bitspersampleconv2/downloads/list
