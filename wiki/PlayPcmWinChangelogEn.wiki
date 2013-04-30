@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.58 ===
- * Fixed Issue 130 PPW does not update Playlist on D&D (but play button is enabled and crash on press) when "Restore the playlist on program startup" is unchecked.
+ * Fixed Issue 130 PPW does not update Playlist on D&D (but play button is enabled and PPW crashes on play button press) when "Restore the playlist on program startup" is unchecked.
 
 ===!PlayPcmWin 4.0.57 ===
  * Refrain DwmEnableMMCSS call. Now this is default of DwmEnableMMCSS call setting.
