@@ -29,6 +29,9 @@ Stable version (!PlayPcmWin 4.0.58)
   * 64-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin458x64en.zip
   * 32-bit http://bitspersampleconv2.googlecode.com/files/PlayPcmWin458en.zip
 
+Other versions
+http://code.google.com/p/bitspersampleconv2/downloads/list
+
 = Changelog =
 
   * http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelogEn
