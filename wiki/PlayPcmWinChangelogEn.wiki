@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.59 ===
- *Fixed Issue 131 "Zero flush millisecionds" does not work. this bug is introduced PlayPcmWin 4.0.52, on the course of refactoring WasapiCS API
+ *Fixed Issue 131 "Zero flush milliseconds" does not work. this bug is introduced !PlayPcmWin 4.0.52, on the course of refactoring WasapiCS API
 
 ===!PlayPcmWin 4.0.58 ===
  * Fixed Issue 130 PPW does not update Playlist on D&D (but play button is enabled and PPW crashes on play button press) when "Restore the playlist on program startup" is unchecked.
