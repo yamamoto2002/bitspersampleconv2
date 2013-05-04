@@ -20,6 +20,8 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 ===!PlayPcmWin 4.0.54 ===
  * Added application icon size 96x96 and 256x256.
 
+http://bitspersampleconv2.googlecode.com/files/ppw150percenticon.png
+
 ===!PlayPcmWin 4.0.53 ===
  * libFLAC.lib optimization option tweak
 
