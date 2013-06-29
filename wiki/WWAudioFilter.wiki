@@ -3,7 +3,7 @@
 
 = WWAudioFilter =
 
-WWAudioFilter is my personal experiment program of digital audio filtering techniques.
+WWAudioFilter is my personal experiment program of several digital audio filtering techniques.
 
 = Functions Available =
 
