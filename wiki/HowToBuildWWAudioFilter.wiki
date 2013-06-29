@@ -1,16 +1,16 @@
 #summary How to build WWAudioFilter
 #labels Featured
 
-= How to build !WWAudioFilter =
+= How to build WWAudioFilter =
 
 == Prerequisites ==
 
  * Windows 7 x64
  * Visual Studio 2010 Professional
 
-== 1. Download !WWAudioFilter sourcecode =
+== 1. Download WWAudioFilter sourcecode =
 
-Checkout !WWAudioFilter sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
+Checkout WWAudioFilter sourcecode onto *C:\work\BpsConvWin2*. For example if you use TortoiseSVN, open windows explorer, create *C:\work\BpsConvWin2* folder, right-click the BpsConvWin2 folder and `[`SVN Checkout...`]` to open Checkout dialog. Enter the following URL on `[`URL of repository`]`
 
 http://bitspersampleconv2.googlecode.com/svn/trunk
 
@@ -43,10 +43,10 @@ http://sourceforge.net/projects/nasm/
 
 Only the x64 build of libFLAC and libogg are needed.
 
-== 4. Build !WWAudioFilter==
+== 4. Build WWAudioFilter==
 
-Open C:\work\BpsConvWin2\!WWAudioFilter\!WWAudioFilter.sln
+Open C:\work\BpsConvWin2\WWAudioFilter\WWAudioFilter.sln
 
-Set build target to Release x64. Other platforms such as AnyCPU or x86 doesn't work). Right-click !WWAudioFilterproject on the solution explorer window and flag it as startup project and build the solution.
+Set build target to Release x64. Other platforms such as AnyCPU or x86 doesn't work). Right-click WWAudioFilterproject on the solution explorer window and flag it as startup project and build the solution.
 
 Folder path to libFLAC_static.lib and libogg_static.lib must be specified to WWAudioFilter project include path and library path to build WWAudioFilter successfully.
