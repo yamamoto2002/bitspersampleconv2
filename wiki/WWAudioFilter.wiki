@@ -1,8 +1,9 @@
 #summary Digital Audio Filter Test Program WWAudioFilter
+#labels Featured
 
-= !WWAudioFilter =
+= WWAudioFilter =
 
-!WWAudioFilter is my personal experiment program of digital audio filtering techniques.
+WWAudioFilter is my personal experiment program of digital audio filtering techniques.
 
 = Functions available =
 
