@@ -17,7 +17,7 @@ All filters are processed using 64-bit floating point type.
 
 = Download =
 
- * Windows x64 version https://bitspersampleconv2.googlecode.com/files/WWAudioFilter101.zip
+ * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter101.zip
 
 = How to Build =
 
