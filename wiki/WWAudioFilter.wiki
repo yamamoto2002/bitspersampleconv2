@@ -12,7 +12,8 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
   * Zero-order hold upsampler
   * FFT upsampler
   * Gain adjustment
-  * 64-bit floating point filter processing
+
+all filters are processed using 64-bit floating point
 
 = How to Build =
 
