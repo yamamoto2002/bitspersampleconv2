@@ -1,7 +1,7 @@
 #summary How to build WWAudioFilter
 #labels Featured
 
-= How to build WWAudioFilter =
+= How to build [WWAudioFilter] =
 
 == Prerequisites ==
 
