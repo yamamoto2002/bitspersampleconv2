@@ -47,6 +47,6 @@ Only the x64 build of libFLAC and libogg are needed.
 
 Open C:\work\BpsConvWin2\WWAudioFilter\WWAudioFilter.sln
 
-Set build target to Release x64. Other platforms such as AnyCPU or x86 doesn't work). Right-click WWAudioFilterproject on the solution explorer window and flag it as startup project and build the solution.
+Set build target to Release x64. Other platforms such as AnyCPU or x86 doesn't work). Right-click WWAudioFilter project on the solution explorer window and flag it as startup project and build the solution.
 
 Folder path to libFLAC_static.lib and libogg_static.lib must be specified to WWAudioFilter project include path and library path to build WWAudioFilter successfully.
