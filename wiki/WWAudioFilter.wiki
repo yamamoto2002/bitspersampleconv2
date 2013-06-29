@@ -13,7 +13,7 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
   * FFT upsampler
   * Gain adjustment
 
-all filters are processed using 64-bit floating point
+All filters are processed using 64-bit floating point type.
 
 = How to Build =
 
