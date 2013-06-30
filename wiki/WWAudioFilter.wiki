@@ -8,17 +8,30 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
 = Functions Available =
 
   * 16bit/24bit FLAC file read, 24bit FLAC file write
+  * 1bit DSF write
   * linear-phase FIR low pass filter
   * Zero-order hold upsampling
   * FFT upsampling
   * Gain adjustment
+  * 2nd order Noise shaping
 
 All filters are processed using 64-bit floating point type.
 
 = Download =
 
- * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter101.zip
+ * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102.zip
 
 = How to Build =
 
 [HowToBuildWWAudioFilter]
+
+= Changelog =
+
+WWAudioFilter 1.0.2
+ * DSF output
+ * 2nd order Noise shaping
+ * (BugFix) Gain is reduced when FFT upsample 4x 8x or 16x is used
+
+WWAudioFilter 1.0.1
+ * Initial release
+ 
