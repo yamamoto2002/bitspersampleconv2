@@ -17,6 +17,8 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
 
 All filters are processed using 64-bit floating point type.
 
+http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102.png
+
 = Download =
 
  * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102.zip
