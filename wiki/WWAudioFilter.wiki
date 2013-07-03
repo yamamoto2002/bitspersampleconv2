@@ -7,8 +7,8 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
 
 = Functions Available =
 
-  * 16bit/24bit FLAC file read, 24bit FLAC file write
-  * 1bit DSF write
+  * 16bit/24bit FLAC file read
+  * 24bit FLAC file write or 1bit DSF write
   * linear-phase FIR low pass filter
   * Zero-order hold upsampling
   * FFT upsampling
@@ -18,6 +18,11 @@ WWAudioFilter is my personal experiment program of several digital audio filteri
 All filters are processed using 64-bit floating point type.
 
 http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102SS.png
+
+= Hardware requirements =
+
+ * Windows 7 64bit or Windows 8 64bit
+ * 8GB main memory
 
 = Download =
 
