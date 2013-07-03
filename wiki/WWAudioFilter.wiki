@@ -22,7 +22,7 @@ http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102SS.png
 = System Requirements =
 
  * Windows 7 64bit or Windows 8 64bit
- * 8GB main memory
+ * 8GB main memory or more
 
 = Download =
 
