@@ -19,7 +19,7 @@ All filters are processed using 64-bit floating point type.
 
 http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102SS.png
 
-= Hardware Requirements =
+= System Requirements =
 
  * Windows 7 64bit or Windows 8 64bit
  * 8GB main memory
