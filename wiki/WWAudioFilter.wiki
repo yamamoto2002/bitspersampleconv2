@@ -26,7 +26,7 @@ http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102SS.png
 
 = Download =
 
- * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter102.zip
+ * Windows x64 version http://bitspersampleconv2.googlecode.com/files/WWAudioFilter103.zip
 
 = Source Code =
 
@@ -37,6 +37,9 @@ http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWAudio
 [HowToBuildWWAudioFilter]
 
 = Changelog =
+
+WWAudioFilter 1.0.3
+ * FFT upsample FFT size setting
 
 WWAudioFilter 1.0.2
  * DSF output
