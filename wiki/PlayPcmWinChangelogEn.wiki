@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.62 ===
- * Fixed read bug of WAV files when fmt chunk size is 40 bytes and extensible size is 0 bytes. (Certain version of Pro Tools produces  this type of WAV files) (revision 3253)
+ * Fixed read bug of WAV files which fmt chunk size is 40 bytes and extensible size is 0 bytes. (Certain version of Pro Tools produces  this type of WAV files) (revision 3253)
 
 ===!PlayPcmWin 4.0.61 ===
  * 1channel monaural DSF playback
