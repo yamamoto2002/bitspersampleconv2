@@ -6,7 +6,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 4.0.62 ===
- * 特定のWAVファイルが読めない問題を修正。("fmt "チャンクのサイズが40バイトなのにextensibleサイズに0バイトが入っているWAVファイル。) (revision 3253)
+ * 特定のWAVファイルが読めない問題を修正。("fmt "チャンクのサイズが40バイトでextensibleサイズに0バイトが入っているWAVファイル。) (revision 3253)
 
 ===!PlayPcmWin 4.0.61 ===
  * 1チャンネルモノラルDSFファイルの再生
