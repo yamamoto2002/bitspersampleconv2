@@ -40,6 +40,8 @@ http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FWWAudio
 
 WWAudioFilter 1.0.4
  * 4th order noise shaping
+ * Accepts input file by file drop
+ * Display error dialog when output file size exceeds 2GB
 
 WWAudioFilter 1.0.3
  * FFT upsample FFT size setting
