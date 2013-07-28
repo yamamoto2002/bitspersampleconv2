@@ -1,4 +1,4 @@
-#summary Digital Audio Filter Test Program WWAudioFilter
+#summary Digital Audio Filter Experiment Program WWAudioFilter
 #labels Featured
 
 = WWAudioFilter =
