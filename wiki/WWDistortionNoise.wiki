@@ -11,6 +11,9 @@ Screenshot
 
 http://bitspersampleconv2.googlecode.com/files/WWDistortionNoise101SS.png
 
+ * RPDF means Rectangular probability density function random noise
+ * TPDF means Triangular probability density function random noise
+
 Output data spectrum
 
 http://bitspersampleconv2.googlecode.com/files/JitterAdded.png
