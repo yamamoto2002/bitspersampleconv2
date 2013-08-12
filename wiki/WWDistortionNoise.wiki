@@ -15,13 +15,18 @@ Output data spectrum
 
 http://bitspersampleconv2.googlecode.com/files/JitterAdded.png
 
+= System Requirements =
+
+ * Windows 8 x64, Windows 7 x64 or Windows Vista x64
+ * A lot of memory
+
 = Downloads =
 
-Version 1.0.1
+WWDistortionNoise Version 1.0.1 64-bit version
  * http://bitspersampleconv2.googlecode.com/files/WWDistortionNoise101.zip
 
 = Changelog =
 
-WWDistortionNoise Version 1.0.1
+Version 1.0.1
 
  * Initial release
