@@ -22,6 +22,6 @@ Version 1.0.1
 
 = Changelog =
 
-Version 1.0.1
+WWDistortionNoise Version 1.0.1
 
  * Initial release
