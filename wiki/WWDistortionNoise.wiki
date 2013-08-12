@@ -1,0 +1,25 @@
+#summary Distortion and noise experiment program
+#labels Featured
+
+= WWDistortionNoise =
+
+WWDistortionNoise is my personal distortion and noise experiment program.
+
+Currently jitter adding function and gain adjustment function are implemented.
+
+http://bitspersampleconv2.googlecode.com/files/WWDistortionNoise101SS.png
+
+http://bitspersampleconv2.googlecode.com/files/JitterAdded.png
+
+= Downloads =
+
+Version 1.0.1
+ * http://bitspersampleconv2.googlecode.com/files/WWDistortionNoise101.zip
+
+= Changelog =
+
+Version 1.0.1
+
+ * Initial release
+
+
