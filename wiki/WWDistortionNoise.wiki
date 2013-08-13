@@ -20,7 +20,7 @@ http://bitspersampleconv2.googlecode.com/files/JitterAdded.png
 
 = System Requirements =
 
- * Windows 8 x64, Windows 7 x64 or Windows Vista x64
+ * Windows 8 x64 or Windows 7 x64
  * 8GB or more memory
 
 = Downloads =
