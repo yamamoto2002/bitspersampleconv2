@@ -6,7 +6,7 @@
 =PlayPcmWin 更新履歴=
 
 ===!PlayPcmWin 4.0.63 ===
- * 量子化ビット数を減らす時の処理にノイズシェイピングの他にディザを加える処理を追加。
+ * Issue 135 量子化ビット数を減らす時の処理にノイズシェイピングの他にディザを加える処理を追加。
 
 http://bitspersampleconv2.googlecode.com/files/SettingsNoiseShapingTypeJP.png
 
