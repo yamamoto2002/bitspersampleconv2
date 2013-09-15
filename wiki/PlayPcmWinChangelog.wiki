@@ -10,6 +10,7 @@
 
 http://bitspersampleconv2.googlecode.com/files/SettingsNoiseShapingTypeJP.png
 
+↓ディザ付きノイズシェイピング処理が行われた時のログ出力
 http://bitspersampleconv2.googlecode.com/files/LogOutputDitheredNoiseshaping.png
 
 ===!PlayPcmWin 4.0.62 ===
