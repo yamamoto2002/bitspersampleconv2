@@ -5,6 +5,13 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.63 ===
+ * 量子化ビット数を減らす時の処理にノイズシェイピングの他にディザを加える処理を追加。
+
+http://bitspersampleconv2.googlecode.com/files/SettingsNoiseShapingEn.png
+
+http://bitspersampleconv2.googlecode.com/files/LogOutputDitheredNoiseshaping.png
+
 ===!PlayPcmWin 4.0.62 ===
  * 特定のWAVファイルが読めない問題を修正。("fmt "チャンクのサイズが40バイトでextensibleサイズに0バイトが入っているWAVファイル。) (revision 3253)
 
