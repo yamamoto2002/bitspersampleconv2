@@ -6,7 +6,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.63 ===
- * (New feature)Add dither when bits per sample is reduced
+ * Issue 135 Add dither when bits per sample is reduced
 
 http://bitspersampleconv2.googlecode.com/files/SettingsNoiseShapingEn.png
 
