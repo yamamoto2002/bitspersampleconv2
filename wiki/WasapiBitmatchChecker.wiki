@@ -3,7 +3,7 @@
 
 = !WasapiBitmatchChecker =
 
-!WasapiBitmatchChecker is bitmatch transfer check program for WASAPI audio devices.
+!WasapiBitmatchChecker is bitmatch transfer check program for PC audio devices.
 
 http://bitspersampleconv2.googlecode.com/files/WBC100ss.png
 
