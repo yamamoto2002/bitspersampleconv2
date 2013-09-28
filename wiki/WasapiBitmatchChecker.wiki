@@ -1,0 +1,18 @@
+#summary Digital audio bitmatch transfer test program WasapiBitmatchChecker
+#labels Featured
+
+= WasapiBitmatchChecker =
+
+WasapiBitmatchChecker is bitmatch transfer test program
+
+= System requirements =
+
+ * Windows 7 x64 or later
+ * 8GB or more memory
+ * PC audio interface with digital output
+ * PC audio interface with digital input
+
+= Download =
+
+Version 1.0.0
+http://bitspersampleconv2.googlecode.com/files/WasapiBitmatchChecker100.zip
