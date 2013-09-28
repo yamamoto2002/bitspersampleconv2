@@ -5,6 +5,8 @@
 
 !WasapiBitmatchChecker is bitmatch transfer test program
 
+http://bitspersampleconv2.googlecode.com/files/WBC100ss.png
+
 = System requirements =
 
  * Windows 7 x64 or later
