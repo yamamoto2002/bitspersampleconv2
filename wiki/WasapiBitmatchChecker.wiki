@@ -1,4 +1,4 @@
-#summary Digital audio bitmatch transfer test program !WasapiBitmatchChecker
+#summary Digital audio bitmatch transfer check program WasapiBitmatchChecker
 #labels Featured
 
 = !WasapiBitmatchChecker =
