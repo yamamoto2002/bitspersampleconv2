@@ -5,8 +5,6 @@
 
 !WasapiBitmatchChecker is bitmatch transfer check program for PC audio devices.
 
-http://bitspersampleconv2.googlecode.com/files/WBC100ss.png
-
 = System requirements =
 
  * Windows 7 x64 or later
@@ -18,3 +16,7 @@ http://bitspersampleconv2.googlecode.com/files/WBC100ss.png
 
 Version 1.0.0
 http://bitspersampleconv2.googlecode.com/files/WasapiBitmatchChecker100.zip
+
+= Screenshot =
+
+http://bitspersampleconv2.googlecode.com/files/WBC100ss.png
