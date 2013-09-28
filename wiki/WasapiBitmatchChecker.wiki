@@ -1,9 +1,9 @@
-#summary Digital audio bitmatch transfer test program WasapiBitmatchChecker
+#summary Digital audio bitmatch transfer test program !WasapiBitmatchChecker
 #labels Featured
 
-= WasapiBitmatchChecker =
+= !WasapiBitmatchChecker =
 
-WasapiBitmatchChecker is bitmatch transfer test program
+!WasapiBitmatchChecker is bitmatch transfer test program
 
 = System requirements =
 
