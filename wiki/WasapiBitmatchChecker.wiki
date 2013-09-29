@@ -19,10 +19,10 @@ http://bitspersampleconv2.googlecode.com/files/WasapiBitmatchChecker101.zip
 
 = Changelog =
 
-Version 1.0.1
+===Version 1.0.1===
   * Fix typo
 
-Version 1.0.0
+===Version 1.0.0===
   * Initial release
 
 = Screenshot =
