@@ -14,8 +14,16 @@
 
 = Download =
 
+Version 1.0.1
+http://bitspersampleconv2.googlecode.com/files/WasapiBitmatchChecker101.zip
+
+= Changelog =
+
+Version 1.0.1
+  * Fix typo
+
 Version 1.0.0
-http://bitspersampleconv2.googlecode.com/files/WasapiBitmatchChecker100.zip
+  * Initial release
 
 = Screenshot =
 
