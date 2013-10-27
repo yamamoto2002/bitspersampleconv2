@@ -176,11 +176,11 @@ http://msdn.microsoft.com/en-us/library/windows/desktop/aa965264%28v=vs.85%29.as
 
 ==WWMFResamplerTest Changelog==
 
-version 1.0.7 : fixed : 24-bit WAV file read bug (Issue 137)
-version 1.0.6 : fixed : WAV file data chunk size calculation bug
-version 1.0.4 : fixed : WAV file chunk skipping size calculation bug
-version 1.0.3 : fixed : 44.1kHz to 192kHz conversion
-version 1.0.2 : fixed : PCM sample is not counted properly
-              : print file open error
-version 1.0.1 : fixed : PCM is not drained properly
-version 1.0.0 : initial release
+ * version 1.0.7 : fixed : 24-bit WAV file read bug (Issue 137)
+ * version 1.0.6 : fixed : WAV file data chunk size calculation bug
+ * version 1.0.4 : fixed : WAV file chunk skipping size calculation bug
+ * version 1.0.3 : fixed : 44.1kHz to 192kHz conversion
+ * version 1.0.2 : fixed : PCM sample is not counted properly.
+              print file open error.
+ * version 1.0.1 : fixed : PCM is not drained properly
+ * version 1.0.0 : initial release
