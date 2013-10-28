@@ -82,6 +82,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(35-6) || MainStatusReadCompleted	 || Read completed. ready to play. || ||
 ||(35-7) || MainStatusReadingFiles	 || Setup device completed. Now reading files to Main memory... || ||
 ||(35-8) || MainStatusStopping	 || Stopping... || ||
+||(35-9) || MainStatusReadingPlaylist || Reading playlist... || ||
 
 == Error messages ==
 ||No.|| Resource identifier          || English text || comment ||
@@ -98,6 +99,9 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||(E-11)|| SaveFileFailed	 || Save file failed || ||
 ||(E-12)|| TooManyChannels	 || This file contains Too many channels(>31) || ||
 ||(E-13)|| UnexpectedEndOfStream	 || Unexpected end of stream. || stream means file :) ||
+||(E-14)|| MD5SumMismatch || MD5 sum validation failed! File may be corrupted: {0} MD5 in metadata = {1} MD5 from PCM data= {2} || ||
+||(E-15)|| MD5SumValid || MD5sum validation succeeded. {0} || {0} is replaced with FLAC file ||
+||(E-16)|| DroppedDataIsNotFile || Some kind of data is dropped but the data is not file nor folder. Failed to process dropped items. || ||
 
 == Log messages ==
 ||No.|| Resource identifier          || English text || comment ||
@@ -126,6 +130,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 || (Filter-1) || FilterCueFiles	 || CUE files || ||
 || (Filter-2) || FilterPpwplFiles	 || PPWPL files || ||
 || (Filter-3) || FilterSupportedFiles	 || Supported files || ||
+|| (Filter-4) || FilterM3uFiles|| M3U files || ||
 
 == Setup failed dialog message ==
 {{{
@@ -133,10 +138,12 @@ Please confirm sample rate or quantization bit rate are supported on your device
   * Some professional audio devices (RME Fireface, M-Audio ProFire, Echo AudioFire etc.) are not able to be changed master sampling rate via WASAPI. Please use FireFace settings, M-Audio ProFire control panel or equivalent tools on your system tray to change master sampling rate of those devices before playback.
   * 44.1kHz and 88.2kHz sample rate of Creative X-Fi Titanium HD do work using timer driven mode.
   * Creative USB Sound Blaster HD prefers event driven mode. Timer driven mode tends to more problematic on some devices.
-  * Lynx AES16e WaveRT driver requires very low latency settings such as 29ms.
   * There are strange audio devices which stops TOSLINK output when no signal. Such devices apparently seem not to deliver first several thousand samples of PCM data. If first part of music is truncated, please increase [Zero flush period on playback starts] value.
   * PlayPcmWin cannot setup E-MU 0404 USB 24bit mode. [Detailed settings][Fix Int16] to play 24bit files on those devices but it truncates lower 8bit information.
   * Halide Bridge seems to require 24bit data always. [Detailed settings][Fix Int24] to play sound on those devices.
+  * Lynx AES16e prefers timer-driven mode and small latency value such as 29 ms.
+  * Some HDMI audio devices prefer 28 ms to 31 ms latency value.
+  * Halide Bridge and DSPeaker Anti-Mode 2.0 Dual core seem to require 24bit data always.     [Detailed settings][Fix Int24] to play sound on those devices.
 }}}
 
 == Settings window ==
@@ -146,15 +153,15 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 ||No.|| Resource identifier          || English text || comment ||
 || (S-1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
 || (S-2) || SettingsGroupBoxQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
-|| (S-3) || SettingsRadioButtonBpsVariable||Auto select Int16,Int32V24,Int32(Suitable for PCI, PCIe, 1394 audio devices)||(max approx. 120 characters) Int, Float, PCI, PCIe USB and 1394 are technical terms ||
-|| (S-4) || SettingsRadioButtonBpsVariableSint16Sint32V24||Auto select Int16,Int32V24(Suitable for PCI、PCIe、1394 audio devices which do not support 32bps)||(max approx. 120 characters) ||
-|| (S-5) || SettingsRadioButtonBpsVariableSint16Sint24||Auto select Int16,Int24(Suitable for USB audio devices)||(max approx. 120 characters) ||
-|| (S-6) || SettingsRadioButtonBpsSint16||Always use Int16 format(Truncates lower bits when 24bps or 32bps data arrives)||(max approx. 120 characters) ||
-|| (S-7) || SettingsRadioButtonBpsSint24||Always use Int24 format(Fills 0 to lower bits when 16bps data arrives, Truncates lower bits when 32bps data arrives)|| (max approx. 120 characters) ||
-|| (S-8) || SettingsRadioButtonBpsSint32V24||Always use Int32V24(Int32, Valid bits=24bps)||(max approx. 120 characters) ||
-|| (S-9) || SettingsRadioButtonBpsSint32||Always use Int32(Fill 0s to lower bits, Valid bits=32bps)|| (max approx. 120 characters)||
-|| (S-10) || SettingsRadioButtonBpsSfloat32||Always use Float32(IEEE754 single precision floating point format: Supported hardware is very rare)|| (max approx. 120 characters)||
-|| (S-11) || SettingsRadioButtonBpsAutoSelect||Auto select(Try Int32V24 and Int24 when 24bps data arrives)||(max approx. 120 characters) ||
+|| (S-3) || (removed)||(removed)||(max approx. 120 characters) ||
+|| (S-4) || (removed)||(removed)||(max approx. 120 characters) ||
+|| (S-5) || (removed)||(removed)||(max approx. 120 characters) ||
+|| (S-6) || SettingsRadioButtonBpsSint16||16bit integer(Truncates lower bits when 24bps or 32bps data arrives)||(max approx. 120 characters) ||
+|| (S-7) || SettingsRadioButtonBpsSint24||24bit integer(Fills 0 to lower bits when 16bps data arrives, Truncates lower bits when 32bps data arrives)|| (max approx. 120 characters) ||
+|| (S-8) || SettingsRadioButtonBpsSint32V24||32bit integer, valid bits=24(Int32, Valid bits=24bps)||(max approx. 120 characters) ||
+|| (S-9) || SettingsRadioButtonBpsSint32||32bit integer(Fill 0s to lower bits, Valid bits=32bps)|| (max approx. 120 characters)||
+|| (S-10) || SettingsRadioButtonBpsSfloat32||Binary32(IEEE754 single precision floating point format: Supported hardware is very rare)|| (max approx. 120 characters)||
+|| (S-11) || SettingsRadioButtonBpsAutoSelect||Auto select||(max approx. 120 characters) ||
 || (S-12) || SettingsGroupBoxCuesheetSettings||CUE sheet settings|| ||
 || (S-13) || SettingsCheckBoxPlaceKokomadeAterIndex00||Set [Batch read endpoint] flag after INDEX00|| ||
 || (S-14) || SettingsGroupBoxDeviceBufferFlush||Device buffer flush settings|| ||
@@ -169,7 +176,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (S-23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
 || (S-24) || SettingsButtonChangeColor||Change color...|| ||
 || (S-25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
-|| (S-26) || SettingsLabelConversionQuality||Quality (1 to 60):|| ||
+|| (S-26) || SettingsLabelConversionQuality||Resampler MFT Quality (1 to 60):|| ||
 || (S-27) || SettingsGroupBoxOtherSettings||Other settings|| ||
 || (S-28) || SettingsCheckBoxManuallySetMainWindowDimension||Remember Window position and size|| (max approx. 30 characters) ||
 || (S-29) || SettingsCheckBoxStorePlaylistContent||Restore the playlist on program startup||(max approx. 30 characters) ||
@@ -183,3 +190,26 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (S-37) || SettingsButtonOK||OK|| ||
 || (S-38) || SettingsButtonCancel||Cancel|| ||
 || - || SettingsLabelFontPoints||pt|| means font size unit is pt (points). no need to translate ||
+|| (S-39) || SettingsGroupBoxWasapiShared ||WASAPI shared mode settings|| group box title ||
+|| (S-40) || SettingsCueEncoding ||Character encoding:|| cue sheet character encoding ||
+|| (S-41) || SettingsTimerResolution1Millisec||Timer resolution = 1 ms|| ms means milliseconds ||
+|| (S-42) || SettingsTimerResolution500Microsec||Timer reso = 0.5 ms (unstable)|| (max approx. 30 characters) ||
+|| (S-43) || SettingsTimerResolutionDefault||Default timer resolution|| (max approx. 30 characters) ||
+|| (S-44) || SettingsSootheLimiterApo||Scale maximum magnitude to 0.98 to soothe limiter APO|| Limiter APO is technical term. magnitude means absolute sample value ||
+|| (S-45) || SettingsGroupBoxWasapiExclusive||WASAPI exclusive mode settings|| Groupbox title text ||
+|| (S-46) || SettingsCheckboxSortDropFolder||Sort dropped folder items|| (max approx. 30 characters) ||
+|| (S-47) || SettingsCheckBoxSetBatchReadEndpoint||Set [Batch read endpoint] on file drop|| (max approx. 30 characters) ||
+|| (S-48) || SettingsCheckBoxSortDroppedFiles||Sort drag&dropped files|| (max approx. 30 characters) ||
+|| (S-49) || SettingsGroupBoxFile||File read settings|| Groupbox title text ||
+|| (S-50) || SettingsGroupBoxPlaybackThread||Playback thread settings|| Groupbox title text ||
+|| (S-51) || SettingsCheckBoxVerifyFlacMD5Sum||Verify MD5 sum on FLAC file read|| (max approx. 30 characters) ||
+|| (S-52) || SettingsCheckBoxGpuRendering||Use GPU for UI draw|| GPU is technical term. UI means user interface. (max approx. 30 characters) ||
+|| (S-53) || SettingsGroupBoxTimerResolution||Timer resolution||Groupbox title text ||
+|| (S-54) || SettingsLabelNoiseShaping||Noise shaping option:||  ||
+|| (S-55) || SettingsNoNoiseShaping||Just trancate lower bits when bits per sample is reduced||  ||
+|| (S-56) || SettingsPerformDitheredNoiseShaping||Perform dithered noise shaping when bits per sample is reduced||  ||
+|| (S-57) || SettingsPerformNoiseShaping||Perform noise shaping when bits per sample is reduced||  ||
+|| (S-58) || SettingsPerformDither||Add dither when bits per sample is reduced||  ||
+
+
+
