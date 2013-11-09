@@ -175,7 +175,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (S-22) || SettingsGroupBoxDisplaySettings||List display settings|| ||
 || (S-23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
 || (S-24) || SettingsButtonChangeColor||Change color...|| ||
-|| (S-25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
+|| (S-25) || (removed)||WASAPI Shared Resampler|| (max approx. 30 characters) ||
 || (S-26) || SettingsLabelConversionQuality||Resampler MFT Quality (1 to 60):|| ||
 || (S-27) || (removed)|||| ||
 || (S-28) || SettingsCheckBoxManuallySetMainWindowDimension||Remember Window position and size|| (max approx. 30 characters) ||
