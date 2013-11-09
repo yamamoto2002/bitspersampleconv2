@@ -88,7 +88,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizePlaymode.png http://bi
 ||No.|| Resource identifier          || English text || comment ||
 ||(E-1) || MemoryExhausted	 || Memory exhausted. Please reduce files on playlist. || ||
 ||(E-2) || CannotAddFile	 || Sorry... Please stop playback to add files to the playlist. || ||
-||(E-3) || NothingToStore	 || Nothing to store  || attempt to save playlist but there is nothing ||
+||(E-3) || MessageNothingToStore	 || Nothing to store  || attempt to save playlist but there is nothing ||
 ||(E-4) || NotSupportedFileFormat	 || Not supported file format || ||
 ||(E-5) || NotSupportedQuantizationBitRate	 || Not supported quantization bit rate. supported formats are 16, 24 and 32 || ||
 ||(E-6) || PlayStartFailed	 || Play start failed || ||
@@ -210,6 +210,4 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (S-56) || SettingsPerformDitheredNoiseShaping||Perform dithered noise shaping when bits per sample is reduced||  ||
 || (S-57) || SettingsPerformNoiseShaping||Perform noise shaping when bits per sample is reduced||  ||
 || (S-58) || SettingsPerformDither||Add dither when bits per sample is reduced||  ||
-
-
 
