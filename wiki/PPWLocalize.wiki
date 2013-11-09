@@ -172,7 +172,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || ~~(S-19)~~ || SettingsRadioButtonTaskProAudio||Pro Audio|| (no need to translate) ||
 || ~~(S-20)~~ || SettingsRadioButtonTaskNone||Playback|| (no need to translate) ||
 || ~~(S-21)~~ || SettingsRadioButtonTaskPlayback||None|| (no need to translate) ||
-|| (S-22) || SettingsGroupBoxListDisplay||List display settings|| ||
+|| (S-22) || SettingsGroupBoxDisplaySettings||List display settings|| ||
 || (S-23) || SettingsCheckBoxAlternateBackground||Alternating row background|| ||
 || (S-24) || SettingsButtonChangeColor||Change color...|| ||
 || (S-25) || SettingsGroupBoxWasapiSharedResampler||WASAPI Shared Resampler|| (max approx. 30 characters) ||
@@ -210,4 +210,3 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 || (S-56) || SettingsPerformDitheredNoiseShaping||Perform dithered noise shaping when bits per sample is reduced||  ||
 || (S-57) || SettingsPerformNoiseShaping||Perform noise shaping when bits per sample is reduced||  ||
 || (S-58) || SettingsPerformDither||Add dither when bits per sample is reduced||  ||
-
