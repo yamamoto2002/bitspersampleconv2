@@ -152,7 +152,7 @@ http://bitspersampleconv2.googlecode.com/files/ppwLocalizeSettings.png
 
 ||No.|| Resource identifier          || English text || comment ||
 || (S-1) || SettingsWindowTitle||PlayPcmWin detailed settings|| ||
-|| (S-2) || (removed)||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
+|| (S-2) || SettingsLabelQuantizationBitrate||Quantization bit rate to pass through the WASAPI(Converts on file loading)||(max approx. 120 characters) ||
 || (S-3) || (removed)||(removed)||(max approx. 120 characters) ||
 || (S-4) || (removed)||(removed)||(max approx. 120 characters) ||
 || (S-5) || (removed)||(removed)||(max approx. 120 characters) ||
