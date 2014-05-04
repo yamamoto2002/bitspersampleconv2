@@ -5,14 +5,18 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
 高音質低レイテンシのPCM音声再生・録音APIです。
 
 =WASAPI排他モードの実験プログラム=
-
-  * 再生プログラム PlayPcmWin
-  * 録音プログラム RecPcmWin
+  * コンソールで再生するシンプルな実験プログラム [http://code.google.com/p/bitspersampleconv2/source/browse/#svn%2Ftrunk%2FPlayPcm PlayPcm]
+  * GUI付き再生プログラム PlayPcmWin
+  * GUI付き録音プログラム RecPcmWin
   * C#からWASAPIを使うためのクラスWasapiCSについて [http://code.google.com/p/bitspersampleconv2/wiki/WasapiCS WasapiCS]
 
 =WASAPIの音楽再生機能を100%楽しむための、おすすめオーディオインターフェース=
+==Musiland Monitor 02 US Dragon==
 
-==おすすめ1: Lynx L22==
+あらゆるPCMフォーマットの動作テストが可能です。
+DoP DSD再生には対応していません。
+
+==Lynx L22==
 
 Lynx L22は、アナログ音声出力は44.1kHz～192kHz、16ビット、24ビットの全ての組み合わせがWASAPI排他イベント駆動モードで使用可能です。
 
@@ -33,7 +37,7 @@ Issue 41 もご覧ください。
 
 PLEASE NOTE: For Windows Vista and Windows 7, Lynx recommends disabling SpeedStep in your BIOS, and setting the Power Options in the OS to "High Performance".  This can improve the overall reliability of audio playback in MME/DirectSound applications.
 
-==おすすめ2: Creative X-Fi Titanium HD==
+==Creative X-Fi Titanium HD==
 
 アナログ音声出力は、44.1kHzと88.2kHzは、WASAPI排他タイマー駆動モードでしか動作しないようですが、
 他のサンプリング周波数(48kHz、96kHz, 176.4kHz 192kHz)ではWASAPI排他イベント駆動モードで動作可能。
