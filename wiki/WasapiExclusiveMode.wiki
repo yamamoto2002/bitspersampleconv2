@@ -9,7 +9,7 @@ WASAPI排他モードは、Windows Vista以降で使える(Windows7推奨)
   * GUI付き再生プログラム PlayPcmWin
   * GUI付き録音プログラム RecPcmWin
   * C#からWASAPIを使うためのクラスWasapiCSについて [http://code.google.com/p/bitspersampleconv2/wiki/WasapiCS WasapiCS]
-  * サンプルレートの変換にはResampler MFTを使用します。 HowToUseResamplerMFT
+  * サンプルレートの変換にはResampler MFTを使用します。 [HowToUseResamplerMFT]
 
 =WASAPIの音楽再生機能を100%楽しむための、おすすめオーディオインターフェース=
 ==Musiland Monitor 02 US Dragon==
