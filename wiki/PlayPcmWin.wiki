@@ -272,7 +272,6 @@ Windows タスクマネージャーの[プロセス]タブを開いて、イメ�
 
 =ソースコード=
 
-閲覧だけなら:
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/PlayPcmWin
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/WasapiCS
   * http://code.google.com/p/bitspersampleconv2/source/browse/#svn/trunk/WasapiIODLL
@@ -327,7 +326,7 @@ WasapiUser.cppに書かれています。
 
 全部で200行ほどの短いプログラムです。
 
-http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#1448
+http://code.google.com/p/bitspersampleconv2/source/browse/trunk/WasapiIODLL/WasapiUser.cpp#692
 
 ==再生スレッド 関数呼び出しグラフ==
 
