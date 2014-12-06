@@ -37,7 +37,7 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
   * なし
 
 その他の版のダウンロード
- * https://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/
+ * http://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/
 
 古い版のダウンロード
  * http://code.google.com/p/bitspersampleconv2/downloads/list
