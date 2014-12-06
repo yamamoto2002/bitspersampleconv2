@@ -5,6 +5,10 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
+===!PlayPcmWin 4.0.73 ===
+ * libflac updated to version 1.3.1
+ * supported media keys (play/pause, stop, next track, prev track)
+
 ===!PlayPcmWin 4.0.72 ===
  * Bugfix: FLAC MD5 signature calculation is performed even when it is disabled on detailed settings of PPW.
  * Bugfix: Read error on unsupported ID3tag. Now PPW skips through it and continue to read the music file
