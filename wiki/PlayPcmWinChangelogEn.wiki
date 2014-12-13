@@ -6,8 +6,8 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
 ===!PlayPcmWin 4.0.74 ===
- * enable NextTrack/PrevTrack buttons on pause state and stop state.
- * when stop button is pressed while playing, play fade-out sound and stop decently.
+ * Enable NextTrack/PrevTrack buttons on pause state and stop state.
+ * When stop button is pressed while playing, play fade-out sound and stop decently.
 
 ===!PlayPcmWin 4.0.73 ===
  * libflac updated to version 1.3.1
