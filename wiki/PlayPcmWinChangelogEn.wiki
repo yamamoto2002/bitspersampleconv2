@@ -5,6 +5,10 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
+===!PlayPcmWin 4.0.75 ===
+ * Issue 144 fixed to capture mediakeys event when application does not have a keyboard focus
+ * Issue 143 remember last selected file filter on file open dialog
+
 ===!PlayPcmWin 4.0.74 ===
  * Enable NextTrack/PrevTrack buttons on pause state and stop state.
  * When stop button is pressed while playing, play fade-out sound and stop decently.
