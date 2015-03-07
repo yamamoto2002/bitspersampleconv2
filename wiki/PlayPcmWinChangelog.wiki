@@ -5,7 +5,7 @@
 
 =PlayPcmWin 更新履歴=
 
-===!PlayPcmWin 4.0.76 ===
+===!PlayPcmWin 4.0.77 ===
  * Issue 60 極性反転機能作成。
  * モノラル再生機能を作成。
 
