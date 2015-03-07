@@ -5,7 +5,7 @@ English | [http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinChangelog 
 
 =[http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWinEn PlayPcmWin] Changelog=
 
-===!PlayPcmWin 4.0.76 ===
+===!PlayPcmWin 4.0.77 ===
  * Issue 60 Phase invert function created
  * Monaural playback function created
 
