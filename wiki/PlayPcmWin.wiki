@@ -29,9 +29,9 @@ http://bitspersampleconv2.googlecode.com/files/ppw3070ss2_jp.png
 
 =ダウンロード=
 
-安定版　(バージョン 4.0.77)
-  * 32ビット版 http://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/PlayPcmWin477jp.zip/download
-  * 64ビット版 http://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/PlayPcmWin477x64jp.zip/download
+安定版　(バージョン 4.0.78)
+  * 32ビット版 http://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/PlayPcmWin478jp.zip/download
+  * 64ビット版 http://sourceforge.net/projects/playpcmwin/files/PlayPcmWin/PlayPcmWin478x64jp.zip/download
 
 非常にバグっぽい開発版
   * なし
