@@ -13,6 +13,7 @@ using System.Windows.Shapes;
 using WasapiPcmUtil;
 using System.Globalization;
 using PcmDataLib;
+using Wasapi;
 
 namespace PlayPcmWin {
     /// <summary>
@@ -28,6 +29,11 @@ namespace PlayPcmWin {
             Sfloat32,
             AutoSelect,
         };
+
+        private bool mWindowLoaded = false;
+        private Preference m_preference = null;
+        private long mPlaylistAlternateBackgroundArgb;
+
 
         public SettingsWindow() {
             InitializeComponent();
@@ -103,12 +109,9 @@ namespace PlayPcmWin {
             checkBoxGpuRendering.Content = Properties.Resources.SettingsCheckBoxGpuRendering;
         }
 
-        Preference m_preference = null;
         public void SetPreference(Preference preference) {
             m_preference = preference;
         }
-
-        private long mPlaylistAlternateBackgroundArgb;
 
         private void UpdateUIFromPreference(Preference preference) {
             switch (preference.BitsPerSampleFixType) {
@@ -227,6 +230,13 @@ namespace PlayPcmWin {
                 break;
             }
 
+            comboBoxRenderThreadPriority.SelectedIndex = (int)preference.MMThreadPriority;
+            if (preference.RenderThreadTaskType == RenderThreadTaskType.None) {
+                comboBoxRenderThreadPriority.IsEnabled = false;
+            } else {
+                comboBoxRenderThreadPriority.IsEnabled = true;
+            }
+
             comboBoxCueEncoding.Items.Clear();
             foreach (var encoding in Encoding.GetEncodings()) {
                 int pos = comboBoxCueEncoding.Items.Add(encoding.DisplayName);
@@ -263,6 +273,8 @@ namespace PlayPcmWin {
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             System.Diagnostics.Debug.Assert(null != m_preference);
             UpdateUIFromPreference(m_preference);
+
+            mWindowLoaded = true;
         }
 
         private void buttonOK_Click(object sender, RoutedEventArgs e) {
@@ -386,6 +398,8 @@ namespace PlayPcmWin {
             if (comboBoxRenderThreadTaskType.SelectedItem == cbItemTaskProAudio) {
                 m_preference.RenderThreadTaskType = RenderThreadTaskType.ProAudio;
             }
+
+            m_preference.MMThreadPriority = (WasapiCS.MMThreadPriorityType)comboBoxRenderThreadPriority.SelectedIndex;
 
             if (0 <= comboBoxCueEncoding.SelectedIndex) {
                 var encodingInfoArray = Encoding.GetEncodings();
@@ -532,6 +546,22 @@ namespace PlayPcmWin {
 
         private void checkBoxParallelRead_Unchecked(object sender, RoutedEventArgs e) {
             checkBoxVerifyFlacMD5Sum.IsEnabled = true;
+        }
+
+        private void comboBoxRenderThreadTaskType_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (!mWindowLoaded) {
+                return;
+            }
+
+            if (comboBoxRenderThreadTaskType.SelectedItem == cbItemTaskNone) {
+                comboBoxRenderThreadPriority.IsEnabled = false;
+            } else {
+                comboBoxRenderThreadPriority.IsEnabled = true;
+            }
+        }
+
+        private void comboBoxRenderThreadPriority_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+
         }
     }
 }
