@@ -258,16 +258,6 @@ namespace PlayPcmWin {
             checkBoxVerifyFlacMD5Sum.IsEnabled = preference.ParallelRead == false;
 
             checkBoxGpuRendering.IsChecked = preference.GpuRendering;
-
-            if (!preference.DwmEnableMmcssCall) {
-                comboBoxDwmEnableMMCSS.SelectedItem = cbItemDemDoNotCall;
-            } else {
-                if (preference.DwmEnableMmcss) {
-                    comboBoxDwmEnableMMCSS.SelectedItem = cbItemDemTrue;
-                } else {
-                    comboBoxDwmEnableMMCSS.SelectedItem = cbItemDemFalse;
-                }
-            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -415,18 +405,6 @@ namespace PlayPcmWin {
             m_preference.VerifyFlacMD5Sum = (checkBoxVerifyFlacMD5Sum.IsChecked == true);
 
             m_preference.GpuRendering = (checkBoxGpuRendering.IsChecked == true);
-
-            if (comboBoxDwmEnableMMCSS.SelectedItem == cbItemDemDoNotCall) {
-                m_preference.DwmEnableMmcssCall = false;
-            }
-            if (comboBoxDwmEnableMMCSS.SelectedItem == cbItemDemTrue) {
-                m_preference.DwmEnableMmcssCall = true;
-                m_preference.DwmEnableMmcss = true;
-            }
-            if (comboBoxDwmEnableMMCSS.SelectedItem == cbItemDemFalse) {
-                m_preference.DwmEnableMmcssCall = true;
-                m_preference.DwmEnableMmcss = false;
-            }
 
             Close();
         }

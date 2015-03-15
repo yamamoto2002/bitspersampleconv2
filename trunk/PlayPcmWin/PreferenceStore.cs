@@ -232,6 +232,9 @@ namespace PlayPcmWin {
                 p.BpsConvNoiseShaping = NoiseShapingType.None;
             }
 
+            // DwmEnableMMCSSは、いつの頃からかエラーが出るようになったので呼び出さないようにする。
+            p.DwmEnableMmcssCall = false;
+
             return p;
         }
 
