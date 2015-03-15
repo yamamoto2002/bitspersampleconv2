@@ -5,6 +5,10 @@
 
 =PlayPcmWin 更新履歴=
 
+===!PlayPcmWin 4.0.81 ===
+ * AvSetMmThreadPriorityで再生スレッドの優先度を調節する機能作成。
+ * 簡体中文翻訳更新
+
 ===!PlayPcmWin 4.0.78 ===
  * 簡体中文翻訳更新
 
