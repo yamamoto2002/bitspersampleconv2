@@ -335,7 +335,7 @@ namespace PlayPcmWin
 
                 s.Add(new PlaylistItemSave().Set(
                         p.DisplayName, p.AlbumTitle, p.ArtistName, p.FullPath,
-                        p.CueSheetIndex, p.StartTick, p.EndTick, playListItem.ReadSeparaterAfter));
+                        p.CueSheetIndex, p.StartTick, p.EndTick, playListItem.ReadSeparaterAfter, p.LastWriteTime));
             }
 
             if (path.Length == 0) {
