@@ -31,16 +31,14 @@ WWAudioFilterMonauralMix::FilterPcm(unsigned char *buff, int bytes)
         float vAcc = 0.0f;
         for (int ch=0; ch<mManip.NumChannels(); ++ch) {
             float v = 0.0f;
-            bool rv = mManip.GetFloatSample(buff, bytes, i, ch, v);
-            assert(rv);
+            mManip.GetFloatSample(buff, bytes, i, ch, v);
             vAcc += v;
         }
 
         vAcc /= mManip.NumChannels();
 
         for (int ch=0; ch<mManip.NumChannels(); ++ch) {
-            bool rv = mManip.SetFloatSample(buff, bytes, i, ch, vAcc);
-            assert(rv);
+            mManip.SetFloatSample(buff, bytes, i, ch, vAcc);
         }
     }
 }

@@ -18,6 +18,8 @@ WWSchedulerTaskTypeToStr(WWSchedulerTaskType t)
     }
 }
 
+#ifndef NDEBUG
+
 static wchar_t *
 WWMMThreadPriorityTypeToStr(WWMMThreadPriorityType t)
 {
@@ -30,6 +32,9 @@ WWMMThreadPriorityTypeToStr(WWMMThreadPriorityType t)
     default: assert(0); return L"";
     }
 };
+
+#endif
+
 static AVRT_PRIORITY
 WWMMThreadPriorityTypeToAvrtPriority(WWMMThreadPriorityType t)
 {

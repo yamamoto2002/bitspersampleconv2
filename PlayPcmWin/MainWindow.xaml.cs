@@ -1625,7 +1625,7 @@ namespace PlayPcmWin
 
         private void MenuItemHelpWeb_Click(object sender, RoutedEventArgs e) {
             try {
-                System.Diagnostics.Process.Start("http://code.google.com/p/bitspersampleconv2/wiki/PlayPcmWin");
+                System.Diagnostics.Process.Start("http://sourceforge.net/projects/playpcmwin/");
             } catch (System.ComponentModel.Win32Exception) {
             }
         }

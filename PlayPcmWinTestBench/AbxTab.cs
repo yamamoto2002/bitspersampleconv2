@@ -317,7 +317,7 @@ namespace PlayPcmWinTestBench {
                     pcmDataValidBitsPerSample, vrt, i);
 
                 hr = wasapi.Setup(deviceId, WasapiCS.DeviceType.Play, WasapiCS.StreamType.PCM, sampleRate,
-                        sf.GetSampleFormatType(), 2, WasapiCS.MMCSSCallType.Enable,
+                        sf.GetSampleFormatType(), 2, WasapiCS.MMCSSCallType.Enable, WasapiCS.MMThreadPriorityType.None,
                         WasapiCS.SchedulerTaskType.ProAudio, WasapiCS.ShareMode.Exclusive,
                         isEventDriven ? WasapiCS.DataFeedMode.EventDriven : WasapiCS.DataFeedMode.TimerDriven,
                         latencyMillisec, 500, 10000);
