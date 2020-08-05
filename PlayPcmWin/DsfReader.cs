@@ -81,7 +81,7 @@ namespace PlayPcmWin {
 
         private ResultType ReadDsfChunk(BinaryReader br) {
             byte[] ckID = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(ckID, 0, "DSD ")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(ckID, 0, "DSD ")) {
                 return ResultType.NotDsf;
             }
 
@@ -99,7 +99,7 @@ namespace PlayPcmWin {
 
         private ResultType ReadFmtChunk(BinaryReader br) {
             byte[] ckID = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(ckID, 0, "fmt ")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(ckID, 0, "fmt ")) {
                 return ResultType.NotFoundFmtHeader;
             }
 
@@ -156,7 +156,7 @@ namespace PlayPcmWin {
 
         private ResultType ReadDataChunkHeader(BinaryReader br) {
             byte[] ckID = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(ckID, 0, "data")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(ckID, 0, "data")) {
                 return ResultType.NotDsf;
             }
 
@@ -222,7 +222,8 @@ namespace PlayPcmWin {
                 // OutputFrames must be even number
                 ++OutputFrames;
             }
-            
+
+            pcmData.SampleDataType = PcmDataLib.PcmData.DataType.DoP;
             pcmData.SetFormat(
                 NumChannels,
                 24,
@@ -230,11 +231,10 @@ namespace PlayPcmWin {
                 SampleRate/16,
                 PcmDataLib.PcmData.ValueRepresentationType.SInt,
                 OutputFrames);
-            pcmData.SampleDataType = PcmDataLib.PcmData.DataType.DoP;
 
             if (mode == ReadHeaderMode.AllHeadersWithID3 &&
                 mMetadataOffset != 0) {
-                PcmDataLib.Util.BinaryReaderSkip(br, (long)mMetadataOffset - STREAM_DATA_OFFSET);
+                PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, (long)mMetadataOffset - STREAM_DATA_OFFSET);
 
                 result = ReadID3Chunk(br);
                 if (ResultType.Success == result) {
@@ -291,7 +291,7 @@ namespace PlayPcmWin {
             }
 
             // DSFの1フレーム=16ビット(2バイト) x チャンネル数
-            PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * 2 * NumChannels);
+            PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipFrames * 2 * NumChannels);
             mPosFrame += skipFrames;
             return skipFrames;
         }
@@ -349,12 +349,12 @@ namespace PlayPcmWin {
                 readFrames = (int)(mDataFrames - mPosFrame);
                 if (mDataFrames != OutputFrames) {
                     // ファイルの最後まで読み込む場合で、フレーム数が奇数の時
-                    // フレーム数が偶数になるように水増しする。
+                    // フレーム数が偶数になるように1フレーム水増しする。
                     appendLastFrame = true;
                 }
             }
 
-            if (readFrames == 0) {
+            if (readFrames <= 0) {
                 // 1バイトも読めない。
                 // N.B. ReadStreamReadOne()が、DataFrames番目==(OutputFrames-1)番目のフレーム「だけ」を取得しようとすることはない。
                 return new byte[0];

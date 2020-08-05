@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="WWUserControls.PoleZeroPlot"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignWidth="300" d:DesignHeight="400" >
+    <Grid Height="400" Width="300">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="300" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="24" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+        <Canvas Height="256" HorizontalAlignment="Center" Name="canvasPoleZero" VerticalAlignment="Center" Width="256" Grid.ColumnSpan="2" Margin="22">
+            <Line X1="0" X2="256" Y1="32" Y2="32" Stroke="Red" Name="mLineH1" />
+            <Line X1="0" X2="256" Y1="128" Y2="128" Stroke="Red" Name="mLineH2" />
+            <Line X1="0" X2="256" Y1="224" Y2="224" Stroke="Red" Name="mLineH3" />
+            <Line X1="32" X2="32" Y1="0" Y2="256" Stroke="Red" Name="mLineV1" />
+            <Line X1="128" X2="128" Y1="0" Y2="256" Stroke="Red" Name="mLineV2" />
+            <Line X1="224" X2="224" Y1="0" Y2="256" Stroke="Red" Name="mLineV3" />
+            <TextBlock Canvas.Left="18" Canvas.Top="128" Text="-1" Name="mXm1" Foreground="Red" />
+            <TextBlock Canvas.Left="118" Canvas.Top="128" Text="0" Name="mZero" Foreground="Red" />
+            <TextBlock Canvas.Left="222" Canvas.Top="128" Text="+1" Name="mXp1" Foreground="Red" />
+            <TextBlock Canvas.Left="114" Canvas.Top="18" Text="+i" Name="mYp1" Foreground="Red" />
+            <TextBlock Canvas.Left="118" Canvas.Top="222" Text="-i" Name="mYm1" Foreground="Red" />
+        </Canvas>
+        <TextBlock HorizontalAlignment="Right" Name="textBlockRe" Text="→Re" VerticalAlignment="Center" />
+        <TextBlock HorizontalAlignment="Center" Name="textBlockIm" Text="Im↑" VerticalAlignment="Top"  />
+        <TextBlock HorizontalAlignment="Center" Name="textBlockGraphTitle" Text="Pole-zero plot (S plane)" VerticalAlignment="Bottom" />
+        <Canvas Grid.Row="1" Margin="0,0,22,0" Name="canvasGradationSample" Width="256" Height="24"/>
+        <Label Content="0°" Grid.Row="2" HorizontalAlignment="Left" Name="label0" VerticalAlignment="Top" Margin="6,0,0,0" />
+        <Label Content="180°" Grid.Row="2" Margin="134,0,0,0" HorizontalAlignment="Left" Name="label180" VerticalAlignment="Top" />
+        <Label Content="360°" Grid.Row="2" Margin="256,0,0,0" HorizontalAlignment="Left" Name="label360" VerticalAlignment="Top" Width="38" />
+        <Ellipse Name="unitCircle" Width="192" Height="192" Stroke="Red" />
+            <ComboBox Grid.Row="3" HorizontalAlignment="Left" Margin="6,0,0,0" Name="comboBoxGradationType" VerticalAlignment="Center" Width="157" SelectionChanged="comboBoxGradationType_SelectionChanged">
+                <ComboBoxItem Content="Show Magnitude" Name="comboBoxItemMagnitude" IsSelected="True" />
+                <ComboBoxItem Content="Show Phase" Name="comboBoxItemPhase" />
+            </ComboBox>
+        <CheckBox Content="Show Grid" Grid.Row="3" HorizontalAlignment="Left" Margin="192,0,0,0" Name="checkBoxShowGrid" VerticalAlignment="Center" Checked="checkBoxShowGrid_Checked" Unchecked="checkBoxShowGrid_Unchecked" IsChecked="True" />
+        <ComboBox Grid.Row="4" HorizontalAlignment="Left" Margin="6,0,0,0" Name="comboBoxScale" VerticalAlignment="Center" Width="100" SelectionChanged="comboBoxScale_SelectionChanged">
+            <ComboBoxItem Content="Scale = 0.05x" Name="comboBoxItemScale0_05x" />
+            <ComboBoxItem Content="Scale = 0.1x" Name="comboBoxItemScale0_1x" />
+            <ComboBoxItem Content="Scale = 0.2x" Name="comboBoxItemScale0_2x" />
+            <ComboBoxItem Content="Scale = 0.5x" Name="comboBoxItemScale0_5x" />
+            <ComboBoxItem Content="Scale = 1x" Name="comboBoxItemScale1x" IsSelected="True" />
+            <ComboBoxItem Content="Scale = 2x" Name="comboBoxItemScale2x" />
+            <ComboBoxItem Content="Scale = 5x" Name="comboBoxItemScale5x" />
+            <ComboBoxItem Content="Scale = 10x" Name="comboBoxItemScale10x" />
+        </ComboBox>
+    </Grid>
+</UserControl>

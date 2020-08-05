@@ -6,6 +6,8 @@ using PcmDataLib;
 using System;
 using System.IO;
 using System.Globalization;
+using WWMFReaderCs;
+using System.Linq;
 
 namespace PlayPcmWin {
     class PcmReader : IDisposable {
@@ -16,6 +18,7 @@ namespace PlayPcmWin {
         private DsdiffReader mDsdiffR;
         private WavReader mWaveR;
         private BinaryReader mBr;
+        private Mp3Reader mMp3Reader;
 
         public long NumFrames { get; set; }
 
@@ -25,13 +28,13 @@ namespace PlayPcmWin {
             WAVE,
             DSF,
             DSDIFF,
+            MP3,
             Unknown
         };
         Format m_format;
 
         protected virtual void Dispose(bool disposing) {
             if (disposing) {
-                mFlacR.Dispose();
                 mBr.Dispose();
             }
         }
@@ -41,10 +44,11 @@ namespace PlayPcmWin {
             GC.SuppressFinalize(this);
         }
         
-        public static bool IsTheFormatCompressed(Format fmt) {
+        public static bool IsTheFormatParallelizable(Format fmt) {
             switch (fmt) {
             case Format.FLAC:
                 return true;
+            case Format.MP3:
             case Format.AIFF:
             case Format.WAVE:
             case Format.DSF:
@@ -73,6 +77,8 @@ namespace PlayPcmWin {
                 return Format.DSF;
             case ".DFF":
                 return Format.DSDIFF;
+            case ".MP3":
+                return Format.MP3;
             default:
                 return Format.Unknown;
             }
@@ -91,7 +97,7 @@ namespace PlayPcmWin {
                 switch (fmt) {
                 case Format.FLAC:
                     m_format = Format.FLAC;
-                    return StreamBeginFlac(path, startFrame, wantFrames, typicalReadFrames);
+                    return StreamBeginFlac(path, startFrame);
                 case Format.AIFF:
                     m_format = Format.AIFF;
                     return StreamBeginAiff(path, startFrame);
@@ -104,6 +110,9 @@ namespace PlayPcmWin {
                 case Format.DSDIFF:
                     m_format = Format.DSDIFF;
                     return StreamBeginDsdiff(path, startFrame);
+                case Format.MP3:
+                    m_format = Format.MP3;
+                    return StreamBeginMp3(path, (int)startFrame);
                 default:
                     System.Diagnostics.Debug.Assert(false);
                     return -1;
@@ -125,11 +134,16 @@ namespace PlayPcmWin {
         /// </summary>
         /// <param name="preferredFrames">読み込みたいフレーム数。1Mフレームぐらいにすると良い。(このフレーム数のデータが戻るとは限らない)</param>
         /// <returns>PCMデータが詰まったバイト列。0要素の配列の場合、もう終わり。</returns>
-        public byte[] StreamReadOne(int preferredFrames) {
+        public byte[] StreamReadOne(int preferredFrames, out int ercd) {
+            ercd = 0;
+
+            // FLACのデコーダーはエラーコードを戻すことがある。
+            // 他のデコーダーは、データ領域に構造がないので読み出しエラーは特にない。System.IOExceptionが起きることはある。
+
             byte[] result;
             switch (m_format) {
             case Format.FLAC:
-                result = mFlacR.ReadStreamReadOne(preferredFrames);
+                result = mFlacR.ReadStreamReadOne(preferredFrames, out ercd);
                 break;
             case Format.AIFF:
                 result = mAiffR.ReadStreamReadOne(mBr, preferredFrames);
@@ -142,6 +156,13 @@ namespace PlayPcmWin {
                 break;
             case Format.DSDIFF:
                 result = mDsdiffR.ReadStreamReadOne(mBr, preferredFrames);
+                break;
+            case Format.MP3:
+                if (int.MaxValue < mMp3Reader.data.LongLength) {
+                    result = new byte[0];
+                } else {
+                    result = mMp3Reader.data.ToArray();
+                }
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -185,7 +206,7 @@ namespace PlayPcmWin {
         }
 
         /// <summary>
-        /// 読み込み処理を通常終了する。
+        /// 読み込み処理を終了する。
         /// </summary>
         /// <returns>Error code</returns>
         public int StreamEnd() {
@@ -196,7 +217,7 @@ namespace PlayPcmWin {
 
             switch (m_format) {
             case Format.FLAC:
-                rv = mFlacR.ReadStreamEnd();
+                rv = mFlacR.ReadEnd();
                 mMD5SumInMetadata = mFlacR.MD5SumInMetadata;
                 mMD5SumOfPcm = mFlacR.MD5SumOfPcm;
                 break;
@@ -211,6 +232,9 @@ namespace PlayPcmWin {
                 break;
             case Format.DSDIFF:
                 mDsdiffR.ReadStreamEnd();
+                break;
+            case Format.MP3:
+                mMp3Reader.ReadStreamEnd();
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
@@ -238,12 +262,12 @@ namespace PlayPcmWin {
 
         public static bool CalcMD5SumIfAvailable { get; set; }
 
-        private int StreamBeginFlac(string path, long startFrame, long wantFrames, int typicalReadFrames)
+        private int StreamBeginFlac(string path, long startFrame)
         {
             // m_pcmData = new PcmDataLib.PcmData();
             mFlacR = new FlacDecodeIF();
             mFlacR.CalcMD5 = CalcMD5SumIfAvailable;
-            int ercd = mFlacR.ReadStreamBegin(path, startFrame, wantFrames, typicalReadFrames, out mPcmData);
+            int ercd = mFlacR.ReadStreamBegin(path, startFrame, out mPcmData);
             if (ercd < 0) {
                 return ercd;
             }
@@ -310,6 +334,18 @@ namespace PlayPcmWin {
             return ercd;
         }
 
+        private int StreamBeginMp3(string path, int startFrame) {
+            mMp3Reader = new Mp3Reader();
+            int hr = mMp3Reader.Read(path);
+            if (0 <= hr && 0 < startFrame) {
+                if (startFrame < mMp3Reader.data.LongLength) {
+                    mMp3Reader.data = mMp3Reader.data.Skip(startFrame);
+                }
+            }
+
+            return hr;
+        }
+        
         private int StreamBeginWave(string path, long startFrame) {
             int ercd = -1;
 

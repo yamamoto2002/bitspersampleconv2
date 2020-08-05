@@ -1,14 +1,17 @@
-﻿using System;
+﻿// 日本語。
+
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
+using WWAudioFilterCore;
 using System.IO;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using System.Globalization;
-using System.Text;
+using WWMath;
 
 namespace WWAudioFilter {
     /// <summary>
@@ -20,6 +23,7 @@ namespace WWAudioFilter {
         }
 
         BackgroundWorker mBackgroundWorker;
+        Stopwatch mStopwatch = new Stopwatch();
 
         private bool mInitialized = false;
 
@@ -35,6 +39,14 @@ namespace WWAudioFilter {
 
         private List<FilterBase> mFilters = new List<FilterBase>();
 
+        private void ProcessCommandline() {
+            var commandLine = new WWAudioFilterCommandLine();
+            if (commandLine.ParseCommandLine()) {
+                Application.Current.Shutdown();
+                return;
+            }
+        }
+
         public MainWindow() {
             InitializeComponent();
 
@@ -47,11 +59,10 @@ namespace WWAudioFilter {
             mBackgroundWorker.ProgressChanged += new ProgressChangedEventHandler(Background_ProgressChanged);
             mBackgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(Background_RunWorkerCompleted);
 
-            var commandLine = new WWAudioFilterCommandLine();
-            if (commandLine.ParseCommandLine()) {
-                Application.Current.Shutdown();
-                return;
-            }
+#if false
+            // Window_Loadedに移動。
+            ProcessCommandline();
+#endif
         }
 
         public void Dispose() {
@@ -67,8 +78,91 @@ namespace WWAudioFilter {
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
+#if true
+            ProcessCommandline();
+#endif
+
             mInitialized = true;
+
+            LoadSettings();
+
             Update();
+        }
+
+        private void LoadSettings() {
+            textBoxInputFile.Text = Properties.Settings.Default.InputPath;
+            textBoxOutputFile.Text = Properties.Settings.Default.OutputPath;
+
+            cbEnableDither.IsChecked = Properties.Settings.Default.Dither;
+            switch (Properties.Settings.Default.OutputBitDepth) {
+            case 0:
+                comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.Auto;
+                break;
+            case 16:
+                comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmInt16;
+                break;
+            case 24:
+                comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmInt24;
+                break;
+            case 32:
+                if (Properties.Settings.Default.OutputFloat) {
+                    comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmFloat32;
+                } else {
+                    comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmInt32;
+                }
+                break;
+            case 64:
+                if (Properties.Settings.Default.OutputFloat) {
+                    comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmFloat64;
+                } else {
+                    comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.PcmInt64;
+                }
+                break;
+            default:
+                Console.WriteLine("E: unknown bitdepth");
+                comboBoxOutputPcmFormat.SelectedIndex = (int)WWAFUtil.AFSampleFormat.Auto;
+                break;
+            }
+        }
+
+        private void SaveSettings() {
+            Properties.Settings.Default.InputPath = textBoxInputFile.Text;
+            Properties.Settings.Default.OutputPath = textBoxOutputFile.Text;
+
+            Properties.Settings.Default.Dither = cbEnableDither.IsChecked == true;
+            var sf = (WWAFUtil.AFSampleFormat)comboBoxOutputPcmFormat.SelectedIndex;
+
+            Properties.Settings.Default.OutputFloat = false;
+            switch (sf) {
+            case WWAFUtil.AFSampleFormat.Auto:
+                Properties.Settings.Default.OutputBitDepth = 0;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmInt16:
+                Properties.Settings.Default.OutputBitDepth = 16;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmInt24:
+                Properties.Settings.Default.OutputBitDepth = 24;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmInt32:
+                Properties.Settings.Default.OutputBitDepth = 32;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmFloat32:
+                Properties.Settings.Default.OutputBitDepth = 32;
+                Properties.Settings.Default.OutputFloat = true;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmInt64:
+                Properties.Settings.Default.OutputBitDepth = 64;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmFloat64:
+                Properties.Settings.Default.OutputBitDepth = 64;
+                Properties.Settings.Default.OutputFloat = true;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+
+            Properties.Settings.Default.Save();
         }
 
         private void SetLocalizedTextToUI() {
@@ -166,39 +260,64 @@ namespace WWAudioFilter {
             UpdateFilterButtons();
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////
+        // ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
         class RunWorkerArgs {
             public string FromPath { get; set; }
             public string ToPath { get; set; }
 
-            public RunWorkerArgs(string fromPath, string toPath) {
+            public WWAFUtil.AFSampleFormat SampleFormat { get; set; }
+
+            public bool Dither { get; set; }
+
+            public RunWorkerArgs(string fromPath, string toPath, WWAFUtil.AFSampleFormat sf, bool bDither) {
                 FromPath = fromPath;
                 ToPath = toPath;
+                SampleFormat = sf;
+                Dither = bDither;
             }
         };
 
-        void ProgressReportCallback(int percentage, WWAudioFilterCore.ProgressArgs args) {
+        long mLastReportedTick = 0;
+        void ProgressReportCallback(int percentage, WWAudioFilterCore.AudioFilterCore.ProgressArgs args) {
+            //Console.WriteLine("ProgressReport {0}", percentage);
+
+            long now = DateTime.Now.Ticks;
+            if (args.Message.Length == 0 && (now - mLastReportedTick) < 10000 * 1000) {
+                // suppress too frequent report to prevent UI freeze.
+                return;
+            }
+
+            mLastReportedTick = now;
             mBackgroundWorker.ReportProgress(percentage, args);
         }
 
         void Background_DoWork(object sender, DoWorkEventArgs e) {
             var args = e.Argument as RunWorkerArgs;
+            int rv = 0;
 
-            var af = new WWAudioFilterCore();
+            mLastReportedTick = 0;
 
-            int rv = af.Run(args.FromPath, mFilters, args.ToPath, ProgressReportCallback);
-            if (rv < 0) {
-                e.Result = rv;
+            var af = new WWAudioFilterCore.AudioFilterCore();
+            try {
+                rv = af.Run(args.FromPath, mFilters, args.ToPath, args.SampleFormat, args.Dither, ProgressReportCallback);
+                if (rv < 0) {
+                    e.Result = rv;
+                    return;
+                }
+            } catch (Exception ex) {
+                Console.WriteLine(ex);
+                mBackgroundWorker.ReportProgress(100, new WWAudioFilterCore.AudioFilterCore.ProgressArgs(ex.ToString(), rv));
+                e.Result = -1;
                 return;
             }
 
-            mBackgroundWorker.ReportProgress(100, new WWAudioFilterCore.ProgressArgs("", rv));
+            mBackgroundWorker.ReportProgress(100, new WWAudioFilterCore.AudioFilterCore.ProgressArgs("", rv));
             e.Result = rv;
         }
 
         void Background_ProgressChanged(object sender, ProgressChangedEventArgs e) {
-            var args = e.UserState as WWAudioFilterCore.ProgressArgs;
+            var args = e.UserState as WWAudioFilterCore.AudioFilterCore.ProgressArgs;
 
             if (0 <= e.ProgressPercentage) {
                 progressBar1.Value = e.ProgressPercentage;
@@ -221,6 +340,8 @@ namespace WWAudioFilter {
             groupBoxOutputFile.IsEnabled = true;
             buttonStartConversion.IsEnabled = true;
 
+            mStopwatch.Stop();
+
             if (rv < 0) {
                 var s = string.Format(CultureInfo.CurrentCulture, "{0} {1} {2}\r\n", Properties.Resources.Error, rv, WWFlacRWCS.FlacRW.ErrorCodeToStr(rv));
                 MessageBox.Show(s, Properties.Resources.Error, MessageBoxButton.OK, MessageBoxImage.Error);
@@ -228,12 +349,12 @@ namespace WWAudioFilter {
                 textBoxLog.Text += s;
                 textBoxLog.ScrollToEnd();
             } else {
-                textBoxLog.Text += Properties.Resources.LogCompleted;
+                textBoxLog.Text += string.Format(CultureInfo.CurrentCulture, Properties.Resources.LogCompleted, mStopwatch.Elapsed);
                 textBoxLog.ScrollToEnd();
             }
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
         private void buttonFilterAdd_Click(object sender, RoutedEventArgs e) {
             var w = new FilterConfiguration(null);
@@ -310,7 +431,7 @@ namespace WWAudioFilter {
                 return;
             }
 
-            WWAudioFilterCore.SaveFilteresToFile(mFilters, dlg.FileName);
+            WWAudioFilterCore.AudioFilterCore.SaveFilteresToFile(mFilters, dlg.FileName);
         }
 
         private void buttonFilterLoad_Click(object sender, RoutedEventArgs e) {
@@ -323,7 +444,7 @@ namespace WWAudioFilter {
                 return;
             }
 
-            var filters = WWAudioFilterCore.LoadFiltersFromFile(dlg.FileName);
+            var filters = WWAudioFilterCore.AudioFilterCore.LoadFiltersFromFile(dlg.FileName);
             if (filters == null) {
                 return;
             }
@@ -332,7 +453,7 @@ namespace WWAudioFilter {
             Update();
         }
 
-        private void InputFormUpdated() {
+        private void FilenameTextBoxUpdated() {
             if (0 < textBoxInputFile.Text.Length &&
                     0 < textBoxOutputFile.Text.Length) {
                 mState = State.Ready;
@@ -345,7 +466,7 @@ namespace WWAudioFilter {
 
         private void buttonBrowseInputFile_Click(object sender, RoutedEventArgs e) {
             var dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Filter = Properties.Resources.FilterFlacFiles;
+            dlg.Filter = Properties.Resources.FilterReadAudioFiles;
             dlg.ValidateNames = true;
 
             var result = dlg.ShowDialog();
@@ -354,13 +475,37 @@ namespace WWAudioFilter {
             }
 
             textBoxInputFile.Text = dlg.FileName;
-            InputFormUpdated();
+            FilenameTextBoxUpdated();
         }
+
+        private enum FilterWriteAudioFilesType {
+            FLAC = 1, //< FilterIndex is 1-based!! see document.
+            DSF,
+            WAV,
+        };
 
         private void buttonBrowseOutputFile_Click(object sender, RoutedEventArgs e) {
             var dlg = new Microsoft.Win32.SaveFileDialog();
             dlg.Filter = Properties.Resources.FilterWriteAudioFiles;
             dlg.ValidateNames = true;
+
+            var outputSampleFormat = (WWAFUtil.AFSampleFormat)comboBoxOutputPcmFormat.SelectedIndex;
+            switch (outputSampleFormat) {
+            case WWAFUtil.AFSampleFormat.Auto:
+            case WWAFUtil.AFSampleFormat.PcmInt16:
+            case WWAFUtil.AFSampleFormat.PcmInt24:
+                dlg.FilterIndex = (int)FilterWriteAudioFilesType.FLAC;
+                break;
+            case WWAFUtil.AFSampleFormat.PcmInt32:
+            case WWAFUtil.AFSampleFormat.PcmFloat32:
+            case WWAFUtil.AFSampleFormat.PcmInt64:
+            case WWAFUtil.AFSampleFormat.PcmFloat64:
+                dlg.FilterIndex = (int)FilterWriteAudioFilesType.WAV;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
 
             var result = dlg.ShowDialog();
             if (result != true) {
@@ -368,7 +513,7 @@ namespace WWAudioFilter {
             }
 
             textBoxOutputFile.Text = dlg.FileName;
-            InputFormUpdated();
+            FilenameTextBoxUpdated();
         }
 
         private void buttonStartConversion_Click(object sender, RoutedEventArgs e) {
@@ -382,6 +527,41 @@ namespace WWAudioFilter {
                 return;
             }
 
+            bool bDither = cbEnableDither.IsChecked == true;
+
+            var outputFileFormat = WWAFUtil.FileNameToFileFormatType(textBoxOutputFile.Text);
+
+            var outputSampleFormat = (WWAFUtil.AFSampleFormat)comboBoxOutputPcmFormat.SelectedIndex;
+            if (outputSampleFormat != WWAFUtil.AFSampleFormat.Auto) {
+                bool formatMatched = true;
+                switch (outputFileFormat) {
+                case WWAFUtil.FileFormatType.FLAC:
+                    if (outputSampleFormat == WWAFUtil.AFSampleFormat.PcmInt16 ||
+                        outputSampleFormat == WWAFUtil.AFSampleFormat.PcmInt24) {
+                        // OK
+                    } else {
+                        formatMatched = false;
+                    }
+                    break;
+                case WWAFUtil.FileFormatType.WAVE:
+                    // 全てOK
+                    break;
+                case WWAFUtil.FileFormatType.DSF:
+                    if (outputSampleFormat == WWAFUtil.AFSampleFormat.Auto) {
+                        // OK
+                    } else {
+                        formatMatched = false;
+                    }
+                    break;
+                default:
+                    break;
+                }
+                if (!formatMatched) {
+                    MessageBox.Show(Properties.Resources.ErrorWriteFormatMismatch, Properties.Resources.Error, MessageBoxButton.OK, MessageBoxImage.Hand);
+                    return;
+                }
+            }
+
             textBoxLog.Text = string.Empty;
             textBoxLog.Text += string.Format(CultureInfo.CurrentCulture, Properties.Resources.LogFileReadStarted, textBoxInputFile.Text);
             progressBar1.Value = 0;
@@ -392,10 +572,16 @@ namespace WWAudioFilter {
             groupBoxOutputFile.IsEnabled = false;
             buttonStartConversion.IsEnabled = false;
 
-            mBackgroundWorker.RunWorkerAsync(new RunWorkerArgs(textBoxInputFile.Text, textBoxOutputFile.Text));
+            mStopwatch.Reset();
+            mStopwatch.Start();
+            mBackgroundWorker.RunWorkerAsync(new RunWorkerArgs(textBoxInputFile.Text, textBoxOutputFile.Text, outputSampleFormat, bDither));
         }
 
-        private void Window_DragEnter(object sender, DragEventArgs e) {
+        private void textBoxFile_PreviewDragOver(object sender, DragEventArgs e) {
+            e.Handled = true;
+        }
+
+        private void textBoxFile_DragEnter(object sender, DragEventArgs e) {
             if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
                 e.Effects = DragDropEffects.Copy;
             } else {
@@ -403,7 +589,7 @@ namespace WWAudioFilter {
             }
         }
 
-        private void Window_Drop(object sender, DragEventArgs e) {
+        private void textBoxInputFile_Drop(object sender, DragEventArgs e) {
             var paths = e.Data.GetData(DataFormats.FileDrop) as string[];
             if (null == paths) {
                 var sb = new StringBuilder(Properties.Resources.DroppedDataIsNotFile);
@@ -416,7 +602,35 @@ namespace WWAudioFilter {
                 return;
             }
             textBoxInputFile.Text = paths[0];
-            InputFormUpdated();
+            FilenameTextBoxUpdated();
+        }
+
+        private void textBoxOutputFile_Drop(object sender, DragEventArgs e) {
+            var paths = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (null == paths) {
+                var sb = new StringBuilder(Properties.Resources.DroppedDataIsNotFile);
+
+                var formats = e.Data.GetFormats(false);
+                foreach (var format in formats) {
+                    sb.Append(string.Format(CultureInfo.InvariantCulture, "{1}    {0}", format, Environment.NewLine));
+                }
+                MessageBox.Show(sb.ToString());
+                return;
+            }
+            textBoxOutputFile.Text = paths[0];
+            FilenameTextBoxUpdated();
+        }
+
+        private void textBoxOutputFile_TextChanged(object sender, TextChangedEventArgs e) {
+            FilenameTextBoxUpdated();
+        }
+
+        private void textBoxInputFile_TextChanged(object sender, TextChangedEventArgs e) {
+            FilenameTextBoxUpdated();
+        }
+
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            SaveSettings();
         }
     }
 }

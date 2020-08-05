@@ -1,0 +1,120 @@
+﻿<Window x:Class="WWWaveSimulator1D.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="WWWaveSimulator1D" Height="720" Width="1366" Loaded="Window_Loaded" Closed="Window_Closed" UseLayoutRounding="True">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="256" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <StackPanel Name="stackPanel1">
+            <GroupBox Header="Settings" Height="160" Name="groupBox1" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Sound speed (m/s)" HorizontalAlignment="Right" Name="labelSoundSpeed" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" HorizontalAlignment="Left" Name="textBoxSoundSpeed" VerticalAlignment="Center" Width="60" Text="334" HorizontalContentAlignment="Right"  />
+                    <Label Content="Time step Δt (ms)" Grid.Row="1" HorizontalAlignment="Right" Name="labelTimeStep" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" Name="textBoxTimeStep" VerticalAlignment="Center" Width="60" Text="0.01" HorizontalContentAlignment="Right" />
+                    <Label Content="Wall reflectivity " Grid.Row="2" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" Grid.Row="2" HorizontalAlignment="Left" Name="textBoxWallReflectivity" VerticalAlignment="Center" Width="60" Text="0.9" HorizontalContentAlignment="Right" />
+                    <Label Content="Courant Nr. Optimal = 1" Grid.Row="3" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBox Grid.Column="1" Grid.Row="3" HorizontalAlignment="Left" Name="textBoxSc" VerticalAlignment="Center" Width="60" Text="1" HorizontalContentAlignment="Right" />
+                    <Button Content="Reset Simulator" Grid.Row="4" HorizontalAlignment="Center" Grid.ColumnSpan="2" Name="buttonUpdateSimulator" VerticalAlignment="Center" Click="buttonUpdateSimulator_Click" />
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Control" Height="146" Name="groupBox2" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="46*" />
+                        <RowDefinition Height="24" />
+                        <RowDefinition Height="24" />
+                        <RowDefinition Height="24" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Content="⏮" HorizontalAlignment="Center" Name="buttonRewind" VerticalAlignment="Center" Width="50" Height="40" FontSize="20" Click="buttonRewind_Click" />
+                    <Button Content="⏸" HorizontalAlignment="Center" Grid.Column="1" Name="buttonPause" VerticalAlignment="Center" Width="50" Height="40" FontSize="20" Click="buttonPause_Click" IsEnabled="True" />
+                    <Button Content="⏩" HorizontalAlignment="Center" Grid.Column="2" Name="buttonFastForward10" VerticalAlignment="Center" Width="50" Height="40" FontSize="20" Click="buttonFastForward10_Click" IsEnabled="True" />
+                    <Label Content="Time Step:" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                    <Slider Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" HorizontalAlignment="Center" Margin="7,0,0,0" Name="sliderTimeStep" VerticalAlignment="Top" Width="50" ValueChanged="sliderTimeStep_ValueChanged" Minimum="0" SmallChange="0.1" Maximum="16" TickPlacement="BottomRight" Value="5" LargeChange="1" />
+                    <Label Content="32" Grid.Row="1" Grid.Column="2" HorizontalAlignment="Right" Name="labelTimeStepNumber" VerticalAlignment="Center" />
+                    <Label Content="Time:" Grid.Row="2" HorizontalAlignment="Right" Name="labelTime" VerticalAlignment="Center" />
+                    <Label Content="0.0" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" Name="labelSec" VerticalAlignment="Center" />
+                    <Label Content="ms" Grid.Row="2" Grid.Column="3" HorizontalAlignment="Left" Name="labelSecUnit" VerticalAlignment="Center" />
+                    <Label Content="Iteration count:" Grid.Row="3" Grid.ColumnSpan="2" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <Label Content="0" Grid.Row="3" Grid.Column="2" HorizontalAlignment="Right" Name="labelIterationCount" VerticalAlignment="Center" />
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Stimulus" Height="100" Name="groupBoxSourceControl" >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+                    <ComboBox Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Left" Name="comboBoxSourceType" VerticalAlignment="Top" Width="120" SelectionChanged="comboBoxSourceType_SelectionChanged">
+                        <ComboBoxItem Content="Waveform: Gaussian" IsSelected="True" />
+                        <ComboBoxItem Content="Waveform: Sinusoidal" />
+                    </ComboBox>
+                    <Label Content="Frequency (Hz)" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Name="labelFreq" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Name="textBoxFreq" VerticalAlignment="Center" Width="60" Text="271.25" HorizontalContentAlignment="Right" />
+                    <Label Content="Magnitude" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" Name="labelStimulusMagnitude" VerticalAlignment="Center" />
+                    <TextBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Name="textBoxMagnitude" VerticalAlignment="Center" Width="60" Text="0.2" HorizontalContentAlignment="Right" />
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Statistics" Height="100" Name="groupBoxStatistics" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="1*" />
+                        <RowDefinition Height="1*" />
+                    </Grid.RowDefinitions>
+                    <Label Content="Magnitude: 0" HorizontalAlignment="Left" Margin="6,0,0,0" Name="labelMagnitude" VerticalAlignment="Center" />
+                    <Label Grid.Row="1" Content="Peak Magnitude: 0" HorizontalAlignment="Left" Margin="6,0,0,0" Name="labelPeakMagnitude" VerticalAlignment="Center" />
+                    <Button Content="_Reset" Grid.Row="1" HorizontalAlignment="Right" Name="buttonResetPeakMagnitude" VerticalAlignment="Center" Width="75" Click="buttonResetPeakMagnitude_Click" />
+                </Grid>
+            </GroupBox>
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <GroupBox Header="Pressure (Touch string to generate Wave)" Height="320">
+                <ScrollViewer Grid.Column="1" Name="scrollViewerP" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <Canvas Height="256" Name="canvasP" Width="1024" MouseUp="canvasP_MouseUp" Background="White">
+                        <Rectangle Canvas.Left="0" Canvas.Top="0" Height="256" Fill="LightGray" Width="51.2" />
+                        <Rectangle Canvas.Left="971.8" Canvas.Top="0" Height="256" Fill="LightGray" Width="51.2" />
+                        <Line X1="-3" X2="1024" Y1="128" Y2="128" Stroke="LightGray" />
+                        <Line X1="512" X2="512" Y1="125" Y2="131" Stroke="Black" />
+                        <Polyline Name="mPolylineP"  Stroke="Black" StrokeThickness="1" />
+                        <TextBlock Canvas.Left="-3" Canvas.Top="128" Name="textBlockZero" Text="0"  />
+                        <TextBlock Canvas.Left="509" Canvas.Top="128" Name="textBlockHalf" Text="Half"  />
+                        <TextBlock Canvas.Left="1021" Canvas.Top="128" Name="textBlockFull" Text="Full"  />
+                        <TextBlock Canvas.Left="1028" Canvas.Top="140" Name="textBlockCm" Text="m"  />
+                    </Canvas>
+                </ScrollViewer>
+            </GroupBox>
+            <GroupBox Header="Velocity" Height="320" Visibility="Collapsed">
+                <ScrollViewer Grid.Column="1" Name="scrollViewerV" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <Canvas Height="256" Name="canvasV" Width="1024" Background="White">
+                        <Polyline Name="mPolylineV" Stroke="Black" StrokeThickness="1" />
+                    </Canvas>
+                </ScrollViewer>
+            </GroupBox>
+        </StackPanel>
+    </Grid>
+</Window>

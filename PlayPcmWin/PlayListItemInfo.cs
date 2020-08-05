@@ -15,6 +15,7 @@ namespace PlayPcmWin {
         private PcmDataLib.PcmData mPcmData;
         private bool mReadSeparatorAfter;
         private int mRowId;
+        private FileDisappearCheck mFileDisappearCheck;
 
         public static void SetNextRowId(int id) {
             mNextRowId = id;
@@ -44,15 +45,24 @@ namespace PlayPcmWin {
             set { mPcmData.AlbumTitle = value; }
         }
 
+        public string ComposerName {
+            get { return mPcmData.ComposerName; }
+            set { mPcmData.ComposerName = value; }
+        }
+
         /// <summary>
         /// 長さ表示用文字列
         /// </summary>
         public string Duration {
-            get { return Util.SecondsToHMSString(mPcmData.DurationSeconds); }
+            get { return Util.SecondsToMSString(mPcmData.DurationSeconds); }
         }
 
-        public int NumChannels {
-            get { return mPcmData.NumChannels; }
+        public string NumChannels {
+            get { return string.Format(CultureInfo.CurrentCulture, "{0}ch", mPcmData.NumChannels); }
+        }
+
+        public int TrackNr {
+            get { return mPcmData.TrackId; }
         }
 
         public int IndexNr {
@@ -77,16 +87,21 @@ namespace PlayPcmWin {
                     return mPcmData.BitsPerSample.ToString(CultureInfo.CurrentCulture)
                             + "bit (" + Properties.Resources.FloatingPointNumbers + ")";
                 }
-                return mPcmData.BitsPerSample.ToString(CultureInfo.CurrentCulture) + "bit";
+                return mPcmData.ValidBitsPerSample.ToString(CultureInfo.CurrentCulture) + "bit";
             }
         }
 
         public string BitRate {
             get {
-                if (mPcmData.SampleDataType == PcmDataLib.PcmData.DataType.DoP) {
-                    return (mPcmData.SampleRate * 16 * mPcmData.NumChannels / 1000).ToString(CultureInfo.CurrentCulture) + " kbps";
+                // Mbpsを小数点以下3桁まで表示する。
+                if (mPcmData.IsLossyCompressed) {
+                    int kbpsComp = mPcmData.BitRate / 1000;
+                    int kbps = mPcmData.ValidBitsPerSample * mPcmData.SampleRate * mPcmData.NumChannels / 1000;
+                    return string.Format(CultureInfo.CurrentCulture, "{0}Mbps → {1}Mbps", kbpsComp * 0.001, kbps*0.001);
+                } else {
+                    int kbps = mPcmData.BitRate / 1000;
+                    return string.Format(CultureInfo.CurrentCulture, "{0}Mbps", kbps * 0.001);
                 }
-                return ((long)mPcmData.BitsPerSample * mPcmData.SampleRate * mPcmData.NumChannels / 1000).ToString(CultureInfo.CurrentCulture) + " kbps";
             }
         }
 
@@ -100,9 +115,18 @@ namespace PlayPcmWin {
             }
         }
 
-        public PlayListItemInfo(PcmDataLib.PcmData pcmData) {
+        public PlayListItemInfo(PcmDataLib.PcmData pcmData, FileDisappearCheck.FileDisappearedEventHandler cb) {
             mPcmData = pcmData;
             mRowId = mNextRowId++;
+            mFileDisappearCheck = new FileDisappearCheck(System.IO.Path.GetDirectoryName(pcmData.FullPath), System.IO.Path.GetFileName(pcmData.FullPath), cb);
+        }
+
+        public string FileExtension {
+            get { return System.IO.Path.GetExtension(mPcmData.FileName); }
+        }
+
+        public string Path {
+            get { return mPcmData.FullPath; }
         }
 
         #region INotifyPropertyChanged members

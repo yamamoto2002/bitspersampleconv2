@@ -148,7 +148,7 @@
     <value>Not supported file format</value>
   </data>
   <data name="NotSupportedQuantizationBitRate" xml:space="preserve">
-    <value>Not supported quantization bit rate. supported formats are 16, 24 and 32</value>
+    <value>Not supported quantization bit rate. supported formats are 16, 24 32 and 64</value>
   </data>
   <data name="MainStatusPaused" xml:space="preserve">
     <value>Paused.</value>
@@ -175,7 +175,7 @@
     <value>Read {0} file failed </value>
   </data>
   <data name="MainStatusReadingFiles" xml:space="preserve">
-    <value>Setup device completed. Now reading files to main memory...</value>
+    <value>Reading PCM from file and arranging decoded PCM to main memory...</value>
   </data>
   <data name="RestoreFailedFiles" xml:space="preserve">
     <value>Missing files while restoring playlist</value>
@@ -243,7 +243,7 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
     <value>Read playgroup {0} completed. Elapsed time: {1}ms</value>
   </data>
   <data name="FilterSupportedFiles" xml:space="preserve">
-    <value>Supported files|*.WAV;*.WAVE;*.FLAC;*.AIF;*.AIFF;*.AIFC;*.AIFFC;*.DSF;*.DFF;*.CUE;*.PPWPL;*.M3U;*.M3U8|WAVE files|*.WAV;*.WAVE|FLAC files|*.FLAC|AIFF files|*.AIF;*.AIFF;*.AIFC;*AIFFC|DSF files|*.DSF|DFF files|*.DFF|CUE files|*.CUE|PPWPL files|*.PPWPL|M3U files|*.M3U;*.M3U8|All files|*.*</value>
+    <value>Supported files|*.WAV;*.WAVE;*.FLAC;*.AIF;*.AIFF;*.AIFC;*.AIFFC;*.DSF;*.DFF;*.MP3;*.CUE;*.PPWPL;*.M3U;*.M3U8|WAVE files|*.WAV;*.WAVE|FLAC files|*.FLAC|AIFF files|*.AIF;*.AIFF;*.AIFC;*AIFFC|DSF files|*.DSF|DFF files|*.DFF|MP3 files|*.MP3|CUE files|*.CUE|PPWPL files|*.PPWPL|M3U files|*.M3U;*.M3U8|All files|*.*</value>
   </data>
   <data name="TimerDriven" xml:space="preserve">
     <value>Timer driven</value>
@@ -488,7 +488,7 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
     <value>Remember Window position and size</value>
   </data>
   <data name="SettingsCheckBoxParallelRead" xml:space="preserve">
-    <value>Parallelize file read</value>
+    <value>Parallelize file read (for Solid State Drives)</value>
   </data>
   <data name="SettingsCheckBoxPlaceKokomadeAterIndex00" xml:space="preserve">
     <value>Set [Batch read endpoint] flag after INDEX00</value>
@@ -614,7 +614,7 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
     <value>Monaural mix (forPCM)</value>
   </data>
   <data name="AudioFilterPolarityInvert" xml:space="preserve">
-    <value>Invert polarity</value>
+    <value>Invert Polarity</value>
   </data>
   <data name="AudioFilterActivated" xml:space="preserve">
     <value>Activated Sound Effects</value>
@@ -637,13 +637,94 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
   <data name="GroupBoxSoundEffects" xml:space="preserve">
     <value>Sound Effects</value>
   </data>
-  <data name="AudioFilterChannelRouting" xml:space="preserve">
-    <value>Channel Routing</value>
+  <data name="AudioFilterChannelMapping" xml:space="preserve">
+    <value>Channel Mapping</value>
   </data>
-  <data name="ChannelRoutingChannelRoutingTable" xml:space="preserve">
-    <value>Channel Routing Table</value>
+  <data name="ChannelMappingChannelMappingTable" xml:space="preserve">
+    <value>Channel Mapping Table</value>
   </data>
-  <data name="ChannelRoutingNumOfInputChannels" xml:space="preserve">
+  <data name="ChannelMappingNumOfInputChannels" xml:space="preserve">
     <value>Number of input channels:</value>
+  </data>
+  <data name="MainStatusReadingFilesDoP" xml:space="preserve">
+    <value>Reading DSD from file and building DoP data onto main memory...</value>
+  </data>
+  <data name="SettingsCheckBoxChannelCountEven" xml:space="preserve">
+    <value>Add silent channel for ch. count to be even number</value>
+  </data>
+  <data name="AudioFilterMuteChannel" xml:space="preserve">
+    <value>Mute Channel</value>
+  </data>
+  <data name="AudioFilterMuteChannelDesc" xml:space="preserve">
+    <value>Mute Channel {0}</value>
+  </data>
+  <data name="AudioFilterSoloChannel" xml:space="preserve">
+    <value>Play the channel selected</value>
+  </data>
+  <data name="AudioFilterSoloChannelDesc" xml:space="preserve">
+    <value>Play the channel {0}</value>
+  </data>
+  <data name="SettingsCbItemChannelCount10" xml:space="preserve">
+    <value>10 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount2" xml:space="preserve">
+    <value>2 ch stereo</value>
+  </data>
+  <data name="SettingsCbItemChannelCount4" xml:space="preserve">
+    <value>4 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount6" xml:space="preserve">
+    <value>6 ch (5.1 ch)</value>
+  </data>
+  <data name="SettingsCbItemChannelCount8" xml:space="preserve">
+    <value>8 ch (7.1 ch)</value>
+  </data>
+  <data name="SettingsCbItemChannelCountNotChanged" xml:space="preserve">
+    <value>Use original channel count</value>
+  </data>
+  <data name="SettingsGroupBoxChannelCount" xml:space="preserve">
+    <value>Channel Count Settings</value>
+  </data>
+  <data name="SettingsCbItemChannelCountMixFormat" xml:space="preserve">
+    <value>Use Mix Format channel count</value>
+  </data>
+  <data name="AudioFilterZohNosdacCompensation" xml:space="preserve">
+    <value>ZOH NOSDAC high frequency roll-off compensation (PCM)</value>
+  </data>
+  <data name="SettingsCbItemChannelCount16" xml:space="preserve">
+    <value>16 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount18" xml:space="preserve">
+    <value>18 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount24" xml:space="preserve">
+    <value>24 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount26" xml:space="preserve">
+    <value>26 ch</value>
+  </data>
+  <data name="SettingsCbItemChannelCount32" xml:space="preserve">
+    <value>32 ch</value>
+  </data>
+  <data name="AudioFilterDelay" xml:space="preserve">
+    <value>Delay</value>
+  </data>
+  <data name="MainDataGridColumnComposer" xml:space="preserve">
+    <value>Composer</value>
+  </data>
+  <data name="SettingsCheckBoxReduceVolume" xml:space="preserve">
+    <value>Reduce PCM volume:</value>
+  </data>
+  <data name="SettingsCheckBoxIsFormatSupportedCall" xml:space="preserve">
+    <value>Call IsFormatSupported on playback</value>
+  </data>
+  <data name="MainDataGridColumnFileExtension" xml:space="preserve">
+    <value>File Extension</value>
+  </data>
+  <data name="SomeFilesAreDisappeared" xml:space="preserve">
+    <value>Some files are disappeared. Playlist updated.</value>
+  </data>
+  <data name="AudioFilterPolarityInvertDesc" xml:space="preserve">
+    <value>Invert Polarity : Channel {0}</value>
   </data>
 </root>

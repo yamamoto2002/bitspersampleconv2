@@ -1,22 +1,22 @@
 ﻿<Window x:Class="WWAudioFilter.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="WWAudioFilter" Height="600" Width="800" Loaded="Window_Loaded" Icon="/WWAudioFilter;component/ppwlogo.ico" DragEnter="Window_DragEnter" Drop="Window_Drop" AllowDrop="True">
+        Title="WWAudioFilter" Height="600" Width="800" Loaded="Window_Loaded" Icon="/WWAudioFilter;component/ppwlogo.ico" AllowDrop="True" Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="70" />
             <RowDefinition Height="2*" />
-            <RowDefinition Height="68" />
+            <RowDefinition Height="114" />
             <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
-        <GroupBox Header="Input FLAC file" Name="groupBoxInputFile" Margin="6,0,6,0">
+        <GroupBox Header="Input file" Name="groupBoxInputFile" Margin="6,0,6,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="100" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="100" />
                 </Grid.ColumnDefinitions>
-                <TextBox Margin="6,0,6,0" Name="textBoxInputFile" VerticalAlignment="Center" Grid.Column="1" Text="" />
+                <TextBox Margin="6,0,6,0" Name="textBoxInputFile" VerticalAlignment="Center" Grid.Column="1" Text="" PreviewDragOver="textBoxFile_PreviewDragOver" Drop="textBoxInputFile_Drop" DragEnter="textBoxFile_DragEnter" TextChanged="textBoxInputFile_TextChanged" />
                 <Button Content="_Browse..." Margin="0,0,6,0" Name="buttonBrowseInputFile" VerticalAlignment="Center" Grid.Column="2" Click="buttonBrowseInputFile_Click" />
                 <Label Content="Input file:" HorizontalAlignment="Right" Margin="0,0,0,0" Name="labelInputFile" VerticalAlignment="Center" />
             </Grid>
@@ -39,19 +39,36 @@
                 <ListBox Name="listBoxFilters" SelectionChanged="listBoxFilters_SelectionChanged" />
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Row="2" Height="65" Header="Output file" Name="groupBoxOutputFile" VerticalAlignment="Top" Margin="6,0,6,0">
+        <GroupBox Grid.Row="2" Header="Output file settings" Name="groupBoxOutputFile" Margin="6,0,6,0">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="100" />
                 </Grid.ColumnDefinitions>
-                <TextBox Margin="6,0,6,0" Name="textBoxOutputFile" VerticalAlignment="Center" Grid.Column="1" Text="" />
-                <Button Content="B_rowse..." Margin="0,0,6,0" Name="buttonBrowseOutputFile" VerticalAlignment="Center" Grid.Column="2" Click="buttonBrowseOutputFile_Click" />
-                <Label Content="Output file:" HorizontalAlignment="Right" Margin="0,0,0,0" Name="labelOutputFile" VerticalAlignment="Center" />
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Label Content="Output file bit-depth:" HorizontalAlignment="Right" Name="labelOutputPcmFormat" VerticalAlignment="Center" />
+                <ComboBox Grid.Column="1" Margin="6,0" Name="comboBoxOutputPcmFormat" VerticalAlignment="Center">
+                    <ComboBoxItem x:Name="cbItemCicType5Stage" Content="24bit for FLAC, 32bit (int) for WAVE, 1bit for DSF" IsSelected="True" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm16bit" Content="16bit PCM (FLAC or WAVE)" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm24bit" Content="24bit PCM (FLAC or WAVE)" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm32bitInt" Content="32bit Integer PCM (WAVE only)" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm32bitFloat" Content="32bit Float PCM (WAVE only)" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm64bitInt" Content="64bit Integer (&lt;16,48&gt; fixed point number) PCM (WAVE only)" />
+                    <ComboBoxItem x:Name="cbItemOutputPcm64bitFloat" Content="64bit Float PCM (WAVE only)" />
+                </ComboBox>
+                <Label Grid.Row="1"   Content="Dither:" HorizontalAlignment="Right" Margin="0,0,0,0" Name="labelDither" VerticalAlignment="Center" />
+                <CheckBox Grid.Row="1" Grid.Column="1"  Margin="6,0,6,0" HorizontalAlignment="Left" VerticalAlignment="Center" Content="Enable _dither before converting to output bit-depth" IsChecked="True" Name="cbEnableDither" />
+                <Label Grid.Row="2"   Content="Output file:" HorizontalAlignment="Right" Margin="0,0,0,0" Name="labelOutputFile" VerticalAlignment="Center" />
+                <Button Grid.Row="2"  Content="B_rowse..." Margin="0,0,6,0" Name="buttonBrowseOutputFile" VerticalAlignment="Center" Grid.Column="2" Click="buttonBrowseOutputFile_Click" />
+                <TextBox Grid.Row="2" Margin="6,0,6,0" Name="textBoxOutputFile" VerticalAlignment="Center" Grid.Column="1" Text="" Drop="textBoxOutputFile_Drop" DragEnter="textBoxFile_DragEnter" PreviewDragOver="textBoxFile_PreviewDragOver" TextChanged="textBoxOutputFile_TextChanged" />
             </Grid>
         </GroupBox>
-        <Button Content="_Start conversion" Grid.Row="3" Margin="6,6,0,0" Name="buttonStartConversion" VerticalAlignment="Top" Click="buttonStartConversion_Click" HorizontalAlignment="Left" Width="102" />
+        <Button Content="_Start conversion" Grid.Row="3" Margin="6,6,0,0" Name="buttonStartConversion" VerticalAlignment="Top" Click="buttonStartConversion_Click" HorizontalAlignment="Left" Width="102" IsDefault="True" />
         <GroupBox Grid.Row="3" Header="Log" Name="groupBoxLog" Margin="118,0,6,24" >
             <Grid>
                 <TextBox Name="textBoxLog" AllowDrop="False" AcceptsReturn="True" AcceptsTab="True" IsReadOnly="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Auto" />

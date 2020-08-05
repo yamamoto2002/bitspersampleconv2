@@ -1,15 +1,21 @@
+// 日本語。
+
 #include "WasapiIOIF.h"
 #include "WasapiUser.h"
 #include "WWPlayPcmGroup.h"
-#include "WWUtil.h"
+#include "WWWasapiIOUtil.h"
 #include "WWTimerResolution.h"
 #include "WWAudioDeviceEnumerator.h"
 #include "WWAudioFilterType.h"
 #include "WWAudioFilterPolarityInvert.h"
 #include "WWAudioFilterMonauralMix.h"
-#include "WWAudioFilterChannelRouting.h"
+#include "WWAudioFilterChannelMapping.h"
+#include "WWAudioFilterMuteSoloChannel.h"
+#include "WWAudioFilterZohNosdacCompensation.h"
+#include "WWAudioFilterDelay.h"
 #include <assert.h>
 #include <map>
+#include "WWCommonUtil.h"
 
 class WasapiIO : public IWWDeviceStateCallback {
 public:
@@ -100,7 +106,7 @@ WasapiIO::ConnectPcmDataNext(int fromIdx, int toIdx)
     }
 
     wasapi.MutexWait();
-    from->next = to;
+    from->SetNext(to);
     wasapi.MutexRelease();
 
     return true;
@@ -134,6 +140,9 @@ WasapiIO::ResampleIfNeeded(int conversionQuality)
         return hr;
     }
 
+    // DoPはPCM形式に変換された。
+    deviceFormat.streamType = WWStreamPcm;
+
     wasapi.UpdatePcmDataFormat(deviceFormat);
 
     return hr;
@@ -166,6 +175,11 @@ WasapiIO::ScanPcmMaxAbsAmplitude(void)
 void
 WasapiIO::ScalePcmAmplitude(double scale)
 {
+    if (scale == 1.0) {
+        // 厳密に1.0倍のとき、何も変わらないので処理を省略する。
+        return;
+    }
+
     for (int i=0; i<playPcmGroup.Count(); ++i) {
         WWPcmData *pcm = playPcmGroup.NthPcmData(i);
         assert(pcm);
@@ -179,7 +193,7 @@ WasapiIO::AddPcmDataEnd(void)
 {
     playPcmGroup.AddPlayPcmDataEnd();
 
-    // ���s�[�g�Ȃ��Ɖ��肵�ă����N���X�g���Ȃ��Ă����B
+    // リピートなしと仮定してリンクリストをつなげておく。
     UpdatePlayRepeat(false);
 }
 
@@ -206,11 +220,10 @@ WasapiIO::StartRecording(void)
 HRESULT
 WasapiIO::OnDeviceStateChanged(LPCWSTR pwstrDeviceId, DWORD dwNewState)
 {
-    (void)dwNewState;
-    // �Đ����ŁA�Đ����Ă���f�o�C�X�̏�Ԃ��ς�����Ƃ���
-    // DeviceStateChanged()�͍Đ����~���Ȃ���΂Ȃ�Ȃ�
+    // 再生中で、再生しているデバイスの状態が変わったときは
+    // DeviceStateChanged()は再生を停止しなければならない
     if (stateChangedCallback) {
-        stateChangedCallback(pwstrDeviceId);
+        stateChangedCallback(pwstrDeviceId, dwNewState);
     }
 
     return S_OK;
@@ -309,48 +322,15 @@ WasapiIO_GetDeviceAttributes(int instanceId, int deviceId, WasapiIoDeviceAttribu
     return true;
 }
 
-/// numChannels to channelMask
-static DWORD
-GetChannelMask(int numChannels)
-{
-    // maskbit32 is reserved therefore allowable numChannels is smaller than 32
-    assert(numChannels < 32);
-    DWORD result = 0;
-
-    switch (numChannels) {
-    case 1:
-        result = 0; // mono (unspecified)
-        break;
-    case 2:
-        result = 3; // 2ch stereo (FL FR)
-        break;
-    case 4:
-        result = 0x33; // 4ch matrix (FL FR BL BR)
-        break;
-    case 6:
-        result = 0x3f; // 5.1 surround (FL FR FC LFE BL BR)
-        break;
-    case 8:
-        result = 0x63f; // 7.1 surround (FL FR FC LFE BL BR SL SR)
-        break;
-    default:
-        // ? unknown sampleFormat
-        result = (DWORD)((1LL << numChannels)-1);
-        break;
-    }
-
-    return result;
-}
-
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_InspectDevice(int instanceId, int deviceId, const WasapiIoInspectArgs &args)
 {
     WasapiIO *self = Instance(instanceId);
     assert(self);
 
     WWPcmFormat pcmFormat;
-    pcmFormat.Set(args.sampleRate, (WWPcmDataSampleFormatType)args.sampleFormat, args.numChannels, GetChannelMask(args.numChannels), WWStreamPcm);
+    pcmFormat.Set(args.sampleRate, (WWPcmDataSampleFormatType)args.sampleFormat, args.numChannels, args.dwChannelMask, WWStreamPcm);
 
     IMMDevice *device = self->deviceEnumerator.GetDevice(deviceId);
     return self->wasapi.InspectDevice(device, pcmFormat);
@@ -368,14 +348,15 @@ WasapiIO_Setup(int instanceId, int deviceId, const WasapiIoSetupArgs &args)
     assert(device);
 
     WWPcmFormat pcmFormat;
-    pcmFormat.Set(args.sampleRate, (WWPcmDataSampleFormatType)args.sampleFormat, args.numChannels, GetChannelMask(args.numChannels), (WWStreamType)args.streamType);
+    pcmFormat.Set(args.sampleRate, (WWPcmDataSampleFormatType)args.sampleFormat, args.numChannels, args.dwChannelMask, (WWStreamType)args.streamType);
 
     self->wasapi.ThreadCharacteristics().Set((WWMMCSSCallType)args.mmcssCall,
         (WWMMThreadPriorityType) args.mmThreadPriority, (WWSchedulerTaskType)args.schedulerTask);
     self->wasapi.PcmStream().SetZeroFlushMillisec(args.zeroFlushMillisec);
     self->wasapi.TimerResolution().SetTimePeriodHundredNanosec(args.timePeriodHandledNanosec);
 
-    return self->wasapi.Setup(device, (WWDeviceType)args.deviceType, pcmFormat, (WWShareMode)args.shareMode, (WWDataFeedMode)args.dataFeedMode, (DWORD)args.latencyMillisec);
+    return self->wasapi.Setup(device, (WWDeviceType)args.deviceType, pcmFormat,
+        (WWShareMode)args.shareMode, (WWDataFeedMode)args.dataFeedMode, (DWORD)args.latencyMillisec, !!args.isFormatSupportedCall);
 }
 
 __declspec(dllexport)
@@ -425,14 +406,21 @@ WasapiIO_AddPlayPcmDataSetPcmFragment(int instanceId, int pcmId, int64_t posByte
         return false;
     }
 
-    assert(posBytes + bytes <= p->nFrames * p->bytesPerFrame);
+    if (p->Frames() * p->BytesPerFrame() < posBytes + bytes) {
+        // MP3のときに起きる。
+        bytes = p->Frames() * p->BytesPerFrame() - posBytes;
+    }
+    if (bytes <= 0) {
+        // コピーの必要なし。
+        return true;
+    }
 
-    memcpy(&p->stream[posBytes], data, bytes);
+    memcpy(&(p->Stream()[posBytes]), data, bytes);
     return true;
 }
 
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_ResampleIfNeeded(int instanceId, int conversionQuality)
 {
     WasapiIO *self = Instance(instanceId);
@@ -535,6 +523,15 @@ WasapiIO_GetCaptureGlitchCount(int instanceId)
 }
 
 __declspec(dllexport)
+void __stdcall
+WasapiIO_ResetCaptureGlitchCount(int instanceId)
+{
+    WasapiIO *self = Instance(instanceId);
+    assert(self);
+    self->wasapi.ResetCaptureGlitchCount();
+}
+
+__declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_StartPlayback(int instanceId, int wavDataId)
 {
@@ -564,16 +561,16 @@ WasapiIO_Run(int instanceId, int millisec)
 }
 
 __declspec(dllexport)
-void __stdcall
+HRESULT __stdcall
 WasapiIO_Stop(int instanceId)
 {
     WasapiIO *self = Instance(instanceId);
     assert(self);
-    self->wasapi.Stop();
+    return self->wasapi.Stop();
 }
 
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_Pause(int instanceId)
 {
     WasapiIO *self = Instance(instanceId);
@@ -582,7 +579,7 @@ WasapiIO_Pause(int instanceId)
 }
 
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_Unpause(int instanceId)
 {
     WasapiIO *self = Instance(instanceId);
@@ -698,13 +695,25 @@ WasapiIO_AppendAudioFilter(int instanceId, int audioFilterType, PCWSTR args)
     {
         switch (audioFilterType) {
         case WWAF_PolarityInvert:
-            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterPolarityInvert());
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterPolarityInvert(args));
             break;
         case WWAF_Monaural:
             self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterMonauralMix());
             break;
-        case WWAF_ChannelRouting:
-            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterChannelRouting(args));
+        case WWAF_ChannelMapping:
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterChannelMapping(args));
+            break;
+        case WWAF_MuteChannel:
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterMuteSoloChannel(WWAFMSMode_Mute, args));
+            break;
+        case WWAF_SoloChannel:
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterMuteSoloChannel(WWAFMSMode_Solo, args));
+            break;
+        case WWAF_ZohNosdacCompensation:
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterZohNosdacCompensation());
+            break;
+        case WWAF_Delay:
+            self->wasapi.AudioFilterSequencer().Append(new WWAudioFilterDelay(args));
             break;
         default:
             assert(0);
@@ -726,6 +735,76 @@ WasapiIO_ClearAudioFilter(int instanceId)
         self->wasapi.AudioFilterSequencer().UnregisterAll();
     }
     self->wasapi.MutexRelease();
+}
+
+__declspec(dllexport)
+HRESULT __stdcall
+WasapiIO_GetMixFormat(int instanceId, int deviceId, WasapiIoMixFormat &mixFormat_return)
+{
+    WasapiIO *self = Instance(instanceId);
+    assert(self);
+
+    IMMDevice *device = self->deviceEnumerator.GetDevice(deviceId);
+    assert(device);
+
+    WWPcmFormat pcmFormat;
+    int hr = self->wasapi.GetMixFormat(device, &pcmFormat);
+    if (SUCCEEDED(hr)) {
+        mixFormat_return.sampleFormat = pcmFormat.sampleFormat;
+        mixFormat_return.sampleRate = pcmFormat.sampleRate;
+        mixFormat_return.numChannels = pcmFormat.numChannels;
+        mixFormat_return.dwChannelMask = pcmFormat.dwChannelMask;
+    }
+
+    return hr;
+}
+
+__declspec(dllexport)
+HRESULT __stdcall
+WasapiIO_GetDevicePeriod(int instanceId, int deviceId, WasapiIoDevicePeriod &devicePeriod_return)
+{
+    WasapiIO *self = Instance(instanceId);
+    assert(self);
+
+    IMMDevice *device = self->deviceEnumerator.GetDevice(deviceId);
+    assert(device);
+
+    int hr = self->wasapi.GetDevicePeriod(device,
+        &devicePeriod_return.defaultPeriod,
+        &devicePeriod_return.minimumPeriod);
+
+    return hr;
+}
+
+
+__declspec(dllexport)
+int __stdcall
+WasapiIO_GetVolumeParams(int instanceId, WasapiIoVolumeParams &result_return)
+{
+    WasapiIO *self = Instance(instanceId);
+    assert(self);
+
+    WWVolumeParams params;
+    int rv = self->wasapi.GetVolumeParams(&params);
+    if (0 <= rv) {
+        // イマイチな感じだが、コピーする。
+        result_return.levelMinDB = params.levelMinDB;
+        result_return.levelMaxDB = params.levelMaxDB;
+        result_return.volumeIncrementDB = params.volumeIncrementDB;
+        result_return.defaultLevel = params.defaultLevel;
+        result_return.hardwareSupport = params.hardwareSupport;
+    }
+    return rv;
+}
+
+__declspec(dllexport)
+int __stdcall
+WasapiIO_SetMasterVolumeInDb(int instanceId, float db)
+{
+    WasapiIO *self = Instance(instanceId);
+    assert(self);
+
+    return self->wasapi.SetMasterVolumeLevelInDb(db);
 }
 
 }; // extern "C"

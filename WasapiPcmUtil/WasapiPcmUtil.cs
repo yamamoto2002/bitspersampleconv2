@@ -45,11 +45,14 @@ namespace WasapiPcmUtil {
             mTryFormat16 = new WasapiCS.SampleFormatType [] {
                 WasapiCS.SampleFormatType.Sint16,
                 WasapiCS.SampleFormatType.Sint24,
+                WasapiCS.SampleFormatType.Sint32V24,
+                WasapiCS.SampleFormatType.Sint32,
             };
  
             mTryFormat24 = new WasapiCS.SampleFormatType [] {
                 WasapiCS.SampleFormatType.Sint24,
                 WasapiCS.SampleFormatType.Sint32V24,
+                WasapiCS.SampleFormatType.Sint32,
                 WasapiCS.SampleFormatType.Sint16,
             };
 
@@ -96,6 +99,7 @@ namespace WasapiPcmUtil {
             switch (validBitsPerSample) {
             case 16:
                 return mTryFormat16.Length;
+            case 20:
             case 24:
             default:
                 return mTryFormat24.Length;
@@ -204,8 +208,8 @@ namespace WasapiPcmUtil {
         /// </summary>
         /// <param name="pd">入力PcmData</param>
         /// <returns>変更後PcmData</returns>
-        public PcmData BitsPerSampleConvAsNeeded(PcmData pd, WasapiCS.SampleFormatType fmt, WasapiPcmUtil.PcmFormatConverter.BitsPerSampleConvArgs args) {
-            switch (fmt) {
+        public PcmData BitsPerSampleConvAsNeeded(PcmData pd, WasapiCS.SampleFormatType targetFmt, WasapiPcmUtil.PcmFormatConverter.BitsPerSampleConvArgs args) {
+            switch (targetFmt) {
             case WasapiCS.SampleFormatType.Sfloat:
                 // System.Console.WriteLine("Converting to Sfloat32bit...");
                 pd = mConv.Convert(pd, WasapiCS.SampleFormatType.Sfloat, args);

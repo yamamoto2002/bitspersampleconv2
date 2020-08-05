@@ -1,3 +1,5 @@
+﻿// 日本語。
+
 #pragma once
 
 #include <Windows.h>
@@ -6,7 +8,7 @@
 
 extern "C" {
 
-typedef void (__stdcall WWStateChanged)(LPCWSTR deviceIdStr);
+typedef void (__stdcall WWStateChanged)(LPCWSTR deviceIdStr, int dwNewState);
 
 /// @param instanceId_return [out] instance id
 /// @return 0: success. -1 or less: failed. returns error code HRESULT
@@ -43,15 +45,41 @@ bool __stdcall
 WasapiIO_GetDeviceAttributes(int instanceId, int deviceId, WasapiIoDeviceAttributes &attr_return);
 
 #pragma pack(push, 4)
-struct WasapiIoInspectArgs {
+struct WasapiIoMixFormat {
     int sampleRate;
     int sampleFormat;    ///< WWPcmDataSampleFormatType
     int numChannels;
+    int dwChannelMask;
 };
-
 #pragma pack(pop)
+
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
+WasapiIO_GetMixFormat(int instanceId, int deviceId, WasapiIoMixFormat &mixFormat_return);
+
+#pragma pack(push, 4)
+struct WasapiIoDevicePeriod {
+    int64_t defaultPeriod;
+    int64_t minimumPeriod;
+};
+#pragma pack(pop)
+
+__declspec(dllexport)
+HRESULT __stdcall
+WasapiIO_GetDevicePeriod(int instanceId, int deviceId, WasapiIoDevicePeriod &devicePeriod_return);
+
+#pragma pack(push, 4)
+struct WasapiIoInspectArgs {
+    int deviceType;      ///< WWDeviceType, 0: Play, 1: Rec
+    int sampleRate;
+    int sampleFormat;    ///< WWPcmDataSampleFormatType
+    int numChannels;
+    int dwChannelMask;
+};
+#pragma pack(pop)
+
+__declspec(dllexport)
+HRESULT __stdcall
 WasapiIO_InspectDevice(int instanceId, int deviceId, const WasapiIoInspectArgs &args);
 
 #pragma pack(push, 4)
@@ -62,15 +90,17 @@ struct WasapiIoSetupArgs {
     int sampleFormat;    ///< WWPcmDataSampleFormatType
     int numChannels;
 
+    int dwChannelMask;
     int shareMode;
     int mmcssCall; ///< 0: disable, 1: enable, 2: do not call DwmEnableMMCSS()
     int mmThreadPriority; ///< 0: None, 1: Low, 2: Normal, 3: High, 4: Critical
     int schedulerTask;
+
     int dataFeedMode;
     int latencyMillisec;
-
     int timePeriodHandledNanosec;
     int zeroFlushMillisec;
+    int isFormatSupportedCall;
 };
 #pragma pack(pop)
 
@@ -96,7 +126,7 @@ WasapiIO_AddPlayPcmDataSetPcmFragment(int instanceId, int pcmId, int64_t posByte
 
 /// @return HRESULT
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_ResampleIfNeeded(int instanceId, int conversionQuality);
 
 __declspec(dllexport)
@@ -128,6 +158,10 @@ int64_t __stdcall
 WasapiIO_GetCaptureGlitchCount(int instanceId);
 
 __declspec(dllexport)
+void __stdcall
+WasapiIO_ResetCaptureGlitchCount(int instanceId);
+
+__declspec(dllexport)
 HRESULT __stdcall
 WasapiIO_Start(int instanceId, int pcmId);
 
@@ -136,15 +170,15 @@ bool __stdcall
 WasapiIO_Run(int instanceId, int millisec);
 
 __declspec(dllexport)
-void __stdcall
+HRESULT __stdcall
 WasapiIO_Stop(int instanceId);
 
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_Pause(int instanceId);
 
 __declspec(dllexport)
-int __stdcall
+HRESULT __stdcall
 WasapiIO_Unpause(int instanceId);
 
 #pragma pack(push, 4)
@@ -205,7 +239,8 @@ struct WasapiIoWorkerThreadSetupResult {
 
 __declspec(dllexport)
 void __stdcall
-WasapiIO_GetWorkerThreadSetupResult(int instanceId, WasapiIoWorkerThreadSetupResult &result_return);
+WasapiIO_GetWorkerThreadSetupResult(int instanceId,
+    WasapiIoWorkerThreadSetupResult &result_return);
 
 /// @param audioFilterType WWAudioFilterType
 __declspec(dllexport)
@@ -215,5 +250,27 @@ WasapiIO_AppendAudioFilter(int instanceId, int audioFilterType, PCWSTR args);
 __declspec(dllexport)
 void __stdcall
 WasapiIO_ClearAudioFilter(int instanceId);
+
+#pragma pack(push, 4)
+struct WasapiIoVolumeParams {
+    float levelMinDB;
+    float levelMaxDB;
+    float volumeIncrementDB;
+    float defaultLevel;
+    /// ENDPOINT_HARDWARE_SUPPORT_VOLUME ==1
+    /// ENDPOINT_HARDWARE_SUPPORT_MUTE   ==2
+    /// ENDPOINT_HARDWARE_SUPPORT_METER  ==4
+    int hardwareSupport;
+};
+#pragma pack(pop)
+
+__declspec(dllexport)
+int __stdcall
+WasapiIO_GetVolumeParams(int instanceId, WasapiIoVolumeParams &result_return);
+
+__declspec(dllexport)
+int __stdcall
+WasapiIO_SetMasterVolumeInDb(int instanceId, float db);
+
 
 }; // extern "C"

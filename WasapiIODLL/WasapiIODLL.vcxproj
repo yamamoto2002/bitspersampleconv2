@@ -68,23 +68,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>bin\x86\$(Configuration)\</OutDir>
-    <IntDir>obj\x86\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(PlatformToolset)\x86\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>bin\x64\$(Configuration)\</OutDir>
-    <IntDir>obj\x64\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(PlatformToolset)\x64\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>bin\x86\$(Configuration)\</OutDir>
-    <IntDir>obj\x86\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(PlatformToolset)\x86\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>bin\x64\$(Configuration)\</OutDir>
-    <IntDir>obj\x64\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)bin\$(PlatformToolset)\x64\$(Configuration)\</OutDir>
+    <IntDir>$(ProjectDir)obj\$(PlatformToolset)\$(Platform)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -95,10 +95,15 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <AdditionalIncludeDirectories>../WWDSPCpp;../WWCommonCpp;../WWMFCommonCpp</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
@@ -113,10 +118,15 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../WWDSPCpp;../WWCommonCpp;../WWMFCommonCpp</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
     </Link>
@@ -129,13 +139,22 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <TreatWarningAsError>false</TreatWarningAsError>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../WWDSPCpp;../WWCommonCpp;../WWMFCommonCpp</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
       <LargeAddressAware>true</LargeAddressAware>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,12 +165,21 @@
       <ExceptionHandling>Async</ExceptionHandling>
       <TreatWarningAsError>true</TreatWarningAsError>
       <DisableSpecificWarnings>4819</DisableSpecificWarnings>
+      <AdditionalIncludeDirectories>../WWDSPCpp;../WWCommonCpp;../WWMFCommonCpp</AdditionalIncludeDirectories>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;ntdll.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>avrt.lib;winmm.lib;Dwmapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -159,40 +187,62 @@
     <ClInclude Include="WasapiUser.h" />
     <ClInclude Include="WWAudioDeviceEnumerator.h" />
     <ClInclude Include="WWAudioFilter.h" />
-    <ClInclude Include="WWAudioFilterChannelRouting.h" />
+    <ClInclude Include="WWAudioFilterChannelMapping.h" />
+    <ClInclude Include="WWAudioFilterDelay.h" />
     <ClInclude Include="WWAudioFilterMonauralMix.h" />
+    <ClInclude Include="WWAudioFilterMuteSoloChannel.h" />
     <ClInclude Include="WWAudioFilterType.h" />
     <ClInclude Include="WWAudioFilterPolarityInvert.h" />
     <ClInclude Include="WWAudioFilterSequencer.h" />
-    <ClInclude Include="WWMFResampler.h" />
+    <ClInclude Include="WWAudioFilterZohNosdacCompensation.h" />
     <ClInclude Include="WWMMNotificationClient.h" />
     <ClInclude Include="WWPcmData.h" />
+    <ClInclude Include="WWPcmDelay.h" />
     <ClInclude Include="WWPcmSampleManipulator.h" />
     <ClInclude Include="WWPcmStream.h" />
     <ClInclude Include="WWPlayPcmGroup.h" />
-    <ClInclude Include="WWThreadCharacteristics.h" />
-    <ClInclude Include="WWTimerResolution.h" />
     <ClInclude Include="WWTypes.h" />
-    <ClInclude Include="WWUtil.h" />
+    <ClInclude Include="WWWasapiIOUtil.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="dllmain.cpp">
+      <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
+    </ClCompile>
     <ClCompile Include="WasapiIOIF.cpp" />
     <ClCompile Include="WasapiUser.cpp" />
     <ClCompile Include="WWAudioDeviceEnumerator.cpp" />
-    <ClCompile Include="WWAudioFilterChannelRouting.cpp" />
+    <ClCompile Include="WWAudioFilterChannelMapping.cpp" />
+    <ClCompile Include="WWAudioFilterDelay.cpp" />
     <ClCompile Include="WWAudioFilterMonauralMix.cpp" />
+    <ClCompile Include="WWAudioFilterMuteSoloChannel.cpp" />
     <ClCompile Include="WWAudioFilterPolarityInvert.cpp" />
     <ClCompile Include="WWAudioFilterSequencer.cpp" />
-    <ClCompile Include="WWMFResampler.cpp" />
+    <ClCompile Include="WWAudioFilterZohNosdacCompensation.cpp" />
     <ClCompile Include="WWMMNotificationClient.cpp" />
-    <ClCompile Include="WWPcmData.cpp" />
+    <ClCompile Include="WWPcmData.cpp">
+      <WarningLevel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Level4</WarningLevel>
+    </ClCompile>
+    <ClCompile Include="WWPcmDelay.cpp" />
     <ClCompile Include="WWPcmSampleManipulator.cpp" />
     <ClCompile Include="WWPcmStream.cpp" />
     <ClCompile Include="WWPlayPcmGroup.cpp" />
-    <ClCompile Include="WWThreadCharacteristics.cpp" />
-    <ClCompile Include="WWTimerResolution.cpp" />
-    <ClCompile Include="WWUtil.cpp" />
+    <ClCompile Include="WWWasapiIOUtil.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\WWCommonCpp\WWCommonCpp.vcxproj">
+      <Project>{cb5a7579-c19c-4625-9eab-81f795507acf}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\WWDSPCpp\WWDSPCppVs2010.vcxproj">
+      <Project>{a7d636e0-5d03-424b-be66-1b7ef35168d9}</Project>
+      <Private>true</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\WWMFCommonCpp\WWMFCommonCpp.vcxproj">
+      <Project>{bbd7e639-b6c0-4dec-886c-95a9e9796af9}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

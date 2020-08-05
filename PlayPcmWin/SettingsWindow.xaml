@@ -34,7 +34,6 @@
                                 <ComboBox x:Uid="comboBoxTimePeriod" HorizontalAlignment="Left" Name="comboBoxTimePeriod" VerticalAlignment="Top" Width="213" SelectedIndex="0">
                                     <ComboBoxItem x:Uid="cbItemTimerResolutionDefault" Content="Default timer resolution" Name="cbItemTimerResolutionDefault" />
                                     <ComboBoxItem x:Uid="cbItemTimerResolution1Millisec" Content="Timer resolution = 1 ms" Name="cbItemTimerResolution1Millisec"  />
-                                    <ComboBoxItem x:Uid="cbItemTimerResolution500Microsec" Content="Timer resolution = 0.5 ms" Name="cbItemTimerResolution500Microsec"  />
                                 </ComboBox>
                             </GroupBox>
                             <GroupBox x:Uid="groupBoxRenderThreadProperty" Header="Render thread properties" Margin="4,0,4,0" Name="groupBoxRenderThreadTaskType">
@@ -45,7 +44,7 @@
                                     <ComboBoxItem x:Uid="cbItemTaskNone" Content="None" Name="cbItemTaskNone" />
                                     <ComboBoxItem x:Uid="cbItemTaskPlayback" Content="Playback" Name="cbItemTaskPlayback" />
                                 </ComboBox>
-                                <ComboBox Name="comboBoxRenderThreadPriority"  Margin="4" VerticalAlignment="Top" SelectedIndex="0" SelectionChanged="comboBoxRenderThreadPriority_SelectionChanged">
+                                <ComboBox Name="comboBoxRenderThreadPriority"  Margin="4" VerticalAlignment="Top" SelectedIndex="0">
                                         <ComboBoxItem Content="Priority: Not set" Name="cbItemPrioNotSet" />
                                         <ComboBoxItem Content="Priority: Low" Name="cbItemPrioLow" />
                                         <ComboBoxItem Content="Priority: Normal" Name="cbItemPrioNormal" />
@@ -98,6 +97,24 @@
                             <Label x:Uid="labelZeroFlushUnit" Content="sec" HorizontalAlignment="Left" Margin="0,0,0,0" Name="labelZeroFlushUnit" VerticalAlignment="Center" Grid.Column="2" />
                         </Grid>
                     </GroupBox>
+                    <GroupBox Header="Channel count settings" Margin="4" Height="59" Name="groupBoxChannelCountSettings" Width="350">
+                        <Grid>
+                            <ComboBox Name="comboBoxChannelCount" Margin="4,0,4,0" HorizontalContentAlignment="Center" VerticalAlignment="Center" SelectedIndex="0">
+                                <ComboBoxItem Content="Use Mix Format channel count" Name="cbItemChannelCountMixFormat" />
+                                <ComboBoxItem Content="Not changed, use original channel count" Name="cbItemChannelCountNotChange" />
+                                <ComboBoxItem Content="2 ch" Name="cbItemChannelCount2" />
+                                <ComboBoxItem Content="4 ch" Name="cbItemChannelCount4" />
+                                <ComboBoxItem Content="6 ch" Name="cbItemChannelCount6" />
+                                <ComboBoxItem Content="8 ch" Name="cbItemChannelCount8" />
+                                <ComboBoxItem Content="10 ch" Name="cbItemChannelCount10" />
+                                <ComboBoxItem Content="16 ch" Name="cbItemChannelCount16" />
+                                <ComboBoxItem Content="18 ch" Name="cbItemChannelCount18" />
+                                <ComboBoxItem Content="24 ch" Name="cbItemChannelCount24" />
+                                <ComboBoxItem Content="26 ch" Name="cbItemChannelCount26" />
+                                <ComboBoxItem Content="32 ch" Name="cbItemChannelCount32" />
+                            </ComboBox>
+                        </Grid>
+                    </GroupBox>
                     <GroupBox x:Uid="groupBoxDisplaySettings" Header="Display settings" Margin="4" Height="200" Width="440" Name="groupBoxDisplaySettings" >
                         <Grid x:Uid="Grid_7">
                             <Grid.ColumnDefinitions>
@@ -119,7 +136,6 @@
                             <CheckBox x:Uid="checkBoxManuallySetMainWindowDimension" Content="Remember Window position and size"  Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="3" Margin="6,6,0,0" Name="checkBoxManuallySetMainWindowDimension" VerticalAlignment="Top" HorizontalAlignment="Left" />
                             <CheckBox x:Uid="checkBoxCoverart" Content="Display coverart images"  Margin="256,6,6,0" Name="checkBoxCoverart"  Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" IsChecked="True" HorizontalAlignment="Left" />
                             <CheckBox x:Uid="checkBoxGpuRender" Content="GPU rendering"  Margin="256,6,6,0" Name="checkBoxGpuRendering"  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" VerticalAlignment="Top" IsChecked="True" HorizontalAlignment="Left" />
-                            <CheckBox x:Uid="checkBoxRefrainRedraw" Content="Minimize GUI redraw when playing"  Margin="6,6,6,0" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="3" Name="checkBoxRefrainRedraw" VerticalAlignment="Top" IsChecked="True" HorizontalAlignment="Left" />
                             <Label x:Uid="labelPlayingTimeFont" Content="Playing time font:" Margin="6,0,6,0" Name="labelPlayingTimeFont" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" HorizontalAlignment="Left" Width="146" />
                             <ComboBox x:Uid="comboBoxPlayingTimeFontNames" HorizontalAlignment="Left" Margin="154,0,0,0" Name="comboBoxPlayingTimeFontNames" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" VerticalAlignment="Top" Width="171" SelectionChanged="comboBoxPlayingTimeFontNames_SelectionChanged"></ComboBox>
                             <TextBox x:Uid="textBoxPlayingTimeSize" Margin="328,0,0,0" Name="textBoxPlayingTimeSize" VerticalAlignment="Top" HorizontalAlignment="Left" Width="53" Text="16" Grid.Column="0" Grid.Row="4" Grid.ColumnSpan="3" VerticalContentAlignment="Center" HorizontalContentAlignment="Right" TextChanged="textBoxPlayingTimeSize_TextChanged" />
@@ -130,14 +146,39 @@
                         </Grid>
                     </GroupBox>
                     <GroupBox x:Uid="groupBoxFileSettings" Header="File read settings" Margin="4" Name="groupBoxFileSettings" >
-                        <StackPanel>
-                            <CheckBox x:Uid="checkBoxParallelRead" Content="Parallelize file read"  Margin="6,6,6,0" Name="checkBoxParallelRead" VerticalAlignment="Top" IsChecked="False" HorizontalAlignment="Left" Checked="checkBoxParallelRead_Checked" Unchecked="checkBoxParallelRead_Unchecked" />
-                            <CheckBox x:Uid="checkBoxStorePlaylistContent" Content="Restore the playlist on program startup"  Margin="6,6,6,0" Name="checkBoxStorePlaylistContent" VerticalAlignment="Top" HorizontalAlignment="Left" />
-                            <CheckBox Content="Sort dropped folder items" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,6,0" Name="checkBoxSortDropFolder" VerticalAlignment="Top" />
-                            <CheckBox Content="Sort dropped files" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,6,0" Name="checkBoxSortDroppedFiles" VerticalAlignment="Top" />
-                            <CheckBox Content="Set [Batch read endpoint] on file drop" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,6,0" Name="checkBoxBatchReadEndpointToEveryTrack" VerticalAlignment="Top" />
-                            <CheckBox Content="Verify FLAC MD5sum on file read" HorizontalAlignment="Left" IsChecked="False" Margin="6,6,6,0" Name="checkBoxVerifyFlacMD5Sum" VerticalAlignment="Top" />
-                        </StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="200" />
+                                <ColumnDefinition Width="70" />
+                                <ColumnDefinition Width="30" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="1*" />
+                            </Grid.RowDefinitions>
+                            <CheckBox Content="Restore the playlist on program startup"  Margin="6,0,6,0" Name="checkBoxStorePlaylistContent" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.ColumnSpan="3" />
+                            <CheckBox Grid.Row="1" Content="Sort dropped folder items" HorizontalAlignment="Left" IsChecked="False" Margin="6,0,6,0" Name="checkBoxSortDropFolder" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+                            <CheckBox Grid.Row="2" Content="Sort dropped files" HorizontalAlignment="Left" IsChecked="False" Margin="6,0,6,0" Name="checkBoxSortDroppedFiles" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+                            <CheckBox Grid.Row="3" Content="Set [Batch read endpoint] on file drop" HorizontalAlignment="Left" IsChecked="False" Margin="6,0,6,0" Name="checkBoxBatchReadEndpointToEveryTrack" VerticalAlignment="Center" Grid.ColumnSpan="3" />
+                            <CheckBox Grid.Row="4" Content="Verify FLAC MD5sum on file read" HorizontalAlignment="Left" IsChecked="False" Margin="6,0,6,0" Name="checkBoxVerifyFlacMD5Sum" VerticalAlignment="Center" Grid.ColumnSpan="2" />
+                            <CheckBox Grid.Row="5" Content="Add silent channel for ch. count to be even" HorizontalAlignment="Left" IsChecked="False" Margin="6,0,6,0" Name="checkBoxChannelCountEven" VerticalAlignment="Center" Grid.ColumnSpan="3" />
+                            <CheckBox Grid.Row="6" Content="Reduce PCM volume:"  Margin="6,0,0,0" Name="checkBoxReduceVolume" VerticalAlignment="Center" IsChecked="False" HorizontalAlignment="Left" Grid.ColumnSpan="2" />
+                            <CheckBox Grid.Row="7" Content="Call IsFormatSupported on playback"  Margin="6,0,6,0" Name="checkBoxIsFormatSupported" VerticalAlignment="Center" IsChecked="False" HorizontalAlignment="Left" Grid.ColumnSpan="2" />
+                            <CheckBox Grid.Row="8" Content="Parallel read (for Solid State Drives)"  Margin="6,0,6,0" Name="checkBoxParallelRead" VerticalAlignment="Center" IsChecked="False" HorizontalAlignment="Left" Checked="checkBoxParallelRead_Checked" Unchecked="checkBoxParallelRead_Unchecked" Grid.ColumnSpan="2" />
+                            <Label Grid.Row="6" Grid.Column="2" Content="dB" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                            <ComboBox Grid.Column="1" Grid.Row="6" Text="6" HorizontalContentAlignment="Right" Name="comboBoxReduceVolumeByDb" VerticalAlignment="Center" >
+                                <ComboBoxItem Content="-2" />
+                                <ComboBoxItem Content="-4" />
+                                <ComboBoxItem Content="-6.02" IsSelected="True" />
+                            </ComboBox>
+                        </Grid>
                     </GroupBox>
                 </WrapPanel>
             </Grid>

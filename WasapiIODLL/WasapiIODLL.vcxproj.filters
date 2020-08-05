@@ -1,61 +1,63 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="WasapiIOIF.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WasapiUser.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWUtil.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
     <ClCompile Include="WWPcmData.cpp">
       <Filter>source files</Filter>
     </ClCompile>
     <ClCompile Include="WWPlayPcmGroup.cpp">
       <Filter>source files</Filter>
     </ClCompile>
-    <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="WWMFResampler.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
     <ClCompile Include="WWPcmStream.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWMMNotificationClient.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWTimerResolution.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWThreadCharacteristics.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWAudioDeviceEnumerator.cpp">
-      <Filter>source files</Filter>
-    </ClCompile>
-    <ClCompile Include="WWAudioFilterPolarityInvert.cpp">
       <Filter>source files</Filter>
     </ClCompile>
     <ClCompile Include="WWPcmSampleManipulator.cpp">
       <Filter>source files</Filter>
     </ClCompile>
-    <ClCompile Include="WWAudioFilterSequencer.cpp">
+    <ClCompile Include="WWPcmDelay.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWWasapiIOUtil.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WasapiIOIF.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWMMNotificationClient.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WasapiUser.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioDeviceEnumerator.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioFilterChannelMapping.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioFilterDelay.cpp">
       <Filter>source files</Filter>
     </ClCompile>
     <ClCompile Include="WWAudioFilterMonauralMix.cpp">
       <Filter>source files</Filter>
     </ClCompile>
-    <ClCompile Include="WWAudioFilterChannelRouting.cpp">
+    <ClCompile Include="WWAudioFilterMuteSoloChannel.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioFilterPolarityInvert.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioFilterSequencer.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="WWAudioFilterZohNosdacCompensation.cpp">
+      <Filter>source files</Filter>
+    </ClCompile>
+    <ClCompile Include="dllmain.cpp">
       <Filter>source files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="WasapiIOIF.h">
-      <Filter>header files</Filter>
-    </ClInclude>
-    <ClInclude Include="WWUtil.h">
       <Filter>header files</Filter>
     </ClInclude>
     <ClInclude Include="WasapiUser.h">
@@ -67,19 +69,10 @@
     <ClInclude Include="WWPlayPcmGroup.h">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="WWMFResampler.h">
-      <Filter>header files</Filter>
-    </ClInclude>
     <ClInclude Include="WWPcmStream.h">
       <Filter>header files</Filter>
     </ClInclude>
     <ClInclude Include="WWMMNotificationClient.h">
-      <Filter>header files</Filter>
-    </ClInclude>
-    <ClInclude Include="WWTimerResolution.h">
-      <Filter>header files</Filter>
-    </ClInclude>
-    <ClInclude Include="WWThreadCharacteristics.h">
       <Filter>header files</Filter>
     </ClInclude>
     <ClInclude Include="WWAudioDeviceEnumerator.h">
@@ -106,7 +99,22 @@
     <ClInclude Include="WWAudioFilterMonauralMix.h">
       <Filter>header files</Filter>
     </ClInclude>
-    <ClInclude Include="WWAudioFilterChannelRouting.h">
+    <ClInclude Include="WWAudioFilterChannelMapping.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWAudioFilterMuteSoloChannel.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWAudioFilterZohNosdacCompensation.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWPcmDelay.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWAudioFilterDelay.h">
+      <Filter>header files</Filter>
+    </ClInclude>
+    <ClInclude Include="WWWasapiIOUtil.h">
       <Filter>header files</Filter>
     </ClInclude>
   </ItemGroup>

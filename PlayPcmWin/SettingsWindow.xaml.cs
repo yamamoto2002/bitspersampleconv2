@@ -80,15 +80,13 @@ namespace PlayPcmWin {
 
             checkBoxCoverart.Content = Properties.Resources.SettingsCheckBoxCoverart;
             checkBoxManuallySetMainWindowDimension.Content = Properties.Resources.SettingsCheckBoxManuallySetMainWindowDimension;
-            checkBoxParallelRead.Content = Properties.Resources.SettingsCheckBoxParallelRead;
+            checkBoxReduceVolume.Content = Properties.Resources.SettingsCheckBoxReduceVolume;
             checkBoxPlaceKokomadeAfterIndex00.Content = Properties.Resources.SettingsCheckBoxPlaceKokomadeAterIndex00;
 
             checkBoxPlayingTimeBold.Content = Properties.Resources.SettingsCheckBoxPlayingTimeBold;
-            checkBoxRefrainRedraw.Content = Properties.Resources.SettingsCheckBoxRefrainRedraw;
             checkBoxStorePlaylistContent.Content = Properties.Resources.SettingsCheckBoxStorePlaylistContent;
             cbItemTimerResolutionDefault.Content = Properties.Resources.SettingsTimerResolutionDefault;
             cbItemTimerResolution1Millisec.Content = Properties.Resources.SettingsTimerResolution1Millisec;
-            cbItemTimerResolution500Microsec.Content = Properties.Resources.SettingsTimerResolution500Microsec;
 
             labelConversionQuality.Content = Properties.Resources.SettingsLabelConversionQuality;
             labelCueEncoding.Content = Properties.Resources.SettingsCueEncoding;
@@ -107,6 +105,24 @@ namespace PlayPcmWin {
             checkBoxBatchReadEndpointToEveryTrack.Content = Properties.Resources.SettingsCheckBoxSetBatchReadEndpoint;
             checkBoxVerifyFlacMD5Sum.Content = Properties.Resources.SettingsCheckBoxVerifyFlacMD5Sum;
             checkBoxGpuRendering.Content = Properties.Resources.SettingsCheckBoxGpuRendering;
+            checkBoxChannelCountEven.Content = Properties.Resources.SettingsCheckBoxChannelCountEven;
+
+            groupBoxChannelCountSettings.Header = Properties.Resources.SettingsGroupBoxChannelCount;
+            cbItemChannelCountNotChange.Content = Properties.Resources.SettingsCbItemChannelCountNotChanged;
+            cbItemChannelCount2.Content = Properties.Resources.SettingsCbItemChannelCount2;
+            cbItemChannelCount4.Content = Properties.Resources.SettingsCbItemChannelCount4;
+            cbItemChannelCount6.Content = Properties.Resources.SettingsCbItemChannelCount6;
+            cbItemChannelCount8.Content = Properties.Resources.SettingsCbItemChannelCount8;
+            cbItemChannelCount10.Content = Properties.Resources.SettingsCbItemChannelCount10;
+            cbItemChannelCount16.Content = Properties.Resources.SettingsCbItemChannelCount16;
+            cbItemChannelCount18.Content = Properties.Resources.SettingsCbItemChannelCount18;
+            cbItemChannelCount24.Content = Properties.Resources.SettingsCbItemChannelCount24;
+            cbItemChannelCount26.Content = Properties.Resources.SettingsCbItemChannelCount26;
+            cbItemChannelCount32.Content = Properties.Resources.SettingsCbItemChannelCount32;
+            cbItemChannelCountMixFormat.Content = Properties.Resources.SettingsCbItemChannelCountMixFormat;
+
+            checkBoxIsFormatSupported.Content = Properties.Resources.SettingsCheckBoxIsFormatSupportedCall;
+            checkBoxParallelRead.Content = Properties.Resources.SettingsCheckBoxParallelRead;
         }
 
         public void SetPreference(Preference preference) {
@@ -150,15 +166,26 @@ namespace PlayPcmWin {
             checkBoxCoverart.IsChecked =
                 preference.DispCoverart;
 
-            checkBoxRefrainRedraw.IsChecked =
-                preference.RefrainRedraw;
+            checkBoxReduceVolume.IsChecked =
+                preference.ReduceVolume;
 
-            checkBoxParallelRead.IsChecked =
-                preference.ParallelRead;
+            switch (preference.ReduceVolumeByDb) {
+            case 2: // -2dB
+                comboBoxReduceVolumeByDb.SelectedIndex = 0;
+                break;
+            case 4: // -4dB
+                comboBoxReduceVolumeByDb.SelectedIndex = 1;
+                break;
+            case 6: // -6dB
+            default:
+                comboBoxReduceVolumeByDb.SelectedIndex = 2;
+                break;
+            }
 
-            if (5000 == preference.TimePeriodHundredNanosec) {
-                comboBoxTimePeriod.SelectedItem = cbItemTimerResolution500Microsec;
-            } else if (10000 == preference.TimePeriodHundredNanosec) {
+            checkBoxIsFormatSupported.IsChecked = preference.IsFormatSupportedCall;
+            checkBoxParallelRead.IsChecked = preference.ParallelRead;
+
+            if (10000 == preference.TimePeriodHundredNanosec) {
                 comboBoxTimePeriod.SelectedItem = cbItemTimerResolution1Millisec;
             } else {
                 comboBoxTimePeriod.SelectedItem = cbItemTimerResolutionDefault;
@@ -258,6 +285,49 @@ namespace PlayPcmWin {
             checkBoxVerifyFlacMD5Sum.IsEnabled = preference.ParallelRead == false;
 
             checkBoxGpuRendering.IsChecked = preference.GpuRendering;
+            checkBoxChannelCountEven.IsChecked = preference.AddSilentForEvenChannel;
+
+            switch (preference.ChannelCount2) {
+            case ChannelCount2Type.MixFormatChannelCount:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCountMixFormat;
+                break;
+            case ChannelCount2Type.SourceChannelCount:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCountNotChange;
+                break;
+            case ChannelCount2Type.Ch2:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount2;
+                break;
+            case ChannelCount2Type.Ch4:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount4;
+                break;
+            case ChannelCount2Type.Ch6:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount6;
+                break;
+            case ChannelCount2Type.Ch8:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount8;
+                break;
+            case ChannelCount2Type.Ch10:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount10;
+                break;
+            case ChannelCount2Type.Ch16:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount16;
+                break;
+            case ChannelCount2Type.Ch18:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount18;
+                break;
+            case ChannelCount2Type.Ch24:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount24;
+                break;
+            case ChannelCount2Type.Ch26:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount26;
+                break;
+            case ChannelCount2Type.Ch32:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCount32;
+                break;
+            default:
+                comboBoxChannelCount.SelectedItem = cbItemChannelCountMixFormat;
+                break;
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -307,15 +377,29 @@ namespace PlayPcmWin {
             m_preference.DispCoverart
                 = checkBoxCoverart.IsChecked == true;
 
-            m_preference.RefrainRedraw
-                = checkBoxRefrainRedraw.IsChecked == true;
+            m_preference.ReduceVolume
+                = checkBoxReduceVolume.IsChecked == true;
 
-            m_preference.ParallelRead
-                = checkBoxParallelRead.IsChecked == true;
+            switch (comboBoxReduceVolumeByDb.SelectedIndex) {
+            case 0: // 2dB
+                m_preference.ReduceVolumeByDb = 2;
+                break;
+            case 1: // 4dB
+                m_preference.ReduceVolumeByDb = 4;
+                break;
+            case 2: // 6dB
+                m_preference.ReduceVolumeByDb = 6;
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
 
-            if (comboBoxTimePeriod.SelectedItem == cbItemTimerResolution500Microsec) {
-                m_preference.TimePeriodHundredNanosec = 5000;
-            } else if (comboBoxTimePeriod.SelectedItem == cbItemTimerResolution1Millisec) {
+            m_preference.IsFormatSupportedCall = checkBoxIsFormatSupported.IsChecked == true;
+
+            m_preference.ParallelRead = checkBoxParallelRead.IsChecked == true;
+
+            if (comboBoxTimePeriod.SelectedItem == cbItemTimerResolution1Millisec) {
                 m_preference.TimePeriodHundredNanosec = 10000;
             } else {
                 m_preference.TimePeriodHundredNanosec = 0;
@@ -403,8 +487,45 @@ namespace PlayPcmWin {
             m_preference.SortDroppedFiles = (checkBoxSortDroppedFiles.IsChecked == true);
             m_preference.BatchReadEndpointToEveryTrack = (checkBoxBatchReadEndpointToEveryTrack.IsChecked == true);
             m_preference.VerifyFlacMD5Sum = (checkBoxVerifyFlacMD5Sum.IsChecked == true);
-
             m_preference.GpuRendering = (checkBoxGpuRendering.IsChecked == true);
+            m_preference.AddSilentForEvenChannel = (checkBoxChannelCountEven.IsChecked == true);
+
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCountNotChange) {
+                m_preference.ChannelCount2 = ChannelCount2Type.SourceChannelCount;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount2) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch2;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount4) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch4;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount6) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch6;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount8) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch8;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount10) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch10;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount16) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch16;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount18) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch18;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount24) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch24;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount26) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch26;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCount32) {
+                m_preference.ChannelCount2 = ChannelCount2Type.Ch32;
+            }
+            if (comboBoxChannelCount.SelectedItem == cbItemChannelCountMixFormat) {
+                m_preference.ChannelCount2 = ChannelCount2Type.MixFormatChannelCount;
+            }
 
             Close();
         }
@@ -517,15 +638,6 @@ namespace PlayPcmWin {
             buttonChangeColor_Click(sender, e);
         }
 
-        private void checkBoxParallelRead_Checked(object sender, RoutedEventArgs e) {
-            checkBoxVerifyFlacMD5Sum.IsChecked = false;
-            checkBoxVerifyFlacMD5Sum.IsEnabled = false;
-        }
-
-        private void checkBoxParallelRead_Unchecked(object sender, RoutedEventArgs e) {
-            checkBoxVerifyFlacMD5Sum.IsEnabled = true;
-        }
-
         private void comboBoxRenderThreadTaskType_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (!mWindowLoaded) {
                 return;
@@ -538,8 +650,13 @@ namespace PlayPcmWin {
             }
         }
 
-        private void comboBoxRenderThreadPriority_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+        private void checkBoxParallelRead_Checked(object sender, RoutedEventArgs e) {
+            checkBoxVerifyFlacMD5Sum.IsEnabled = false;
+            checkBoxVerifyFlacMD5Sum.IsChecked = false;
+        }
 
+        private void checkBoxParallelRead_Unchecked(object sender, RoutedEventArgs e) {
+            checkBoxVerifyFlacMD5Sum.IsEnabled = true;
         }
     }
 }

@@ -1,8 +1,13 @@
+//ã€€æ—¥æœ¬èª
+
 #pragma once
 
 #include <Windows.h>
 #include <mmsystem.h>
 #include <MMReg.h>
+
+#define PI_D 3.141592653589793238462643
+#define PI_F 3.141592653589793238462643f
 
 #ifdef _DEBUG
 #  include <stdio.h>
@@ -11,7 +16,10 @@
 #  define dprintf(x, ...)
 #endif
 
-// ³í‚àdprintf‚ªo‚éƒo[ƒWƒ‡ƒ“BHRGR‚àQÆB
+double
+SincD(double sinx, double x);
+
+// æ­£å¸¸æ™‚ã‚‚dprintfãŒå‡ºã‚‹ãƒãƒ¼ã‚¸ãƒ§ãƒ³ã€‚HRGRã‚‚å‚ç…§ã€‚
 #define HRG(x)                                    \
 {                                                 \
     dprintf("D: %s\n", #x);                       \
@@ -23,7 +31,7 @@
     }                                             \
 }                                                 \
 
-// ƒGƒ‰[‚Égoto end;‚Å‚Í‚È‚­return hr;‚·‚éHRGB
+// ã‚¨ãƒ©ãƒ¼æ™‚ã«goto end;ã§ã¯ãªãreturn hr;ã™ã‚‹HRGã€‚
 #define HRR(x)                                    \
 {                                                 \
     dprintf("D: %s\n", #x);                       \
@@ -35,7 +43,7 @@
     }                                             \
 }                                                 \
 
-// ³í‚Ìdprintf‚ğ—}§‚µ‚½HRGB¸”s‚·‚é‚Æresult=false;‚·‚éB
+// æ­£å¸¸æ™‚ã®dprintfã‚’æŠ‘åˆ¶ã—ãŸHRGã€‚å¤±æ•—ã™ã‚‹ã¨result=false;ã™ã‚‹ã€‚
 #define HRGR(x)                                   \
 {                                                 \
     hr = x;                                       \
@@ -49,7 +57,7 @@
 
 #define CHK(x)                           \
 {   if (!x) {                            \
-        dprintf("E: %s:%d %s is NULL\n", \
+        dprintf("E: %s:%d %s is nullptr\n", \
             __FILE__, __LINE__, #x);     \
         return E_FAIL;                   \
     }                                    \
@@ -60,12 +68,12 @@ template <class T> void SafeRelease(T **ppT)
     if (*ppT)
     {
         (*ppT)->Release();
-        *ppT = NULL;
+        *ppT = nullptr;
     }
 }
-#define SAFE_RELEASE(x) { if (x) { x->Release(); x = NULL; } }
+#define SAFE_RELEASE(x) { if (x) { x->Release(); x = nullptr; } }
 
-#define SAFE_DELETE(x) { delete x; x=NULL; }
+#define SAFE_DELETE(x) { delete x; x=nullptr; }
 
 // malloc memory and copy-create 32bitWAV from 24bitWAV data
 BYTE*

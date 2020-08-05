@@ -1,0 +1,33 @@
+﻿<Window x:Class="WWShowUSBDeviceTree.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WWShowUSBDeviceTree"
+        mc:Ignorable="d"
+        Title="WWShowUSBDeviceTree" Height="1080" Width="1920" Loaded="Window_Loaded" Closing="Window_Closing" MouseWheel="Window_MouseWheel" PreviewMouseWheel="Window_PreviewMouseWheel">
+    <Grid RenderTransformOrigin="0.0,0.0" >
+        <Grid.LayoutTransform>
+            <TransformGroup x:Uid="TransformGroup_1">
+                <ScaleTransform 
+                    x:Uid="ScaleTransform_1" ScaleY="{Binding ElementName=sliderWindowScaling, Path=Value}" 
+                    ScaleX="{Binding ElementName=sliderWindowScaling, Path=Value}"/>
+            </TransformGroup>
+        </Grid.LayoutTransform>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="24"/>
+            <RowDefinition Height="1*"/>
+        </Grid.RowDefinitions>
+        <Menu >
+            <Button x:Name="mButtonRefresh" Content="_Refresh" Click="mButtonRefresh_Click"/>
+            <CheckBox x:Name="mCBShowDesc" Content="_Show Description" IsChecked="True" Checked="mCBShowDesc_Checked" Unchecked="mCBShowDesc_Unchecked" />
+            <CheckBox x:Name="mCBShowDetail" Content="Show _Detail" IsChecked="True" Checked="mCBShowDetail_Checked" Unchecked="mCBShowDetail_Unchecked" />
+        </Menu>
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Visible" Background="#FF1E1E1E">
+            <Canvas x:Name="mCanvas" Background="#ff1e1e1e" HorizontalAlignment="Left" VerticalAlignment="Top" >
+            </Canvas>
+        </ScrollViewer>
+        <TextBox x:Name="mTextBoxDescription" Grid.Row="1" Width="480" Height="384" TextWrapping="Wrap" Text="TextBox" HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10,0,0,50" Background="Black" Foreground="White" BorderThickness="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" AcceptsTab="True" />
+        <Slider x:Uid="sliderWindowScaling" Margin="0,0,1,1" Name="sliderWindowScaling" VerticalAlignment="Bottom" Maximum="2.0" Minimum="0.25" Value="1" Visibility="Hidden" Grid.Column="1" HorizontalAlignment="Right" Width="52" SmallChange="0.0048828125" LargeChange="0.0625" />
+    </Grid>
+</Window>

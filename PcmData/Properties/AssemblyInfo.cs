@@ -14,9 +14,9 @@ using System;
 
 [assembly: ComVisible(false)]
 
-[assembly: CLSCompliant(true)]
+[assembly: CLSCompliant(false)]
 
 [assembly: Guid("8a8890e1-7aea-4d9a-810e-5f5a09131cce")]
 
-[assembly: AssemblyVersion("2.0.54.0")]
-[assembly: AssemblyFileVersion("2.0.54.0")]
+[assembly: AssemblyVersion("2.0.93.8")]
+[assembly: AssemblyFileVersion("2.0.93.8")]

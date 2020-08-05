@@ -34,7 +34,11 @@ namespace PlayPcmWin {
             // WWAudioFilterTypeと同じ順番にする
             listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterPolarityInvert);
             listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterMonauralMix);
-            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterChannelRouting);
+            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterChannelMapping);
+            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterMuteChannel);
+            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterSoloChannel);
+            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterZohNosdacCompensation);
+            listBoxAvailableEffects.Items.Add(Properties.Resources.AudioFilterDelay);
 
             listBoxAvailableEffects.SelectedIndex = 0;
             buttonLeftArrow.IsEnabled = true;
@@ -75,7 +79,7 @@ namespace PlayPcmWin {
             }
         }
 
-        private string[] BuildChannelRoutingArgArray(List<Tuple<int, int>> tupleList) {
+        private static string[] BuildChannelMappingArgArray(List<Tuple<int, int>> tupleList) {
             var rv = new string[tupleList.Count];
 
             for (int i=0; i<tupleList.Count; ++i) {
@@ -84,28 +88,80 @@ namespace PlayPcmWin {
             return rv;
         }
 
+        private static string SelectedChannelFlagsToString(bool[] channelFlags) {
+            var sb = new StringBuilder();
+
+            for (int i = 0; i < channelFlags.Length; ++i) {
+                if (channelFlags[i]) {
+                    if (sb.Length == 0) {
+                        sb.AppendFormat("{0}", i);
+                    } else {
+                        sb.AppendFormat(",{0}", i);
+                    }
+                }
+            }
+
+            return sb.ToString();
+        }
+
         private void buttonLeftArrow_Click(object sender, RoutedEventArgs e) {
             if (listBoxAvailableEffects.SelectedIndex < 0) {
                 return;
             }
 
             PreferenceAudioFilter filter = null;
-            switch ((PreferenceAudioFilterType)listBoxAvailableEffects.SelectedIndex) {
-            case PreferenceAudioFilterType.PolarityInvert:
-                filter = new PreferenceAudioFilter(PreferenceAudioFilterType.PolarityInvert, null);
-                break;
+            var filterType = (PreferenceAudioFilterType)listBoxAvailableEffects.SelectedIndex;
+            switch (filterType) {
             case PreferenceAudioFilterType.MonauralMix:
                 filter = new PreferenceAudioFilter(PreferenceAudioFilterType.MonauralMix, null);
                 break;
             case PreferenceAudioFilterType.ChannelRouting: {
-                    var dlg = new ChannelRoutingSettings();
-                    dlg.UpdateChannelRouting(null);
+                    var dlg = new ChannelMappingSettings();
+                    dlg.UpdateChannelMapping(null);
                     var dlgResult = dlg.ShowDialog();
                     if (dlgResult != true) {
                         return;
                     }
 
-                    filter = new PreferenceAudioFilter(PreferenceAudioFilterType.ChannelRouting, BuildChannelRoutingArgArray(dlg.ChannelRouting));
+                    filter = new PreferenceAudioFilter(PreferenceAudioFilterType.ChannelRouting, BuildChannelMappingArgArray(dlg.ChannelMapping));
+                }
+                break;
+            case PreferenceAudioFilterType.PolarityInvert:
+            case PreferenceAudioFilterType.MuteChannel:
+            case PreferenceAudioFilterType.SoloChannel: {
+                    var dlg = new ChannelSelect();
+
+                    if (filterType == PreferenceAudioFilterType.PolarityInvert) {
+                        // デフォルトで両チャンネル極性反転。
+                        dlg.SetChannel(0, true);
+                        dlg.SetChannel(1, true);
+                    }
+
+                    var dlgResult = dlg.ShowDialog();
+                    if (dlgResult != true) {
+                        return;
+                    }
+
+                    var selectedChannelsStr = SelectedChannelFlagsToString(dlg.SelectedChannels);
+                    if (selectedChannelsStr.Length == 0) {
+                        MessageBox.Show("Please select one or more channels.");
+                        return;
+                    } else {
+                        filter = new PreferenceAudioFilter(filterType, new string[1] { selectedChannelsStr });
+                    }
+                }
+                break;
+            case PreferenceAudioFilterType.ZohNosdacCompensation:
+                filter = new PreferenceAudioFilter(PreferenceAudioFilterType.ZohNosdacCompensation, null);
+                break;
+            case PreferenceAudioFilterType.Delay: {
+                    var dlg = new DelaySettingsWindow();
+                    var dlgResult = dlg.ShowDialog();
+                    if (dlgResult != true) {
+                        return;
+                    }
+
+                    filter = new PreferenceAudioFilter(PreferenceAudioFilterType.Delay, new string[1]{dlg.DelayString});
                 }
                 break;
             default:
@@ -154,13 +210,13 @@ namespace PlayPcmWin {
 
                 switch (before.FilterType) {
                 case PreferenceAudioFilterType.ChannelRouting:
-                    var dlg = new ChannelRoutingSettings();
-                    dlg.UpdateChannelRouting(before.ChannelRouting());
+                    var dlg = new ChannelMappingSettings();
+                    dlg.UpdateChannelMapping(before.ChannelMapping());
                     var dlgResult = dlg.ShowDialog();
                     if (dlgResult != true) {
                         return;
                     }
-                    before.ArgArray = BuildChannelRoutingArgArray(dlg.ChannelRouting);
+                    before.ArgArray = BuildChannelMappingArgArray(dlg.ChannelMapping);
                     break;
                 default:
                     System.Diagnostics.Debug.Assert(false);

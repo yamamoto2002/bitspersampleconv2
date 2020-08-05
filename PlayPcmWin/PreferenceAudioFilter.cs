@@ -13,7 +13,11 @@ namespace PlayPcmWin {
     public enum PreferenceAudioFilterType {
         PolarityInvert,
         MonauralMix,
-        ChannelRouting,
+        ChannelRouting, //< ChannelMapping。設定ファイルで使用されるフィルター名称は互換性のためにChannelRoutingとする。
+        MuteChannel,
+        SoloChannel,
+        ZohNosdacCompensation,
+        Delay,
         NUM
     };
 
@@ -45,33 +49,17 @@ namespace PlayPcmWin {
                     return sb.ToString().TrimEnd();
                 }
             case PreferenceAudioFilterType.MonauralMix:
-            case PreferenceAudioFilterType.PolarityInvert:
+            case PreferenceAudioFilterType.ZohNosdacCompensation:
                 return "";
+            case PreferenceAudioFilterType.PolarityInvert: // mArgArray[0]に全てのパラメータが入っている。
+            case PreferenceAudioFilterType.MuteChannel: // mArgArray[0]に全てのパラメータが入っている。
+            case PreferenceAudioFilterType.SoloChannel:
+            case PreferenceAudioFilterType.Delay:
+                return string.Format("{0}", mArgArray[0]);
             default:
                 System.Diagnostics.Debug.Assert(false);
                 return "";
             }
-        }
-
-        /// <summary>
-        /// 設定ボタンの可視
-        /// </summary>
-        public Visibility SettingsButtonVisibility {
-            get {
-                switch (FilterType) {
-                case PreferenceAudioFilterType.ChannelRouting:
-                    return Visibility.Visible;
-                default:
-                    return Visibility.Collapsed;
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void NotifyPropertyChanged(string propName) {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
 
         public static List<PreferenceAudioFilter> LoadFiltersFromStream(Stream stream) {
@@ -239,18 +227,15 @@ namespace PlayPcmWin {
                 return null;
             }
 
-            PreferenceAudioFilterType t;
-            switch (tokens[0]) {
-            case "PolarityInvert":
-                t = PreferenceAudioFilterType.PolarityInvert;
-                break;
-            case "MonauralMix":
-                t = PreferenceAudioFilterType.MonauralMix;
-                break;
-            case "ChannelRouting":
-                t = PreferenceAudioFilterType.ChannelRouting;
-                break;
-            default:
+            PreferenceAudioFilterType t = PreferenceAudioFilterType.NUM;
+            for (int i = 0; i < (int)PreferenceAudioFilterType.NUM; ++i) {
+                var paf = (PreferenceAudioFilterType)i;
+                if (0 == paf.ToString().CompareTo(tokens[0])) {
+                    t = paf;
+                    break;
+                }
+            }
+            if (t == PreferenceAudioFilterType.NUM) {
                 return null;
             }
 
@@ -262,32 +247,64 @@ namespace PlayPcmWin {
                 }
             }
 
+            // 過去バージョンPPWのファイルとの後方互換性の処理。
+            switch (t) {
+            case PreferenceAudioFilterType.PolarityInvert:
+                if (argArray.Length == 0) {
+                    // 昔は全チャンネルの極性反転だった。
+                    argArray = new string[] { "-1" };
+                }
+                break;
+            default:
+                break;
+            }
+
             return new PreferenceAudioFilter(t, argArray);
         }
 
+        /// <summary>
+        /// 設定ボタンの可視
+        /// </summary>
+        public Visibility SettingsButtonVisibility {
+            get {
+                switch (FilterType) {
+                case PreferenceAudioFilterType.ChannelRouting:
+                    return Visibility.Visible;
+                default:
+                    return Visibility.Collapsed;
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public void NotifyPropertyChanged(string propName) {
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
+        }
         public PreferenceAudioFilter(PreferenceAudioFilterType t, string[] argArray) {
             FilterType = t;
             mArgArray = argArray;
         }
 
-        public List<Tuple<int, int>> ChannelRouting() {
-            return ArgArrayToChannelRouting(mArgArray);
+        public List<Tuple<int, int>> ChannelMapping() {
+            return ArgArrayToChannelMapping(mArgArray);
         }
 
-        public static List<Tuple<int, int>> ArgArrayToChannelRouting(string[] args) {
+        public static List<Tuple<int, int>> ArgArrayToChannelMapping(string[] args) {
             if (args == null) {
                 return null;
             }
 
             var rv = new List<Tuple<int, int>>();
             foreach (var i in args) {
-                rv.Add(ArgToChannelRouting1(i));
+                rv.Add(ArgToChannelMapping1(i));
             }
 
             return rv;
         }
 
-        private static Tuple<int, int> ArgToChannelRouting1(string s) {
+        private static Tuple<int, int> ArgToChannelMapping1(string s) {
             var fromTo = s.Split('>');
             if (fromTo.Length != 2) {
                 return null;
@@ -304,22 +321,66 @@ namespace PlayPcmWin {
             return new Tuple<int, int>(from, to);
         }
 
+        /// <summary>
+        /// 表示用のチャンネル番号表示。
+        /// </summary>
+        private static string ChannelListToDisplayString(string channelList) {
+            var sb = new StringBuilder();
+            var s = channelList.Split(new char[]{','});
+            foreach (var ch in s) {
+                int v = Int32.Parse(ch);
+                if (0 < sb.Length) {
+                    // 2番目以降に現れた数字。カンマで続ける。
+                    sb.Append(",");
+                }
+
+                if (v == -1) {
+                    sb.Append("ALL");
+                } else if (v == 0) {
+                    sb.Append("1(Left)");
+                } else if (v == 1) {
+                    sb.Append("2(Right)");
+                } else {
+                    sb.AppendFormat("{0}", v + 1);
+                }
+            }
+            return sb.ToString();
+        }
+
         public string DescriptionText {
             get {
                 switch (FilterType) {
-                case PreferenceAudioFilterType.PolarityInvert:
-                    return Properties.Resources.AudioFilterPolarityInvert;
                 case PreferenceAudioFilterType.MonauralMix:
                     return Properties.Resources.AudioFilterMonauralMix;
                 case PreferenceAudioFilterType.ChannelRouting: {
                         // 説明文はチャンネル番号が1から始まる。
-                        StringBuilder sb = new StringBuilder(Properties.Resources.AudioFilterChannelRouting);
+                        StringBuilder sb = new StringBuilder(Properties.Resources.AudioFilterChannelMapping);
                         sb.AppendFormat(" ({0}ch)", mArgArray.Length);
                         foreach (var s in mArgArray) {
-                            var m = ArgToChannelRouting1(s);
-                            sb.AppendFormat(" {0}→{1}", m.Item1+1, m.Item2+1);
+                            var m = ArgToChannelMapping1(s);
+                            sb.AppendFormat(" {0}←{1}", m.Item1+1, m.Item2+1);
                         }
                         return sb.ToString();
+                    }
+                case PreferenceAudioFilterType.PolarityInvert:
+                    return string.Format(Properties.Resources.AudioFilterPolarityInvertDesc, ChannelListToDisplayString(mArgArray[0]));
+                case PreferenceAudioFilterType.MuteChannel:
+                    return string.Format(Properties.Resources.AudioFilterMuteChannelDesc, ChannelListToDisplayString(mArgArray[0]));
+                case PreferenceAudioFilterType.SoloChannel:
+                    return string.Format(Properties.Resources.AudioFilterSoloChannelDesc, ChannelListToDisplayString(mArgArray[0]));
+                case PreferenceAudioFilterType.ZohNosdacCompensation:
+                    return Properties.Resources.AudioFilterZohNosdacCompensation;
+                case PreferenceAudioFilterType.Delay: {
+                    StringBuilder sb = new StringBuilder(Properties.Resources.AudioFilterDelay);
+                        sb.AppendFormat(": ");
+                        var delaySeconds = mArgArray[0].Split(',');
+                        for (int ch = 0; ch < delaySeconds.Length; ++ch) {
+                            if (0 < ch) {
+                                sb.AppendFormat(", ");
+                            }
+                            sb.AppendFormat("Ch{0}={1}ms", ch + 1, Double.Parse(delaySeconds[ch]) * 1000);
+                        }
+                        return string.Format(sb.ToString());
                     }
                 default:
                     System.Diagnostics.Debug.Assert(false);

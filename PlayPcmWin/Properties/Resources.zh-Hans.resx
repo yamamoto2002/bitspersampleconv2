@@ -149,7 +149,7 @@
     <value>PPWPL文件|*.PPWPL</value>
   </data>
   <data name="FilterSupportedFiles" xml:space="preserve">
-    <value>支持的文件|*.WAV;*.WAVE;*.FLAC;*.AIF;*.AIFF;*.AIFC;*.AIFFC;*.DSF;*.DFF;*.CUE;*.PPWPL;*.M3U;*.M3U8|WAVE文件|*.WAV;*.WAVE|FLAC文件|*.FLAC|AIFF文件|*.AIF;*.AIFF;*.AIFC;*AIFFC|DSF文件|*.DSF|DFF文件|*.DFF|CUE文件|*.CUE|PPWPL文件|*.PPWPL|M3U文件|*.M3U;*.M3U8|All文件|*.*</value>
+    <value>支持的文件|*.WAV;*.WAVE;*.FLAC;*.AIF;*.AIFF;*.AIFC;*.AIFFC;*.DSF;*.DFF;*.MP3;*.CUE;*.PPWPL;*.M3U;*.M3U8|WAVE文件|*.WAV;*.WAVE|FLAC文件|*.FLAC|AIFF文件|*.AIF;*.AIFF;*.AIFC;*AIFFC|DSF文件|*.DSF|DFF文件|*.DFF|MP3文件|*.MP3|CUE文件|*.CUE|PPWPL文件|*.PPWPL|M3U文件|*.M3U;*.M3U8|All文件|*.*</value>
   </data>
   <data name="Latency" xml:space="preserve">
     <value>延迟</value>
@@ -287,7 +287,7 @@
     <value>读取完成。准备播放。</value>
   </data>
   <data name="MainStatusReadingFiles" xml:space="preserve">
-    <value>设备设置完成。读取文件到主内存...</value>
+    <value>正在从文件读取PCM数据并载入到内存...</value>
   </data>
   <data name="MainStatusReadingPlaylist" xml:space="preserve">
     <value>读取播放列表中...</value>
@@ -355,7 +355,7 @@
     <value>不支持的文件格式。</value>
   </data>
   <data name="NotSupportedQuantizationBitRate" xml:space="preserve">
-    <value>不支持的位深，只支持位深为16bit，24bit和32bit的音频文件。</value>
+    <value>不支持的位深，只支持位深为16bit，24bit，32bit和64bit的音频文件。</value>
   </data>
   <data name="PlayStartFailed" xml:space="preserve">
     <value>开始播放失败。</value>
@@ -592,5 +592,47 @@ Jcode.pm copyright is as follows: Copyright 1999-2005 Dan Kogai</value>
   </data>
   <data name="GroupBoxSoundEffects" xml:space="preserve">
     <value>音效</value>
+  </data>
+  <data name="AudioFilterChannelMapping" xml:space="preserve">
+    <value>声道映射</value>
+  </data>
+  <data name="ChannelMappingChannelMappingTable" xml:space="preserve">
+    <value>声道映射表</value>
+  </data>
+  <data name="ChannelMappingNumOfInputChannels" xml:space="preserve">
+    <value>输入声道数:</value>
+  </data>
+  <data name="MainStatusReadingFilesDoP" xml:space="preserve">
+    <value>正在从文件读取DSD数据并将DoP数据载入到内存...</value>
+  </data>
+  <data name="AudioFilterMuteChannel" xml:space="preserve">
+    <value>静音</value>
+  </data>
+  <data name="AudioFilterMuteChannelDesc" xml:space="preserve">
+    <value>静音：声道{0}</value>
+  </data>
+  <data name="AudioFilterSoloChannel" xml:space="preserve">
+    <value>仅播放选定的声道</value>
+  </data>
+  <data name="AudioFilterSoloChannelDesc" xml:space="preserve">
+    <value>仅播放选定的声道{0}</value>
+  </data>
+  <data name="SettingsCbItemChannelCountNotChanged" xml:space="preserve">
+    <value>与音源声道数一致</value>
+  </data>
+  <data name="SettingsCheckBoxChannelCountEven" xml:space="preserve">
+    <value>添加静音声道使声道数为偶数</value>
+  </data>
+  <data name="SettingsGroupBoxChannelCount" xml:space="preserve">
+    <value>多声道设置</value>
+  </data>
+  <data name="SettingsCbItemChannelCountMixFormat" xml:space="preserve">
+    <value>启用Mix Format音源声道数</value>
+  </data>
+  <data name="MainDataGridColumnComposer" xml:space="preserve">
+    <value>作曲家</value>
+  </data>
+  <data name="MainDataGridColumnFileExtension" xml:space="preserve">
+    <value>文件扩展名</value>
   </data>
 </root>

@@ -1,0 +1,25 @@
+﻿// 日本語 UTF-8
+
+#pragma once
+
+#include <Windows.h>
+
+class WWTimerResolution
+{
+public:
+    WWTimerResolution(void)
+            : m_beforeHns(0),
+            m_desiredHns(0),
+            m_setHns(0) { }
+
+    void SetTimePeriodHundredNanosec(int hnanosec);
+    int  GetTimePeriodHundredNanosec(void) const { return m_setHns; }
+
+    DWORD Setup(void);
+    void Unsetup(void);
+
+private:
+    ULONG        m_beforeHns;
+    ULONG        m_desiredHns;
+    ULONG        m_setHns;
+};

@@ -1,10 +1,28 @@
+//ã€€æ—¥æœ¬èª
+
 #pragma once
 
 #include "WWDirectComputeUser.h"
 
 class WWUpsampleGpu {
 public:
+    /* ä½¿ã„æ–¹ã€‚
+    Init()
+    GetCU().EnumAdapter()
+    GetCU().GetAdapterDesc()
+    GetCU().GetAdapterVideoMemoryBytes()
+    GetCU().ChooseAdaper()
+    Setup()
+    Dispatch(), GetResultFromGpuMemory()
+    Dispatch(), GetResultFromGpuMemory()
+    ...
+    Unsetup()
+    Term()
+    */
     void Init(void);
+
+    WWDirectComputeUser &GetCU(void) { return mCU; }
+
     void Term(void);
 
     HRESULT Setup(
@@ -55,7 +73,7 @@ public:
         int * resamplePosArray,
         double *fractionArrayD);
 
-    // output[0]`output[count-1]‚É‘‚«‚Ş
+    // output[0]ï½output[count-1]ã«æ›¸ãè¾¼ã‚€
     HRESULT UpsampleCpuDo(
         int startPos,
         int count,
@@ -70,7 +88,7 @@ private:
     int m_sampleRateTo;
     int m_sampleTotalTo;
 
-    WWDirectComputeUser *m_pDCU;
+    WWDirectComputeUser mCU;
     ID3D11ComputeShader *m_pCS;
 
     ID3D11ShaderResourceView*   m_pBuf0Srv;
@@ -78,9 +96,8 @@ private:
     ID3D11ShaderResourceView*   m_pBuf2Srv;
     ID3D11ShaderResourceView*   m_pBuf3Srv;
     ID3D11UnorderedAccessView*  m_pBufResultUav;
-    ID3D11Buffer * m_pBufConst;
 
-    //CPUˆ——p
+    //CPUå‡¦ç†ç”¨
     float        * m_sampleFrom;
     int          * m_resamplePosArray;
     double       * m_fractionArray;

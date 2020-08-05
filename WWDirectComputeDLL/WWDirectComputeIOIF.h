@@ -1,14 +1,63 @@
+//　日本語
 #pragma once
 
 #include <Windows.h>
+#include "WWWave1DGpu.h"
+#include "WWWave2DGpu.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// �A�b�v�T���v�� GPU����
+// ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+// 共通デバイス選択処理。
+
+enum WWDirectComputeType {
+    WWDCT_Upsample,
+    WWDCT_Wave1D,
+    WWDCT_Wave2D,
+};
+
+struct WWDirectComputeAdapterDesc {
+    wchar_t name[256];
+    int64_t videoMemoryBytes;
+};
+
+/// アダプターの個数が戻る。
+/// 0の時一つも無い。負の時エラーコード HRESULT。
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDC_EnumAdapter(WWDirectComputeType t);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDC_GetAdapterDesc(WWDirectComputeType t, int idx, WWDirectComputeAdapterDesc *desc);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDC_ChooseAdapter(WWDirectComputeType t, int idx);
+
+// ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+// アップサンプル GPU処理
+
+/* 使い方。
+    Init()
+    WWDC_EnumAdapter()
+    WWDC_GetAdapterDesc()
+    WWDC_GetAdapterVideoMemoryBytes()
+    WWDC_ChooseAdaper()
+    Setup() or SetupWithResamplePosArray()
+    Dispatch(), GetResultFromGpuMemory()
+    Dispatch(), GetResultFromGpuMemory()
+    ...
+    Term()
+*/
+
+/// @result HRESULT
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCUpsample_Init(void);
 
 /// @result HRESULT
 extern "C" __declspec(dllexport)
 int __stdcall
-WWDCUpsample_Init(
+WWDCUpsample_Setup(
         int convolutionN,
         float * sampleFrom,
         int sampleTotalFrom,
@@ -19,7 +68,7 @@ WWDCUpsample_Init(
 /// @result HRESULT
 extern "C" __declspec(dllexport)
 int __stdcall
-WWDCUpsample_InitWithResamplePosArray(
+WWDCUpsample_SetupWithResamplePosArray(
         int convolutionN,
         float * sampleFrom,
         int sampleTotalFrom,
@@ -47,8 +96,78 @@ extern "C" __declspec(dllexport)
 void __stdcall
 WWDCUpsample_Term(void);
 
-/////////////////////////////////////////////////////////////////////////////
-// CPU����
+// ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+// Wave1D GPU
+
+/*
+    WWWave1DGpu 使い方
+    Init()
+    WWDC_EnumAdapter()
+    WWDC_GetAdapterDesc()
+    WWDC_GetAdapterVideoMemoryBytes()
+    WWDC_ChooseAdaper()
+    Setup()
+    Run(), GetResult()
+    Run(), GetResult()
+    ...
+    Term()
+*/
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCWave1D_Init(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave1D_Setup(const WWWave1DParams &p, float *loss, float *roh, float *cr);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave1D_Run(int cRepeat, int stimNum, WWWave1DStim *stim);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave1D_GetResult(
+        int outputToElemNum,
+        float * outputVTo,
+        float * outputPTo);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCWave1D_Term(void);
+
+// ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+// Wave2D GPU
+
+/*
+    WWWave2DGpuの使い方はWWWave1DGpuと同様。
+*/
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCWave2D_Init(void);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave2D_Setup(const WWWave2DParams &p, float *loss, float *roh, float *cr);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave2D_Run(int cRepeat, int stimNum, WWWave1DStim *stim);
+
+extern "C" __declspec(dllexport)
+int __stdcall
+WWDCWave2D_GetResult(
+        int outputToElemNum,
+        float * outputVTo,
+        float * outputPTo);
+
+extern "C" __declspec(dllexport)
+void __stdcall
+WWDCWave1D_Term(void);
+
+// ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+// CPU処理
 
 extern "C" __declspec(dllexport)
 int __stdcall

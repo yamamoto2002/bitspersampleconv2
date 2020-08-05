@@ -36,7 +36,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\x86\Debug\</OutputPath>
+    <OutputPath>bin\v100\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -46,7 +46,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\x86\Release\</OutputPath>
+    <OutputPath>bin\v100\x86\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -57,7 +57,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\x64\Debug\</OutputPath>
+    <OutputPath>bin\v100\x64\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -65,7 +65,7 @@
     <CodeAnalysisIgnoreBuiltInRules>false</CodeAnalysisIgnoreBuiltInRules>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>bin\x64\Release\</OutputPath>
+    <OutputPath>bin\v100\x64\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -92,14 +92,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
@@ -113,24 +111,36 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="AiffReader.cs" />
-    <Compile Include="ChannelRoutingSettings.xaml.cs">
-      <DependentUpon>ChannelRoutingSettings.xaml</DependentUpon>
+    <Compile Include="AudioPlayer.cs" />
+    <Compile Include="ChannelMappingSettings.xaml.cs">
+      <DependentUpon>ChannelMappingSettings.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChannelSelect.xaml.cs">
+      <DependentUpon>ChannelSelect.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Mp3Reader.cs" />
     <Compile Include="CueSheetRW.cs" />
     <Compile Include="DeviceAttributes.cs" />
     <Compile Include="DeviceSetupParams.cs" />
     <Compile Include="DsdiffReader.cs" />
+    <Compile Include="FileDisappearCheck.cs" />
     <Compile Include="FlacDecodeIF.cs" />
     <Compile Include="InterceptMediaKeys.cs" />
     <Compile Include="M3uRW.cs" />
+    <Compile Include="NextTask.cs" />
     <Compile Include="PcmDataList.cs" />
     <Compile Include="PcmHeaderReader.cs" />
     <Compile Include="PcmReader.cs" />
     <Compile Include="PlayListItemInfo.cs" />
     <Compile Include="PlaylistRW.cs" />
     <Compile Include="PpwPlaylistRW.cs" />
+    <Compile Include="PPWServer.cs" />
+    <Compile Include="PPWServerSettingsWindow.xaml.cs">
+      <DependentUpon>PPWServerSettingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PreferenceAudioFilter.cs" />
     <Compile Include="PreferenceAudioFilterStore.cs" />
+    <Compile Include="RemoteCommand.cs" />
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -140,7 +150,14 @@
     <Compile Include="SoundEffectsUpdater.cs" />
     <Compile Include="Util.cs" />
     <Compile Include="DsfReader.cs" />
-    <Page Include="ChannelRoutingSettings.xaml">
+    <Compile Include="DelaySettingsWindow.xaml.cs">
+      <DependentUpon>DelaySettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="ChannelMappingSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ChannelSelect.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -156,11 +173,19 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="PPWServerSettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="SoundEffectsConfiguration.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DelaySettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -189,7 +214,10 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.zh-Hant.resx" />
-    <EmbeddedResource Include="Properties\Resources.zh-Hans.resx" />
+    <EmbeddedResource Include="Properties\Resources.zh-Hans.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config" />
     <None Include="PlayPcmWin.exe.manifest">
       <SubType>Designer</SubType>
     </None>
@@ -203,7 +231,7 @@
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0,Profile=Client">
       <Visible>False</Visible>
-      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 および x64%29</ProductName>
+      <ProductName>Microsoft .NET Framework 4 Client Profile %28x86 and x64%29</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -218,15 +246,11 @@
     </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
       <Visible>False</Visible>
-      <ProductName>Windows インストーラー 3.1</ProductName>
+      <ProductName>Windows Installer 3.1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FlacDecodeCS\FlacDecodeCS.csproj">
-      <Project>{2148EF2A-38E0-4E85-8459-386F55DB7015}</Project>
-      <Name>FlacDecodeCS</Name>
-    </ProjectReference>
     <ProjectReference Include="..\PcmData\PcmDataLib.csproj">
       <Project>{7AF36E7B-839D-4C2F-AAFD-6D8319714D66}</Project>
       <Name>PcmDataLib</Name>
@@ -243,29 +267,36 @@
       <Project>{77005090-E2C5-4063-9681-0D0EED33A2B2}</Project>
       <Name>WavRWLib2</Name>
     </ProjectReference>
+    <ProjectReference Include="..\WWFilterCppCs\WWFilterCppCs.csproj">
+      <Project>{1D2FED4A-D40F-4A8F-A963-4C733B8EDD04}</Project>
+      <Name>WWFilterCppCs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WWFlacRWCS\WWFlacRWCS.csproj">
+      <Project>{DA071B6A-B2E2-4567-84D1-5A9122DAB75C}</Project>
+      <Name>WWFlacRWCS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WWMFReaderCs\WWMFReaderCs.csproj">
+      <Project>{43047D33-5FDB-45D0-AEF0-4FA81060F2E1}</Project>
+      <Name>WWMFReaderCs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\WWUtil\WWUtil.csproj">
+      <Project>{FC57308E-CF56-4B3E-B920-4093660D0A4A}</Project>
+      <Name>WWUtil</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WWXmlRW\WWXmlRW.csproj">
       <Project>{AB557C03-95F9-4D3A-B2CB-16EC26D884CD}</Project>
       <Name>WWXmlRW</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="libFlacLicense.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="PlayPcmWinLicense.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <SplashScreen Include="ppwsplash.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="ppwlogo.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /y $(ProjectDir)..\FlacDecodeDLL\bin\x86\$(ConfigurationName)\* $(TargetDir);
-copy /y $(ProjectDir)..\WasapiIODLL\$(OutDir)* $(TargetDir)
-
-call "$(DevEnvDir)..\tools\vsvars32.bat"
+    <PostBuildEvent>call "$(DevEnvDir)..\tools\vsvars32.bat"
 
 if $(PlatformName) == x64 goto :plat_x64
     echo "Setting LargeAddressAware to " $(TargetPath)

@@ -2,6 +2,8 @@
 using PcmDataLib;
 using Wasapi;
 using System.Threading;
+using WWUtil;
+using System.IO;
 
 namespace WasapiPcmUtil {
     public enum NoiseShapingType {
@@ -12,6 +14,97 @@ namespace WasapiPcmUtil {
     };
 
     public class PcmFormatConverter {
+        private static readonly byte[][] mDopSilence = new byte[][] {
+            new byte[] { 0x69, 0x69, 0x05 },
+            new byte[] { 0x69, 0x69, 0xfa },
+        };
+
+        public static byte[] ChangeChannelCount(WasapiCS.SampleFormatType sampleFormat,
+                WasapiCS.StreamType streamType, int fromChannels, byte[] fromBytes, int toChannels) {
+            if (fromChannels == toChannels) {
+                return fromBytes;
+            }
+
+            // DoPのときは、サンプルフォーマットが24ビットである必要がある。
+            System.Diagnostics.Debug.Assert(streamType != WasapiCS.StreamType.DoP
+                || (sampleFormat == WasapiCS.SampleFormatType.Sint24
+                    || sampleFormat != WasapiCS.SampleFormatType.Sint32V24));
+
+            int fromBytesPerFrame = fromChannels * WasapiCS.SampleFormatTypeToUseBitsPerSample(sampleFormat) / 8;
+            int toBytesPerFrame = toChannels * WasapiCS.SampleFormatTypeToUseBitsPerSample(sampleFormat) / 8;
+            int numFrames = fromBytes.Length / fromBytesPerFrame;
+
+            var toBytes = new byte[numFrames * toBytesPerFrame];
+
+            int copyBytes = toBytesPerFrame;
+            if (fromBytesPerFrame < copyBytes) {
+                copyBytes = fromBytesPerFrame;
+            }
+            int fromPos = 0;
+            int toPos = 0;
+
+            switch (streamType) {
+            case WasapiCS.StreamType.DoP:
+                if (fromChannels == 1 && 1 < toChannels) {
+                    for (int i = 0; i < numFrames; ++i) {
+                        // モノラル→ステレオ2ch
+                        for (int ch = 0; ch < 2; ++ch) {
+                            Array.Copy(fromBytes, fromPos, toBytes, toPos, copyBytes);
+                            toPos += copyBytes;
+                        }
+
+                        // 残りのチャンネルはDoP無音を追加する。
+                        int offs = sampleFormat == WasapiCS.SampleFormatType.Sint24 ? 0 : 1;
+                        for (int ch = 2; ch < toChannels; ++ch) {
+                            Array.Copy(mDopSilence[i & 1], 0, toBytes, toPos + offs, 3);
+                            toPos += toBytesPerFrame;
+                        }
+
+                        fromPos += fromBytesPerFrame;
+                    }
+                } else {
+                    for (int i = 0; i < numFrames; ++i) {
+                        Array.Copy(fromBytes, fromPos, toBytes, toPos, copyBytes);
+                        fromPos += fromBytesPerFrame;
+                        toPos += copyBytes;
+
+                        if (fromChannels < toChannels) {
+                            // コピー先のほうがチャンネル数が多いとき、DoP無音を追加する。
+                            int offs = sampleFormat == WasapiCS.SampleFormatType.Sint24 ? 0 : 1;
+                            for (int ch = 0; ch < (toChannels - fromChannels); ++ch) {
+                                Array.Copy(mDopSilence[i & 1], 0, toBytes, toPos + offs, 3);
+                                toPos += toBytesPerFrame;
+                            }
+                        }
+                    }
+                }
+                break;
+            case WasapiCS.StreamType.PCM:
+                if (fromChannels == 1 && 1 < toChannels) {
+                    for (int i = 0; i < numFrames; ++i) {
+                        // モノラル→ステレオ2ch
+                        for (int ch = 0; ch < 2; ++ch) {
+                            Array.Copy(fromBytes, fromPos, toBytes, toPos, copyBytes);
+                            toPos += copyBytes;
+                        }
+                        
+                        // 残りのチャンネルはPCM無音。
+                        toPos += copyBytes * (toChannels - 2);
+
+                        fromPos += fromBytesPerFrame;
+                    }
+                } else {
+                    for (int i = 0; i < numFrames; ++i) {
+                        Array.Copy(fromBytes, fromPos, toBytes, toPos, copyBytes);
+                        fromPos += fromBytesPerFrame;
+                        toPos += toBytesPerFrame;
+                    }
+                }
+                break;
+            }
+
+            return toBytes;
+        }
 
         public class BitsPerSampleConvArgs {
             /// <summary>
@@ -137,7 +230,38 @@ namespace WasapiPcmUtil {
                 return null;
             }
 
-            var newSampleArray = mConvert[(int)fromFormat][(int)toFormat](pcmFrom, toFormat, args);
+            var fromSampleArray = pcmFrom.GetSampleLargeArray();
+            var fromSampleArrayFrameCount = fromSampleArray.LongLength / (pcmFrom.BitsPerFrame / 8);
+            int toBytesPerFrame = pcmFrom.NumChannels * WasapiCS.SampleFormatTypeToUseBitsPerSample(toFormat) / 8;
+            long toBytes = fromSampleArrayFrameCount * toBytesPerFrame;
+            var toSampleArray = new LargeArray<byte>(toBytes);
+
+            {
+                var fromFragment = new byte[4096 * pcmFrom.BitsPerFrame / 8];
+
+                var pcmTemp = new PcmData();
+
+                long writePosBytes = 0;
+
+                for (long readPosBytes = 0; readPosBytes < fromSampleArray.LongLength; readPosBytes += fromFragment.Length) {
+                    long bytes = fromFragment.Length;
+                    if (fromSampleArray.LongLength < readPosBytes + bytes) {
+                        bytes = fromSampleArray.LongLength - readPosBytes;
+                    }
+
+                    fromSampleArray.CopyTo(readPosBytes, ref fromFragment, 0, (int)bytes);
+
+                    pcmTemp.CopyHeaderInfoFrom(pcmFrom);
+                    pcmTemp.SetSampleLargeArray(bytes / (pcmFrom.BitsPerFrame / 8), new LargeArray<byte>(fromFragment));
+
+                    var toFragment = mConvert[(int)fromFormat][(int)toFormat](pcmTemp, toFormat, args);
+
+                    toSampleArray.CopyFrom(toFragment, 0, writePosBytes, (int)pcmTemp.NumFrames * toBytesPerFrame);
+                    writePosBytes += toFragment.Length;
+                }
+            }
+
+
 
             PcmData newPcmData = new PcmData();
             newPcmData.CopyHeaderInfoFrom(pcmFrom);
@@ -145,7 +269,7 @@ namespace WasapiPcmUtil {
                     WasapiCS.SampleFormatTypeToUseBitsPerSample(toFormat),
                     WasapiCS.SampleFormatTypeToValidBitsPerSample(toFormat), pcmFrom.SampleRate,
                     SampleFormatInfo.BftToVrt(WasapiCS.SampleFormatTypeToBitFormatType(toFormat)), pcmFrom.NumFrames);
-            newPcmData.SetSampleArray(newSampleArray);
+            newPcmData.SetSampleLargeArray(toSampleArray);
 
             return newPcmData;
         }
@@ -184,13 +308,13 @@ namespace WasapiPcmUtil {
         }
 
         private byte[] ConvClone(PcmData from, WasapiCS.SampleFormatType toFormat, BitsPerSampleConvArgs args) {
-            return (byte[])from.GetSampleArray().Clone();
+            return from.GetSampleLargeArray().ToArray();
         }
 
         private delegate void ConversionLoop(byte[] from, byte[] to, long nSample, NoiseShapingType noiseShaping);
 
         private byte[] ConvCommon(PcmData pcmFrom, WasapiCS.SampleFormatType toFormat, BitsPerSampleConvArgs args, ConversionLoop convLoop) {
-            var from = pcmFrom.GetSampleArray();
+            var from = pcmFrom.GetSampleLargeArray().ToArray();
             long nSample = from.LongLength * 8 / pcmFrom.BitsPerSample;
             var to = new byte[nSample * WasapiCS.SampleFormatTypeToUseBitsPerSample(toFormat) / 8];
             convLoop(from, to, nSample, args.noiseShaping);
@@ -337,22 +461,26 @@ namespace WasapiPcmUtil {
 
                         for (int i = 0; i < nFrame; ++i) {
                             for (int ch=0; ch < pcmFrom.NumChannels; ++ch) {
-                                int v = (short)(from[fromPos + 1] + (from[fromPos + 2] << 8) + (from[fromPos + 3] << 16));
+                                long v = (int)((from[fromPos + 0] << 0) + (from[fromPos + 1] << 8) + (from[fromPos + 2] << 16) + (from[fromPos + 3] << 24));
 
-                                v += mErr[ch] >> 8;
-                                if (8388607 < v) {
-                                    v = 8388607;
+                                int vOut;
+                                if (Int32.MaxValue < v) {
+                                    vOut = Int32.MaxValue;
+                                } else if (v < Int32.MinValue) {
+                                    vOut = Int32.MinValue;
+                                } else {
+                                    vOut = (int)v;
                                 }
+                                vOut = (int)(vOut & 0xffffff00);
 
-                                mErr[ch] -= ((mErr[ch]) >> 8) << 8;
-                                mErr[ch] += from[fromPos];
+                                mErr[ch] = (int)(v - vOut);
 
                                 if (writePad) {
                                     to[toPos++] = 0;
                                 }
-                                to[toPos++] = (byte)(v & 0xff);
-                                to[toPos++] = (byte)((v >> 8) & 0xff);
-                                to[toPos++] = (byte)((v >> 16) & 0xff);
+                                to[toPos++] = (byte)((vOut >> 8) & 0xff);
+                                to[toPos++] = (byte)((vOut >> 16) & 0xff);
+                                to[toPos++] = (byte)((vOut >> 24) & 0xff);
 
                                 fromPos += 4;
                             }
@@ -531,13 +659,19 @@ namespace WasapiPcmUtil {
         ////////////////////////////////////////////////////////////////////
         // F32
 
-        private static readonly double SAMPLE_VALUE_MAX_DOUBLE =  1.0;
         private static readonly double SAMPLE_VALUE_MIN_DOUBLE = -1.0;
-        private static readonly float  SAMPLE_VALUE_MAX_FLOAT  =  1.0f;
         private static readonly float  SAMPLE_VALUE_MIN_FLOAT  = -1.0f;
 
+        // これらの定数は “ぴったり正確に” 右辺のリテラルの値を保持する。
         private static readonly float SAMPLE_VALUE_MAX_FLOAT_TO_I16 = 32767.0f / 32768.0f;
-        private static readonly float SAMPLE_VALUE_MAX_FLOAT_TO_I24 = 8388607.0f / 8388608.0f; //< 0x3f7ffffe
+        private static readonly float SAMPLE_VALUE_MAX_FLOAT_TO_I24 = 8388607.0f / 8388608.0f;  //< 0x3f7ffffe
+        private static readonly float SAMPLE_VALUE_MAX_FLOAT_TO_I32 = 16777215.0f / 8388608.0f; //< 0x3f7fffff
+        private static readonly float FLOAT_TO_INT16_SCALE = 32768.0f;
+        private static readonly float INT16_TO_FLOAT_SCALE = 1.0f / 32768.0f;
+        private static readonly float FLOAT_TO_INT24_SCALE = 8388608.0f;
+        private static readonly float FLOAT_TO_INT32_SCALE = 2147483648.0f;
+        private static readonly float INT32_TO_FLOAT_SCALE = 1.0f / 2147483648.0f;
+        private static readonly int INT32_TO_FLOAT_MAX_INT = 2147483520;
 
         private byte[] ConvF32toI16(PcmData pcmFrom, WasapiCS.SampleFormatType toFormat, BitsPerSampleConvArgs args) {
             return ConvCommon(pcmFrom, toFormat, args, (from, to, nSample, noiseShaping) => {
@@ -548,7 +682,7 @@ namespace WasapiPcmUtil {
                 case NoiseShapingType.None:
                     for (int i = 0; i < nSample; ++i) {
                         float fv = System.BitConverter.ToSingle(from, fromPos);
-                        if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
+                        if (SAMPLE_VALUE_MAX_FLOAT_TO_I16 < fv) {
                             fv = SAMPLE_VALUE_MAX_FLOAT_TO_I16;
                             IncrementClippedCounter();
                         }
@@ -557,7 +691,7 @@ namespace WasapiPcmUtil {
                             IncrementClippedCounter();
                         }
 
-                        int iv = (int)(fv * 32768.0f);
+                        int iv = (int)(fv * FLOAT_TO_INT16_SCALE);
 
                         to[toPos++] = (byte)(iv & 0xff);
                         to[toPos++] = (byte)((iv >> 8) & 0xff);
@@ -567,7 +701,7 @@ namespace WasapiPcmUtil {
                 case NoiseShapingType.AddDither: {
                         for (int i = 0; i < nSample; ++i) {
                             float fv = System.BitConverter.ToSingle(from, fromPos);
-                            if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
+                            if (SAMPLE_VALUE_MAX_FLOAT_TO_I16 < fv) {
                                 fv = SAMPLE_VALUE_MAX_FLOAT_TO_I16;
                                 IncrementClippedCounter();
                             }
@@ -606,7 +740,7 @@ namespace WasapiPcmUtil {
                         for (int i = 0; i < nFrame; ++i) {
                             for (int ch=0; ch < pcmFrom.NumChannels; ++ch) {
                                 float fv = System.BitConverter.ToSingle(from, fromPos);
-                                if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
+                                if (SAMPLE_VALUE_MAX_FLOAT_TO_I16 < fv) {
                                     fv = SAMPLE_VALUE_MAX_FLOAT_TO_I16;
                                     IncrementClippedCounter();
                                 }
@@ -643,7 +777,7 @@ namespace WasapiPcmUtil {
                         for (int i = 0; i < nFrame; ++i) {
                             for (int ch=0; ch < pcmFrom.NumChannels; ++ch) {
                                 float fv = System.BitConverter.ToSingle(from, fromPos);
-                                if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
+                                if (SAMPLE_VALUE_MAX_FLOAT_TO_I16 < fv) {
                                     fv = SAMPLE_VALUE_MAX_FLOAT_TO_I16;
                                     IncrementClippedCounter();
                                 }
@@ -690,7 +824,7 @@ namespace WasapiPcmUtil {
 
                 for (int i = 0; i < nSample; ++i) {
                     float fv = System.BitConverter.ToSingle(from, fromPos);
-                    if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
+                    if (SAMPLE_VALUE_MAX_FLOAT_TO_I24 < fv) {
                         fv = SAMPLE_VALUE_MAX_FLOAT_TO_I24;
                         IncrementClippedCounter();
                     }
@@ -698,7 +832,7 @@ namespace WasapiPcmUtil {
                         fv = SAMPLE_VALUE_MIN_FLOAT;
                         IncrementClippedCounter();
                     }
-                    int iv = (int)(fv * 8388608.0f);
+                    int iv = (int)(fv * FLOAT_TO_INT24_SCALE);
 
                     if (writePad) {
                         to[toPos++] = 0;
@@ -718,20 +852,20 @@ namespace WasapiPcmUtil {
 
                 for (int i = 0; i < nSample; ++i) {
                     float fv = System.BitConverter.ToSingle(from, fromPos);
-                    if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
-                        fv = SAMPLE_VALUE_MAX_FLOAT_TO_I24;
+                    if (SAMPLE_VALUE_MAX_FLOAT_TO_I32 < fv) {
+                        fv = SAMPLE_VALUE_MAX_FLOAT_TO_I32;
                         IncrementClippedCounter();
                     }
                     if (fv < SAMPLE_VALUE_MIN_FLOAT) {
                         fv = SAMPLE_VALUE_MIN_FLOAT;
                         IncrementClippedCounter();
                     }
-                    int iv = (int)(fv * 8388608.0f);
+                    int iv = (int)(fv * FLOAT_TO_INT32_SCALE);
 
-                    to[toPos++] = 0;
                     to[toPos++] = (byte)(iv & 0xff);
                     to[toPos++] = (byte)((iv >> 8) & 0xff);
                     to[toPos++] = (byte)((iv >> 16) & 0xff);
+                    to[toPos++] = (byte)((iv >> 24) & 0xff);
                     fromPos += 4;
                 }
             });
@@ -745,7 +879,7 @@ namespace WasapiPcmUtil {
                 for (int i = 0; i < nSample; ++i) {
                     short iv = (short)(from[fromPos]
                         + (from[fromPos + 1] << 8));
-                    float fv = ((float)iv) * (1.0f / 32768.0f);
+                    float fv = ((float)iv) * INT16_TO_FLOAT_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(fv);
 
@@ -767,7 +901,7 @@ namespace WasapiPcmUtil {
                     int iv = ((int)from[fromPos] << 8)
                            + ((int)from[fromPos + 1] << 16)
                            + ((int)from[fromPos + 2] << 24);
-                    float fv = ((float)iv) * (1.0f / 2147483648.0f);
+                    float fv = ((float)iv) * INT32_TO_FLOAT_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(fv);
 
@@ -786,10 +920,19 @@ namespace WasapiPcmUtil {
                 int toPos   = 0;
 
                 for (int i = 0; i < nSample; ++i) {
-                    int iv = ((int)from[fromPos + 1] << 8)
+                    int iv = (int)from[fromPos + 0]
+                           + ((int)from[fromPos + 1] << 8)
                            + ((int)from[fromPos + 2] << 16)
                            + ((int)from[fromPos + 3] << 24);
-                    float fv = ((float)iv) * (1.0f / 2147483648.0f);
+
+                    // float値 0x3f7fffffは整数値2147483520に対応する。
+                    // 範囲外のfloat値 3f800000 (== +1.0f) が
+                    // 出てこないようにクランプする。
+                    if (INT32_TO_FLOAT_MAX_INT < iv) {
+                        iv = INT32_TO_FLOAT_MAX_INT;
+                    }
+
+                    float fv = ((float)iv) * INT32_TO_FLOAT_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(fv);
 
@@ -807,6 +950,13 @@ namespace WasapiPcmUtil {
 
         private static readonly double SAMPLE_VALUE_MAX_DOUBLE_TO_I16 = 32767.0 / 32768.0;
         private static readonly double SAMPLE_VALUE_MAX_DOUBLE_TO_I24 = 8388607.0 / 8388608.0;
+        private static readonly double SAMPLE_VALUE_MAX_DOUBLE_TO_I32 = 2147483647.0 / 2147483648.0;
+
+        private static readonly double DOUBLE_TO_I16_SCALE = 32768.0;
+        private static readonly double DOUBLE_TO_I24_SCALE = 8388608.0;
+        private static readonly double DOUBLE_TO_I32_SCALE = 2147483648.0;
+        private static readonly double INT16_TO_DOUBLE_SCALE = 1.0 / 32768.0;
+        private static readonly double INT32_TO_DOUBLE_SCALE = 1.0 / 2147483648.0;
 
         private byte[] ConvF64toI16(PcmData pcmFrom, WasapiCS.SampleFormatType toFormat, BitsPerSampleConvArgs args) {
             return ConvCommon(pcmFrom, toFormat, args, (from, to, nSample, noiseShaping) => {
@@ -815,7 +965,7 @@ namespace WasapiPcmUtil {
 
                 for (int i = 0; i < nSample; ++i) {
                     double dv = System.BitConverter.ToDouble(from, fromPos);
-                    if (SAMPLE_VALUE_MAX_DOUBLE <= dv) {
+                    if (SAMPLE_VALUE_MAX_DOUBLE_TO_I16 < dv) {
                         dv = SAMPLE_VALUE_MAX_DOUBLE_TO_I16;
                         IncrementClippedCounter();
                     }
@@ -823,7 +973,7 @@ namespace WasapiPcmUtil {
                         dv = SAMPLE_VALUE_MIN_DOUBLE;
                         IncrementClippedCounter();
                     }
-                    int iv = (int)(dv * 32768.0);
+                    int iv = (int)(dv * DOUBLE_TO_I16_SCALE);
 
                     to[toPos++] = (byte)(iv & 0xff);
                     to[toPos++] = (byte)((iv >> 8) & 0xff);
@@ -840,7 +990,7 @@ namespace WasapiPcmUtil {
 
                 for (int i = 0; i < nSample; ++i) {
                     double dv = System.BitConverter.ToDouble(from, fromPos);
-                    if (SAMPLE_VALUE_MAX_DOUBLE <= dv) {
+                    if (SAMPLE_VALUE_MAX_DOUBLE_TO_I24 < dv) {
                         dv = SAMPLE_VALUE_MAX_DOUBLE_TO_I24;
                         IncrementClippedCounter();
                     }
@@ -848,7 +998,7 @@ namespace WasapiPcmUtil {
                         dv = SAMPLE_VALUE_MIN_DOUBLE;
                         IncrementClippedCounter();
                     }
-                    int iv = (int)(dv * 8388608.0);
+                    int iv = (int)(dv * DOUBLE_TO_I24_SCALE);
 
                     if (writePad) {
                         to[toPos++] = 0;
@@ -868,17 +1018,16 @@ namespace WasapiPcmUtil {
 
                 for (int i = 0; i < nSample; ++i) {
                     double dv = System.BitConverter.ToDouble(from, fromPos);
-
-                    int iv = 0;
-                    if ((long)Int32.MaxValue < (long)(dv * Int32.MaxValue)) {
-                        iv = Int32.MaxValue;
+                    if (SAMPLE_VALUE_MAX_DOUBLE_TO_I32 < dv) {
+                        dv = SAMPLE_VALUE_MAX_DOUBLE_TO_I32;
                         IncrementClippedCounter();
-                    } else if ((long)(-dv * Int32.MinValue) < (long)Int32.MinValue) {
-                        iv = Int32.MinValue;
-                        IncrementClippedCounter();
-                    } else {
-                        iv = (int)(-dv * Int32.MinValue);
                     }
+                    if (dv < SAMPLE_VALUE_MIN_DOUBLE) {
+                        dv = SAMPLE_VALUE_MIN_DOUBLE;
+                        IncrementClippedCounter();
+                    }
+
+                    int iv = (int)(dv * DOUBLE_TO_I32_SCALE);
 
                     to[toPos++] = (byte)((iv >> 0) & 0xff);
                     to[toPos++] = (byte)((iv >> 8) & 0xff);
@@ -897,8 +1046,8 @@ namespace WasapiPcmUtil {
                 for (int i = 0; i < nSample; ++i) {
                     double dv = System.BitConverter.ToDouble(from, fromPos);
                     float fv = (float)dv;
-                    if (SAMPLE_VALUE_MAX_FLOAT <= fv) {
-                        fv = SAMPLE_VALUE_MAX_FLOAT_TO_I24;
+                    if (SAMPLE_VALUE_MAX_FLOAT_TO_I32 < fv) {
+                        fv = SAMPLE_VALUE_MAX_FLOAT_TO_I32;
                         IncrementClippedCounter();
                     }
                     if (fv < SAMPLE_VALUE_MIN_FLOAT) {
@@ -923,7 +1072,7 @@ namespace WasapiPcmUtil {
                 for (int i = 0; i < nSample; ++i) {
                     short iv = (short)(from[fromPos]
                         + (from[fromPos + 1] << 8));
-                    double dv = ((double)iv) * (1.0 / 32768.0);
+                    double dv = ((double)iv) * INT16_TO_DOUBLE_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(dv);
 
@@ -944,7 +1093,7 @@ namespace WasapiPcmUtil {
                     int iv = ((int)from[fromPos] << 8)
                            + ((int)from[fromPos + 1] << 16)
                            + ((int)from[fromPos + 2] << 24);
-                    double dv = ((double)iv) * (1.0 / 2147483648.0);
+                    double dv = ((double)iv) * INT32_TO_DOUBLE_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(dv);
 
@@ -965,7 +1114,7 @@ namespace WasapiPcmUtil {
                     int iv = ((int)from[fromPos + 1] << 8)
                            + ((int)from[fromPos + 2] << 16)
                            + ((int)from[fromPos + 3] << 24);
-                    double dv = ((double)iv) * (1.0 / 2147483648.0);
+                    double dv = ((double)iv) * INT32_TO_DOUBLE_SCALE;
 
                     byte [] b = System.BitConverter.GetBytes(dv);
 

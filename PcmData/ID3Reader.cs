@@ -12,11 +12,19 @@ namespace PcmDataLib {
         public string AlbumName { get; set; }
         public string TitleName { get; set; }
         public string ArtistName { get; set; }
+        public string Composer { get; set; }
+
+        public int MinorVersion { get { return m_tagVersion[0]; } }
 
         /// <summary>
         /// true: unsynchro処理をほどく(ファイルから0xffが出てきたら次のバイトを捨てる)
         /// </summary>
         private bool m_unsynchro;
+
+        /// <summary>
+        /// Presence of footer
+        /// </summary>
+        private bool m_footerPresent;
 
         /// <summary>
         /// Unsynchroの捨てデータも含めた、読み込み可能バイト数。
@@ -49,7 +57,9 @@ namespace PcmDataLib {
             AlbumName = string.Empty;
             TitleName = string.Empty;
             ArtistName = string.Empty;
+            Composer = string.Empty;
             m_unsynchro = false;
+            m_footerPresent = false;
             m_bytesRemain = 0;
             m_readBytes = 0;
 
@@ -113,7 +123,7 @@ namespace PcmDataLib {
                 return;
             } else {
                 // unsynchroしない
-                PcmDataLib.Util.BinaryReaderSkip(br, bytes);
+                PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, bytes);
                 m_bytesRemain -= bytes;
                 m_readBytes   += bytes;
             }
@@ -155,9 +165,10 @@ namespace PcmDataLib {
                     tagIdentifier[2] != '3') {
                 return ID3Result.ReadError;
             }
+
             m_tagVersion = BinaryReadBytes(br, 2);
-            if (m_tagVersion[0] != 2 && m_tagVersion[0] != 3) {
-                // not ID3v2.2 nor ID3v2.3...
+            if (MinorVersion != 2 && MinorVersion != 3 && MinorVersion != 4) {
+                // not ID3v2.2 nor ID3v2.3 ...
                 return ID3Result.NotSupportedID3version;
             }
             var tagFlags = BinaryReadByte(br);
@@ -172,17 +183,55 @@ namespace PcmDataLib {
 
             // ID3v2 tagヘッダー読み込み終了。
 
-            // ID3v2.3 extended headerがもしあれば読み込む。
+            // extended headerがもしあれば読み込む。
             if (0 != (tagFlags & 0x40)) {
-                var ehSize  = ByteArrayToBigU32(ReadBytesWithUnsynchro(br, 4));
-                var ehFlags = ByteArrayToBigU16(ReadBytesWithUnsynchro(br, 2));
-                var ehPad   = ByteArrayToBigU32(ReadBytesWithUnsynchro(br, 4));
-                SkipBytesWithUnsynchro(br, ehSize + ehPad - 6);
+                switch (MinorVersion) {
+                case 3: // v2.3
+                    {
+                        var ehSize  = ByteArrayToBigU32(ReadBytesWithUnsynchro(br, 4));
+                        var ehFlags = ByteArrayToBigU16(ReadBytesWithUnsynchro(br, 2));
+                        var ehPad   = ByteArrayToBigU32(ReadBytesWithUnsynchro(br, 4));
+                        SkipBytesWithUnsynchro(br, ehSize + ehPad - 6);
+                    }
+                    break;
+                case 4: // v2.4
+                    {
+                        var ehSize = ByteArrayToBigU32(ReadBytesWithUnsynchro(br, 4));
+                        var numberOfFlagBytes = BinaryReadByte(br);
+                        var extendedFlags = BinaryReadByte(br);
+                        SkipBytesWithUnsynchro(br, ehSize - 6);
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException("Unknown ID3 version");
+                }
             }
+
+            if (0 != (tagFlags & 0x10)) {
+                // v2.4 Footer present
+                m_footerPresent = true;
+            } else {
+                m_footerPresent = false;
+            }
+
             return ID3Result.Success;
         }
 
-        private string ReadNameFrame(BinaryReader br, int frameSize, int frameFlags) {
+        private ID3Result ReadTagFooter(BinaryReader br) {
+            var tagIdentifier = BinaryReadBytes(br, 3);
+            if (tagIdentifier[0] != '3' ||
+                    tagIdentifier[1] != 'D' ||
+                    tagIdentifier[2] != 'I') {
+                return ID3Result.ReadError;
+            }
+            var tagVersion = BinaryReadBytes(br, 2);
+            var tagFlags = BinaryReadByte(br);
+            var tagSize = ID3TagHeaderSize(BinaryReadBytes(br, 4));
+
+            return ID3Result.Success;
+        }
+
+        private string ReadTextFrame(BinaryReader br, int frameSize, int frameFlags) {
             // フラグを見る
             bool compression = (frameFlags & 0x0080) != 0;
             bool encryption  = (frameFlags & 0x0040) != 0;
@@ -288,15 +337,19 @@ namespace PcmDataLib {
                 switch (frameId) {
                 case 0x54414c42:
                     // "TALB" Album
-                    AlbumName = ReadNameFrame(br, frameSize, frameFlags);
+                    AlbumName = ReadTextFrame(br, frameSize, frameFlags);
                     break;
                 case 0x54495432:
                     // "TIT2" Title
-                    TitleName = ReadNameFrame(br, frameSize, frameFlags);
+                    TitleName = ReadTextFrame(br, frameSize, frameFlags);
                     break;
                 case 0x54504531:
                     // "TPE1" artist
-                    ArtistName = ReadNameFrame(br, frameSize, frameFlags);
+                    ArtistName = ReadTextFrame(br, frameSize, frameFlags);
+                    break;
+                case 0x54434f4d:
+                    // "TCOM" composer
+                    Composer = ReadTextFrame(br, frameSize, frameFlags);
                     break;
                 case 0x41504943:
                     // "APIC" attached picture
@@ -335,15 +388,19 @@ namespace PcmDataLib {
                 switch (frameId) {
                 case 0x54414c:
                     // "TAL" Album name
-                    AlbumName = ReadNameFrame(br, frameSize, 0);
+                    AlbumName = ReadTextFrame(br, frameSize, 0);
                     break;
                 case 0x545432:
                     // "TT2" Title
-                    TitleName = ReadNameFrame(br, frameSize, 0);
+                    TitleName = ReadTextFrame(br, frameSize, 0);
                     break;
                 case 0x545031:
                     // "TP1" Artist
-                    ArtistName = ReadNameFrame(br, frameSize, 0);
+                    ArtistName = ReadTextFrame(br, frameSize, 0);
+                    break;
+                case 0x54434d:
+                    // "TCM" composer
+                    Composer = ReadTextFrame(br, frameSize, 0);
                     break;
                 case 0x504943:
                     // "PIC" Attached Picture
@@ -362,6 +419,19 @@ namespace PcmDataLib {
             return ID3Result.Success;
         }
 
+        private void SkipPadding(BinaryReader br) {
+            long skipBytes = m_bytesRemain-10;
+            if (m_footerPresent) {
+                skipBytes = m_bytesRemain - 20;
+            }
+
+            if (skipBytes < 0) {
+                return;
+            }
+
+            SkipBytesWithUnsynchro(br, skipBytes);
+        }
+
         public ID3Result Read(BinaryReader br) {
             Clear();
 
@@ -371,15 +441,37 @@ namespace PcmDataLib {
                 return result;
             }
 
+            //Console.WriteLine("read  ={0}", m_readBytes);
+            //Console.WriteLine("remain={0}", m_bytesRemain);
+
             switch (m_tagVersion[0]) {
+            case 4:
             case 3:
-                return ReadFramesV23(br);
+                result = ReadFramesV23(br);
+                break;
             case 2:
-                return ReadFramesV22(br);
+                result = ReadFramesV22(br);
+                break;
             default:
-                System.Diagnostics.Debug.Assert(false);
-                return ID3Result.ReadError;
+                throw new NotImplementedException("Unknown ID3 version");
             }
+            if (result != ID3Result.Success) {
+                return result;
+            }
+
+            //Console.WriteLine("read  ={0}", m_readBytes);
+            //Console.WriteLine("remain={0}", m_bytesRemain);
+
+            SkipPadding(br);
+
+            if (m_footerPresent) {
+                result = ReadTagFooter(br);
+                if (result != ID3Result.Success) {
+                    return result;
+                }
+            }
+
+            return result;
         }
 
     }

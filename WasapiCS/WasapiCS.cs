@@ -4,6 +4,8 @@ using System;
 
 namespace Wasapi {
     public class WasapiCS {
+
+#region native methods
         [DllImport("WasapiIODLL.dll")]
         private extern static int
         WasapiIO_Init(ref int instanceIdReturn);
@@ -34,10 +36,36 @@ namespace Wasapi {
         WasapiIO_GetDeviceAttributes(int instanceId, int deviceId, out WasapiIoDeviceAttributes attr);
 
         [StructLayout(LayoutKind.Sequential, Pack = 4)]
-        internal struct InspectArgs {
+        internal struct MixFormatArgs {
             public int sampleRate;
             public int sampleFormat;    ///< WWPcmDataSampleFormatType
             public int numChannels;
+            public int dwChannelMask;
+        };
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetMixFormat(int instanceId, int deviceId, out MixFormatArgs mixFormat);
+
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        internal struct DevicePeriodArgs {
+            public long defaultPeriod;
+            public long minimumPeriod;
+        };
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetDevicePeriod(int instanceId, int deviceId, out DevicePeriodArgs devicePeriod);
+
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        internal struct InspectArgs {
+            public int deviceType;      ///< DeviceType
+            public int sampleRate;
+            public int sampleFormat;    ///< WWPcmDataSampleFormatType
+            public int numChannels;
+            public int dwChannelMask;
         };
 
         [DllImport("WasapiIODLL.dll")]
@@ -52,15 +80,17 @@ namespace Wasapi {
             public int sampleFormat;
             public int numChannels;
 
+            public int dwChannelMask;
             public int shareMode;
             public int mmcssCall; ///< 0: disable, 1: enable, 2: do not call DwmEnableMMCSS()
             public int mmThreadPriority; ///< 0: None, 1: Low, 2: Normal, 3: High, 4: Critical
             public int schedulerTask;
+
             public int dataFeedMode;
             public int latencyMillisec;
-
             public int timePeriodHandledNanosec;
             public int zeroFlushMillisec;
+            public int isFormatSupportedCall;
         };
 
         [DllImport("WasapiIODLL.dll")]
@@ -128,6 +158,10 @@ namespace Wasapi {
         WasapiIO_GetCaptureGlitchCount(int instanceId);
 
         [DllImport("WasapiIODLL.dll")]
+        private extern static void
+        WasapiIO_ResetCaptureGlitchCount(int instanceId);
+
+        [DllImport("WasapiIODLL.dll")]
         private extern static int
         WasapiIO_StartPlayback(int instanceId, int wavDataId);
 
@@ -140,7 +174,7 @@ namespace Wasapi {
         WasapiIO_Run(int instanceId, int millisec);
 
         [DllImport("WasapiIODLL.dll")]
-        private extern static void
+        private extern static int
         WasapiIO_Stop(int instanceId);
 
         [DllImport("WasapiIODLL.dll")]
@@ -181,8 +215,20 @@ namespace Wasapi {
         private extern static bool
         WasapiIO_GetPlayCursorPosition(int instanceId, int usageType, out WasapiIoCursorLocation a);
 
+        public enum WasapiDeviceState {
+            Active = 1,
+            Disabled = 2,
+            NotPresent = 4,
+            Unplugged = 8,
+        };
+
+        /// <summary>
+        /// デバイスが消えたとかのイベント。
+        /// </summary>
+        /// <param name="idStr">デバイスのID。</param>
+        /// <param name="dwNewState">WasapiDeviceState型の値のOR</param>
         [UnmanagedFunctionPointer(CallingConvention.StdCall, CharSet = CharSet.Unicode)]
-        public delegate void StateChangedCallback(StringBuilder idStr);
+        public delegate void StateChangedCallback(StringBuilder idStr, int dwNewState);
 
         [DllImport("WasapiIODLL.dll")]
         private static extern void WasapiIO_RegisterStateChangedCallback(int instanceId, StateChangedCallback callback);
@@ -213,6 +259,28 @@ namespace Wasapi {
         [DllImport("WasapiIODLL.dll")]
         private extern static void
         WasapiIO_ClearAudioFilter(int instanceId);
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        internal struct WasapiIoVolumeParams {
+            public float levelMinDB;
+            public float levelMaxDB;
+            public float volumeIncrementDB;
+            public float defaultLevel;
+            /// ENDPOINT_HARDWARE_SUPPORT_VOLUME ==1
+            /// ENDPOINT_HARDWARE_SUPPORT_MUTE   ==2
+            /// ENDPOINT_HARDWARE_SUPPORT_METER  ==4
+            public int hardwareSupport;
+        };
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_GetVolumeParams(int instanceId, out WasapiIoVolumeParams args);
+
+        [DllImport("WasapiIODLL.dll")]
+        private extern static int
+        WasapiIO_SetMasterVolumeInDb(int instanceId, float db);
+
+#endregion
 
         public enum MMCSSCallType {
             Disable,
@@ -259,13 +327,27 @@ namespace Wasapi {
             SFloat
         };
 
+        /// <summary>
+        /// 注: 項目を追加したら以下のEnumも追加。
+        /// WWPcmDataSampleFormatType
+        /// 以下の関数に追加する。
+        /// WWPcmDataSampleFormatTypeToStr
+        /// WWPcmDataSampleFormatTypeToBitsPerSample
+        /// WWPcmDataSampleFormatTypeToBytesPerSample
+        /// WWPcmDataSampleFormatTypeToValidBitsPerSample
+        /// WWPcmDataSampleFormatTypeIsFloat
+        /// WWPcmDataSampleFormatTypeIsInt
+        /// WWPcmDataSampleFormatTypeGenerate
+        /// </summary>
         public enum SampleFormatType {
             Unknown = -1,
+            
             Sint16,
             Sint24,
             Sint32V24,
             Sint32,
             Sfloat,
+
             Sdouble, //< WASAPIはサポートしないが便宜上用意する
         };
 
@@ -280,6 +362,12 @@ namespace Wasapi {
         public enum WWAudioFilterType {
             PolarityInvert,
             Monaural,
+            ChannelMapping,
+            MuteChannel,
+            SoloChannel,
+
+            ZohNosdacCompensation,
+            Delay
         };
 
         /// <summary>
@@ -383,6 +471,40 @@ namespace Wasapi {
             }
         }
 
+        /// numChannels to channelMask
+        /// please refer this article https://msdn.microsoft.com/en-us/library/windows/hardware/dn653308%28v=vs.85%29.aspx
+        public static int
+        GetTypicalChannelMask(int numChannels) {
+            int result = 0;
+
+            switch (numChannels) {
+            case 1:
+                result = 0; // mono (unspecified)
+                break;
+            case 2:
+                result = 3; // 2ch stereo (FL FR)
+                break;
+            case 4:
+                result = 0x33; // 4ch matrix (FL FR BL BR)
+                break;
+            case 6:
+                result = 0x3f; // 5.1 surround (FL FR FC LFE BL BR)
+                break;
+            case 8:
+                result = 0x63f;    // 7.1 surround   (FL FR FC LFE BL BR SL SR)
+                break;
+            case 12:
+                result = 0x2d63f; //< 7.1.4 surround (FL FR FC LFE BL BR SL SR TFL TFR TBL TBR)
+                break;
+            default:
+                // 0 means we does not specify particular speaker locations.
+                result = 0;
+                break;
+            }
+
+            return result;
+        }
+
         private int mId =  -1;
 
         private NativeCaptureCallback mNativeCaptureCallback;
@@ -460,25 +582,75 @@ namespace Wasapi {
             return new DeviceAttributes(a.deviceId, a.name, a.deviceIdString);
         }
 
-        public int InspectDevice(int deviceId, int sampleRate, SampleFormatType format, int numChannels) {
+        public class MixFormat {
+            public int sampleRate;
+            public SampleFormatType sampleFormat;    ///< WWPcmDataSampleFormatType
+            public int numChannels;
+            public int dwChannelMask;
+            public MixFormat(int sampleRate, SampleFormatType sampleFormat, int numChannels, int dwChannelMask) {
+                this.sampleRate = sampleRate;
+                this.sampleFormat = sampleFormat;
+                this.numChannels = numChannels;
+                this.dwChannelMask = dwChannelMask;
+            }
+        };
+
+        public MixFormat GetMixFormat(int deviceId) {
+            MixFormatArgs args;
+            if (WasapiIO_GetMixFormat(mId, deviceId, out args) < 0) {
+                return null;
+            }
+            return new MixFormat(args.sampleRate, (SampleFormatType)args.sampleFormat, args.numChannels, args.dwChannelMask);
+        }
+
+        public class DevicePeriod {
+            /// <summary>
+            /// unit is 100 * nanosec
+            /// </summary>
+            public long defaultPeriod;
+            /// <summary>
+            /// unit is 100 * nanosec
+            /// </summary>
+            public long minimumPeriod;
+            public DevicePeriod(long defaultPeriod, long minimumPeriod) {
+                this.defaultPeriod = defaultPeriod;
+                this.minimumPeriod = minimumPeriod;
+            }
+        }
+
+        public DevicePeriod GetDevicePeriod(int deviceId) {
+            DevicePeriodArgs args;
+            if (WasapiIO_GetDevicePeriod(mId, deviceId, out args) < 0) {
+                return null;
+            }
+
+            return new DevicePeriod(args.defaultPeriod, args.minimumPeriod);
+        }
+
+        public int InspectDevice(int deviceId, DeviceType dt, int sampleRate, SampleFormatType format, int numChannels, int dwChannelMask) {
             var args = new InspectArgs();
+            args.deviceType = (int)dt;
             args.sampleRate = sampleRate;
             args.numChannels = numChannels;
             args.sampleFormat = (int)format;
+            args.dwChannelMask = dwChannelMask;
             return WasapiIO_InspectDevice(mId, deviceId, ref args);
         }
 
         public int Setup(int deviceId, DeviceType t, StreamType streamType,
                 int sampleRate, SampleFormatType format, int numChannels,
+                int dwChannelMask,
                 MMCSSCallType mmcssCall, MMThreadPriorityType threadPriority,
                 SchedulerTaskType schedulerTask, ShareMode shareMode, DataFeedMode dataFeedMode,
-                int latencyMillisec, int zeroFlushMillisec, int timePeriodHandredNanosec) {
+                int latencyMillisec, int zeroFlushMillisec, int timePeriodHandredNanosec,
+                bool isFormatSupportedCall) {
             var args = new SetupArgs();
             args.deviceType = (int)t;
             args.streamType = (int)streamType;
             args.sampleRate = sampleRate;
             args.sampleFormat = (int)format;
             args.numChannels = numChannels;
+            args.dwChannelMask = dwChannelMask;
             args.mmcssCall = (int)mmcssCall;
             args.mmThreadPriority = (int)threadPriority;
             args.schedulerTask = (int)schedulerTask;
@@ -487,6 +659,7 @@ namespace Wasapi {
             args.latencyMillisec = latencyMillisec;
             args.timePeriodHandledNanosec = timePeriodHandredNanosec;
             args.zeroFlushMillisec = zeroFlushMillisec;
+            args.isFormatSupportedCall = isFormatSupportedCall ? 1 : 0;
             return WasapiIO_Setup(mId, deviceId, ref args);
         }
 
@@ -500,6 +673,23 @@ namespace Wasapi {
 
         public bool AddPlayPcmData(int pcmId, byte[] data) {
             return WasapiIO_AddPlayPcmData(mId, pcmId, data, data.LongLength);
+        }
+
+        public bool AddPlayPcmData(int pcmId, WWUtil.LargeArray<byte> data) {
+            if (!AddPlayPcmDataAllocateMemory(pcmId, data.LongLength)) {
+                return false;
+            }
+
+            long posBytes = 0;
+            for (int i = 0; i < data.ArrayNum(); ++i) {
+                var fragment = data.ArrayNth(i);
+                if (!AddPlayPcmDataSetPcmFragment(pcmId, posBytes, fragment)) {
+                    return false;
+                }
+                posBytes += fragment.LongLength;
+            }
+
+            return true;
         }
 
         public bool AddPlayPcmDataAllocateMemory(int pcmId, long bytes) {
@@ -525,7 +715,14 @@ namespace Wasapi {
 
         public void ScalePcmAmplitude(double scale) {
             WasapiIO_ScalePcmAmplitude(mId, scale);
+            mPcmScale = scale;
         }
+
+        public double GetScalePcmAmplitude() {
+            return mPcmScale;
+        }
+
+        private double mPcmScale = 1.0;
 
         public bool AddPlayPcmDataEnd() {
             return WasapiIO_AddPlayPcmDataEnd(mId);
@@ -574,6 +771,10 @@ namespace Wasapi {
             return WasapiIO_GetCaptureGlitchCount(mId);
         }
 
+        public void ResetCaptureGlitchCount() {
+            WasapiIO_ResetCaptureGlitchCount(mId);
+        }
+
         public int StartPlayback(int wavDataId) {
             return WasapiIO_StartPlayback(mId, wavDataId);
         }
@@ -582,12 +783,17 @@ namespace Wasapi {
             return WasapiIO_StartRecording(mId);
         }
 
+        /// <summary>
+        /// 再生スレッドが終了したかどうか調べる。
+        /// </summary>
+        /// <param name="millisec">中でブロックする待ち時間。</param>
+        /// <returns>true: 終了した。false: 再生スレッドが続行した。</returns>
         public bool Run(int millisec) {
             return WasapiIO_Run(mId, millisec);
         }
 
-        public void Stop() {
-            WasapiIO_Stop(mId);
+        public int Stop() {
+            return WasapiIO_Stop(mId);
         }
 
         public int Pause() {
@@ -674,8 +880,102 @@ namespace Wasapi {
         }
 
         public void AppendAudioFilter(WWAudioFilterType aft, string args) {
-
             WasapiIO_AppendAudioFilter(mId, (int)aft, args);
+        }
+
+        public int SetMasterVolumeInDb(float db) {
+            return WasapiIO_SetMasterVolumeInDb(mId, db);
+        }
+
+        public class VolumeParams {
+            public float levelMinDB;
+            public float levelMaxDB;
+            public float volumeIncrementDB;
+            public float defaultLevel;
+            /// ENDPOINT_HARDWARE_SUPPORT_VOLUME ==1
+            /// ENDPOINT_HARDWARE_SUPPORT_MUTE   ==2
+            /// ENDPOINT_HARDWARE_SUPPORT_METER  ==4
+            public int hardwareSupport;
+            public VolumeParams(float min, float max, float increment, float aDefault, int hs) {
+                levelMinDB = min;
+                levelMaxDB = max;
+                volumeIncrementDB = increment;
+                defaultLevel = aDefault;
+                hardwareSupport = hs;
+            }
+        };
+
+        public int GetVolumeParams(out VolumeParams volumeParams) {
+            var vp = new WasapiIoVolumeParams();
+            int hr = WasapiIO_GetVolumeParams(mId, out vp);
+            volumeParams = new VolumeParams(vp.levelMinDB, vp.levelMaxDB, vp.volumeIncrementDB, vp.defaultLevel, vp.hardwareSupport);
+            return hr;
+        }
+
+        public static string GetErrorMessage(int ercd) {
+            switch ((uint)ercd) {
+            case 0x80070005: return "Access denied";
+            case 0x800700AA: return "Resource is in use";
+            case 0x88890001: return "AUDCLNT_E_NOT_INITIALIZED";
+            case 0x88890002: return "AUDCLNT_E_ALREADY_INITIALIZED";
+            case 0x88890003: return "AUDCLNT_E_WRONG_ENDPOINT_TYPE";
+            case 0x88890004: return "AUDCLNT_E_DEVICE_INVALIDATED";
+            case 0x88890005: return "AUDCLNT_E_NOT_STOPPED";
+
+            case 0x88890006: return "AUDCLNT_E_BUFFER_TOO_LARGE";
+            case 0x88890007: return "AUDCLNT_E_OUT_OF_ORDER";
+            case 0x88890008: return "AUDCLNT_E_UNSUPPORTED_FORMAT";
+            case 0x88890009: return "AUDCLNT_E_INVALID_SIZE";
+            case 0x8889000a: return "AUDCLNT_E_DEVICE_IN_USE";
+
+            case 0x8889000b: return "AUDCLNT_E_BUFFER_OPERATION_PENDING";
+            case 0x8889000c: return "AUDCLNT_E_THREAD_NOT_REGISTERED";
+            case 0x8889000e: return "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED";
+            case 0x8889000f: return "AUDCLNT_E_ENDPOINT_CREATE_FAILED";
+            case 0x88890010: return "AUDCLNT_E_SERVICE_NOT_RUNNING";
+
+            case 0x88890011: return "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED";
+            case 0x88890012: return "AUDCLNT_E_EXCLUSIVE_MODE_ONLY";
+            case 0x88890013: return "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL";
+            case 0x88890014: return "AUDCLNT_E_EVENTHANDLE_NOT_SET";
+            case 0x88890015: return "AUDCLNT_E_INCORRECT_BUFFER_SIZE";
+
+            case 0x88890016: return "AUDCLNT_E_BUFFER_SIZE_ERROR";
+            case 0x88890017: return "AUDCLNT_E_CPUUSAGE_EXCEEDED";
+            case 0x88890018: return "AUDCLNT_E_BUFFER_ERROR";
+            case 0x88890019: return "AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED";
+            case 0x88890020: return "AUDCLNT_E_INVALID_DEVICE_PERIOD";
+
+            case 0x88890021: return "AUDCLNT_E_INVALID_STREAM_FLAG";
+            case 0x88890022: return "AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE";
+            case 0x88890023: return "AUDCLNT_E_OUT_OF_OFFLOAD_RESOURCES";
+            case 0x88890024: return "AUDCLNT_E_OFFLOAD_MODE_ONLY";
+            case 0x88890025: return "AUDCLNT_E_NONOFFLOAD_MODE_ONLY";
+
+            case 0x88890026: return "AUDCLNT_E_RESOURCES_INVALIDATED";
+            case 0x88890027: return "AUDCLNT_E_RAW_MODE_UNSUPPORTED";
+            case 0x88890028: return "AUDCLNT_E_ENGINE_PERIODICITY_LOCKED";
+            case 0x88890029: return "AUDCLNT_E_ENGINE_FORMAT_LOCKED";
+
+            case 0x88890100: return "SPTLAUDCLNT_E_DESTROYED";
+            case 0x88890101: return "SPTLAUDCLNT_E_OUT_OF_ORDER";
+            case 0x88890102: return "SPTLAUDCLNT_E_RESOURCES_INVALIDATED";
+            case 0x88890103: return "SPTLAUDCLNT_E_NO_MORE_OBJECTS";
+            case 0x88890104: return "SPTLAUDCLNT_E_PROPERTY_NOT_SUPPORTED";
+
+            case 0x88890105: return "SPTLAUDCLNT_E_ERRORS_IN_OBJECT_CALLS";
+            case 0x88890106: return "SPTLAUDCLNT_E_METADATA_FORMAT_NOT_SUPPORTED";
+            case 0x88890107: return "SPTLAUDCLNT_E_STREAM_NOT_AVAILABLE";
+            case 0x88890108: return "SPTLAUDCLNT_E_INVALID_LICENSE";
+
+            case 0x8889010a: return "SPTLAUDCLNT_E_STREAM_NOT_STOPPED";
+            case 0x8889010b: return "SPTLAUDCLNT_E_STATIC_OBJECT_NOT_AVAILABLE";
+            case 0x8889010c: return "SPTLAUDCLNT_E_OBJECT_ALREADY_ACTIVE";
+            case 0x8889010d: return "SPTLAUDCLNT_E_INTERNAL";
+
+            default:
+                return "";
+            }
         }
     }
 }

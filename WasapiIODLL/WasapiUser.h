@@ -12,6 +12,7 @@
 #include "WWThreadCharacteristics.h"
 #include "WWTypes.h"
 #include "WWAudioFilterSequencer.h"
+#include <endpointvolume.h>
 
 /// @param data captured data
 /// @param dataBytes captured data size in bytes
@@ -36,6 +37,17 @@ enum WWBitFormatType {
     WWBitFormatNUM
 };
 
+struct WWVolumeParams {
+    float levelMinDB;
+    float levelMaxDB;
+    float volumeIncrementDB;
+    float defaultLevel;
+    /// ENDPOINT_HARDWARE_SUPPORT_VOLUME ==1
+    /// ENDPOINT_HARDWARE_SUPPORT_MUTE   ==2
+    /// ENDPOINT_HARDWARE_SUPPORT_METER  ==4
+    int hardwareSupport;
+};
+
 class WasapiUser {
 public:
     WasapiUser(void);
@@ -44,12 +56,17 @@ public:
     HRESULT Init(void);
     void    Term(void);
 
+    /// @return HRESULT
+    HRESULT GetMixFormat(IMMDevice *device, WWPcmFormat *mixFormat);
+
+    HRESULT GetDevicePeriod(IMMDevice *device, int64_t *defaultPeriod, int64_t *minPeriod);
+
     /// @return 0 when the specified sampleFormat is supported
-    int InspectDevice(IMMDevice *device, const WWPcmFormat &pcmFormat);
+    HRESULT InspectDevice(IMMDevice *device, const WWPcmFormat &pcmFormat);
 
     /// @param format sampleRate pcm data sample rate. On WASAPI shared mode, device sample rate cannot be changed so
     ///        you need to resample pcm to DeviceSampleRate
-    HRESULT Setup(IMMDevice *device, WWDeviceType deviceType, const WWPcmFormat &pcmFormat, WWShareMode sm, WWDataFeedMode dfm, int latencyMillisec);
+    HRESULT Setup(IMMDevice *device, WWDeviceType deviceType, const WWPcmFormat &pcmFormat, WWShareMode sm, WWDataFeedMode dfm, int latencyMillisec, bool isFormatSupportedCall);
 
     void Unsetup(void);
 
@@ -76,7 +93,7 @@ public:
     bool Run(int millisec);
 
     /// 停止。
-    void Stop(void);
+    HRESULT Stop(void);
 
     /// ポーズ。
     HRESULT Pause(void);
@@ -99,12 +116,16 @@ public:
     EDataFlow GetDataFlow(void) const { return m_dataFlow; }
     int GetEndpointBufferFrameNum(void) const { return m_bufferFrameNum; }
     int64_t GetCaptureGlitchCount(void) const { return m_glitchCount; }
+    void ResetCaptureGlitchCount(void) { m_glitchCount = 0; }
 
     WWStreamType StreamType(void) const { return m_pcmStream.StreamType(); }
     WWPcmStream &PcmStream(void) { return m_pcmStream; }
     WWTimerResolution &TimerResolution(void) { return m_timerResolution; }
     WWThreadCharacteristics &ThreadCharacteristics(void) { return m_threadCharacteristics; }
     WWAudioFilterSequencer &AudioFilterSequencer(void) { return m_audioFilterSequencer; }
+
+    int GetVolumeParams(WWVolumeParams *volumeParams_return);
+    int SetMasterVolumeLevelInDb(float db);
 
 private:
     HANDLE       m_shutdownEvent;
@@ -142,6 +163,7 @@ private:
     WWTimerResolution m_timerResolution;
     WWThreadCharacteristics m_threadCharacteristics;
     WWAudioFilterSequencer m_audioFilterSequencer;
+    IAudioEndpointVolume *m_endpointVolume;
 
     static DWORD WINAPI RenderEntry(LPVOID lpThreadParameter);
     static DWORD WINAPI CaptureEntry(LPVOID lpThreadParameter);
@@ -149,8 +171,8 @@ private:
     DWORD RenderMain(void);
     DWORD CaptureMain(void);
 
-    bool AudioSamplesSendProc(void);
-    bool AudioSamplesRecvProc(void);
+    HRESULT AudioSamplesSendProc(bool &continue_return);
+    HRESULT AudioSamplesRecvProc(bool &continue_return);
 
     /// WASAPIレンダーバッファに詰めるデータを作る。
     int CreateWritableFrames(BYTE *pData_return, int wantFrames);
@@ -161,5 +183,6 @@ private:
     void UpdatePlayPcmDataWhenPlaying(WWPcmData &playPcmData);
 
     void PrepareBuffers(void);
+
 };
 

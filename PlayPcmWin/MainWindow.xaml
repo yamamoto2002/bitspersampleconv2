@@ -40,6 +40,9 @@
                 <Separator x:Uid="Separator_3" />
                 <MenuItem x:Uid="menuItemPlayListItemEditMode" Name="menuItemPlayListItemEditMode" Header="Playlist item edit mode(_E)" Click="buttonPlayListItemEditMode_Click" IsCheckable="True" />
             </MenuItem>
+            <MenuItem Name="menuPPWServer" Header="PPWServer(_A)">
+                <MenuItem Name="menuItemPPWServerSettings" Header="Settings(_B)" Click="MenuItemPPWServerSettings_Click" />
+            </MenuItem>
             <MenuItem x:Uid="menuHelp" Name="menuHelp" Header="_Help">
                 <MenuItem x:Uid="menuItemHelpAbout" Header="About(_V)" Click="MenuItemHelpAbout_Click" Name="menuItemHelpAbout"/>
                 <MenuItem x:Uid="menuItemHelpWeb" Header="Visit PlayPcmWin _Website" Click="MenuItemHelpWeb_Click" Name="menuItemHelpWeb" />
@@ -67,13 +70,20 @@
                     DragLeave="dataGridPlayList_CheckDropTarget"
                     DragOver="dataGridPlayList_CheckDropTarget"
                     Drop="dataGridPlayList_Drop"
-                    MouseMove="dataGridPlayList_MouseMove" AllowDrop="True" SelectedCellsChanged="dataGridPlayList_SelectedCellsChanged" IsReadOnly="True" LoadingRow="dataGrid1_LoadingRow" Background="{x:Null}" IsEnabled="False">
+                    MouseMove="dataGridPlayList_MouseMove" AllowDrop="True" SelectedCellsChanged="dataGridPlayList_SelectedCellsChanged" IsReadOnly="True"
+                    LoadingRow="dataGrid1_LoadingRow" Background="{x:Null}" IsEnabled="False">
                     
                     <DataGrid.RowHeaderStyle>
                         <Style x:Uid="Style_1" TargetType="{x:Type DataGridRowHeader}">
                             <Setter x:Uid="Setter_1" Property="Content" Value="{Binding RowId}"/>
                         </Style>
                     </DataGrid.RowHeaderStyle>
+                    
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="ToolTip" Value="{Binding Path=Path}" />
+                        </Style>
+                    </DataGrid.RowStyle>
 
                     <!--
                     <DataGrid.ItemContainerStyle>
@@ -86,18 +96,29 @@
                         -->
 
                     <DataGrid.Columns>
-                        <!-- <DataGridTextColumn x:Name="IdColumn" Width="Auto" Binding="{Binding Path=Id}" Header="Id" />
-                        -->
-                        <DataGridTextColumn x:Uid="dataGridColumnTitle" x:Name="dataGridColumnTitle" Width="Auto" Binding="{Binding Path=Title}" Header="Title" />
-                        <DataGridTextColumn x:Uid="dataGridColumnDuration" x:Name="dataGridColumnDuration" Width="Auto" Binding="{Binding Path=Duration}" Header="Duration"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnArtist" x:Name="dataGridColumnArtist" Width="Auto" Binding="{Binding Path=ArtistName}" Header="Artists"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnAlbumTitle" x:Name="dataGridColumnAlbumTitle" Width="Auto" Binding="{Binding Path=AlbumTitle}" Header="Album name"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnSampleRate" x:Name="dataGridColumnSampleRate" Width="Auto" Binding="{Binding Path=SampleRate}" Header="Sample rate"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnQuantizationBitRate" x:Name="dataGridColumnQuantizationBitRate" Width="Auto" Binding="{Binding Path=QuantizationBitRate}" Header="Quantization bit rate"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnNumChannels" x:Name="dataGridColumnNumChannels" Width="SizeToCells"  Binding="{Binding Path=NumChannels}" Header="Num of channels"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnBitRate" x:Name="dataGridColumnBitRate" Width="Auto" Binding="{Binding Path=BitRate}" Header="Bitrate"/>
-                        <DataGridTextColumn x:Uid="dataGridColumnIndexNr" x:Name="dataGridColumnIndexNr" Width="SizeToCells" Binding="{Binding Path=IndexNr}" Header="Index"/>
-                        <DataGridCheckBoxColumn x:Uid="dataGridColumnReadSeparaterAfter" x:Name="dataGridColumnReadSeparaterAfter" Width="SizeToCells" Binding="{Binding Path=ReadSeparaterAfter}" Header="Batch read endpoint"/>
+                        <DataGridTextColumn x:Name="dataGridColumnTitle" Width="Auto" Binding="{Binding Path=Title}" Header="Title" >
+                            <!--
+                            <DataGridTextColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="ToolTip" Value="{Binding Path=Path}" />
+                                </Style>
+                            </DataGridTextColumn.CellStyle>
+                            -->
+                        </DataGridTextColumn>
+                        <DataGridTextColumn x:Name="dataGridColumnDuration" Width="Auto" Binding="{Binding Path=Duration}" Header="Duration"/>
+                        <DataGridTextColumn x:Name="dataGridColumnArtist" Width="Auto" Binding="{Binding Path=ArtistName}" Header="Artists"/>
+                        <DataGridTextColumn x:Name="dataGridColumnAlbumTitle" Width="Auto" Binding="{Binding Path=AlbumTitle}" Header="Album name"/>
+                        <DataGridTextColumn x:Name="dataGridColumnComposerName" Width="Auto" Binding="{Binding Path=ComposerName}" Header="Composer"/>
+
+                        <DataGridTextColumn x:Name="dataGridColumnSampleRate" Width="SizeToCells" Binding="{Binding Path=SampleRate}" Header="Sample rate"/>
+                        <DataGridTextColumn x:Name="dataGridColumnQuantizationBitRate" Width="SizeToCells" Binding="{Binding Path=QuantizationBitRate}" Header="Quantization bit rate"/>
+                        <DataGridTextColumn x:Name="dataGridColumnNumChannels" Width="SizeToCells"  Binding="{Binding Path=NumChannels}" Header="Num of channels"/>
+                        <DataGridTextColumn x:Name="dataGridColumnBitRate" Width="SizeToCells" Binding="{Binding Path=BitRate}" Header="Bitrate"/>
+                        <DataGridTextColumn x:Name="dataGridColumnTrackNr" Width="SizeToCells" Binding="{Binding Path=TrackNr}" Header="Track"/>
+                        
+                        <DataGridTextColumn x:Name="dataGridColumnIndexNr" Width="SizeToCells" Binding="{Binding Path=IndexNr}" Header="Index"/>
+                        <DataGridTextColumn x:Name="dataGridColumnFileExtension" Width="SizeToCells" Binding="{Binding Path=FileExtension}" Header="FileExtension"/>
+                        <DataGridCheckBoxColumn x:Name="dataGridColumnReadSeparaterAfter" Width="SizeToCells" Binding="{Binding Path=ReadSeparaterAfter}" Header="Batch read endpoint"/>
                     </DataGrid.Columns>
 
                 </DataGrid>
@@ -114,7 +135,7 @@
                         <Button x:Uid="buttonPause" Content="Pa_use" HorizontalAlignment="Left" IsEnabled="False" Margin="149,6,0,0" Name="buttonPause" VerticalAlignment="Top" Width="89" Click="buttonPause_Click" />
                         <Button x:Uid="buttonPrev" Content="Prev" HorizontalAlignment="Left" IsEnabled="False" Margin="256,6,0,0" Name="buttonPrev" VerticalAlignment="Top" Width="50" Click="buttonPrev_Click" />
                         <Button x:Uid="buttonNext" Content="Next" HorizontalAlignment="Left" IsEnabled="False" Margin="311,6,0,0" Name="buttonNext" VerticalAlignment="Top" Width="50" Click="buttonNext_Click" />
-                        <Label x:Uid="labelPlayingTime" Content="00:00:00/00:00:00" Margin="148,30,6,0" Name="labelPlayingTime" Height="29" VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="16" FontFamily="Courier New" />
+                        <Label x:Uid="labelPlayingTime" Content="0:00:00/0:00:00" Margin="148,30,6,0" Name="labelPlayingTime" Height="29" VerticalAlignment="Top" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" FontWeight="Bold" FontSize="16" FontFamily="Courier New" />
                         <ComboBox x:Uid="comboBoxPlayMode" HorizontalAlignment="Left" Margin="6,33,0,0" Name="comboBoxPlayMode" VerticalAlignment="Top" />
                     </Grid>
                 </GroupBox>
@@ -174,10 +195,23 @@
                 </GroupBox>
             </Grid>
         </Expander>
-        <StatusBar x:Uid="statusBar1" Name="statusBar1" Height="23" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
-            <StatusBarItem x:Uid="statusBarText" Content="abcde" Name="statusBarText" />
+        <StatusBar x:Uid="statusBar1" Name="statusBar1" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem x:Uid="statusBarText" Content="Status bar text" VerticalAlignment="Center" Name="statusBarText" />
+            <StatusBarItem Grid.Column="1">
+                <ProgressBar x:Uid="progressBar1" Name="progressBar1" VerticalAlignment="Center" Height="20" Visibility="Visible" Width="200" />
+            </StatusBarItem>
         </StatusBar>
-        <ProgressBar x:Uid="progressBar1" Name="progressBar1" VerticalAlignment="Bottom" Margin="200,0,0,0" HorizontalAlignment="Left" Width="200" Height="22" Visibility="Hidden" />
         <Slider x:Uid="sliderWindowScaling" Margin="0,0,1,1" Name="sliderWindowScaling" VerticalAlignment="Bottom" Maximum="1.25" Minimum="0.8" Value="1" Visibility="Hidden" Grid.Column="1" HorizontalAlignment="Right" Width="52" SmallChange="0.0048828125" LargeChange="0.0625" />
     </Grid>
 </Window>

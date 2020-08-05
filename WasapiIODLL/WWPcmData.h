@@ -18,20 +18,25 @@ enum WWPcmDataContentType {
 const char *
 WWPcmDataContentTypeToStr(WWPcmDataContentType w);
 
-/// サンプルフォーマット。
+/// サンプルフォーマット。WasapiCS.SampleFormatTypeと一致させる。
+/// すぐ下の関数群もしっかり作って下さい。
 enum WWPcmDataSampleFormatType {
     WWPcmDataSampleFormatUnknown = -1,
+
     WWPcmDataSampleFormatSint16,
     WWPcmDataSampleFormatSint24,
     WWPcmDataSampleFormatSint32V24,
     WWPcmDataSampleFormatSint32,
     WWPcmDataSampleFormatSfloat,
 
+    WWPcmDataSampleFormatSdouble,
+
     WWPcmDataSampleFormatNUM
 };
 const char *
 WWPcmDataSampleFormatTypeToStr(WWPcmDataSampleFormatType w);
 int WWPcmDataSampleFormatTypeToBitsPerSample(WWPcmDataSampleFormatType t);
+int WWPcmDataSampleFormatTypeToBytesPerSample(WWPcmDataSampleFormatType t);
 int WWPcmDataSampleFormatTypeToValidBitsPerSample(WWPcmDataSampleFormatType t);
 bool WWPcmDataSampleFormatTypeIsFloat(WWPcmDataSampleFormatType t);
 bool WWPcmDataSampleFormatTypeIsInt(WWPcmDataSampleFormatType t);
@@ -55,12 +60,13 @@ struct WWPcmFormat {
     DWORD                     dwChannelMask;
     WWStreamType              streamType;
 
-    void Set(int sampleRate, WWPcmDataSampleFormatType sampleFormat, int numChannels, DWORD dwChannelMask, WWStreamType streamType) {
-        this->sampleRate    = sampleRate;
-        this->sampleFormat  = sampleFormat;
-        this->numChannels   = numChannels;
-        this->dwChannelMask = dwChannelMask;
-        this->streamType    = streamType;
+    void Set(int aSampleRate, WWPcmDataSampleFormatType aSampleFormat, int aNumChannels,
+            DWORD aDwChannelMask, WWStreamType aStreamType) {
+        this->sampleRate    = aSampleRate;
+        this->sampleFormat  = aSampleFormat;
+        this->numChannels   = aNumChannels;
+        this->dwChannelMask = aDwChannelMask;
+        this->streamType    = aStreamType;
     }
 
     void Clear(void) {
@@ -84,38 +90,23 @@ struct WWPcmFormat {
  *   pcmData->posFrame: available recorded frame num
  *   pcmData->nFrames: recording buffer size
  */
-struct WWPcmData {
-    WWPcmData *next;
-
-    int       id;
-    WWPcmDataSampleFormatType sampleFormat;
-    WWStreamType              streamType;
-    WWPcmDataContentType      contentType;
-    int       nChannels;
-    int       bytesPerFrame;
-
-    /// used by FillBufferAddData()
-    int64_t   filledFrames;
-    int64_t   nFrames;
-    int64_t   posFrame;
-
-    BYTE      *stream;
-
+class WWPcmData {
+public:
     WWPcmData(void) {
-        next         = nullptr;
+        mNext         = nullptr;
 
-        id           = 0;
-        sampleFormat = WWPcmDataSampleFormatUnknown;
-        streamType   = WWStreamPcm;
-        contentType  = WWPcmDataContentMusicData;
-        nChannels    = 0;
-        bytesPerFrame = 0;
+        mId           = 0;
+        mSampleFormat = WWPcmDataSampleFormatUnknown;
+        mStreamType   = WWStreamPcm;
+        mContentType  = WWPcmDataContentMusicData;
+        mChannels    = 0;
+        mBytesPerFrame = 0;
 
-        filledFrames  = 0;
-        nFrames       = 0;
-        posFrame      = 0;
+        mFilledFrames  = 0;
+        mFrames       = 0;
+        mPosFrame      = 0;
 
-        stream        = nullptr;
+        mStream        = nullptr;
     }
 
     ~WWPcmData(void) {
@@ -127,11 +118,12 @@ struct WWPcmData {
     /// @param bytesPerFrame 1フレームのバイト数。
     ///     (1サンプル1チャンネルのバイト数×チャンネル数)
     bool Init(int id, WWPcmDataSampleFormatType sampleFormat, int nChannels,
-        int64_t nFrames, int bytesPerFrame, WWPcmDataContentType aContentType, WWStreamType aStreamType);
+        int64_t nFrames, int bytesPerFrame, WWPcmDataContentType aContentType,
+        WWStreamType aStreamType);
     void Term(void);
 
     void Forget(void) {
-        stream = nullptr;
+        mStream = nullptr;
     }
 
     void CopyFrom(WWPcmData *rhs);
@@ -147,7 +139,7 @@ struct WWPcmData {
         const WWPcmData &toPcmData,   int64_t toPosFrame);
 
     int64_t AvailableFrames(void) const {
-        return nFrames - posFrame;
+        return mFrames - mPosFrame;
     }
 
     /// @return retrieved data bytes
@@ -166,16 +158,16 @@ struct WWPcmData {
 
     /// get float sample min/max for volume correction
     void FindSampleValueMinMax(float *minValue_return, float *maxValue_return);
-    void ScaleSampleValue(float scale);
+    bool ScaleSampleValue(float scale);
 
     void SetStreamType(WWStreamType t) {
-        streamType = t;
+        mStreamType = t;
     }
 
     void FillDopSilentData(void);
 
-    void DopToPcm(void);
-    void PcmToDop(void);
+    void DopToPcmFast(void);
+    void PcmToDopFast(void);
 
     void CheckDopMarker(void);
 
@@ -183,18 +175,87 @@ struct WWPcmData {
     /// @return current pcmData after nFrame
     static WWPcmData *AdvanceFrames(WWPcmData *pcmData, int64_t nFrames);
 
+    WWPcmDataSampleFormatType SampleFormat(void) const {
+        return mSampleFormat;
+    }
+
+    WWStreamType StreamType(void) const {
+        return mStreamType;
+    }
+
+    WWPcmDataContentType ContentType(void) const {
+        return mContentType;
+    }
+
+    int Channels(void) const {
+        return mChannels;
+    }
+
+    WWPcmData *Next(void) const {
+        return mNext;
+    }
+
+    int Id(void) const {
+        return mId;
+    }
+
+    int64_t Frames(void) const {
+        return mFrames;
+    }
+
+    int64_t PosFrame(void) const {
+        return mPosFrame;
+    }
+
+    void SetPosFrame(int64_t n) {
+        mPosFrame = n;
+    }
+
+    void SetNext(WWPcmData *n) {
+        mNext = n;
+    }
+
+    BYTE *Stream(void) {
+        return mStream;
+    }
+    
+    const BYTE *Stream(void) const {
+        return mStream;
+    }
+
+    int BytesPerFrame(void) const {
+        return mBytesPerFrame;
+    }
+
 private:
+    WWPcmData *mNext;
+
+    int       mId;
+    WWPcmDataSampleFormatType mSampleFormat;
+    WWStreamType              mStreamType;
+    WWPcmDataContentType      mContentType;
+    int       mChannels;
+    int       mBytesPerFrame;
+
+    /// used by FillBufferAddData()
+    int64_t   mFilledFrames;
+    int64_t   mFrames;
+    int64_t   mPosFrame;
+
+    BYTE      *mStream;
+
     /** get sample value on posFrame.
      * 24 bit signed int value is returned when Sint32V24
      */
     int GetSampleValueInt(int ch, int64_t posFrame) const;
     float GetSampleValueFloat(int ch, int64_t posFrame) const;
-
-    bool SetSampleValueInt(int ch, int64_t posFrame, int value);
-    bool SetSampleValueFloat(int ch, int64_t posFrame, float value);
-
+    int GetSampleValueAsInt24(int ch, int64_t posFrame) const;
     float GetSampleValueAsFloat(int ch, int64_t posFrame) const;
-    bool SetSampleValueAsFloat(int ch, int64_t posFrame, float value);
+
+    bool SetSampleValueInt(int ch, int64_t posFrame, int v);
+    bool SetSampleValueFloat(int ch, int64_t posFrame, float v);
+    bool SetSampleValueAsInt24(int ch, int64_t posFrame, int v);
+    bool SetSampleValueAsFloat(int ch, int64_t posFrame, float v);
 
     /** create splice data from the two adjacent sample data */
     int UpdateSpliceDataWithStraightLinePcm(

@@ -1,16 +1,16 @@
-﻿// WavRW2.csから読み込み部分だけを切り出したコード。
-
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using WWUtil;
+using System.Diagnostics;
 
 namespace WavRWLib2 {
     public class WavReader {
         class DataSubChunk {
             public uint ChunkSize { get; set; }
 
-            private byte[] mRawData;
+            private LargeArray<byte> mRawData;
 
             /// <summary>
             /// ファイル先頭から、このデータチャンクのPCMデータ先頭までのオフセット
@@ -18,7 +18,7 @@ namespace WavRWLib2 {
             public long Offset { get; set; }
             public long NumFrames { get; set; }
 
-            public byte[] GetSampleArray() {
+            public LargeArray<byte> GetSampleLargeArray() {
                 return mRawData;
             }
 
@@ -27,7 +27,7 @@ namespace WavRWLib2 {
             /// 4バイトしか進まない。
             /// </summary>
             public long ReadDataChunkHeader(BinaryReader br, long offset, byte[] fourcc, int numChannels, int bitsPerSample) {
-                if (!PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "data")) {
+                if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "data")) {
                     System.Diagnostics.Debug.Assert(false);
                     return 0;
                 }
@@ -81,10 +81,19 @@ namespace WavRWLib2 {
                 }
 
                 if (0 < startBytes) {
-                    PcmDataLib.Util.BinaryReaderSkip(br, startBytes);
+                    PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, startBytes);
                 }
 
-                mRawData = br.ReadBytes((int)newNumFrames * frameBytes);
+                mRawData = new LargeArray<byte>(newNumFrames * frameBytes);
+                int fragmentBytes = 1048576;
+                for (long pos=0; pos<mRawData.LongLength; pos += fragmentBytes) {
+                    int bytes = fragmentBytes;
+                    if (mRawData.LongLength - pos < bytes) {
+                        bytes = (int)(mRawData.LongLength-pos);
+                    }
+                    var buff = br.ReadBytes(bytes);
+                    mRawData.CopyFrom(buff, 0, pos, bytes);
+                }
                 NumFrames = newNumFrames;
                 return true;
             }
@@ -110,6 +119,7 @@ namespace WavRWLib2 {
         public string Title { get; set; }
         public string ArtistName { get; set; }
         public string AlbumName { get; set; }
+        public string ComposerName { get; set; }
 
         /// <summary>
         /// 画像データバイト数(無いときは0)
@@ -136,12 +146,12 @@ namespace WavRWLib2 {
             OnlyHeader
         }
 
-        // 大体100テラぐらい
+        // 大体100テラバイトぐらい
         const long INT64_DATA_SIZE_LIMIT = 0x0000ffffffffffffL;
 
         public long ReadRiffChunk(BinaryReader br, byte[] chunkId) {
-            if (!PcmDataLib.Util.FourCCHeaderIs(chunkId, 0, "RIFF") &&
-                    !PcmDataLib.Util.FourCCHeaderIs(chunkId, 0, "RF64")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(chunkId, 0, "RIFF") &&
+                    !PcmDataLib.PcmDataUtil.FourCCHeaderIs(chunkId, 0, "RF64")) {
                 // 起こらない。
                 System.Diagnostics.Debug.Assert(false);
                 return 0;
@@ -154,7 +164,7 @@ namespace WavRWLib2 {
             }
 
             byte[] format = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(format, 0, "WAVE")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(format, 0, "WAVE")) {
                 ErrorReason = string.Format("E: RiffChunkDescriptor.format mismatch. \"{0}{1}{2}{3}\" should be \"WAVE\"",
                         (char)format[0], (char)format[1], (char)format[2], (char)format[3]);
                 return 0;
@@ -163,29 +173,35 @@ namespace WavRWLib2 {
             return 8;
         }
 
-        public long ReadFmtChunk(BinaryReader br, byte[] fourcc) {
-            if (!PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
+        public int FmtSubChunkSize { get; set; }
+
+        private long ReadFmtChunk(BinaryReader br, byte[] fourcc) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "fmt ")) {
                 // 起こらない。
                 System.Diagnostics.Debug.Assert(false);
                 return 0;
             }
 
             uint subChunk1Size = br.ReadUInt32();
+            FmtSubChunkSize = (int)subChunk1Size;
 
-            if (40 == subChunk1Size) {
-                // Console.WriteLine("D: FmtSubChunk.ReadRiffChunk() WAVEFORMATEXTENSIBLE\n");
-            } else if (16 != subChunk1Size && 18 != subChunk1Size) {
-                ErrorReason = string.Format("E: FmtSubChunk.ReadRiffChunk() subChunk1Size!=16 {0} this file type is not supported", subChunk1Size);
+            if (18 <= subChunk1Size) {
+                // extensible領域がある。
+                // subChunk1Size==18でextensibleSize==0のWAVファイルを見たことがある。
+                // subChunk1Size==40でextensibleSize==22のときWAVEFORMATEXTENSIBLE。
+            } else if (14 != subChunk1Size && 16 != subChunk1Size) {
+                ErrorReason = string.Format("E: FmtSubChunk.ReadRiffChunk() subChunk1Size={0} this file type is not supported", subChunk1Size);
                 return 0;
             }
 
             ushort audioFormat = br.ReadUInt16();
             if (1 == audioFormat) {
+                // WAVE_FORMAT_PCM
                 SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SInt;
             } else if (3 == audioFormat) {
                 SampleValueRepresentationType = PcmDataLib.PcmData.ValueRepresentationType.SFloat;
             } else if (0xfffe == audioFormat) {
-                // WAVEFORMATEXTENSIBLE
+                // WAVEFORMATEXTENSIBLE == 0xfffe
             } else {
                 ErrorReason = string.Format("E: non PCM format {0}. Cannot read this wav file.", audioFormat);
                 return 0;
@@ -195,10 +211,22 @@ namespace WavRWLib2 {
             uint sampleRate = br.ReadUInt32();
             uint byteRate = br.ReadUInt32();
             ushort blockAlign = br.ReadUInt16();
-            BitsPerSample = br.ReadUInt16();
-            ValidBitsPerSample = BitsPerSample;
 
-            int extensibleSize = 0;
+            if (16 <= subChunk1Size) {
+                BitsPerSample = br.ReadUInt16();
+            } else {
+                BitsPerSample = blockAlign * 8 / NumChannels;
+            }
+
+            if (BitsPerSample == 20) {
+                // WaveLab creates such WAVE file. (WAVEFORMAT structure with BitsPerSample==20 and apparently 1 sample==3bytes)
+                BitsPerSample = 24;
+                ValidBitsPerSample = 20;
+            } else {
+                // WAVEFORMATEXの場合、ValidBitsPerSampleはここで確定する。
+                // WAVEFORMATEXTENSIBLEの場合、真のValidBitsPerSampleが20行後に判明する。
+                ValidBitsPerSample = BitsPerSample;
+            }
 
             if (Int32.MaxValue <= SampleRate) {
                 ErrorReason = string.Format("E: Sample rate is too large {0}", SampleRate);
@@ -206,15 +234,23 @@ namespace WavRWLib2 {
             }
             SampleRate = (int)sampleRate;
 
-            if (16 < subChunk1Size) {
+            int extensibleSize = 0;
+            if (18 <= subChunk1Size) {
                 // cbSize 2bytes
                 extensibleSize = br.ReadUInt16();
             }
 
-            if (22 == extensibleSize) {
-                // WAVEFORMATEX(22 bytes)
+            if (22 == extensibleSize && 40 <= subChunk1Size) {
+                // WAVEFORMATEXTENSIBLE(22 bytes)
+                // WAVEFORMATex == 18バイト
+                // 計40バイト。
 
                 ValidBitsPerSample = br.ReadUInt16();
+                if (ValidBitsPerSample == 0) {
+                    // Adobe Audition CS5.5
+                    ValidBitsPerSample = BitsPerSample;
+                }
+
                 ChannelMask = br.ReadUInt32();
                 var formatGuid = br.ReadBytes(16);
 
@@ -234,18 +270,15 @@ namespace WavRWLib2 {
                             formatGuid[12], formatGuid[13], formatGuid[14], formatGuid[15]);
                     return 0;
                 }
-            }
-
-            if (40 == subChunk1Size && 0 == extensibleSize) {
-                // Pro Tools WAV
-                PcmDataLib.Util.BinaryReaderSkip(br, 22);
-            }
-
-            if (0 != extensibleSize && 22 != extensibleSize) {
-                // extensibleSizeが壊れているのではないだろうか。
-                // extensibleSizeを信用せず、subChunk1Sizeを使用してfmtチャンクをスキップする。
-                // この場合fmtチャンクを既に18バイト読み込んでいるのでスキップするバイト数はsubChunk1Size-18。
-                PcmDataLib.Util.BinaryReaderSkip(br, subChunk1Size - 18);
+            } else {
+                if (18 < subChunk1Size) {
+                    // 知らないextensibleSize。
+                    // extensibleSizeを信用せず、subChunk1Sizeを使用してfmtチャンクをスキップする。
+                    // この場合fmtチャンクを既に18バイト読み込んでいるので
+                    // スキップするバイト数はsubChunk1Size - 18。2の倍数に繰り上げる。
+                    int skipBytes = (int)((subChunk1Size - 18 + 1) & (~1L));
+                    PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipBytes);
+                }
             }
 
             if (byteRate != SampleRate * NumChannels * BitsPerSample / 8) {
@@ -261,7 +294,7 @@ namespace WavRWLib2 {
             return subChunk1Size + 4;
         }
 
-        public long ReadDS64Chunk(BinaryReader br) {
+        private long ReadDS64Chunk(BinaryReader br) {
             // chunkIdは、既に読んでいる。
 
             uint chunkSize = br.ReadUInt32();
@@ -328,7 +361,7 @@ namespace WavRWLib2 {
             }
             // PADの処理。chunkSizeが奇数の場合、1バイト読み進める。
             long skipBytes = (chunkSize + 1) & (~1L);
-            PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
+            PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipBytes);
             return skipBytes + 4;
         }
 
@@ -344,17 +377,23 @@ namespace WavRWLib2 {
             }
             int readBytes = (int)((headerBytes + 1) & (~1L));
 
-            byte[] data = br.ReadBytes(readBytes);
-
-            mId3Reader.Read(new BinaryReader(new MemoryStream(data)));
-            if (mId3Reader.TitleName != null && 0 < mId3Reader.TitleName.Length) {
-                Title = mId3Reader.TitleName;
-            }
-            if (mId3Reader.AlbumName != null && 0 < mId3Reader.AlbumName.Length) {
-                AlbumName = mId3Reader.AlbumName;
-            }
-            if (mId3Reader.ArtistName != null && 0 < mId3Reader.ArtistName.Length) {
-                ArtistName = mId3Reader.ArtistName;
+            try {
+                byte[] data = br.ReadBytes(readBytes);
+                mId3Reader.Read(new BinaryReader(new MemoryStream(data)));
+                if (mId3Reader.TitleName != null && 0 < mId3Reader.TitleName.Length) {
+                    Title = mId3Reader.TitleName;
+                }
+                if (mId3Reader.AlbumName != null && 0 < mId3Reader.AlbumName.Length) {
+                    AlbumName = mId3Reader.AlbumName;
+                }
+                if (mId3Reader.ArtistName != null && 0 < mId3Reader.ArtistName.Length) {
+                    ArtistName = mId3Reader.ArtistName;
+                }
+                if (mId3Reader.Composer != null && 0 < mId3Reader.Composer.Length) {
+                    ComposerName = mId3Reader.Composer;
+                }
+            } catch (Exception ex) {
+                Console.WriteLine("ID3 chunk read error. continue... {0}", ex);
             }
 
             return 4 + readBytes;
@@ -379,7 +418,7 @@ namespace WavRWLib2 {
                 ++result;
             }
 
-            if (!PcmDataLib.Util.FourCCHeaderIs(data, 0, "INFO")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(data, 0, "INFO")) {
                 // これはエラーでない。チャンクをスキップして続行する。
                 Console.WriteLine("D: LIST header does not follows INFO. skipped.");
                 return result;
@@ -394,13 +433,13 @@ namespace WavRWLib2 {
                 }
                 int bytes = data[pos + 4] + 256 * data[pos + 5]+ 65536 * data[pos + 6];
                 if (0 < bytes) {
-                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "INAM")) {
+                    if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(data, pos, "INAM")) {
                         Title = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
-                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IART")) {
+                    if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(data, pos, "IART")) {
                         ArtistName = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
-                    if (PcmDataLib.Util.FourCCHeaderIs(data, pos, "IPRD")) {
+                    if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(data, pos, "IPRD")) {
                         AlbumName = JapaneseTextByteArrayToString(data, pos + 8, bytes);
                     }
                 }
@@ -435,6 +474,45 @@ namespace WavRWLib2 {
             return result;
         }
 
+        public enum DataType {
+            PCM,
+            DoP
+        };
+
+        /// <summary>
+        /// DoP or PCM
+        /// </summary>
+        public DataType SampleDataType { get; set; }
+
+        /// <summary>
+        /// DoPマーカーが出てくるか調べ、SampleDataTypeを確定する。
+        /// </summary>
+        /// <returns>DATAチャンクの中身をPeekしたバイト数。</returns>
+        private int ScanDopMarker(BinaryReader br, long numFrames) {
+            SampleDataType = DataType.PCM;
+
+            var pcmData = new PcmDataLib.PcmData();
+            pcmData.SetFormat(NumChannels, BitsPerSample, ValidBitsPerSample, SampleRate,
+                SampleValueRepresentationType, numFrames);
+
+            int bytesPerFrame = BitsPerSample / 8 * NumChannels;
+
+            int scanFrames = PcmDataLib.PcmData.DOP_SCAN_FRAMES;
+            if (numFrames < scanFrames) {
+                scanFrames = (int)NumFrames;
+            }
+
+            int scanBytes = scanFrames * bytesPerFrame;
+
+            var buff = br.ReadBytes(scanBytes);
+
+            if (pcmData.ScanDopMarker(buff)) {
+                SampleDataType = DataType.DoP;
+            }
+
+            return buff.Length;
+        }
+
         private bool Read(BinaryReader br, ReadMode mode, long startFrame, long endFrame) {
             ErrorReason = string.Empty;
 
@@ -455,8 +533,8 @@ namespace WavRWLib2 {
                     long advance = 0;
 
                     if (!riffChunkExist) {
-                        if (!PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "RIFF") &&
-                            !PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "RF64")) {
+                        if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "RIFF") &&
+                            !PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "RF64")) {
                             // ファイルの先頭がRF64でもRIFFもない。WAVではない。
                             ErrorReason = "File does not start with RIFF nor RF64.";
                             return false;
@@ -464,17 +542,19 @@ namespace WavRWLib2 {
 
                         advance = ReadRiffChunk(br, fourcc);
                         riffChunkExist = true;
-                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "fmt ")) {
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "fmt ")) {
                         advance = ReadFmtChunk(br, fourcc);
                         fmtChunkExist = true;
-                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "LIST")) {
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "LIST")) {
                         advance = ReadListChunk(br);
-                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "id3 ")) {
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "id3 ")) {
                         advance = ReadId3Chunk(br);
-                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "ds64")) {
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "ID3 ")) {
+                        advance = ReadId3Chunk(br);
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "ds64")) {
                         advance = ReadDS64Chunk(br);
                         ds64ChunkExist = true;
-                    } else if (PcmDataLib.Util.FourCCHeaderIs(fourcc, 0, "data")) {
+                    } else if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(fourcc, 0, "data")) {
                         if (!fmtChunkExist) {
                             // fmtチャンクがないと量子化ビット数がわからず処理が継続できない。
                             ErrorReason = "fmt subchunk is missing.";
@@ -517,10 +597,18 @@ namespace WavRWLib2 {
                             }
                         }
 
+                        int peekBytes = 0;
+
+                        if (mode == ReadMode.OnlyHeader) {
+                            peekBytes = ScanDopMarker(br, dsc.NumFrames);
+                        }
+
                         // マルチデータチャンク形式の場合、data chunkの後にさらにdata chunkが続いたりするので、
                         // 読み込みを続行する。
-                        long skipBytes = (dsc.NumFrames * frameBytes + 1) & (~1L);
-                        PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
+                        long skipBytes = (dsc.NumFrames * frameBytes - peekBytes + 1) & (~1L);
+                        if (0 < skipBytes) {
+                            PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipBytes);
+                        }
 
                         if (br.BaseStream.Length < (offset + advance) + skipBytes) {
                             // ファイルが途中で切れている。
@@ -584,12 +672,12 @@ namespace WavRWLib2 {
             }
         }
 
-        public byte[] GetSampleArray() {
+        public LargeArray<byte> GetSampleLargeArray() {
             if (mDscList.Count != 1) {
                 Console.WriteLine("multi data chunk wav. not supported");
                 return null;
             }
-            return mDscList[0].GetSampleArray();
+            return mDscList[0].GetSampleLargeArray();
         }
 
         int mCurrentDsc = -1;
@@ -624,7 +712,7 @@ namespace WavRWLib2 {
                     // 開始フレームはこのdscにある。
                     mCurrentDsc = i;
                     mDscPosFrame = skipFrames;
-                    PcmDataLib.Util.BinaryReaderSeekFromBegin(br, dsc.Offset + frameBytes * skipFrames);
+                    PcmDataLib.PcmDataUtil.BinaryReaderSeekFromBegin(br, dsc.Offset + frameBytes * skipFrames);
                     return true;
                 } else {
                     skipFrames -= dsc.NumFrames;
@@ -663,7 +751,7 @@ namespace WavRWLib2 {
             if (dsc.NumFrames <= mDscPosFrame && (mCurrentDsc + 1) < mDscList.Count) {
                 // 次のdscに移動する
                 // 8 == data chunk id + data chunk sizeのバイト数
-                PcmDataLib.Util.BinaryReaderSkip(br, 8);
+                PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, 8);
                 ++mCurrentDsc;
                 mDscPosFrame = 0;
             }

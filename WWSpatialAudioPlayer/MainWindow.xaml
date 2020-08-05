@@ -1,0 +1,85 @@
+﻿<Window x:Class="WWSpatialAudioPlayer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WWSpatialAudioPlayer"
+        mc:Ignorable="d"
+        Title="WWSpatialAudioPlayer" Height="600" Width="800" Closed="Window_Closed" Loaded="Window_Loaded" Closing="Window_Closing" >
+    <Grid Name="mGridWholeContainer" >
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" >
+            
+        </Grid>
+        <Grid Grid.Column="1" Name="mGridMainContainer" Visibility="Visible">
+            <Grid Margin="6,0,6,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="110"/>
+                    <RowDefinition Height="120*"/>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="120"/>
+                    <RowDefinition Height="20" />
+                </Grid.RowDefinitions>
+                <GroupBox x:Name="mGroupBoxInputAudioFile" Header="Input Audio File:" >
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="5*"/>
+                            <ColumnDefinition Width="2*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <Label Content="Input _File name" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                        <TextBox IsReadOnly="True" x:Name="mTextBoxInputFileName" TextWrapping="Wrap" Text="C:/audio/12channel.wav" VerticalAlignment="Center" Grid.Column="1" Margin="0,0,0,0" />
+                        <Button x:Name="mButtonBrowse" Content="_Browse..." Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100" Margin="6,0,0,0" Click="ButtonBrowse_Click"/>
+                        <Button x:Name="mButtonRead" Content="_Read" Grid.Column="1" Grid.Row="1" HorizontalAlignment="Left" VerticalAlignment="Center" Width="100" Margin="-60,0,0,0" Click="ButtonRead_Click"/>
+                        <Label x:Name="mLabelInputAudioFmt" Content="" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Margin="4,0,0,0" VerticalAlignment="Center" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox x:Name="mGroupBoxPlaybackDevice" Header="Playback Device" Grid.Row="1" IsEnabled="False" >
+                    <Grid>
+                        <Grid >
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="1*" />
+                                <RowDefinition Height="30" />
+                            </Grid.RowDefinitions>
+                            <GroupBox x:Name="mGroupBoxDeviceList" Header="Device to use" >
+                                <ListBox x:Name="mListBoxPlaybackDevices" />
+                            </GroupBox>
+                            <StackPanel Grid.Row="1" Orientation="Horizontal" >
+                                <Button x:Name="mButtonActivate" Width="120" Content="_Activate device" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,0,0" Click="ButtonActivateDevice_Click"/>
+                                <Button x:Name="mButtonDeactivate" Width="120" Content="_Deactivate device" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,6,0" Click="ButtonDeactivateDevice_Click" IsEnabled="False"/>
+                                <Button x:Name="mButtonUpdatePlaybackDeviceList" Width="100" Content="_Update list" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="6,0,6,0" Click="ButtonUpdatePlaybackDeviceList_Click"/>
+                            </StackPanel>
+                        </Grid>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Playback controls" Grid.Row="2" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" >
+                            <Button x:Name="mButtonPlay" Content="_Play" VerticalAlignment="Center" Width="100" Margin="6,0,0,0" IsEnabled="False" Click="ButtonPlay_Click"/>
+                            <Button x:Name="mButtonStop" Content="_Stop" VerticalAlignment="Center" Width="100" Margin="6,0,0,0" IsEnabled="False" Click="ButtonStop_Click"/>
+                            <Label x:Name="mLabelPlayingTime" Content="--:-- / --:--" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Slider x:Name="mSliderPlayPosion" Grid.Row="1" VerticalAlignment="Center" IsMoveToPointEnabled="True" MouseMove="MSliderPlayPosion_MouseMove" MouseLeftButtonDown="MSliderPlayPosion_MouseLeftButtonDown" MouseLeftButtonUp="MSliderPlayPosion_MouseLeftButtonUp" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Log" Grid.Row="3" >
+                    <TextBox x:Name="mTextBoxLog" Text="Show logs here" AcceptsTab="True" AcceptsReturn="True" ScrollViewer.CanContentScroll="True" IsReadOnly="True" VerticalScrollBarVisibility="Auto" />
+                </GroupBox>
+                <ProgressBar x:Name="mProgressbar" Grid.Row="5" />
+
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

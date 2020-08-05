@@ -18,7 +18,27 @@ namespace PlayPcmWin {
         EditItem,
     }
 
+    public enum ChannelCount2Type {
+        SourceChannelCount = 0,
+
+        Ch2 = 2,
+        Ch4 = 4,
+        Ch6 = 6,
+        Ch8 = 8,
+        Ch10 = 10,
+
+        Ch16 = 16,
+        Ch18 = 18,
+        Ch24 = 24,
+        Ch26 = 26,
+        Ch32 = 32,
+
+        MixFormatChannelCount = 65536,
+    };
+
     public class Preference : WWXmlRW.SaveLoadContents {
+        public const int TIME_PERIOD_ONE_MILLISEC = 10000;
+
         // SaveLoadContents IF
         public int GetCurrentVersionNumber() { return CurrentVersion; }
         public int GetVersionNumber() { return Version; }
@@ -56,6 +76,10 @@ namespace PlayPcmWin {
         public bool SettingsIsExpanded { get; set; }
         public bool StorePlaylistContent { get; set; }
         public bool DispCoverart { get; set; }
+        public bool ReduceVolume { get; set; }
+        public int ReduceVolumeByDb { get; set; }
+
+        // RefrainRedraw is deprecated 
         public bool RefrainRedraw { get; set; }
         public bool Shuffle { get; set; }
         public int ZeroFlushMillisec { get; set; }
@@ -90,6 +114,15 @@ namespace PlayPcmWin {
 
         public bool SoundEffectsEnabled { get; set; }
 
+        public bool AddSilentForEvenChannel { get; set; }
+
+        public bool IsFormatSupportedCall { get; set; }
+
+        // deprecated (because it has wrong default value) ChannelCount2 is now used
+        //public int ChannelCount { get; set; }
+
+        public ChannelCount2Type ChannelCount2 { get; set; }
+
         public void PlayListColumnsOrderRemoveRange(int idx, int count) {
             playListColumnsOrder.RemoveRange(idx, count);
         }
@@ -102,12 +135,16 @@ namespace PlayPcmWin {
             pl.Add("Duration");
             pl.Add("Artist");
             pl.Add("AlbumTitle");
-            pl.Add("SampleRate");
+            pl.Add("ComposerName");
 
+            pl.Add("SampleRate");
             pl.Add("QuantizationBitRate");
             pl.Add("NumChannels");
             pl.Add("BitRate");
+            pl.Add("TrackNr");
+
             pl.Add("IndexNr");
+            pl.Add("FileExtension");
             pl.Add("ReadSeparaterAfter");
         }
 
@@ -142,9 +179,11 @@ namespace PlayPcmWin {
             SettingsIsExpanded = true;
             StorePlaylistContent = true;
             DispCoverart = true;
+            ReduceVolume = false;
+            ReduceVolumeByDb = 6;
             RefrainRedraw = false;
             ZeroFlushMillisec = 500;
-            TimePeriodHundredNanosec = 10000;
+            TimePeriodHundredNanosec = TIME_PERIOD_ONE_MILLISEC;
             LastPlayItemIndex = 0;
             EnableNoiseShaping = true;
             DwmEnableMmcss = true;
@@ -172,6 +211,11 @@ namespace PlayPcmWin {
             GpuRendering = true;
             OpenFileDialogFilterIndex = -1;
             SoundEffectsEnabled = false;
+            AddSilentForEvenChannel = true;
+
+            ChannelCount2 = ChannelCount2Type.MixFormatChannelCount;
+
+            IsFormatSupportedCall = true;
         }
 
         /// <summary>
@@ -185,6 +229,29 @@ namespace PlayPcmWin {
             MainWindowWidth  = width;
             MainWindowHeight = height;
         }
+
+        public double ReduceVolumeScale() {
+            if (!ReduceVolume) {
+                return 1.0;
+            }
+
+            double scale = 1.0;
+            switch (ReduceVolumeByDb) {
+            case 2:
+                scale = 0.7943282347243; // -2dB
+                break;
+            case 4:
+                scale = 0.6309573444802; // -4dB
+                break;
+            case 6:
+                scale = 0.5; // -6.02dB
+                break;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                break;
+            }
+            return scale;
+        }
     }
 
     sealed class PreferenceStore {
@@ -196,16 +263,29 @@ namespace PlayPcmWin {
         public static Preference Load() {
             var xmlRW = new WWXmlRW.XmlRW<Preference>(m_fileName);
 
+            int nColumnCount = 13;
+
             Preference p = xmlRW.Load();
 
             // postprocess playlist columns order info...
-            if (p.PlayListColumnsOrder.Count == 10) {
-                // OK: older format. no playlist column info.
-            } else if (p.PlayListColumnsOrder.Count == 20) {
-                // OK: load success. delete former 10 items inserted by Reset()
-                p.PlayListColumnsOrderRemoveRange(0, 10);
+            // at this point, column count must be nColumnCount * 2 
+            if (p.PlayListColumnsOrder.Count == nColumnCount) {
+                // very old format. no playlist column info in preference file.
+            } else if (p.PlayListColumnsOrder.Count == nColumnCount + 10) {
+                // old format. delete latter 10 items inserted by file load.
+                p.PlayListColumnsOrderRemoveRange(nColumnCount, 10);
+            } else if (p.PlayListColumnsOrder.Count == nColumnCount + 11) {
+                // PlayPcmWin 4.0.98 format. delete latter 11 items inserted by file load.
+                p.PlayListColumnsOrderRemoveRange(nColumnCount, 11);
+            } else if (p.PlayListColumnsOrder.Count == nColumnCount + 12) {
+                // PlayPcmWin 5.0.16 format. delete latter 12 items inserted by file load.
+                p.PlayListColumnsOrderRemoveRange(nColumnCount, 12);
+            } else if (p.PlayListColumnsOrder.Count == nColumnCount * 2) {
+                // Latest PlayPcmWin 5.0.32 format. saved data is okay. delete former nColumnCount items inserted by Reset()
+                p.PlayListColumnsOrderRemoveRange(0, nColumnCount);
             } else {
                 System.Console.WriteLine("E: Preference PlayListColumnOrder item count {0}", p.PlayListColumnsOrder.Count);
+                System.Diagnostics.Debug.Assert(false);
                 p.Reset();
             }
 
@@ -222,6 +302,9 @@ namespace PlayPcmWin {
                 break;
             }
 
+            // 再描画抑止は再生時間表示がなくなるのが紛らわしいので廃止。
+            p.RefrainRedraw = false;
+
             // 並列読み込みが有効のときはFLACのMD5計算を行わない。
             if (p.ParallelRead) {
                 p.VerifyFlacMD5Sum = false;
@@ -234,6 +317,11 @@ namespace PlayPcmWin {
 
             // DwmEnableMMCSSは、いつの頃からかエラーが出るようになったので呼び出さないようにする。
             p.DwmEnableMmcssCall = false;
+
+            if (p.TimePeriodHundredNanosec < Preference.TIME_PERIOD_ONE_MILLISEC) {
+                // 0.5msモードは動作不安定なので廃止。
+                p.TimePeriodHundredNanosec = Preference.TIME_PERIOD_ONE_MILLISEC;
+            }
 
             return p;
         }

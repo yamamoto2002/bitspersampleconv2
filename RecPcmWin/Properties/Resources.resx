@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,102 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ErrorCouldNotAllocateMemory" xml:space="preserve">
+    <value>Error: Memory allocation failed: please reduce recording buffer size</value>
+  </data>
+  <data name="ErrorNumChannels" xml:space="preserve">
+    <value>Error: Num of channels must be integer number larger than 1</value>
+  </data>
+  <data name="ErrorRecordingBufferSize" xml:space="preserve">
+    <value>Error: Recording buffer size must be larger than 0 and smaller than 2097151</value>
+  </data>
+  <data name="ErrorWasapiBufferSize" xml:space="preserve">
+    <value>Error: Wasapi buffer size must be integer number greater than 0</value>
+  </data>
+  <data name="EventDriven" xml:space="preserve">
+    <value>Event Driven (_E)</value>
+  </data>
+  <data name="MainAvailableFormats" xml:space="preserve">
+    <value>Print Available formats (_A)</value>
+  </data>
+  <data name="MainCheckboxSetDwChannelMask" xml:space="preserve">
+    <value>Set dwChannelMask</value>
+  </data>
+  <data name="MainDeselect" xml:space="preserve">
+    <value>Deselect (_D)</value>
+  </data>
+  <data name="MainDisplaySettings" xml:space="preserve">
+    <value>Display Settings</value>
+  </data>
+  <data name="MainGroupBoxDwChannelMask" xml:space="preserve">
+    <value>DwChannelMask settings</value>
+  </data>
+  <data name="MainGroupBoxMasterVolumeControl" xml:space="preserve">
+    <value>Recording Endpoint Master Volume Control</value>
+  </data>
+  <data name="MainLanguage" xml:space="preserve">
+    <value>Language:</value>
+  </data>
+  <data name="MainLevelMeter" xml:space="preserve">
+    <value>Level Meter</value>
+  </data>
+  <data name="MainLevelMeterUpdateWhileRecording" xml:space="preserve">
+    <value>Update while recording</value>
+  </data>
+  <data name="MainListOfRecordingDevices" xml:space="preserve">
+    <value>List of Recording Devices</value>
+  </data>
+  <data name="MainLog" xml:space="preserve">
+    <value>Log</value>
+  </data>
+  <data name="MainNumOfChannels" xml:space="preserve">
+    <value>Num of Channels</value>
+  </data>
+  <data name="MainOperationMode" xml:space="preserve">
+    <value>Operation Mode</value>
+  </data>
+  <data name="MainQuantizationBitRate" xml:space="preserve">
+    <value>Quantization Bit Rate</value>
+  </data>
+  <data name="MainRecord" xml:space="preserve">
+    <value>Record (_R)</value>
+  </data>
+  <data name="MainRecordingControl" xml:space="preserve">
+    <value>Recording Control</value>
+  </data>
+  <data name="MainRecordingDataSize" xml:space="preserve">
+    <value>Recording Data Size</value>
+  </data>
+  <data name="MainSampleRate" xml:space="preserve">
+    <value>Sample Rate (Hz)</value>
+  </data>
+  <data name="MainSelect" xml:space="preserve">
+    <value>Select (_L)</value>
+  </data>
+  <data name="MainStop" xml:space="preserve">
+    <value>Stop (_S)</value>
+  </data>
+  <data name="MainWasapiBufferSize" xml:space="preserve">
+    <value>WASAPI Buffer Size</value>
+  </data>
+  <data name="MainWasapiSettings" xml:space="preserve">
+    <value>WASAPI Settings</value>
+  </data>
+  <data name="SaveFileFailed" xml:space="preserve">
+    <value>Save file Failed</value>
+  </data>
+  <data name="SaveFileSucceeded" xml:space="preserve">
+    <value>Save file Succeeded</value>
+  </data>
+  <data name="Seconds" xml:space="preserve">
+    <value>seconds</value>
+  </data>
+  <data name="TimerDriven" xml:space="preserve">
+    <value>Timer Driven (_T)</value>
+  </data>
 </root>

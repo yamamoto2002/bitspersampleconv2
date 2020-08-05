@@ -1,8 +1,12 @@
-﻿using System;
+﻿// 日本語。
+
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Globalization;
 using Microsoft.Win32;
+using WWMath;
+using WWAudioFilterCore;
 
 namespace WWAudioFilter {
     /// <summary>
@@ -15,6 +19,28 @@ namespace WWAudioFilter {
         private FilterBase mFilter = null;
 
         private bool mInitialized = false;
+
+        // フィルターの長さ。
+        private readonly int[] mConvolutionLengthArray = { 1024, 4096, 16384, 65536, 262144, 1048576 };
+        private int FilterLengthToComboboxSelectedIndex(int filterLength) {
+            switch (filterLength) {
+            case 1024:
+                return 0;
+            case 4096:
+                return 1;
+            case 16384:
+                return 2;
+            case 65536:
+                return 3;
+            case 262144:
+                return 4;
+            case 1048576:
+                return 5;
+            default:
+                System.Diagnostics.Debug.Assert(false);
+                return 4096;
+            }
+        }
 
         public FilterConfiguration(FilterBase filter) {
             InitializeComponent();
@@ -57,6 +83,9 @@ namespace WWAudioFilter {
             cbItemFftUpsampler.Content = Properties.Resources.CbItemFftUpsampler;
             cbItemZohUpsampler.Content = Properties.Resources.CbItemZohUpsampler;
             cbItemInsertZeroesUpsampler.Content = Properties.Resources.CbItemInsertZeroesUpsampler;
+            cbItemLineDrawUpsampler.Content = Properties.Resources.CbItemLineDrawUpsampler;
+            cbItemCubicHermiteSplineUpsampler.Content = Properties.Resources.CbIteCubicHermiteSplineUpsampler;
+            cbItemWindowedSincUpsampler.Content = Properties.Resources.cbItemWindowedSincUpsampler;
             labelUpsampleFactor.Content = Properties.Resources.LabelUpsamplingFactor;
             labelUpsampleLen.Content = Properties.Resources.LabelUpsamplerLength;
             labelUpsampleLenUnit.Content = Properties.Resources.LabelSamples;
@@ -75,16 +104,18 @@ namespace WWAudioFilter {
             buttonUseTagEdit.Content = Properties.Resources.ButtonUseThisFilter;
 
             groupBoxDownsampler.Header = Properties.Resources.GroupDownsampler;
-            labelDownsamplerOption.Content = Properties.Resources.LabelDownsamplerOption;
             labelDownsamplerType.Content = Properties.Resources.LabelDownsamplerType;
-            cbItemDownsamplerType2x.Content = Properties.Resources.CbItemDownsamplerType2x;
+            labelDownsamplerFactor.Content = Properties.Resources.LabelDownsamplerFactor;
             cbItemDownsamplerOption0.Content = Properties.Resources.CbItemDownsamplerOption0;
             cbItemDownsamplerOption1.Content = Properties.Resources.CbItemDownsamplerOption1;
+            labelDownsampleLen.Content = Properties.Resources.LabelUpsamplerLength;
+            labelDownsampleLenUnit.Content = Properties.Resources.LabelSamples;
             buttonUseDownsampler.Content = Properties.Resources.ButtonUseThisFilter;
 
             groupBoxCic.Header = Properties.Resources.GroupCic;
             labelCicFilterType.Content = Properties.Resources.LabelCicFilterType;
             cbItemCicTypeSingleStage.Content = Properties.Resources.CbItemCicTypeSingleStage;
+            cbItemCicType3Stage.Content = Properties.Resources.CbItemCicType3rdStage;
             labelCicDelay.Content = Properties.Resources.LabelCicDelay;
             labelCicDelaySamples.Content = Properties.Resources.LabelCicDelaySamples;
             buttonUseCic.Content = Properties.Resources.ButtonUseThisFilter;
@@ -92,6 +123,44 @@ namespace WWAudioFilter {
             groupBoxHalfBandFilter.Header = Properties.Resources.GroupHalfbandFilter;
             labelHalfBandFilterTap.Content = Properties.Resources.LabelHalfBandFilterTaps;
             buttonUseHalfBandFilter.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxNormalize.Header = Properties.Resources.GroupNormalizeFilter;
+            labelNormalizeAmplitude.Content = Properties.Resources.LabelNormalizeAmplitude;
+            buttonUseNormalize.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxAddFundamentals.Header = Properties.Resources.GroupAddFundamentals;
+            labelAddFundamentalsGain.Content = Properties.Resources.LabelGainInDb;
+            buttonUseAddFundamentals.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxReduceBitDepth.Header = Properties.Resources.GroupReduceBitDepth;
+            labelQuantizerBit.Content = Properties.Resources.LabelTargetBitDepth;
+            buttonUseReduceBitDepth.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxFirstOrderAllPassIIR.Header = Properties.Resources.GroupFirstOrderAllPassIIR;
+            groupBoxSecondOrderAllPassIIR.Header = Properties.Resources.GroupSecondOrderAllPassIIR;
+            labelSecondAllPassIirT.Content = Properties.Resources.LabelSecondAllPassIirT;
+
+            buttonUseCrossfeedFilter.Content = Properties.Resources.ButtonUseThisFilter;
+            buttonUseAddJitter.Content = Properties.Resources.ButtonUseThisFilter;
+            buttonUseGaussianNoise.Content = Properties.Resources.ButtonUseThisFilter;
+            buttonUseDynamicRangeCompression.Content = Properties.Resources.ButtonUseThisFilter;
+            buttonUseFirstOrderAllPassIir.Content = Properties.Resources.ButtonUseThisFilter;
+            buttonUseSecondOrderAllPassIir.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxDynamicRangeCompression.Header = Properties.Resources.GroupDynamicRangeCompression;
+            groupBoxAddGaussianNoise.Header = Properties.Resources.GroupAddGaussianNoise;
+            groupBoxAddJitter.Header = Properties.Resources.GroupAddJitter;
+
+            groupBoxSubsonicFilter.Header = Properties.Resources.GroupSubsonicFilter;
+            labelSubsonicFilterCutoffFrequency.Content = Properties.Resources.LabelSubsonicFilterCutoffFrequency;
+            buttonUseSubsonicFilter.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxTimeReversalFilter.Header = Properties.Resources.GroupTimeReversalFilter;
+            buttonUseTimeReversalFilter.Content = Properties.Resources.ButtonUseThisFilter;
+
+            groupBoxNosdacCompensationFilter.Header = Properties.Resources.GroupNosdacCompensationFilter;
+            labelNosdacCompensationTaps.Content = Properties.Resources.LabelNosdacCompensationTaps;
+            buttonUseNosdacCompensationFilter.Content = Properties.Resources.ButtonUseThisFilter;
         }
 
         public FilterBase Filter {
@@ -112,9 +181,19 @@ namespace WWAudioFilter {
                 textBoxGainInAmplitude.TextChanged += mTextBoxGainInAmplitudeChangedEH;
                 break;
             case FilterType.ZohUpsampler:
-                var zoh = filter as ZeroOrderHoldUpsampler;
-                comboBoxUpsamplingFactor.SelectedIndex = (int)UpsamplingFactorToUpsamplingFactorType(zoh.Factor);
+                var zoh = filter as WWAudioFilterCore.ZeroOrderHoldUpsampler;
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(zoh.Factor);
                 comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.ZOH;
+                break;
+            case FilterType.LineDrawUpsampler:
+                var ldu = filter as LineDrawUpsampler;
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(ldu.Factor);
+                comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.LineDraw;
+                break;
+            case FilterType.CubicHermiteSplineUpsampler:
+                var chu = filter as CubicHermiteSplineUpsampler;
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(chu.Factor);
+                comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.CubicHermiteSpline;
                 break;
             case FilterType.LowPassFilter:
                 var lpf = filter as LowpassFilter;
@@ -124,9 +203,15 @@ namespace WWAudioFilter {
                 break;
             case FilterType.FftUpsampler:
                 var fftu = filter as FftUpsampler;
-                comboBoxUpsamplingFactor.SelectedIndex = (int)UpsamplingFactorToUpsamplingFactorType(fftu.Factor);
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(fftu.Factor);
                 comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.FFT;
-                comboBoxUpsampleLen.SelectedIndex = (int)UpsampleLenToUpsampleLenType(fftu.FftLength);
+                comboBoxUpsampleLen.SelectedIndex = (int)ResampleLenToUpsampleLenType(fftu.FftLength);
+                break;
+            case FilterType.WindowedSincUpsampler:
+                var wsu = filter as WindowedSincUpsampler;
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(wsu.Factor);
+                comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.WindowedSinc;
+                comboBoxUpsampleLen.SelectedIndex = (int)ResampleLenToUpsampleLenType(wsu.WindowLength+1);
                 break;
             case FilterType.Mash2:
                 var mash = filter as MashFilter;
@@ -137,6 +222,19 @@ namespace WWAudioFilter {
                 var ns = filter as NoiseShapingFilter;
                 textBoxNoiseShapingTargetBit.Text = string.Format(CultureInfo.CurrentCulture, "{0}", ns.TargetBitsPerSample);
                 comboBoxNoiseShapingMethod.SelectedIndex = (int)NoiseShapingCbItemType.NoiseShaping2nd;
+                break;
+            case FilterType.ReduceBitDepth:
+                var q = filter as ReduceBitDepth;
+                textBoxTargetBitDepth.Text = string.Format(CultureInfo.CurrentCulture, "{0}", q.TargetBitsPerSample);
+                break;
+            case FilterType.FirstOrderAllPassIIR:
+                var fomp = filter as FirstOrderAllPassIIRFilter;
+                textBoxFirstOrderAllPassIirA.Text = string.Format(CultureInfo.CurrentCulture, "{0}", fomp.A);
+                break;
+            case FilterType.SecondOrderAllPassIIR:
+                var somp = filter as SecondOrderAllPassIIRFilter;
+                textBoxSecondOrderAllPassIirR.Text = string.Format(CultureInfo.CurrentCulture, "{0}", somp.R);
+                textBoxSecondOrderAllPassIirT.Text = string.Format(CultureInfo.CurrentCulture, "{0}", somp.T);
                 break;
             case FilterType.NoiseShaping4th:
                 var ns4 = filter as NoiseShaping4thFilter;
@@ -150,16 +248,35 @@ namespace WWAudioFilter {
                 break;
             case FilterType.Downsampler:
                 var ds = filter as Downsampler;
-                comboBoxDownsampleOption.SelectedIndex = ds.PickSampleIndex;
+                comboBoxDownsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(ds.Factor);
+                comboBoxDownsampleType.SelectedIndex = ds.PickSampleIndex;
                 break;
             case FilterType.CicFilter:
                 var cic = filter as CicFilter;
+                switch (cic.Order) {
+                case 1:
+                    comboBoxCicType.SelectedIndex = 0;
+                    break;
+                case 2:
+                    comboBoxCicType.SelectedIndex = 1;
+                    break;
+                case 3:
+                default:
+                    comboBoxCicType.SelectedIndex = 2;
+                    break;
+                case 4:
+                    comboBoxCicType.SelectedIndex = 3;
+                    break;
+                case 5:
+                    comboBoxCicType.SelectedIndex = 4;
+                    break;
+                }
                 textBoxCicDelay.Text = string.Format(CultureInfo.CurrentCulture, "{0}", cic.Delay);
                 break;
 
             case FilterType.InsertZeroesUpsampler:
                 var izu = filter as InsertZeroesUpsampler;
-                comboBoxUpsamplingFactor.SelectedIndex = (int)UpsamplingFactorToUpsamplingFactorType(izu.Factor);
+                comboBoxUpsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(izu.Factor);
                 comboBoxUpsamplerType.SelectedIndex = (int)UpsamplerType.InsertZeroes;
                 break;
             case FilterType.HalfbandFilter:
@@ -169,6 +286,75 @@ namespace WWAudioFilter {
             case FilterType.Crossfeed:
                 var cf = filter as CrossfeedFilter;
                 textBoxCrossfeedCoefficientFile.Text = cf.FilterFilePath;
+                break;
+            case FilterType.JitterAdd:
+                {
+                    var jaf = filter as JitterAddFilter;
+                    comboBoxFilterLength.SelectedIndex =
+                        FilterLengthToComboboxSelectedIndex(
+                            jaf.ConvolutionLengthMinus1);
+                    textBoxSinusoidalJitterFreq.Text =
+                        string.Format(CultureInfo.CurrentCulture, "{0}", jaf.SineJitterFreq);
+                    textBoxSinusoidalJitterNanoSeconds.Text =
+                        string.Format(CultureInfo.CurrentCulture, "{0}", jaf.SineJitterNanosec);
+                    textBoxTpdfJitterNanoSeconds.Text =
+                        string.Format(CultureInfo.CurrentCulture, "{0}", jaf.TpdfJitterNanosec);
+                    textBoxRpdfJitterNanoSeconds.Text =
+                        string.Format(CultureInfo.CurrentCulture, "{0}", jaf.RpdfJitterNanosec);
+                    textBoxTimingErrorFile.Text =
+                        jaf.TimingErrorFile;
+                    textBoxTimingErrorNanosec.Text =
+                        string.Format(CultureInfo.CurrentCulture, "{0}", jaf.TimingErrorFileNanosec);
+                }
+                break;
+            case FilterType.GaussianNoise:
+                var gnf = filter as GaussianNoiseFilter;
+                textBoxGaussianNoiseDb.Text = string.Format(CultureInfo.CurrentCulture, "{0}", gnf.NoiseLevelDb);
+                break;
+            case FilterType.RandomNoise: {
+                    var rf = filter as RandomNoiseFilter;
+                    comboBoxRandomNoiseType.SelectedIndex = (int)rf.NoiseType;
+                    textBoxRandomNoiseDb.Text = string.Format(CultureInfo.CurrentCulture, "{0}", rf.NoiseLevelDb);
+                    break;
+                }
+            case FilterType.DynamicRangeCompression:
+                var drc = filter as DynamicRangeCompressionFilter;
+                textBoxDynamicRangeCompressionLsbScaling.Text = string.Format(CultureInfo.CurrentCulture, "{0}", drc.LsbScalingDb);
+                break;
+            case FilterType.UnevenBitDac:
+                var ubd = filter as UnevenBitDacFilter;
+                textBoxUnevenBitDacLsbScaling.Text = string.Format(CultureInfo.CurrentCulture, "{0}", ubd.LsbScalingDb);
+                break;
+            case FilterType.AddFundamentals:
+                var af = filter as AddFundamentalsFilter;
+                textBoxAddFundamentalsGain.Text = string.Format(CultureInfo.CurrentCulture, "{0}", 20.0 * Math.Log10(af.Gain));
+                break;
+            case FilterType.SubsonicFilter: {
+                    var f = filter as SubsonicFilter;
+                    textBoxSubsonicFilterCutoffFrequency.Text = string.Format(CultureInfo.CurrentCulture, "{0}", f.CutoffFreq);
+                    break;
+                }
+            case FilterType.TimeReversal:
+                break;
+            case FilterType.ZohNosdacCompensation: {
+                    var f = filter as ZohNosdacCompensationFilter;
+                    comboBoxNosdacCompensationTaps.SelectedIndex = ZohNosdacTapsToComboBoxIndex(f.Taps);
+                }
+                break;
+            case FilterType.WindowedSincDownsampler: {
+                    var f = filter as WindowedSincDownsampler;
+                    comboBoxDownsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(f.Factor);
+                    comboBoxDownsampleType.SelectedIndex = (int)DownsamplerType.WindowedSinc;
+                    comboBoxDownsampleLen.SelectedIndex = (int)ResampleLenToUpsampleLenType(f.WindowLength + 1);
+                }
+                break;
+            case FilterType.FftDownsampler:
+                var fftd = filter as FftDownsampler;
+                comboBoxDownsamplingFactor.SelectedIndex = (int)ResamplingFactorToResamplingFactorType(fftd.Factor);
+                comboBoxDownsampleType.SelectedIndex = (int)DownsamplerType.FFT;
+                comboBoxDownsampleLen.SelectedIndex = (int)ResampleLenToUpsampleLenType(fftd.BeforeFftLength);
+                break;
+            case FilterType.OnebitConversion:
                 break;
             }
         }
@@ -198,43 +384,57 @@ namespace WWAudioFilter {
             textBoxGainInDB.TextChanged += mTextBoxGainInAmplitudeChangedEH;
         }
 
-        enum UpsamplingFactorType {
+        enum ResamplingFactorType {
             x2,
+            x3,
             x4,
+            x5,
+            x7,
+
             x8,
             x16,
+            x20,
+            x40,
+            x64,
+
+            x80,
+            x147,
+            x160,
+            x320
         };
 
-        private static UpsamplingFactorType UpsamplingFactorToUpsamplingFactorType(int factor) {
-            switch (factor) {
-            case 2:
-                return UpsamplingFactorType.x2;
-            case 4:
-                return UpsamplingFactorType.x4;
-            case 8:
-                return UpsamplingFactorType.x8;
-            case 16:
-                return UpsamplingFactorType.x16;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return UpsamplingFactorType.x2;
+        private static readonly int[] ResamplingFactorNumbers = {
+            2,
+            3,
+            4,
+            5,
+            7,
+
+            8,
+            16,
+            20,
+            40,
+            64,
+
+            80,
+            147,
+            160,
+            320
+        };
+
+        private static ResamplingFactorType ResamplingFactorToResamplingFactorType(int factor) {
+            for (int i = 0; i < ResamplingFactorNumbers.Length; ++i) {
+                if (factor == ResamplingFactorNumbers[i]) {
+                    return (ResamplingFactorType)i;
+                }
             }
+
+            // 該当しない。
+            return ResamplingFactorType.x2;
         }
 
-        private static int UpsamplingFactorTypeToUpsampingfactor(int t) {
-            switch (t) {
-            case (int)UpsamplingFactorType.x2:
-                return 2;
-            case (int)UpsamplingFactorType.x4:
-                return 4;
-            case (int)UpsamplingFactorType.x8:
-                return 8;
-            case (int)UpsamplingFactorType.x16:
-                return 16;
-            default:
-                System.Diagnostics.Debug.Assert(false);
-                return 2;
-            }
+        private static int ResamplingFactorTypeToResampingfactor(ResamplingFactorType t) {
+            return ResamplingFactorNumbers[(int)t];
         }
 
         enum LpfLenType {
@@ -243,6 +443,8 @@ namespace WWAudioFilter {
             L4095,
             L16383,
             L65535,
+
+            L1048575,
         };
 
         private static LpfLenType LpfLenToLpfLenType(int lpfLen) {
@@ -252,76 +454,90 @@ namespace WWAudioFilter {
             case 1023:
                 return LpfLenType.L1023;
             case 4095:
+            default:
                 return LpfLenType.L4095;
             case 16383:
                 return LpfLenType.L16383;
             case 65535:
-            default:
                 return LpfLenType.L65535;
+
+            case 1048575:
+                return LpfLenType.L1048575;
             }
         }
 
-        private static int LpfLenTypeToLpfLen(int t) {
+        private static int LpfLenTypeToLpfLen(LpfLenType t) {
             switch (t) {
-            case (int)LpfLenType.L255:
+            case LpfLenType.L255:
                 return 255;
-            case (int)LpfLenType.L1023:
+            case LpfLenType.L1023:
                 return 1023;
-            case (int)LpfLenType.L4095:
-                return 4095;
-            case (int)LpfLenType.L16383:
-                return 16383;
-            case (int)LpfLenType.L65535:
+            case LpfLenType.L4095:
             default:
+                return 4095;
+            case LpfLenType.L16383:
+                return 16383;
+            case LpfLenType.L65535:
                 return 65535;
+            case LpfLenType.L1048575:
+                return 1048575;
             }
         }
 
         enum UpsamplerType {
             FFT,
             ZOH,
-            InsertZeroes
+            InsertZeroes,
+            LineDraw,
+            CubicHermiteSpline,
+            WindowedSinc
         };
 
-        enum UpsampleLenType {
+        enum ResampleLenType {
             L1024,
             L4096,
             L16384,
             L65536,
             L262144,
+
+            L1048576,
         };
 
-        private static UpsampleLenType UpsampleLenToUpsampleLenType(int len) {
+        private static ResampleLenType ResampleLenToUpsampleLenType(int len) {
             switch (len) {
             case 1024:
-                return UpsampleLenType.L1024;
+                return ResampleLenType.L1024;
             case 4096:
-                return UpsampleLenType.L4096;
-            case 16384:
-                return UpsampleLenType.L16384;
-            case 65536:
-                return UpsampleLenType.L65536;
-            case 262144:
-                return UpsampleLenType.L262144;
             default:
-                return UpsampleLenType.L262144;
+                return ResampleLenType.L4096;
+            case 16384:
+                return ResampleLenType.L16384;
+            case 65536:
+                return ResampleLenType.L65536;
+            case 262144:
+                return ResampleLenType.L262144;
+
+            case 1048576:
+                return ResampleLenType.L1048576;
             }
         }
 
-        private static int UpsampleLenTypeToLpfLen(int t) {
+        private static int ResampleLenTypeToLpfLen(ResampleLenType t) {
             switch (t) {
-            case (int)UpsampleLenType.L1024:
+            case ResampleLenType.L1024:
                 return 1024;
-            case (int)UpsampleLenType.L4096:
-                return 4096;
-            case (int)UpsampleLenType.L16384:
-                return 16384;
-            case (int)UpsampleLenType.L65536:
-                return 65536;
-            case (int)UpsampleLenType.L262144:
-                return 262144;
+            case ResampleLenType.L4096:
             default:
+                return 4096;
+            case ResampleLenType.L16384:
+                return 16384;
+            case ResampleLenType.L65536:
+                return 65536;
+            case ResampleLenType.L262144:
                 return 262144;
+
+            case ResampleLenType.L1048576:
+                return 1048576;
             }
         }
 
@@ -355,22 +571,51 @@ namespace WWAudioFilter {
         }
 
         private void buttonUseUpsampler_Click(object sender, RoutedEventArgs e) {
-            int factor = UpsamplingFactorTypeToUpsampingfactor(comboBoxUpsamplingFactor.SelectedIndex);
-            int len = UpsampleLenTypeToLpfLen(comboBoxUpsampleLen.SelectedIndex);
+            int factor = ResamplingFactorTypeToResampingfactor((ResamplingFactorType)comboBoxUpsamplingFactor.SelectedIndex);
+            int len = ResampleLenTypeToLpfLen((ResampleLenType)comboBoxUpsampleLen.SelectedIndex);
+            var factorType = (UpsamplerType)comboBoxUpsamplerType.SelectedIndex;
+
+            if (!Functions.IsPowerOfTwo(factor)) {
+                switch (factorType) {
+                case UpsamplerType.FFT:
+                    // 2の乗数ではない倍数に対応していない。
+                    MessageBox.Show(Properties.Resources.ErrorNotImplementedUpsampler);
+                    return;
+                case UpsamplerType.CubicHermiteSpline:
+                case UpsamplerType.InsertZeroes:
+                case UpsamplerType.LineDraw:
+                case UpsamplerType.WindowedSinc:
+                case UpsamplerType.ZOH:
+                    // 2の乗数ではない倍数に対応している。
+                    break;
+                default:
+                    System.Diagnostics.Debug.Assert(false);
+                    break;
+                }
+            }
 
             switch (comboBoxUpsamplerType.SelectedIndex) {
             case (int)UpsamplerType.ZOH:
                 mFilter = new ZeroOrderHoldUpsampler(factor);
                 break;
+            case (int)UpsamplerType.LineDraw:
+                mFilter = new LineDrawUpsampler(factor);
+                break;
+            case (int)UpsamplerType.CubicHermiteSpline:
+                mFilter = new CubicHermiteSplineUpsampler(factor);
+                break;
             case (int)UpsamplerType.FFT:
                 mFilter = new FftUpsampler(factor, len);
+                break;
+            case (int)UpsamplerType.WindowedSinc:
+                mFilter = new WindowedSincUpsampler(factor, len - 1);
                 break;
             case (int)UpsamplerType.InsertZeroes:
                 mFilter = new InsertZeroesUpsampler(factor);
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
-                mFilter = new FftUpsampler(factor, len);
+                mFilter = null;
                 break;
             }
 
@@ -400,7 +645,7 @@ namespace WWAudioFilter {
                 return;
             }
 
-            int filterLength = LpfLenTypeToLpfLen(comboBoxLpfLen.SelectedIndex);
+            int filterLength = LpfLenTypeToLpfLen((LpfLenType)comboBoxLpfLen.SelectedIndex);
 
             mFilter = new LowpassFilter(v, filterLength, slope);
             DialogResult = true;
@@ -443,10 +688,16 @@ namespace WWAudioFilter {
                 return;
             }
 
-            if (comboBoxUpsamplerType.SelectedIndex == (int)UpsamplerType.FFT) {
+            switch (comboBoxUpsamplerType.SelectedIndex) {
+            case (int)UpsamplerType.FFT:
                 comboBoxUpsampleLen.IsEnabled = true;
-            } else {
+                break;
+            case (int)UpsamplerType.WindowedSinc:
+                comboBoxUpsampleLen.IsEnabled = true;
+                break;
+            default:
                 comboBoxUpsampleLen.IsEnabled = false;
+                break;
             }
         }
 
@@ -488,34 +739,42 @@ namespace WWAudioFilter {
         }
 
         enum DownsamplerType {
-            Down2x,
+            Pick0,
+            Pick1,
+            WindowedSinc,
+            FFT,
         };
 
         private void buttonUseDownsampler_Click(object sender, RoutedEventArgs e) {
-            int factor = 0;
-            switch (comboBoxDownsampleType.SelectedIndex) {
-            case (int)DownsamplerType.Down2x:
-                factor = 2;
+            var factorType = (ResamplingFactorType)comboBoxDownsamplingFactor.SelectedIndex;
+            int factor = ResamplingFactorTypeToResampingfactor(factorType);
+            int len = ResampleLenTypeToLpfLen((ResampleLenType)comboBoxDownsampleLen.SelectedIndex);
+
+            DownsamplerType type = (DownsamplerType)comboBoxDownsampleType.SelectedIndex;
+
+            switch (type) {
+            case DownsamplerType.Pick0:
+            case DownsamplerType.Pick1:
+                mFilter = new Downsampler(factor, (int)type);
+                break;
+            case DownsamplerType.WindowedSinc:
+                mFilter = new WindowedSincDownsampler(factor, len - 1);
+                break;
+            case DownsamplerType.FFT:
+                mFilter = new FftDownsampler(factor, len);
                 break;
             default:
                 System.Diagnostics.Debug.Assert(false);
-                return;
+                break;
             }
 
-            int pickSampleIndex = (int)comboBoxDownsampleOption.SelectedIndex;
-
-            mFilter = new Downsampler(factor, pickSampleIndex);
             DialogResult = true;
             Close();
         }
 
-        enum CicFilterType {
-            Decimation1stOrder8x,
-            Decimation1stOrder8xWithCompensation,
-            Interpolation1stOrder4x,
-        };
-
         private void buttonUseCic_Click(object sender, RoutedEventArgs e) {
+            int order = comboBoxCicType.SelectedIndex+1;
+
             int delay;
             if (!Int32.TryParse(textBoxCicDelay.Text, out delay)) {
                 MessageBox.Show(Properties.Resources.ErrorCicDelay);
@@ -526,7 +785,7 @@ namespace WWAudioFilter {
                 return;
             }
 
-            mFilter = new CicFilter(CicFilter.CicType.SingleStage, delay);
+            mFilter = new CicFilter(order, delay);
             DialogResult = true;
             Close();
         }
@@ -570,5 +829,274 @@ namespace WWAudioFilter {
             DialogResult = true;
             Close();
         }
+
+        private void buttonUseAddJitter_Click(object sender, RoutedEventArgs e) {
+            double sineJitterFreq;
+            if (!Double.TryParse(textBoxSinusoidalJitterFreq.Text, out sineJitterFreq)) {
+                MessageBox.Show(Properties.Resources.ErrorSinusolidalJitterFreq);
+                return;
+            }
+            if (sineJitterFreq < 0) {
+                MessageBox.Show(Properties.Resources.ErrorSinusolidalJitterFreq);
+                return;
+            }
+
+            double sineJitterNanosec;
+            if (!Double.TryParse(textBoxSinusoidalJitterNanoSeconds.Text, out sineJitterNanosec)) {
+                MessageBox.Show(Properties.Resources.ErrorSinusolidalJitterAmount);
+                return;
+            }
+            if (sineJitterNanosec < 0) {
+                MessageBox.Show(Properties.Resources.ErrorSinusolidalJitterAmount);
+                return;
+            }
+
+            double tpdfJitterNanosec;
+            if (!Double.TryParse(textBoxTpdfJitterNanoSeconds.Text, out tpdfJitterNanosec)) {
+                MessageBox.Show(Properties.Resources.ErrorTpdfJitterAmount);
+                return;
+            }
+            if (tpdfJitterNanosec < 0) {
+                MessageBox.Show(Properties.Resources.ErrorTpdfJitterAmount);
+                return;
+            }
+
+            double rpdfJitterNanosec;
+            if (!Double.TryParse(textBoxRpdfJitterNanoSeconds.Text, out rpdfJitterNanosec)) {
+                MessageBox.Show(Properties.Resources.ErrorRpdfJitterAmount);
+                return;
+            }
+            if (rpdfJitterNanosec < 0) {
+                MessageBox.Show(Properties.Resources.ErrorRpdfJitterAmount);
+                return;
+            }
+
+            int convolutionN = 1024;
+            if (0 <= comboBoxFilterLength.SelectedIndex) {
+                convolutionN = mConvolutionLengthArray[comboBoxFilterLength.SelectedIndex];
+            }
+
+            double timingErrorNanosec;
+            if (!Double.TryParse(textBoxTimingErrorNanosec.Text, out timingErrorNanosec)) {
+                MessageBox.Show(Properties.Resources.ErrorTimingErrorNanosec);
+                return;
+            }
+
+            mFilter = new JitterAddFilter(sineJitterFreq, sineJitterNanosec, tpdfJitterNanosec,
+                    rpdfJitterNanosec, convolutionN, textBoxTimingErrorFile.Text, timingErrorNanosec);
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseGaussianNoise_Click(object sender, RoutedEventArgs e) {
+            double noiseLevelDb = 0;
+            if (!Double.TryParse(textBoxGaussianNoiseDb.Text, out noiseLevelDb)) {
+                MessageBox.Show(Properties.Resources.ErrorGaussianNoiseLevel);
+                return;
+            }
+
+            mFilter = new GaussianNoiseFilter(noiseLevelDb);
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseRandomNoise_Click(object sender, RoutedEventArgs e) {
+            double noiseLevelDb = 0;
+            if (!Double.TryParse(textBoxRandomNoiseDb.Text, out noiseLevelDb)) {
+                MessageBox.Show(Properties.Resources.ErrorRandomNoiseLevel);
+                return;
+            }
+
+            RandomNoiseFilter.NoiseTypeEnum nt = (RandomNoiseFilter.NoiseTypeEnum)(comboBoxRandomNoiseType.SelectedIndex);
+
+            mFilter = new RandomNoiseFilter(nt, noiseLevelDb);
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseDynamicRangeCompression_Click(object sender, RoutedEventArgs e) {
+            double lsbScalingDb = 1;
+            if (!Double.TryParse(textBoxDynamicRangeCompressionLsbScaling.Text, out lsbScalingDb)) {
+                MessageBox.Show(Properties.Resources.ErrorDynamicRangeCompressionLsbScaling);
+                return;
+            }
+
+            mFilter = new DynamicRangeCompressionFilter(lsbScalingDb);
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseUnevenBitDac_Click(object sender, RoutedEventArgs e) {
+            double lsbScalingDb = 1;
+            if (!Double.TryParse(textBoxUnevenBitDacLsbScaling.Text, out lsbScalingDb)) {
+                MessageBox.Show(Properties.Resources.ErrorUnevenBitDacLsbScaling);
+                return;
+            }
+
+            mFilter = new UnevenBitDacFilter(lsbScalingDb);
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseNormalize_Click(object sender, RoutedEventArgs e) {
+            double v;
+            if (!Double.TryParse(textBoxNormalizeAmplitude.Text, out v) || 0.0 < v) {
+                MessageBox.Show(Properties.Resources.ErrorNormalizeValue);
+                return;
+            }
+
+            mFilter = new NormalizeFilter(Math.Pow(10.0, v / 20.0));
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseAddFundamentals_Click(object sender, RoutedEventArgs e) {
+            double v;
+            if (!Double.TryParse(textBoxAddFundamentalsGain.Text, out v) || 0.0 < v) {
+                MessageBox.Show(Properties.Resources.ErrorFundamentalsGainValue);
+                return;
+            }
+
+            mFilter = new AddFundamentalsFilter(Math.Pow(10.0, v / 20.0));
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseReduceBitDepth_Click(object sender, RoutedEventArgs e) {
+            int v;
+            if (!Int32.TryParse(textBoxTargetBitDepth.Text, out v) || 24 <= v || v < 1) {
+                MessageBox.Show(Properties.Resources.ErrorTargetBitDepth);
+                return;
+            }
+
+            mFilter = new ReduceBitDepth(v);
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseFirstOrderAllPassIir_Click(object sender, RoutedEventArgs e) {
+            double a;
+            if (!Double.TryParse(textBoxFirstOrderAllPassIirA.Text, out a) || 1.0 < Math.Abs(a) || a == 0) {
+                MessageBox.Show(Properties.Resources.ErrorFirstOrderAllPassIIR);
+                return;
+            }
+
+            mFilter = new FirstOrderAllPassIIRFilter(a);
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseSecondOrderAllPassIir_Click(object sender, RoutedEventArgs e) {
+            double r;
+            if (!Double.TryParse(textBoxSecondOrderAllPassIirR.Text, out r) || 1.0 < Math.Abs(r) || r== 0) {
+                MessageBox.Show(Properties.Resources.ErrorSecondOrderAllPassIirR);
+                return;
+            }
+
+            double t;
+            if (!Double.TryParse(textBoxSecondOrderAllPassIirT.Text, out t)) {
+                MessageBox.Show(Properties.Resources.ErrorSecondOrderAllPassIirT);
+                return;
+            }
+
+            mFilter = new SecondOrderAllPassIIRFilter(r, t);
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseSubsonicFilter_Click(object sender, RoutedEventArgs e) {
+            double v;
+            if (!Double.TryParse(textBoxSubsonicFilterCutoffFrequency.Text, out v) || v < 1.0) {
+                MessageBox.Show(Properties.Resources.ErrorSubsonicFilterCutoffFrequency);
+                return;
+            }
+
+            mFilter = new SubsonicFilter(v);
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void buttonUseTimeReversalFilter_Click(object sender, RoutedEventArgs e) {
+            mFilter = new TimeReversalFilter();
+
+            DialogResult = true;
+            Close();
+        }
+
+        private static int ZohNosdacTapsToComboBoxIndex(int taps) {
+            switch (taps) {
+            case 9:
+                return 0;
+            case 17:
+                return 1;
+            case 33:
+                return 2;
+            default:
+                return -1;
+            }
+        }
+
+        private static int ZohNosdacComboBoxIndexToTaps(int idx) {
+            switch (idx) {
+            case 0:
+                return 9;
+            case 1:
+                return 17;
+            case 2:
+            default:
+                return 33;
+            }
+        }
+
+        private void buttonUseNosdacCompensationFilter_Click(object sender, RoutedEventArgs e) {
+            mFilter = new ZohNosdacCompensationFilter(ZohNosdacComboBoxIndexToTaps(comboBoxNosdacCompensationTaps.SelectedIndex));
+
+            DialogResult = true;
+            Close();
+        }
+
+        private void comboBoxDownsampleType_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (!mInitialized) {
+                return;
+            }
+
+            DownsamplerType type = (DownsamplerType)comboBoxDownsampleType.SelectedIndex;
+            switch (type) {
+            case DownsamplerType.Pick0:
+            case DownsamplerType.Pick1:
+                comboBoxDownsampleLen.IsEnabled = false;
+                break;
+            case DownsamplerType.WindowedSinc:
+                comboBoxDownsampleLen.IsEnabled = true;
+                break;
+            }
+        }
+
+        private void buttonBrowseTimingErrorFile_Click(object sender, RoutedEventArgs e) {
+            var dlg = new OpenFileDialog();
+            dlg.Filter = Properties.Resources.FilterReadAudioFiles;
+            dlg.CheckFileExists = true;
+            var result = dlg.ShowDialog();
+            if (result != true) {
+                return;
+            }
+
+            textBoxTimingErrorFile.Text = dlg.FileName;
+        }
+
+        private void buttonUseOnebitConversionFilter_Click(object sender, RoutedEventArgs e) {
+            mFilter = new OnebitConversionFilter();
+
+            DialogResult = true;
+            Close();
+        }
+
     }
 }

@@ -60,7 +60,7 @@ namespace PlayPcmWin {
 
         private ResultType ReadFormChunkHeader(BinaryReader br) {
             byte[] ckID = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(ckID, 0, "FORM")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(ckID, 0, "FORM")) {
                 return ResultType.NotAiff;
             }
 
@@ -70,8 +70,8 @@ namespace PlayPcmWin {
             }
 
             byte[] formType = br.ReadBytes(4);
-            if (!PcmDataLib.Util.FourCCHeaderIs(formType, 0, "AIFF")) {
-                if (PcmDataLib.Util.FourCCHeaderIs(formType, 0, "AIFC")) {
+            if (!PcmDataLib.PcmDataUtil.FourCCHeaderIs(formType, 0, "AIFF")) {
+                if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(formType, 0, "AIFC")) {
                     mIsAIFC = true;
                 } else {
                     return ResultType.NotAiff;
@@ -91,12 +91,17 @@ namespace PlayPcmWin {
             try {
                 while (true) {
                     byte[] ckID = br.ReadBytes(4);
-                    if (PcmDataLib.Util.FourCCHeaderIs(ckID, 0, findCkId)) {
+                    if (PcmDataLib.PcmDataUtil.FourCCHeaderIs(ckID, 0, findCkId)) {
                         return true;
                     }
 
                     long ckSize = Util.ReadBigU32(br);
-                    PcmDataLib.Util.BinaryReaderSkip(br, PcmDataLib.Util.ChunkSizeWithPad(ckSize));
+                    long skipBytes = PcmDataLib.PcmDataUtil.ChunkSizeWithPad(ckSize);
+                    if (skipBytes < 0) {
+                        Console.WriteLine("E: SkipToChunk skipBytes < 0 {0}", skipBytes);
+                        return false;
+                    }
+                    PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipBytes);
                 }
             } catch (System.IO.EndOfStreamException ex) {
                 Console.WriteLine(ex);
@@ -150,7 +155,12 @@ namespace PlayPcmWin {
                     return ResultType.NotSupportAifcCompression;
                 }
             }
-            PcmDataLib.Util.BinaryReaderSkip(br, ckSize - readSize);
+
+            if (ckSize - readSize < 0) {
+                Console.WriteLine("E: ReadCommonChunk ckSize - readSize = {0}", ckSize - readSize);
+                return ResultType.HeaderError;
+            }
+            PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, ckSize - readSize);
             
             SampleRate = (int)IEEE754ExtendedDoubleBigEndianToDouble(sampleRate80);
             
@@ -186,37 +196,61 @@ namespace PlayPcmWin {
             } else {
                 // SoundDataチャンクの最後まで移動。
                 // sizeof offset + blockSize == 8
-                PcmDataLib.Util.BinaryReaderSkip(br, PcmDataLib.Util.ChunkSizeWithPad(ckSize) - 8);
+
+                long skipBytes = PcmDataLib.PcmDataUtil.ChunkSizeWithPad(ckSize) - 8;
+                if (skipBytes < 0) {
+                    Console.WriteLine("E: ReadSoundDataChunk skipBytes < 0 {0}", skipBytes);
+                    return ResultType.HeaderError;
+                }
+                PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipBytes);
             }
 
             return ResultType.Success;
         }
 
+        /// <summary>
+        /// ID3チャンクの読み込み。
+        /// 失敗してもクラッシュしないようにした: ReadErrorが戻る。
+        /// この関数を呼び出した後、ファイルポインタは中途半端な場所を挿した状態になる。
+        /// </summary>
         private ResultType ReadID3Chunk(BinaryReader br) {
-            if (!SkipToChunk(br, "ID3 ")) {
+            long ckSize = 0;
+            PcmDataLib.ID3Reader.ID3Result id3r = PcmDataLib.ID3Reader.ID3Result.ReadError;
+
+            try {
+                if (!SkipToChunk(br, "ID3 ")) {
+                    return ResultType.ReadError;
+                }
+
+                ckSize = Util.ReadBigU32(br);
+                if (ckSize < 10) {
+                    return ResultType.ReadError;
+                }
+            
+                id3r = mId3Reader.Read(br);
+            } catch (Exception ex) {
+                Console.WriteLine("ReadID3Chunk {0}", ex);
                 return ResultType.ReadError;
             }
-
-            long ckSize = Util.ReadBigU32(br);
-            if (ckSize < 10) {
-                return ResultType.ReadError;
-            }
-
-            var id3r = mId3Reader.Read(br);
 
             ResultType result = ResultType.Success;
             switch (id3r) {
             case PcmDataLib.ID3Reader.ID3Result.ReadError:
+            case PcmDataLib.ID3Reader.ID3Result.NotSupportedID3version: //< ID3が読めなくても再生はできるようにする。
                 result = ResultType.ReadError;
-                break;
-            case PcmDataLib.ID3Reader.ID3Result.NotSupportedID3version:
-                // ID3が読めなくても再生はできるようにする。
-                result = ResultType.Success;
-                PcmDataLib.Util.BinaryReaderSkip(br, PcmDataLib.Util.ChunkSizeWithPad(ckSize) - mId3Reader.ReadBytes);
                 break;
             case PcmDataLib.ID3Reader.ID3Result.Success:
                 result = ResultType.Success;
-                PcmDataLib.Util.BinaryReaderSkip(br, PcmDataLib.Util.ChunkSizeWithPad(ckSize) - mId3Reader.ReadBytes);
+                /* 以下はチャンクの終わりまでスキップする処理。必要ない。
+                {
+                    long skipBytes = PcmDataLib.Util.ChunkSizeWithPad(ckSize) - mId3Reader.ReadBytes;
+                    if (skipBytes < 0) {
+                        Console.WriteLine("ReadID3Chunk skipBytes < 0");
+                    } else {
+                        PcmDataLib.Util.BinaryReaderSkip(br, skipBytes);
+                    }
+                }
+                */
                 break;
             default:
                 // 追加忘れ
@@ -224,12 +258,14 @@ namespace PlayPcmWin {
                 result = ResultType.ReadError;
                 break;
             }
+
             return result;
         }
 
         public string TitleName { get { return mId3Reader.TitleName; } }
         public string AlbumName { get { return mId3Reader.AlbumName; } }
         public string ArtistName { get { return mId3Reader.ArtistName; } }
+        public string ComposerName { get { return mId3Reader.Composer; } }
 
         /// <summary>
         /// 画像データバイト数(無いときは0)
@@ -287,6 +323,7 @@ namespace PlayPcmWin {
                     pcmData.DisplayName = TitleName;
                     pcmData.AlbumTitle = AlbumName;
                     pcmData.ArtistName = ArtistName;
+                    pcmData.ComposerName = ComposerName;
                     if (0 < PictureBytes) {
                         pcmData.SetPicture(PictureBytes, PictureData);
                     }
@@ -381,7 +418,7 @@ namespace PlayPcmWin {
                 return 0;
             }
 
-            PcmDataLib.Util.BinaryReaderSkip(br, skipFrames * BytesPerFrame / 8);
+            PcmDataLib.PcmDataUtil.BinaryReaderSkip(br, skipFrames * BytesPerFrame / 8);
             m_posFrame += skipFrames;
             return skipFrames;
         }
@@ -416,7 +453,7 @@ namespace PlayPcmWin {
                     {
                         const int workUnit = 256 * 1024;
                         int sampleUnits = (int)(readFrames * NumChannels / workUnit);
-                        Parallel.For(0, sampleUnits, delegate(int m) {
+                        Parallel.For(0, sampleUnits, m => {
                             int pos = m * workUnit * 3;
                             for (int i = 0; i < workUnit; ++i) {
                                 byte v0 = sampleArray[pos + 0];

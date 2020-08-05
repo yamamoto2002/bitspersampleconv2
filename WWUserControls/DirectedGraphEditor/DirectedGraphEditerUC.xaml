@@ -1,0 +1,132 @@
+﻿<UserControl x:Class="WWUserControls.DirectedGraphEditerUC"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="720" d:DesignWidth="1024" Loaded="UserControl_Loaded" SizeChanged="UserControl_SizeChanged">
+    <GroupBox Header="Graph" Margin="6" Name="mGroupBoxDGEditor" >
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="192" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="192" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <GroupBox Header="Mode" Margin="4" Name="mGroupBoxSettings" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <RadioButton Grid.Row="0" Content="_Add"    Margin="4,4,0,4" IsChecked="True" HorizontalAlignment="Left" Name="mRadioButtonAddPointEdge" VerticalAlignment="Center" Checked="mRadioButtonAddPoint_Checked" />
+                        <RadioButton Grid.Row="1" Content="_Delete" Margin="4,4,0,4"                  HorizontalAlignment="Left" Name="mRadioButtonDeletePoint"  VerticalAlignment="Center" Checked="mRadioButtonDeletePoint_Checked" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Draw params" Margin="4" Name="mGroupBoxDrawParams" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="1*" />
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" Grid.Row="0" HorizontalAlignment="Right" Content="Point Size (pixel)" />
+                        <TextBox Grid.Column="1" Grid.Row="0" Text="32" Margin="4" Name="mTextBoxPointSize" HorizontalContentAlignment="Right" />
+                        <Label Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right" Content="Arrow Size (pixel)" />
+                        <TextBox Grid.Column="1" Grid.Row="1" Text="10" Margin="4" Name="mTextBoxArrowSize" HorizontalContentAlignment="Right" />
+                        <Button Grid.ColumnSpan="2" Grid.Row="2" Margin="4" Content="Redraw" Click="mButtonRedraw_Click" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Grid Size (pixel)" Margin="4" Name="mGroupBoxGridSize" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <TextBox Text="32" Margin="4"  Name="mTextBoxGridSize" HorizontalContentAlignment="Right" />
+                        <Button Grid.Row="1" Margin="4" Content="Resize" Name="mButtonResize" Click="mButtonResize_Click" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Commands" Margin="4" Name="mGroupBoxCommands" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Button Margin="4" Name="mButtonUndo" Content="_Undo" Click="mButtonUndo_Click" IsEnabled="False" />
+                    </Grid>
+                </GroupBox>
+                <GroupBox Header="Graph params" Margin="4" Name="mGroupBoxGraphParams" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="1*" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Name="mLabelNumOfPoints" Content="Num of Points = 0" />
+                        <Label Grid.Row="1" Name="mLabelNumOfEdges" Content="Num of Edges = 0" />
+                    </Grid>
+                </GroupBox>
+            </StackPanel>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="32" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="mLabelDescription" HorizontalAlignment="Left" Name="mLabelDescription" VerticalAlignment="Center" />
+                <GroupBox Grid.Row="1" Header="Graph" >
+                    <Canvas Name="mCanvas" Background="#FFFEFEFE" OpacityMask="{x:Null}" MouseDown="mCanvas_MouseDown" MouseMove="mCanvas_MouseMove" MouseLeave="mCanvas_MouseLeave" />
+                </GroupBox>
+            </Grid>
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1*" />
+                    <RowDefinition Height="1*" />
+                </Grid.RowDefinitions>
+                <GroupBox Grid.Row="0" Header="Point params" Margin="4" Name="mGroupBoxPointParams" >
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="32" />
+                            <RowDefinition Height="1*" />
+                        </Grid.RowDefinitions>
+                        <Grid Grid.Row="0" >
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+                            <Label Content="Ground Idx:" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                            <TextBox Grid.Column="1" Margin="0,0,4,0" Name="mTextBoxEarthPointIdx" Text="-1" VerticalAlignment="Center" HorizontalContentAlignment="Right"/>
+                        </Grid>
+                        <DataGrid Grid.Row="1" Name="mDataGridP" ItemsSource="{Binding}" AutoGenerateColumns="False" CellEditEnding="mDataGridP_CellEditEnding">
+                            <DataGrid.RowHeaderStyle>
+                                <Style TargetType="{x:Type DataGridRowHeader}">
+                                    <Setter Property="Content" Value="{Binding Name}" />
+                                </Style>
+                            </DataGrid.RowHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="f" Binding="{Binding F}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Header="Edge params" Margin="4" Name="mGroupBoxEdgeParams" >
+                    <Grid>
+                        <DataGrid Name="mDataGridE" ItemsSource="{Binding}" AutoGenerateColumns="False" CellEditEnding="mDataGridE_CellEditEnding">
+                            <DataGrid.RowHeaderStyle>
+                                <Style TargetType="{x:Type DataGridRowHeader}">
+                                    <Setter Property="Content" Value="{Binding Name}" />
+                                </Style>
+                            </DataGrid.RowHeaderStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="C" Binding="{Binding C}" />
+                                <DataGridTextColumn Header="b" Binding="{Binding B}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </GroupBox>
+            </Grid>
+        </Grid>
+    </GroupBox>
+</UserControl>
