@@ -68,6 +68,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BinaryLinearSVMClassifier.cs" />
     <Compile Include="ComplexPolynomial.cs" />
     <Compile Include="CrossCorrelation.cs" />
     <Compile Include="DiscreteSineTransform.cs" />
@@ -77,11 +78,15 @@
     <Compile Include="GF2.cs" />
     <Compile Include="MatrixGF2.cs" />
     <Compile Include="MaximumLengthSequence.cs" />
+    <Compile Include="MulticlassLinearSVMClassifier.cs" />
     <Compile Include="NewtonsMethod.cs" />
     <Compile Include="BairstowPolynomialRootFinding.cs" />
     <Compile Include="ComplexRationalPolynomial.cs" />
+    <Compile Include="WWComplexF.cs" />
     <Compile Include="WWGaussianQuadrature.cs" />
+    <Compile Include="WWNormalize.cs" />
     <Compile Include="WWPolynomialFit.cs" />
+    <Compile Include="WWRadix2FftF.cs" />
     <Compile Include="WWSegmentPointDistance.cs" />
     <Compile Include="WWGoertzel.cs" />
     <Compile Include="WWOverlappedFft.cs" />
@@ -103,6 +108,7 @@
     <Compile Include="WWRadix2FftLargeArray.cs" />
     <Compile Include="WWSlidingDFT.cs" />
     <Compile Include="WWLinearEquation.cs" />
+    <Compile Include="WWStatistics.cs" />
     <Compile Include="WWTimeDependentForwardFourierTransform.cs" />
     <Compile Include="WWTimeDependentInverseFourierTransform.cs" />
     <Compile Include="WWUtil.cs" />

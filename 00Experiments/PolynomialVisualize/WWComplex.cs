@@ -1,7 +1,7 @@
 ﻿using System;
 
 namespace WWAudioFilter {
-    struct WWComplex {
+    public struct WWComplex {
         public double real;
         public double imaginary;
 
@@ -41,11 +41,21 @@ namespace WWAudioFilter {
             imaginary += rhs.imaginary;
             return this;
         }
+        public WWComplex Sub(WWComplex rhs) {
+            real -= rhs.real;
+            imaginary -= rhs.imaginary;
+            return this;
+        }
 
         public WWComplex Mul(double v) {
             real      *= v;
             imaginary *= v;
             return this;
+        }
+
+        public WWComplex Div(WWComplex rhs) {
+            var denom = new WWComplex(rhs).Reciprocal();
+            return Mul(denom);
         }
 
         public WWComplex Mul(WWComplex rhs) {
@@ -76,6 +86,10 @@ namespace WWAudioFilter {
             real = real / sq;
             imaginary = -imaginary / sq;
             return this;
+        }
+
+        public override string ToString() {
+            return string.Format("re={0}, im={1}", real, imaginary);
         }
     }
 }
