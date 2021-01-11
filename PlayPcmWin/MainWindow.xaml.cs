@@ -21,6 +21,7 @@ using PcmDataLib;
 using Wasapi;
 using WasapiPcmUtil;
 using WWUtil;
+using MultipleAppInstanceComm;
 
 namespace PlayPcmWin
 {
@@ -301,6 +302,62 @@ namespace PlayPcmWin
 
         List<PreferenceAudioFilter> mPreferenceAudioFilterList = new List<PreferenceAudioFilter>();
 
+        MultipleAppInstanceMgr mMultiAppInstMgr = new MultipleAppInstanceMgr("PlayPcmWin");
+        List<string> mDelayedAddFiles = new List<string>();
+
+        /// <summary>
+        /// 他のアプリからのコマンドライン引数を受け取るコールバック関数。
+        /// </summary>
+        private void MultipleAppInstanceRecvMsg(object cbObject, MultipleAppInstanceMgr.ReceivedMessage msg) {
+            // 後から起動したアプリのコマンドライン引数を受け取った。
+            var self = (MainWindow)cbObject;
+
+            self.CommandlineArgsReceived(msg);
+        }
+
+        /// <summary>
+        /// コマンドライン引数から音声ファイル名を抽出します。
+        /// </summary>
+        private static string[] GetFileListFromCommandlineArgs(List<string> args) {
+            List<string> r = new List<string>();
+
+            // args[0]はプログラムの名前なのでスキップ。1から始める。
+            for (int i = 1; i < args.Count; ++i) {
+                if (args[i].Length == 0 || args[i][0] == '-') {
+                    // コマンドラインのオプション。
+                    continue;
+                }
+                // ファイル名なので追加。
+                r.Add(args[i]);
+            }
+
+            return r.ToArray();
+        }
+
+        public void CommandlineArgsReceived(MultipleAppInstanceMgr.ReceivedMessage msg) {
+            Dispatcher.BeginInvoke(new Action(delegate() {
+                // UIスレッドで実行される。
+
+                var fileList = GetFileListFromCommandlineArgs(msg.args);
+                if (0 < fileList.Length) {
+                    // ファイルを再生リストに追加。後で追加しても良い。
+                    AddFilesToPlaylist(fileList, false);
+                }
+            }));
+        }
+
+        /// <summary>
+        /// 溜まっていたファイル追加リクエストをまとめて処理します。
+        /// 再生停止時にUIスレッドから実行。
+        /// </summary>
+        private void ProcAddFilesMsg() {
+            // 再生リストに今すぐ追加しなければならない。
+            bool b = AddFilesToPlaylist(mDelayedAddFiles.ToArray(), true);
+            System.Diagnostics.Debug.Assert(b);
+
+            mDelayedAddFiles.Clear();
+        }
+
         // ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
         public MainWindow()
@@ -311,10 +368,22 @@ namespace PlayPcmWin
             this.AddHandler(Slider.MouseLeftButtonDownEvent, new MouseButtonEventHandler(slider1_MouseLeftButtonDown), true);
             this.AddHandler(Slider.MouseLeftButtonUpEvent, new MouseButtonEventHandler(slider1_MouseLeftButtonUp), true);
 
-            // InitializeComponent()によって、チェックボックスのチェックイベントが発生し
-            // m_preferenceの内容が変わるので、InitializeComponent()の後にロードする。
+            // ■■ 順番注意：InitializeComponent()によって、チェックボックスのチェックイベントが発生し
+            // m_preferenceの内容が変わるので、InitializeComponent()の後にロードする。■■
 
             m_preference = PreferenceStore.Load();
+
+            if (!m_preference.AllowsMultipleAppInstances) {
+                // 多重起動の防止をする。
+                if (mMultiAppInstMgr.IsAppAlreadyRunning()) {
+                    // 既に起動しているアプリ インスタンスにコマンドライン引数を送って終了する。
+                    mMultiAppInstMgr.ClientSendMsgToServer(Environment.GetCommandLineArgs());
+                    Exit();
+                } else {
+                    // 名前付きパイプを作り、後から起動したアプリのコマンドライン引数を受け取ります。
+                    mMultiAppInstMgr.ServerStart(MultipleAppInstanceRecvMsg, this);
+                }
+            }
 
             if (m_preference.ManuallySetMainWindowDimension) {
                 // 記録されているウィンドウ形状が、一部分でも画面に入っていたら、そのウィンドウ形状に設定する。
@@ -432,6 +501,12 @@ namespace PlayPcmWin
 
         // ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 
+        private void Issue130() {
+            EnableDataGridPlaylist();
+            ChangeState(State.再生リストなし);
+            UpdateUIStatus();
+        }
+
         private void Window_Loaded(object wSender, RoutedEventArgs we) {
             {
                 // slider1のTrackをクリックしてThumbがクリック位置に移動した時Thumbがつままれた状態になるようにする
@@ -445,15 +520,83 @@ namespace PlayPcmWin
                 });
             }
 
-            if (m_preference.StorePlaylistContent) {
-                ReadPpwPlaylistStart(string.Empty, ReadPpwPlaylistMode.RestorePlaylistOnProgramStart);
+            if (ProcessCommandline(Environment.GetCommandLineArgs())) {
+                // コマンドラインの命令を実行した場合。
             } else {
-                // Issue 130
-                EnableDataGridPlaylist();
-                ChangeState(State.再生リストなし);
-                UpdateUIStatus();
+                // コマンドライン命令無し。
+
+                if (m_preference.StorePlaylistContent) {
+                    ReadPpwPlaylistStart(string.Empty, ReadPpwPlaylistMode.RestorePlaylistOnProgramStart);
+                } else {
+                    Issue130();
+                }
             }
         }
+
+        private void PrintUsage() {
+            AddLogText("Commandline Usage: PlayPcmWin [-stop] [-play] [soundFile1 [soundFile2 ...] ] \r\n");
+        }
+
+        /// <param name="args">1個目がPPWの名前。</param>
+        private bool ProcessCommandline(string[] args) {
+            if (args.Length == 1) {
+                return false;
+            }
+
+            Issue130();
+
+            bool bPlay = true;
+
+            var fileList = new List<string>();
+
+            for (int i = 1; i < args.Length; ++i) {
+                string s = args[i];
+                switch (s) {
+                case "-stop":
+                    // 停止状態で起動。
+                    bPlay = false;
+                    break;
+                case "-play":
+                    // 再生状態で起動。
+                    bPlay = true;
+                    break;
+                default:
+                    if (File.Exists(s)){
+                        fileList.Add(s);
+                    } else {
+                        AddLogText(string.Format("Error: Unknown command: {0}\r\n", s));
+                        PrintUsage();
+                        return false;
+                    }
+                    break;
+                }
+            }
+
+            if (0 < fileList.Count()) {
+                ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
+                int loadFileCount = 0;
+                foreach (var f in fileList) {
+                    int errCount = ReadFileHeader(f, PcmHeaderReader.ReadHeaderMode.OnlyConcreteFile, null);
+                    if (0 == errCount) {
+                        ++loadFileCount;
+                    }
+                }
+
+                if (0 < loadFileCount) {
+                    if (bPlay) {
+                        ButtonPlayClicked();
+                    } else {
+                        ChangeState(State.再生リストあり);
+                        UpdateUIStatus();
+                    }
+                }
+                return true;
+            }
+
+            // コマンドラインに有効な命令無し。
+            return false;
+        }
+
 
         /// <summary>
         /// 再生モードコンボボックスの項目
@@ -1123,6 +1266,8 @@ namespace PlayPcmWin
                 DeleteKeyListener();
                 FileDisappearCheck.Clear();
 
+                mMultiAppInstMgr.Term();
+
                 if (ap.wasapi != null) {
                     // バックグラウンドスレッドにjoinして、完全に止まるまで待ち合わせするブロッキング版のStopを呼ぶ。
                     // そうしないと、バックグラウンドスレッドによって使用中のオブジェクトが
@@ -1552,34 +1697,8 @@ namespace PlayPcmWin
                 return;
             }
 
-            if (State.デバイスSetup完了 <= m_state) {
-                // 追加不可。
-                MessageBox.Show(Properties.Resources.CannotAddFile);
-                return;
-            }
-
-            // エラーメッセージを貯めて出す。作りがいまいちだが。
-            m_loadErrorMessages = new StringBuilder();
-
-            if (m_preference.SortDroppedFiles) {
-                paths = (from s in paths orderby s select s).ToArray();
-            }
-
-            for (int i = 0; i < paths.Length; ++i) {
-                ReadFileHeader(paths[i], PcmHeaderReader.ReadHeaderMode.ReadAll, null);
-            }
-
-            if (0 < m_loadErrorMessages.Length) {
-                AddLogText(m_loadErrorMessages.ToString());
-                MessageBox.Show(m_loadErrorMessages.ToString(), Properties.Resources.ReadFailedFiles, MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            
-            m_loadErrorMessages = null;
-
-            if (0 < m_playListItems.Count) {
-                ChangeState(State.再生リストあり);
-            }
-            UpdateUIStatus();
+            // ドロップされたファイルを後でもよいので再生リストに追加する。
+            AddFilesToPlaylist(paths, false);
         }
 
         private void MenuItemFileSaveCueAs_Click(object sender, RoutedEventArgs e) {
@@ -1663,29 +1782,24 @@ namespace PlayPcmWin
             ClearPlayList(PlayListClearMode.ClearWithUpdateUI);
         }
 
-        private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
-        {
-            if (State.デバイスSetup完了 <= m_state) {
-                // 追加不可。
-                MessageBox.Show(Properties.Resources.CannotAddFile);
-                return;
-            }
-
-            var dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Filter = Properties.Resources.FilterSupportedFiles;
-            dlg.Multiselect = true;
-
-            if (0 <= m_preference.OpenFileDialogFilterIndex) {
-                dlg.FilterIndex = m_preference.OpenFileDialogFilterIndex;
-            }
-
-            var result = dlg.ShowDialog();
-            if (result == true) {
+        /// <summary>
+        /// ファイルを再生リスト画面に追加する。
+        /// </summary>
+        /// <param name="files">追加するファイル名のリスト。</param>
+        /// <param name="bNow">true:再生リストに今すぐ追加。できなければ失敗を戻す。false:後でもよいので追加する。</param>
+        /// <returns>再生リストに今すぐ追加する時失敗。</returns>
+        private bool AddFilesToPlaylist(string[] files, bool bNow) {
+            if (m_state < State.デバイスSetup完了) {
+                // 即時ファイルを追加。
                 // エラーメッセージを貯めて出す。
                 m_loadErrorMessages = new StringBuilder();
 
-                for (int i = 0; i < dlg.FileNames.Length; ++i) {
-                    ReadFileHeader(dlg.FileNames[i], PcmHeaderReader.ReadHeaderMode.ReadAll, null);
+                if (m_preference.SortDroppedFiles) {
+                    files = (from s in files orderby s select s).ToArray();
+                }
+
+                for (int i = 0; i < files.Length; ++i) {
+                    ReadFileHeader(files[i], PcmHeaderReader.ReadHeaderMode.ReadAll, null);
                 }
 
                 if (0 < m_loadErrorMessages.Length) {
@@ -1701,6 +1815,32 @@ namespace PlayPcmWin
                     ChangeState(State.再生リストあり);
                 }
                 UpdateUIStatus();
+            } else {
+                if (bNow) {
+                    return false;
+                }
+
+                // 再生中。再生停止後追加。
+                mDelayedAddFiles.AddRange(files);
+                AddLogText(Properties.Resources.FilesWillBeAddedAfterPlaybackStops + "\n");
+            }
+
+            return true;
+        }
+
+        private void MenuItemFileOpen_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.Filter = Properties.Resources.FilterSupportedFiles;
+            dlg.Multiselect = true;
+
+            if (0 <= m_preference.OpenFileDialogFilterIndex) {
+                dlg.FilterIndex = m_preference.OpenFileDialogFilterIndex;
+            }
+
+            var result = dlg.ShowDialog();
+            if (result == true) {
+                AddFilesToPlaylist(dlg.FileNames, false);
 
                 // 最後に選択されていたフィルターをデフォルトとする
                 m_preference.OpenFileDialogFilterIndex = dlg.FilterIndex;
@@ -2894,6 +3034,8 @@ namespace PlayPcmWin
                 UpdateDeviceList();
                 m_deviceListUpdatePending = false;
             }
+
+            ProcAddFilesMsg();
 
             GC.Collect();
         }

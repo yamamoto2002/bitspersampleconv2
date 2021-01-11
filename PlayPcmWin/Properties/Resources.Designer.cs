@@ -97,6 +97,15 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to De-emphasis (for 44.1kHz PCM playback).
+        /// </summary>
+        internal static string AudioFilterDeEmphasis {
+            get {
+                return ResourceManager.GetString("AudioFilterDeEmphasis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delay.
         /// </summary>
         internal static string AudioFilterDelay {
@@ -302,6 +311,15 @@ namespace PlayPcmWin.Properties {
         internal static string Failed {
             get {
                 return ResourceManager.GetString("Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ■ Files will be added after playback stops. ■.
+        /// </summary>
+        internal static string FilesWillBeAddedAfterPlaybackStops {
+            get {
+                return ResourceManager.GetString("FilesWillBeAddedAfterPlaybackStops", resourceCulture);
             }
         }
         
@@ -1029,6 +1047,15 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Message about multiple app instance settings changed.
+        /// </summary>
+        internal static string MultipleAppInstanceSettingsChanged {
+            get {
+                return ResourceManager.GetString("MultipleAppInstanceSettingsChanged", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Nothing to store .
         /// </summary>
         internal static string NothingToStore {
@@ -1110,6 +1137,15 @@ namespace PlayPcmWin.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restart the app to take effect..
+        /// </summary>
+        internal static string RestartTheAppToTakeEffect {
+            get {
+                return ResourceManager.GetString("RestartTheAppToTakeEffect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing files while restoring playlist.
         /// </summary>
         internal static string RestoreFailedFiles {
@@ -1124,6 +1160,15 @@ namespace PlayPcmWin.Properties {
         internal static string SaveFileFailed {
             get {
                 return ResourceManager.GetString("SaveFileFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allows Multiple App Instances.
+        /// </summary>
+        internal static string SettingsAllowMultipleInstances {
+            get {
+                return ResourceManager.GetString("SettingsAllowMultipleInstances", resourceCulture);
             }
         }
         

@@ -62,11 +62,22 @@ namespace PlayPcmWinAlbum {
             mBackgroundPlay.WorkerSupportsCancellation = true;
             mTextBoxBufferSizeMs.Text = string.Format(CultureInfo.InvariantCulture, "{0}", mPreference.BufferSizeMillisec);
             switch (mPreference.WasapiDataFeedMode) {
-            case WasapiPcmUtil.WasapiDataFeedModeType.EventDriven:
-                mRadioButtonEvent.IsChecked = true;
-                break;
             case WasapiPcmUtil.WasapiDataFeedModeType.TimerDriven:
                 mRadioButtonTimer.IsChecked = true;
+                break;
+            case WasapiPcmUtil.WasapiDataFeedModeType.EventDriven:
+            default:
+                mRadioButtonEvent.IsChecked = true;
+                break;
+            }
+
+            switch (mPreference.SharedOrExlusive) {
+            case WasapiPcmUtil.WasapiSharedOrExclusiveType.Shared:
+                mRadioButtonShared.IsChecked = true;
+                break;
+            case WasapiPcmUtil.WasapiSharedOrExclusiveType.Exclusive:
+            default:
+                mRadioButtonExclusive.IsChecked = true;
                 break;
             }
 
@@ -80,6 +91,13 @@ namespace PlayPcmWinAlbum {
             mGroupBoxPlaybackControl.Header = Properties.Resources.MainGroupBoxPlaybackControl;
             mGroupBoxPlaybackDevice.Header = Properties.Resources.MainGroupBoxPlaybackDevice;
             mGroupBoxWasapiSettings.Header = Properties.Resources.MainGroupBoxWasapiSettings;
+            mGroupBoxOperationMode.Header = Properties.Resources.MainGroupBoxOperationMode;
+            mGroupBoxDataFeedMode.Header = Properties.Resources.MainGroupBoxDataFeedMode;
+            mGroupBoxBufferSize.Header = Properties.Resources.MainGroupBoxBufferSize;
+            mRadioButtonExclusive.Content = Properties.Resources.MainRadioButtonExclusive;
+            mRadioButtonShared.Content = Properties.Resources.MainRadioButtonShared;
+            mRadioButtonEvent.Content = Properties.Resources.MainRadioButtonEvent;
+            mRadioButtonTimer.Content = Properties.Resources.MainRadioButtonTimer;
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -527,7 +545,17 @@ namespace PlayPcmWinAlbum {
                 mPreference.WasapiDataFeedMode = WasapiPcmUtil.WasapiDataFeedModeType.TimerDriven;
             }
 
-            mPlaybackController.SetWasapiParams(bufferSizeMs, DEFAULT_ZERO_FLUSH_MILLISEC, dfm);
+            // 共有モードか排他モードか。
+            WasapiCS.ShareMode shareMode;
+            if (mRadioButtonShared.IsChecked == true) {
+                shareMode = WasapiCS.ShareMode.Shared;
+                mPreference.SharedOrExlusive = WasapiPcmUtil.WasapiSharedOrExclusiveType.Shared;
+            } else {
+                shareMode = WasapiCS.ShareMode.Exclusive;
+                mPreference.SharedOrExlusive = WasapiPcmUtil.WasapiSharedOrExclusiveType.Exclusive;
+            }
+
+            mPlaybackController.SetWasapiParams(bufferSizeMs, DEFAULT_ZERO_FLUSH_MILLISEC, dfm, shareMode);
             return true;
         }
 
@@ -630,6 +658,11 @@ namespace PlayPcmWinAlbum {
                             e.Cancel = true;
                             return;
                         }
+
+                        // LoadAddDoの戻り値ercdが
+                        // ・1以上の時はまだ読み出せる。
+                        // ・0のとき最後まで読み終わった。
+                        // ・負の時エラー。
                         ercd = mPlaybackController.LoadAddDo(af);
                         if (ercd < 0) {
                             // fixme:
@@ -670,7 +703,8 @@ namespace PlayPcmWinAlbum {
 
             var result = e.Result as BackgroundLoadResult;
             if (!result.Result) {
-                MessageBox.Show("Error: File load failed!");
+                mPlaybackController.Stop();
+                MessageBox.Show(Properties.Resources.ErrorFileLoadFailed, Properties.Resources.ErrorFileLoadFailed, MessageBoxButton.OK, MessageBoxImage.Error);
                 UpdatePlaybackControlState();
                 return;
             }

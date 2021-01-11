@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "WWDelay.h"
+#include "WWFIRFilter.h"
 
 class WWZohCompensation {
 public:
@@ -12,8 +12,6 @@ public:
     void Filter(int count, const double * inPcm, double *outPcm);
 
 private:
-    WWDelay<double> mDelay;
-
-    double Convolution(void);
+    WWFIRFilter mFIRFilter;
 };
 

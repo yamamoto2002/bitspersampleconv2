@@ -10,6 +10,7 @@ namespace WWFlacRWCS {
         private int mId = (int)FlacErrorCode.IdNotFound;
         private Metadata mDecodedMetadata = null;
         private LargeArray<byte> mPcmAllBuffer = null;
+        private string mPath = string.Empty;
 
         public static string ErrorCodeToStr(int ercd) {
             switch (ercd) {
@@ -88,6 +89,8 @@ namespace WWFlacRWCS {
         public int DecodeAll(string path) {
             int rv = 0;
 
+            mPath = path;
+
             rv = DecodeStreamStart(path);
             if (rv < 0) {
                 return rv;
@@ -139,7 +142,7 @@ namespace WWFlacRWCS {
             }
 
             if (fragment.Length < copySamples * bps) {
-                throw new ArgumentException("fragment");
+                throw new ArgumentException("fragment is too small");
             }
 
             for (int i = 0; i < copySamples; ++i) {
@@ -152,6 +155,119 @@ namespace WWFlacRWCS {
         }
 
         /// <summary>
+        /// 指定チャンネルのPCMデータを取得。
+        /// </summary>
+        /// <param name="ch">チャンネル番号 0から始まる。</param>
+        /// <param name="posSamples">取得開始サンプル番号。</param>
+        /// <param name="copySamples">取得するサンプル数。</param>
+        /// <returns>float型のPCMデータ。-1 ≦ v ＜ +1</returns>
+        public LargeArray<float> GetFloatPcmOfChannel(int ch, long posSamples, long copySamples) {
+            System.Diagnostics.Debug.Assert(mDecodedMetadata != null);
+            System.Diagnostics.Debug.Assert(mPcmAllBuffer != null);
+            System.Diagnostics.Debug.Assert(0 <= ch && ch < mDecodedMetadata.channels);
+
+            int bpf = mDecodedMetadata.BytesPerFrame;
+            int bps = mDecodedMetadata.BytesPerSample;
+
+            // copySamplesを決定します。
+            long totalSamples = mPcmAllBuffer.LongLength / bpf;
+            if (totalSamples < posSamples + copySamples) {
+                copySamples = (int)(totalSamples - posSamples);
+            }
+            if (copySamples < 0) {
+                copySamples = 0;
+            }
+
+            var samples = new LargeArray<float>(copySamples);
+            long toIdx = 0;
+
+            switch (bps) {
+            case 2:
+                for (long pos = posSamples; pos < posSamples + copySamples; ++pos) {
+                    long idx = bpf * pos + ch * bps;
+                    short vS = (short)(mPcmAllBuffer.At(idx) + (mPcmAllBuffer.At(idx + 1) <<8));
+                    float vF = vS / 32768.0f;
+                    samples.Set(toIdx++, vF);
+                    //Console.WriteLine("{0:+00000;-00000}", vS);
+                }
+                break;
+            case 3:
+                for (long pos = posSamples; pos < posSamples + copySamples; ++pos) {
+                    long idx = bpf * pos + ch * bps;
+                    int vI = (int)((mPcmAllBuffer.At(idx + 0)<<8)
+                                 + (mPcmAllBuffer.At(idx + 1)<<16)
+                                 + (mPcmAllBuffer.At(idx + 2)<<24));
+
+                    //Console.WriteLine("{0:+00000000;-00000000}", vI);
+
+                    float vF = vI / 2147483648.0f;
+                    samples.Set(toIdx++, vF);
+                }
+                break;
+            default:
+                throw new ArgumentException(string.Format("Unexpected BytesPerSample {0}", bps));
+            }
+
+            return samples;
+        }
+
+        /// <summary>
+        /// float配列のPCMデータを指定ビットデプスのbyte配列PCMデータにする。
+        /// </summary>
+        public static LargeArray<byte> ConvertToByteArrayPCM(LargeArray<float> from, int bytesPerSample) {
+            var w = new LargeArray<byte>(from.LongLength * bytesPerSample);
+            long wIdx = 0;
+
+            switch (bytesPerSample) {
+            case 2:
+                for (long pos = 0; pos < from.LongLength; ++pos) {
+                    // 値vを取得。
+                    float vF = from.At(pos);
+                    if (vF < -1.0f) {
+                        vF = -1.0f;
+                    }
+                    if (32767.0f / 32768.0f < vF) {
+                        vF = 32767.0f / 32768.0f;
+                    }
+                    
+                    // 型変換。
+                    short vS = (short)(vF*32768.0f);
+
+                    //Console.WriteLine("{0:+00000;-00000}", vS);
+
+                    // 書き込み。
+                    w.Set(wIdx++, (byte)(vS & 0xff));
+                    w.Set(wIdx++, (byte)((vS>>8) & 0xff));
+                }
+                break;
+            case 3:
+                for (long pos = 0; pos < from.LongLength; ++pos) {
+                    // 値vを取得。
+                    float vF = from.At(pos);
+                    if (vF < -1.0f) {
+                        vF = -1.0f;
+                    }
+                    if (8388607.0f / 8388608.0f < vF) {
+                        vF = 8388607.0f / 8388608.0f;
+                    }
+
+                    // 型変換。
+                    int vI = (int)(vF * 2147483648.0f);
+
+                    // 書き込み。
+                    w.Set(wIdx++, (byte)((vI>>8) & 0xff));
+                    w.Set(wIdx++, (byte)((vI>>16) & 0xff));
+                    w.Set(wIdx++, (byte)((vI>>24) & 0xff));
+                }
+                break;
+            default:
+                throw new ArgumentException(string.Format("Unexpected BytesPerSample {0}", bytesPerSample));
+            }
+
+            return w;
+        }
+
+        /// <summary>
         /// FLACファイルのヘッダー部分を読み込んでメタデータを取り出す。
         /// この関数呼び出し後
         /// ・GetDecodedMetadata()でメタデータを取り出す。
@@ -161,6 +277,8 @@ namespace WWFlacRWCS {
         /// <param name="path">FLACファイルのパス</param>
         /// <returns>0以上のとき成功。負のときFlacErrorCode</returns>
         public int DecodeHeader(string path) {
+            mPath = path;
+
             mDecodedMetadata = null;
             mPcmAllBuffer = null;
             mId = NativeMethods.WWFlacRW_Decode(NativeMethods.WWFLAC_FRDT_HEADER, path);
@@ -168,6 +286,8 @@ namespace WWFlacRWCS {
         }
 
         public int DecodeStreamStart(string path) {
+            mPath = path;
+
             mDecodedMetadata = null;
             mPcmAllBuffer = null;
             mId = NativeMethods.WWFlacRW_Decode(NativeMethods.WWFLAC_FRDT_STREAM_ONE, path);
@@ -189,6 +309,40 @@ namespace WWFlacRWCS {
         public int DecodeStreamSeekAbsolute(long numFramesFromBegin) {
             int ercd = NativeMethods.WWFlacRW_DecodeStreamSeekAbsolute(mId, numFramesFromBegin);
             return ercd;
+        }
+
+        /// <summary>
+        /// メタデータ文字列を表示用文字列にする。
+        /// </summary>
+        /// <param name="meta">入力メタデータ。上書きされる。</param>
+        /// <returns>入力メタデータが上書きされて戻る。</returns>
+        public Metadata MetaConvToDisplayable(Metadata meta) {
+            if (meta.titleStr.Length == 0) {
+                meta.titleStr = System.IO.Path.GetFileName(mPath);
+            }
+            if (meta.albumStr.Length == 0) {
+                meta.albumStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.albumArtistStr.Length == 0) {
+                meta.albumArtistStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.artistStr.Length == 0) {
+                meta.artistStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.composerStr.Length == 0) {
+                meta.composerStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.dateStr.Length == 0) {
+                meta.dateStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.discNumberStr.Length == 0) {
+                meta.discNumberStr = Properties.Resources.FlacMetadataUnknown;
+            }
+            if (meta.genreStr.Length == 0) {
+                meta.genreStr = Properties.Resources.FlacMetadataUnknown;
+            }
+
+            return meta;
         }
 
         public int GetDecodedMetadata(out Metadata meta) {
